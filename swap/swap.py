@@ -28,13 +28,7 @@ class SWAP(object):
         SWAP implementation, which calculates the 
         confusion matrix of each user
     """
-
-    def __init__(self, db, subjects, p0=0.01, epsilon=0.5):
-        """
-            SWAP implementation, which calculates the 
-            confusion matrix of each user
-        """
-
+    
     def __init__(self, db, subjects, p0=0.01, epsilon=0.5):
         """
             Initialize SWAP instance
@@ -156,11 +150,15 @@ class SWAP(object):
 
         # get all the classifications
         cursor = self.db["classifications"].find()
+
+
         total = cursor.count()
         skipped_count = 0
         count = 1
+
         for doc in cursor:
             subject_id = int(doc["subject_data"].keys()[0])
+
             if subject_id in set(self.subjects):
                 user_index = self.unique_users.index(doc["user_name"])
                 subject_index = int(np.where(np.array(self.subjects) == subject_id)[0][0])
