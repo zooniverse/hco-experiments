@@ -28,7 +28,7 @@ class SWAP(object):
         SWAP implementation, which calculates the 
         confusion matrix of each user
     """
-    
+
     def __init__(self, db, subjects, p0=0.01, epsilon=0.5):
         """
             Initialize SWAP instance
@@ -160,14 +160,16 @@ class SWAP(object):
             subject_id = int(doc["subject_data"].keys()[0])
 
             if subject_id in set(self.subjects):
+
                 user_index = self.unique_users.index(doc["user_name"])
                 subject_index = int(np.where(np.array(self.subjects) == subject_id)[0][0])
+
                 annotation = self.value_to_label.index(doc["annotations"][0]["value"])
                 gold, label = self.isGoldStandard(subject_id)
+
                 if gold and self.gold_updates:
                     self.updateM(user_index, label, annotation)
-                #else:
-                    #continue
+
                 if annotation == 1:
                     self.S[subject_index] = self.S[subject_index]*self.M[user_index][1] / \
                                             (self.S[subject_index]*self.M[user_index][1] + \
@@ -176,22 +178,41 @@ class SWAP(object):
                         self.S[subject_index] = self.S[subject_index]*(1-self.M[user_index][1]) / \
                                             (self.S[subject_index]*(1-self.M[user_index][1]) + \
                                             (self.M[user_index][0])*(1-self.S[subject_index]))
+
+                # NOTE if we do switch away from the indexed array system,
+                # then might have to check calculations for div0 and Inf
+
+                # Fixes replaces invalid data (/0, Inf) with p0
                 np.ma.fix_invalid(self.S,copy=False,fill_value=self.p0)
+
                 try:
+                    # tries to append the current probability to the subject's history
                     self.subject_history[subject_id].append(self.S[subject_index])
                 except KeyError:
+                    # otherwise initializes a history list for this subject
+                    # in subject_history with p0s
                     self.subject_history[subject_id] = [self.p0, self.S[subject_index]]
                 
+                # Print progress to stdout
                 sys.stdout.write("%.3f%% complete.\r" % (100*float(count)/float(total-skipped_count)))
                 sys.stdout.flush()
                 count += 1
+
+            # not sure what this is for
             skipped_count += 1
 
 
     def isGoldStandard(self, subject_id):
-        diff_id = self.db["diffID_to_subjectID"].find({"subject_id":{"$eq":subject_id}})[0]["diff_id"]
+        """
+
+        """
+        diff_id = self.db["diffID_to_subjectID"].\
+            find({"subject_id":{"$eq":subject_id}})[0]["diff_id"]
+
         try:
-            label = self.db["gold_standard"].find({"id":{"$eq":diff_id.split("_")[0]}})[0]["label"]
+            label = self.db["gold_standard"].\
+                find({"id":{"$eq":diff_id.split("_")[0]}})[0]["label"]
+
             if label == -1:
                 raise ValueError
         except:
@@ -200,6 +221,9 @@ class SWAP(object):
             return True, label
 
     def updateM(self, user_index, label, annotation):
+        """
+
+        """
         self.dt[user_index,label] += 1
         if annotation == label:
             self.dt_prime[user_index,label] += 1
@@ -213,6 +237,15 @@ class SWAP(object):
         np.ma.fix_invalid(self.M,copy=False,fill_value=self.epsilon)
 
     def save(self, filename):
+        """
+            Save the processed data to pickled mat files. Creates two
+            files, one for the user_history and one for the subject_history
+
+            Args:
+                filename (str):
+                    filename suffix to store the data in. replaces the extension with .pkl
+                    ex. 'foo.mat' will create 'user_dict_foo.pkl' and 'subject_dict_foo.pkl'
+        """
         sio.savemat(filename,{"subjects":self.subjects, \
                                 "p0":self.p0, \
                                 "epsilon":self.epsilon, \
@@ -220,8 +253,7 @@ class SWAP(object):
                                 "M":self.M, \
                                 "S":self.S, \
                                 "dt":self.dt, \
-                                "dt_prime":self.dt_prime}
-                  )
+                                "dt_prime":self.dt_prime})
 
         out = open("user_dict_"+filename[:-4]+".pkl","wb")
         pickle.dump(self.user_history,out)
