@@ -24,26 +24,50 @@ def get_subjects_by_date_limits(db, mjd_limits):
     return subjects
 
 class SWAP(object):
+    """
+        SWAP implementation, which calculates the confusion matrix of each user
+    """
 
     def __init__(self, db, subjects, p0=0.01, epsilon=0.5):
+        """
+            Initialize SWAP instance
+            Args:
+                db: (pymongo database) Reference to the MongoClient database
+                subjects: (list) List of subject id numbers. Are the values distinct?
+                p0: Prior probability real...
+                    ...what does this mean?
+                epsilon: Estimated volunteer performance...
+                    ...what does this meain?
+        """
+
+        # assign class variables from args
         self.db = db
         self.subjects = subjects
         self.p0 = p0 # prior probability real
         self.epsilon = epsilon # estimated volunteer performance
+
+        #define value to label map...
+        #...what does this mean?
         self.value_to_label = ["No","Yes"]
+
+        # ???
+        # Directive to update
         self.gold_updates = True
         
-        self.M, self.unique_users = self.initialiseM()
-        self.S = self.initialiseS()
-        
-        #self.dt = np.ones(self.M.shape) * 1e-9
-        #self.dt_prime = np.ones(self.M.shape) * 1e-9
+        # what I understand here is 
+        # Confustion matrix for the user
+        self.M, self.unique_users = self.initializeM()
+        self.S = self.initializeS()
         self.dt = np.zeros(self.M.shape)
         self.dt_prime = np.zeros(self.M.shape)
+
         self.user_history = {}
         self.subject_history = {}
     
     def setGoldUpdates(self, str):
+        """
+            Sets the class gold_updates directive
+        """
         if str == "on":
             self.gold_updates = True
         elif str == "off":
@@ -53,18 +77,39 @@ class SWAP(object):
 
     def initialiseM(self):
         """
-           Initialises a matrix with each row being a compressed confusion matrix for 
-           each unique user name in the database.  The method assigns all not logged in
-           classifications to a single agent.
+           Initialises a matrix with each row being a
+           compressed confusion matrix for each unique 
+           username in the database. Assigns all classifications
+           to a single agent when not logged in.
+
+            Returns: (np.array, list)
+                1. Array with 2 columns and as many rows as users
+                   I'm guessing this is a performance matrix for each user?
+                2. List of users
         """
+
+        # gets a list of all uses from the db
         unique_users = self.db["classifications"].distinct("user_name")
+
+        # creates a matrix with two columns and as many rows as users
+        # I'm guessing this gets used as some kind of performance matrix?
+        matrix = np.ones((len(unique_users),2))*self.epsilon
         
-        return np.ones((len(unique_users),2))*self.epsilon, unique_users
+        return (matrix, unique_users)
     
     def initialiseS(self):
+        """
+            Initialize the probability matrix for each subject
+            Returns: (np.array) List with the initial probability value in p0
+        """
         return np.ones((np.shape(self.subjects)))*self.p0
 
     def process(self):
+        """
+            Process the classifications in the database
+        """
+
+        # get all the classifications
         cursor = self.db["classifications"].find()
         total = cursor.count()
         skipped_count = 0
