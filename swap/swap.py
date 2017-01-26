@@ -25,8 +25,15 @@ def get_subjects_by_date_limits(db, mjd_limits):
 
 class SWAP(object):
     """
-        SWAP implementation, which calculates the confusion matrix of each user
+        SWAP implementation, which calculates the 
+        confusion matrix of each user
     """
+
+    def __init__(self, db, subjects, p0=0.01, epsilon=0.5):
+        """
+            SWAP implementation, which calculates the 
+            confusion matrix of each user
+        """
 
     def __init__(self, db, subjects, p0=0.01, epsilon=0.5):
         """
@@ -42,7 +49,6 @@ class SWAP(object):
 
         # assign class variables from args
         self.db = db
-        self.subjects = subjects
         self.p0 = p0 # prior probability real
         self.epsilon = epsilon # estimated volunteer performance
 
@@ -50,16 +56,50 @@ class SWAP(object):
         #...what does this mean?
         self.value_to_label = ["No","Yes"]
 
-        # ???
+        #???
         # Directive to update
         self.gold_updates = True
-        
-        # what I understand here is 
-        # Confustion matrix for the user
-        self.M, self.unique_users = self.initializeM()
+
+        """
+            self.subjects:
+                Array containing data on each subject
+                FIXME: not sure exactly what this is
+            self.S:
+                Array containing the probability score assigned to each subject
+
+            NOTE: Just like my (michael) comments below about M and unique_users,
+            this doesn't seem like a good way of doing this
+        """
+        self.subjects = subjects
         self.S = self.initializeS()
+        
+        """
+            self.unique_users:
+                A list of all users that contributed classifications
+            self.M:
+                2d array, where each row is a user's confusion matrix. 
+                The matrices of each user appear in the same order 
+                as in unique_users.
+
+            NOTE: This doesn't seem like a good implementation. 
+            Would it make more sense to have a list of dicts, where 
+            each item in the list contains the username, user_id, 
+            matrix, etc. of each user?
+        """
+        # restructured class assignments for clarity
+        initM = self.initializeM()
+        self.M = initM[0]
+        self.unique_users = initM[1]
+
+        """
+            self.dt:
+            self.dt_prime:
+        """
         self.dt = np.zeros(self.M.shape)
         self.dt_prime = np.zeros(self.M.shape)
+        
+        #self.dt = np.ones(self.M.shape) * 1e-9
+        #self.dt_prime = np.ones(self.M.shape) * 1e-9
 
         self.user_history = {}
         self.subject_history = {}
