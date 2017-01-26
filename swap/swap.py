@@ -93,20 +93,25 @@ class SWAP(object):
 
         """
             self.dt:
+                FIXME: not sure yet what these two are for
             self.dt_prime:
+                FIXME
         """
         self.dt = np.zeros(self.M.shape)
         self.dt_prime = np.zeros(self.M.shape)
-        
-        #self.dt = np.ones(self.M.shape) * 1e-9
-        #self.dt_prime = np.ones(self.M.shape) * 1e-9
 
+        """
+            self.user_history:
+                QBECK
+            self.subject_history:
+                QBECK
+        """
         self.user_history = {}
         self.subject_history = {}
     
     def setGoldUpdates(self, str):
         """
-            Sets the class gold_updates directive
+            QBECK
         """
         if str == "on":
             self.gold_updates = True
@@ -204,6 +209,7 @@ class SWAP(object):
         try:
             self.user_history[self.unique_users[user_index]]
         except KeyError:
+            # QBECK why does this use integers as dictionary keys
             self.user_history[self.unique_users[user_index]] = {0:[],1:[]}
         self.user_history[self.unique_users[user_index]][label].append(self.M[user_index, label])
         np.ma.fix_invalid(self.M,copy=False,fill_value=self.epsilon)
