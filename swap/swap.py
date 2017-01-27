@@ -254,7 +254,7 @@ class SWAP(object):
                                 "S":self.S, \
                                 "dt":self.dt, \
                                 "dt_prime":self.dt_prime})
-
+        # FIXME: this won't work with paths, only with filenames
         out = open("user_dict_"+filename[:-4]+".pkl","wb")
         pickle.dump(self.user_history,out)
         out.close()
@@ -263,10 +263,35 @@ class SWAP(object):
         pickle.dump(self.subject_history,out)
         out.close()
 
-class MATSWAP(SWAP):
+class MATSWAP(SWAP): 
+        
+    """ Create MATSWAP object which implements SWAP based on .MAT file input
+    
+    Parameters
+    -----------
+    dotMatFile: str
+        A .MAT file that can be loaded with scipy.io.loadmat and contains a dictionary with arrays for the
+        different variables: 
+        - annotation (the label submitted by the volunteer)
+        - classification_id (autoincremented unique id for each classification)
+        - diff (the name of the individual difference image for a specific subject)
+        - gold_label (the "expert" provided label taken to be the ground truth label. Ignore
+                      classifications with a gold_label = -1)
+        - machine_score (CNN score for this object)
+        - object_id (PS1 TSS unique object id.  There are multiple subjects per object)
+        - subject_id (autoincremented unique subject id)
+        - user_id (autoincremented unique id for volunteers.  This field is blank if the 
+                   volunteer is not looged in when submitting a classification)
+        - user_name (volunteers username)
+    
+    p0: numeric
+        prior probability of a subject to be of interest
+    epsilon:numeric
+        prior probability for a user to correctly classify a subject
+    
+    """
 
     def __init__(self, dotMatFile, p0=0.01, epsilon=0.5):
-        #self.dotMatFile = dotMatFile
         self.data = sio.loadmat(dotMatFile)
         self.subjects = np.squeeze(self.data["subject_id"])
         self.usernames = np.squeeze(self.data["user_name"])
@@ -287,29 +312,61 @@ class MATSWAP(SWAP):
         self.subject_history = {}
 
     def initialiseM(self):
+        
+        """ Initialize user confusion matrix with prior probabilites of users
+        
+        Returns
+        -------
+            (np.array,np.array) : 
+                2D array with dimensions number of distinct users * 2, all values initialized to epsilon
+                1D array with unique users
+            
+        """
+        
         unique_users = np.unique(self.data["user_name"])
         return np.ones((len(unique_users),2))*self.epsilon, unique_users
 
     def process(self):
+        
+        """ Process classifications and update subject and user data
+        
+        
+        Updates user confusion matrix given the true label &
+        updates subjects' probability of being of interest, given historical classifications,
+        the users' annotation and the users' estimated accuracy
+                
+        """
         total = len(self.classifications)
         print total
+        # for each classification
         for i,classification_id in enumerate(self.classifications):
+             # select current subject
             subject_id = self.subjects[i]
+            # find user index in unique user array
             user_index = self.unique_users.tolist().index(self.usernames[i])
+            # find index of first occurrence of current subject in classifications
             subject_index = int(np.where(np.array(self.subjects) == subject_id)[0][0])
+            # get user and gold label
             annotation = self.annotations[i]
             gold, label = self.isGoldStandard(i)
+            # if subject is gold standard update user success probability
             if gold and self.gold_updates:
+                # update user success probabilities for given label
                 self.updateM(user_index, label, annotation)
+            # given the user annotated as 1
             if annotation == 1:
+                # update probability that subject is of interest (=1), given the users accuracy
                 self.S[subject_index] = self.S[subject_index]*self.M[user_index][1] / \
                                         (self.S[subject_index]*self.M[user_index][1] + \
                                         (1-self.M[user_index][0])*(1-self.S[subject_index]))
             elif annotation == 0:
+                # update probability that subject is not of interest (=0), given the users accuracy
                 self.S[subject_index] = self.S[subject_index]*(1-self.M[user_index][1]) / \
                                         (self.S[subject_index]*(1-self.M[user_index][1]) + \
                                         (self.M[user_index][0])*(1-self.S[subject_index]))
+            # fill invalid? fields with prior
             np.ma.fix_invalid(self.S,copy=False,fill_value=self.p0)
+            # update subjects probability of being of interest
             try:
                 self.subject_history[subject_id].append(self.S[subject_index])
             except KeyError:
@@ -318,6 +375,7 @@ class MATSWAP(SWAP):
             sys.stdout.flush()
 
     def isGoldStandard(self, i):
+        """ Return if current classification is of a subject with a gold label and return the label """
         try:
             label = self.gold_labels[i]
             if label == -1:
@@ -577,18 +635,11 @@ def main():
     
     counter = 0
     max = 0
+    # Loop over all users in random order
     for i in order:
-        #if counter == 100:
-        #    break
-        #u = str(data["unique_users"][i].rstrip())
-        #u = data["unique_users"][i]
-        #print u
-        #print user_dict[u]
         try:
-            #u = str(data["unique_users"][i].rstrip())
             u = data["unique_users"][i]
-            #print u
-            #print user_dict[u]
+            # update max number of classifications of any user
             if len(user_dict[u][1])+len(user_dict[u][0]) > max:
                 max =  len(user_dict[u][1])+len(user_dict[u][0])
             #    continue
