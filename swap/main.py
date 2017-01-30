@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import swap
+from swap import SWAP
 import sys
 import _pickle as pickle
 import numpy as np

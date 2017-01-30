@@ -136,7 +136,7 @@ class SWAP(object):
         else:
             raise ValueError
 
-    def initialiseM(self):
+    def initializeM(self):
         """
            Initialises a matrix with each row being a
            compressed confusion matrix for each unique
@@ -162,7 +162,7 @@ class SWAP(object):
 
         return (matrix, unique_users)
 
-    def initialiseS(self):
+    def initializeS(self):
         """
             Initialize the probability matrix for each subject
             Returns: (np.array) List with the initial probability value in p0
@@ -189,7 +189,7 @@ class SWAP(object):
             # retrieve the subject id that will be used to index various lists containing
             # current probabilities that a subject contains an object of interest as well
             # as intermediate quantities that are required to compute those probabilities.
-            subject_id = int(doc["subject_data"].keys()[0])
+            subject_id = int(doc["subject_id"])
 
             # The list self.subjects is initialized using the contents of a constructor argument
             # and can apparently be used to filter subjects that are stored in the database if the
