@@ -80,7 +80,7 @@ class MATSWAP(SWAP):
 
         """
         total = len(self.classifications)
-        print total
+        print(total)
         # for each classification
         for i, classification_id in enumerate(self.classifications):
             # select current subject

@@ -6,6 +6,7 @@ import _pickle as pickle
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.io as sio
+from pymongo import MongoClient
 
 
 
@@ -126,19 +127,19 @@ def swap_forward_test(db):
     mjd_limits = get_date_limits_from_manifest("../data/20161128.txt")
     max_mjd = mjd_limits[1]
     mjd_limits = (min_mjd, max_mjd)
-    print mjd_limits
+    print(mjd_limits)
 
     subjects = get_subjects_by_date_limits(db, mjd_limits)
-    print len(subjects)
+    print(len(subjects))
     # load the saved SWAP run on data between 20160725 and 20160829 with updates to M turned off
     file = "swap_20160725-20160829.mat"
     swap = load_saved_SWAP(db, file, "off")
-    print len(swap.subjects)
+    print(len(swap.subjects))
     swap.subjects += subjects
-    print len(swap.subjects)
-    print swap.S.shape
+    print(len(swap.subjects))
+    print(swap.S.shape)
     swap.S = np.concatenate((swap.S, np.ones((np.shape(subjects))) * swap.p0))
-    print swap.S.shape
+    print(swap.S.shape)
     swap.epsilon = 0.1
 
     swap.process()
@@ -150,7 +151,7 @@ def plot_S_surface():
 
     M_real = np.arange(0, 1, 0.01)
     M_bogus = np.arange(0, 1, 0.01)
-    print M_bogus.shape
+    print(M_bogus.shape)
     S = np.ones((100, 100)) * 0.5
 
     fig = plt.figure()
@@ -190,7 +191,7 @@ def old_main():
     data = sio.loadmat("matswaptest.mat")
     user_dict = pickle.load(open("user_dict_swaptes.pkl", "rb"))
     m = len(data["unique_users"])
-    print m
+    print(m)
     order = np.random.permutation(m)
 
     counter = 0
@@ -204,7 +205,7 @@ def old_main():
                 max = len(user_dict[u][1]) + len(user_dict[u][0])
             #    continue
             if u[:6] == "robot_":
-                print u, "%.3f %.3f" % (user_dict[u][1][-1], user_dict[u][0][-1])
+                print(u, "%.3f %.3f" % (user_dict[u][1][-1], user_dict[u][0][-1]))
                 plt.plot(user_dict[u][1][-1], user_dict[u][0][-1], "o",
                          color="#FFBA08", alpha=0.5)
             else:
@@ -216,7 +217,7 @@ def old_main():
             counter += 1
         except (KeyError, IndexError):
             continue
-    print max
+    print(max)
     plt.text(0.03, 0.03, "Obtuse")
     plt.text(0.75, 0.03, "Optimistic")
     plt.text(0.03, 0.95, "Pessimistic")
@@ -311,7 +312,7 @@ def old_main():
     """
 
     m = len(data["unique_users"])
-    print m
+    print(m)
     order = np.random.permutation(m)
 
     counter = 0
@@ -326,7 +327,7 @@ def old_main():
                 max = len(user_dict[u][1]) + len(user_dict[u][0])
             #    continue
             if u[:6] == "robot_":
-                print u, "%.3f %.3f" % (user_dict[u][1][-1], user_dict[u][0][-1])
+                print(u, "%.3f %.3f" % (user_dict[u][1][-1], user_dict[u][0][-1]))
                 plt.plot(user_dict[u][1][-1], user_dict[u][0][-1], "o",
                          color="#FFBA08", alpha=0.5)
             else:
@@ -338,7 +339,7 @@ def old_main():
             counter += 1
         except (KeyError, IndexError):
             continue
-    print max
+    print(max)
     plt.text(0.03, 0.03, "Obtuse")
     plt.text(0.75, 0.03, "Optimistic")
     plt.text(0.03, 0.95, "Pessimistic")
