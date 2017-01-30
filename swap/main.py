@@ -1,6 +1,8 @@
+#!/usr/bin/python3
+
 import swap
 import sys
-import cPickle as pickle
+import _pickle as pickle
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.io as sio
