@@ -3,3 +3,4 @@
 from .swap import SWAP
 from .matswap import MATSWAP
 from .snap import SNAP
+from .mongo import Mongo
