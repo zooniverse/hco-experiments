@@ -2,8 +2,8 @@
 ################################################################
 # Script to test Mongo functionality
 
-from swap import Mongo
+import swap.mongo as mongo
 
-a = Mongo()
+a = mongo.DB()
 
 a.test()

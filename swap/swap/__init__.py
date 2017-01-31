@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-from .swap import SWAP
-from .matswap import MATSWAP
-from .snap import SNAP
-from .mongo import Mongo
+from swap.swap import SWAP
+from swap.matswap import MATSWAP
+from swap.snap import SNAP

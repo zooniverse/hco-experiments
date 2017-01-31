@@ -1,11 +1,12 @@
 ################################################################
 # Mongo client
 
-from .config import Config
+from swap.config import Config
+from pymongo import MongoClient
 
-class Mongo:
+class DB:
     """
-        Mongo
+        DB
 
         The main interaction between the python code and the 
         supporting mongo database. All calls to the database
@@ -24,6 +25,9 @@ class Mongo:
         self._client = MongoClient('%s:%d' % (host,port))
         self._db = self._client[db_name]
 
-    def test(self):
-        print(self._db.collection_names())
+    def get():
+        pass
 
+    def test(self):
+        print("running a test....")
+        print(self._db.collection_names())
