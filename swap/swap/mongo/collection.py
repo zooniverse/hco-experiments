@@ -1,11 +1,32 @@
 ################################################################
 # Collection abstract class
 
-from swap.mongo import DB
+from abc import ABC, abstractmethod
 
-class Collection:
+class Collection(ABC):
     """
         Collection
 
-        Pare
+        Abstract class describing the functionality
+        the collection subclasses should implement
     """
+
+    @abstractmethod
+    def __init__(self, db):
+        pass
+
+    @abstractmethod
+    def addItem(self, item):
+        pass
+
+    @abstractmethod
+    def addItems(self, items):
+        pass
+
+    @abstractmethod
+    def getItem(self, **kwargs):
+        pass
+
+    @abstractmethod
+    def getAll(self):
+        pass
