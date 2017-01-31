@@ -1,5 +1,5 @@
 ################################################################
-# Classifaction database interface
+# Classification database interface
 
 """
     Current collection field configuration. This is 
@@ -15,7 +15,7 @@
         subject_id
         diff
         object_id
-        machine_score <<<< Is this an artefact 
+        machine_score <<<< Is this an artifact 
                            from previous processing?
 
     I propose the following structure for the main classifications
@@ -37,7 +37,7 @@
         machine_score
 """
 
-from swap.mongo import Collection
+from swap.mongo.collection import Collection
 from swap.config import Config
 
 class Classifications(Collection):
@@ -49,21 +49,21 @@ class Classifications(Collection):
     
     def __init__(self, db):
         config = Config()
-        name = config.database['collection']['classifications']
+        name = config.database['collections']['classifications']
 
         self.config = config
         self.collection = getattr(db, name)
 
-    def addItem(self, item):
+    def addOne(self, item):
         result = self.collection.insert_one(item)
 
-    def addItems(self, items):
+    def addMany(self, items):
         self.collection.insert_many(items)
 
-    def getItem(self, **kwargs):
+    def getItems(self, **kwargs):
         return self.collection.find(kwargs)
 
-    def getAll(self):
+    def getAllItems(self):
         return self.collection.find({})
 
     def drop(self):

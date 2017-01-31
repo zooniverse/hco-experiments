@@ -16,17 +16,17 @@ class Collection(ABC):
         pass
 
     @abstractmethod
-    def addItem(self, item):
+    def addOne(self, item):
         pass
 
     @abstractmethod
-    def addItems(self, items):
+    def addMany(self, items):
         pass
 
     @abstractmethod
-    def getItem(self, **kwargs):
+    def getItems(self, **kwargs):
         pass
 
     @abstractmethod
-    def getAll(self):
+    def getAllItems(self):
         pass

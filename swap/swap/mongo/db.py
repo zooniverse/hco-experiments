@@ -2,6 +2,7 @@
 # Mongo client
 
 from swap.config import Config
+from swap.mongo.classifications import Classifications
 from pymongo import MongoClient
 
 class DB:
@@ -17,19 +18,11 @@ class DB:
         config = Config()
 
         # Get database configuration from config file
-        c = config.s
-        host = c['database']['host']
-        db_name = c['database']['name']
-        port = c['database']['port']
+        host = config.database['host']
+        db_name = config.database['name']
+        port = config.database['port']
 
         self._client = MongoClient('%s:%d' % (host,port))
         self._db = self._client[db_name]
 
-    def get():
-        pass
-
-    def test(self):
-        print("running a test....")
-        print(self._db.collection_names())
-
-        return 1
+        self.classifications = Classifications(self._db)
