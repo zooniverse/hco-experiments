@@ -1,4 +1,5 @@
-#!/usr/bin/python3
+################################################################
+# SWAP implementation for matlab files
 
 from .swap import SWAP
 

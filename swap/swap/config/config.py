@@ -1,3 +1,6 @@
+################################################################
+# Configuration module to handle local config setup
+
 import yaml
 import os
 

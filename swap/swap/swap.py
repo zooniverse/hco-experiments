@@ -1,4 +1,6 @@
-#!/usr/bin/python3
+################################################################
+# Main SWAP implementation. Currently still in legacy form
+
 
 import sys
 import _pickle as pickle

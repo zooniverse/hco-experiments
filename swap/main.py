@@ -1,4 +1,5 @@
-#!/usr/bin/python3
+################################################################
+# Main entrypoint for the processing algorithm
 
 from swap import SWAP
 import sys
