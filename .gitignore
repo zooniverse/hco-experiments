@@ -101,6 +101,7 @@ data/
 *.mat
 *.csv
 *.txt
+!requirements.txt
 
 
 # Sublime text project files
