@@ -5,3 +5,5 @@ database:
   name: swapDB
   host: localhost
   port: 27017
+  collections:
+    classifications: classifications
