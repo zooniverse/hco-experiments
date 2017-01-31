@@ -1,0 +1,7 @@
+################################################################
+# YAML config file to set up vars
+
+database:
+	name: swapDB
+	host: localhost
+	port: 27017
