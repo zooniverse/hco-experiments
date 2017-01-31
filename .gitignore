@@ -103,6 +103,8 @@ data/
 *.txt
 !requirements.txt
 
+*dump
+
 
 # Sublime text project files
 *.sublime-project
