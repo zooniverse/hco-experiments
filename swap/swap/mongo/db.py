@@ -17,7 +17,7 @@ class DB:
         config = Config()
 
         # Get database configuration from config file
-        c = config.config
+        c = config.s
         host = c['database']['host']
         db_name = c['database']['name']
         port = c['database']['port']
@@ -31,3 +31,5 @@ class DB:
     def test(self):
         print("running a test....")
         print(self._db.collection_names())
+
+        return 1

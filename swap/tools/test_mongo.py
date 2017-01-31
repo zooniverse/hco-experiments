@@ -6,4 +6,5 @@ import swap.mongo as mongo
 
 a = mongo.DB()
 
-a.test()
+def test_test():
+    assert(a.test() == 1)

@@ -6,4 +6,4 @@ from swap.config import Config
 
 a = Config()
 
-print(a.config)
+print(a.s)

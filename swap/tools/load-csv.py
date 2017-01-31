@@ -8,8 +8,8 @@ from swap import Mongo
 
 
 def main():
-    c = Config()
-    config = c.config
+    config = Config()
+    
 
 
     
