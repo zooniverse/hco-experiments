@@ -4,6 +4,9 @@
 ### Get the data
 [SNHunters_classification_dump_20170109.mat](https://www.dropbox.com/s/0sjkfhbxocnkbbb/SNHunters_classification_dump_20170109.mat?dl=0)
 
+Same as above but with magnitude metadata.
+[SNHunters_classification_dump_20170109_metadata.mat](https://www.dropbox.com/s/4i2ilou79tixc61/SNHunters_classification_dump_20170109_metadata.mat?dl=0)
+
 ### Usage Example
 
 Process the .mat file:
