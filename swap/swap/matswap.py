@@ -50,7 +50,7 @@ class MATSWAP(SWAP):
         self.gold_updates = True
 
         self.M, self.unique_users = self.initialiseM()
-        self.S = self.initialiseS()
+        self.S = self.initializeS()
 
         self.dt = np.zeros(self.M.shape)
         self.dt_prime = np.zeros(self.M.shape)
