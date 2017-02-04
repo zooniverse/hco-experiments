@@ -5,5 +5,6 @@ database:
   name: swapDB
   host: localhost
   port: 27017
-  collections:
-    classifications: classifications
+  metadata:
+    magnitude: mag
+    magnitude_error: mag_err
