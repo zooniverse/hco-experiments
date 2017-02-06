@@ -49,7 +49,7 @@ class Classifications(Collection):
     
     def __init__(self, db):
         config = Config()
-        name = config.database['collections']['classifications']
+        name = 'classifications'
 
         self.config = config
         self.collection = getattr(db, name)

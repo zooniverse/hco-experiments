@@ -182,6 +182,15 @@ def main():
     swap = SWAP(db, subjects, p0=0.1, epsilon=0.5)
 
     swap.process()
+    
+def main_matswap():
+    plot_S_surface()
+    swap = MATSWAP("SNHunters_classification_dump_20170109.mat")
+    swap.process()
+    # TODO: only relative paths work
+    swap.save("matswaptest.mat")
+    data = sio.loadmat("matswaptest.mat")
+
 
 
 def old_main():
