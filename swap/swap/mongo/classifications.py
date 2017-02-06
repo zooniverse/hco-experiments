@@ -7,7 +7,7 @@
 
     classifications:
         _id
-        #classification_id
+        classification_id
         user_name
         user_id
         annotation
@@ -15,8 +15,9 @@
         subject_id
         diff
         object_id
-        machine_score <<<< Is this an artifact 
-                           from previous processing?
+        mag
+        mag_err
+        machine_score
 
     I propose the following structure for the main classifications
     collection. This would take a little bit of preprocessing when
