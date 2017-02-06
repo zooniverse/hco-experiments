@@ -9,22 +9,32 @@ from swap.mongo import DB
 import csv
 import os
 import sys
+import argparse
 
 db = DB()
 
 
 def main():
-    path = os.path.dirname(os.path.realpath(__file__))
-    folder = '.'
-    fname = 'SNHunters_classification_dump_20170109_metadata.csv'
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument('file')
+    args = parser.parse_args()
+    print("Using file %s" % args.file)
+
+    if not os.path.isfile(args.file):
+        raise FileNotFoundError("Couldn't find file at '%s'" % args.file)
+    if args.file.split('.')[-1] != 'csv':
+        raise ValueError("File '%s' not a valid csv file" % args.file)
+
+
+    file = args.file
     count = 0
     to_upload = []
     total_count = 0
 
     db.classifications.drop()
 
-    with open('/'.join((path, folder, fname)), 'r') as csvfile:
+    with open(file, 'r') as csvfile:
         reader = csv.DictReader(csvfile, delimiter=',')
 
         for row in reader:
