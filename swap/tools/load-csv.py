@@ -8,14 +8,15 @@ from swap.mongo import DB
 
 import csv
 import os
+import sys
 
 db = DB()
 
 
 def main():
     path = os.path.dirname(os.path.realpath(__file__))
-    folder = 'SNHunters_classification_dump'
-    fname = 'SNHunters_classification_dump_20170109.csv'
+    folder = '.'
+    fname = 'SNHunters_classification_dump_20170109_metadata.csv'
 
     count = 0
     to_upload = []
@@ -29,11 +30,13 @@ def main():
         for row in reader:
             to_upload.append(processRow(row))
 
-            print("%d: %s" % (total_count, str(row)))
+            #print("%d: %s" % (total_count, str(row)))
+            sys.stdout.write("%d records processed\r" % total_count)
+            sys.stdout.flush()
             
             total_count += 1
             count += 1
-            if count >= 5000:
+            if count >= 100000:
                 upload(to_upload)
                 to_upload = []
 
