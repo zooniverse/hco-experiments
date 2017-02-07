@@ -62,10 +62,29 @@ class Classifications(Collection):
         self.collection.insert_many(items)
 
     def getItems(self, **kwargs):
-        return self.collection.find(kwargs)
+        query = self.genQuery(kwargs)
+        return self.collection.find(limit=5, **query)
 
-    def getAllItems(self):
-        return self.collection.find({})
+    def getAllItems(self, **kwargs):
+        query = self.genQuery(kwargs)
+        return self.collection.find(limit=5, **query)
+
+    def getDistinctSet(self, id):
+        return self.collection.distinct(id, limit=5)
+
+    def genQuery(self, kwargs):
+        query = {}
+
+        if 'keys' in kwargs:
+            projection = {}
+            for field in kwargs['fields']:
+                projection[field] = 1
+            query['projection'] = projection
+
+        if 'filter' in kwargs:
+            query['filter'] = kwargs['filter']
+
+        return query
 
     def drop(self):
         self.collection.drop()
