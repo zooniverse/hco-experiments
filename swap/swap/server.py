@@ -30,7 +30,7 @@ class Server:
         fields = {'user_id', 'classification_id', 'subject_id', 'annotation', 'gold_label'}
         classifications = self.collection.getAllItems(fields=fields)
 
-        for key in classifications.keys():
+        for item in classifications:
             classifications[key]['probability'] = self.epsilon
 
         return classifications
