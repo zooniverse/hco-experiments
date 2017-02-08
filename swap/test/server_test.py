@@ -3,7 +3,41 @@
 # Script to test server functionality
 
 import swap
+from swap.mongo.query import Query
+from pprint import pprint
 
-server = swap.Server(.5,.5)
+# server = swap.Server(.5,.5)
 
-print(server.getClassifications())
+# print(server.getClassifications())
+
+fields = {'user_id', 'classification_id', 'subject_id', \
+                  'annotation', 'gold_label'}
+db = swap.mongo.DB()
+
+def test_classifications_projection():
+    q = Query()
+    q.fields(['user_id', 'classification_id'])
+    raw = db.classifications.aggregate(q.build())
+
+    item = raw.next()
+
+    assert 'user_id' in item
+    assert 'classification_id' in item
+    assert 'subject_id' not in item
+
+def test_classifications_limit():
+    q = Query()
+    q.fields(fields).limit(5)
+    raw = db.classifications.aggregate(q.build())
+
+    assert len(list(raw)) == 5
+
+# print(q.build())
+# print(q._project)
+# print(fields)
+# print(type(fields))
+
+
+# raw = db.classifications.aggregate(q.build())
+
+# pprint(list(raw))

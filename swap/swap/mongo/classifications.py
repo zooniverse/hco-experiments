@@ -86,5 +86,8 @@ class Classifications(Collection):
 
         return query
 
+    def aggregate(self, pipeline):
+        return self.collection.aggregate(pipeline)
+
     def drop(self):
         self.collection.drop()

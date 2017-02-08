@@ -7,6 +7,8 @@
 
 from swap import SWAP
 from swap.mongo import DB
+from swap.mongo import Query
+from pprint import pprint
 
 class Server:
 
@@ -27,12 +29,18 @@ class Server:
         return {'classifications': classifications, 'subjects': subjects}
 
     def getClassifications(self):
-        fields = {'user_id', 'classification_id', 'subject_id', 'annotation', 'gold_label'}
-        classifications = self.collection.getAllItems(fields=fields)
+        fields = {'user_id', 'classification_id', 'subject_id', \
+                  'annotation', 'gold_label'}
+        q = Query()
+        q.fields(fields).limit(5)
+
+
+        raw = self.collection.aggregate(q.build())
+
+        pprint(list(raw))
 
         for item in classifications:
-            print(item)
-            classifications[key]['probability'] = self.epsilon
+                item['probability'] = self.epsilon
 
         return classifications
 
