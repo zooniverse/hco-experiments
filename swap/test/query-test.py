@@ -69,6 +69,15 @@ def test_add_fields():
     assert q._project['field2'] == 1
     assert q._project['field3'] == 1
 
+def test_add_fields_set():
+    q = Query()
+    q.fields({'field1', 'field2', 'field3'})
+
+    assert len(q._project) == 3
+    assert q._project['field1'] == 1
+    assert q._project['field2'] == 1
+    assert q._project['field3'] == 1
+
 def test_project_build():
     q = Query()
     q.fields(['field1', 'field2', 'field3'])
