@@ -31,6 +31,7 @@ class Server:
         classifications = self.collection.getAllItems(fields=fields)
 
         for item in classifications:
+            print(item)
             classifications[key]['probability'] = self.epsilon
 
         return classifications

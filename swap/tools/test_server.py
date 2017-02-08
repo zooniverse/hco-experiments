@@ -6,4 +6,4 @@ import swap
 
 server = swap.Server(.5,.5)
 
-server.process()
+print(server.getClassifications())
