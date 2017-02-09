@@ -8,6 +8,7 @@
 from swap import SWAP
 from swap.mongo import DB
 from swap.mongo import Query
+from swap.mongo import Group
 from pprint import pprint
 
 class Server:
@@ -30,16 +31,30 @@ class Server:
         return {'classifications': classifications, 'subjects': subjects}
 
     def getClassifications(self):
-        fields = {'user_id', 'classification_id', 'subject_id', \
-                  'annotation', 'gold_label'}
+        fields = ['user_id', 'classification_id', 'subject_id', \
+                  'annotation', 'gold_label', \
+                  ('probability', self.epsilon)]
         q = Query()
-        q.fields(fields).limit(5).newField('probability', self.epsilon)
+        q.project(fields).limit(5)
 
 
         classifictaions = self.classifictaions.aggregate(q.build())
 
 
         return classifications
+
+    def getUsers(self):
+        q = Query()
+        g = Group().id('user_id').push('classifications',['classification_id','subject_id','annotation'])
+        q.group(g).match('_id','',False).limit(5)
+
+        print(q.build())
+
+        users = self.classifications.aggregate(q.build(),allowDiskUse=True)
+
+        return users
+
+
 
     def getSubjects(self):
         """
