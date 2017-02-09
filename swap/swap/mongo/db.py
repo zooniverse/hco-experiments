@@ -2,7 +2,6 @@
 # Mongo client
 
 from swap.config import Config
-from swap.mongo.classifications import Classifications
 from pymongo import MongoClient
 
 class DB:
@@ -25,4 +24,5 @@ class DB:
         self._client = MongoClient('%s:%d' % (host,port))
         self._db = self._client[db_name]
 
-        self.classifications = Classifications(self._db)
+        self.classifications = self._db.classifications
+        self.subjects = self._db.subjects
