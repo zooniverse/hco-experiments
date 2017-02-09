@@ -10,19 +10,32 @@ class Query:
         self._project = {}
 
     def limit(self, num):
+        """
+            Limits number of results to return
+        """
         self._limit = num
 
         return self
 
     def match(self, key, value):
+        """
+            Limits results to documents where the field 'key'
+            matches with value
+        """
         self._match[key] = value
         return self
 
     def newField(self, name, value):
+        """
+            Adds a new field with a static value
+        """
         self._project[name] = {'$literal': value}
         return self
 
     def fields(self, fields):
+        """
+            Limits the fields that are returned
+        """
         if type(fields) is str:
             fields = [fields]
 
@@ -33,6 +46,12 @@ class Query:
         return self
 
     def group(self, by, count=False):
+        """
+            Groups the data by the fields in by
+
+            If count=True then adds a field counting
+            number of entries in each group
+        """
         pipeline = {}
         groupby = {}
         if type(by) is str:
@@ -58,6 +77,10 @@ class Query:
         return self
 
     def build(self):
+        """
+            Builds an SOM out of this object 
+            for the mongo aggregation pipeline
+        """
         pipeline = []
 
         if self._group:
