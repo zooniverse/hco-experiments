@@ -4,11 +4,7 @@
 class Query:
 
     def __init__(self):
-        self._group = {}
-        self._match = {}
-        self._limit = 0
-        self._project = {}
-        self._out = None
+        self._pipeline = []
 
     def limit(self, num):
         """
@@ -16,39 +12,41 @@ class Query:
         """
         if not type(num) is int:
             raise ValueError('Limit needs to by type int')
-        self._limit = num
+        self._pipeline.append({'$limit': num})
 
         return self
 
-    def match(self, key, value):
+    def match(self, key, value, eq=True):
         """
             Limits results to documents where the field 'key'
             matches with value
         """
-        self._match[key] = value
-        return self
-
-    def newField(self, name, value):
-        """
-            Adds a new field with a static value
-        """
-        self._project[name] = {'$literal': value}
+        if eq:
+            match = {'$match': {key: value}}
+        else:
+            match = {'$match': {key: {'$ne': value}}}
+        self._pipeline.append(match)
         return self
 
     def project(self, fields):
         """
             Limits the fields that are returned
         """
+        project = {}
         if type(fields) is str:
             fields = [fields]
 
         if type(fields) is list or type(fields) is set:
             for field in fields:
-                self._project[field] = 1
+                if type(field) is tuple:
+                    project[field[0]] = {'$literal': field[1]}
+                else:
+                    project[field] = 1
 
         elif type(fields) is dict:
-            self._project = fields
+            project = fields
 
+        self._pipeline.append({'$project': project})
         return self
 
     def group(self, by, count=False):
@@ -58,28 +56,15 @@ class Query:
             If count=True then adds a field counting
             number of entries in each group
         """
-        pipeline = {}
-        groupby = {}
-        if type(by) is str:
-            by = [by]
-
-        if type(by) is list or type(by) is set:
-            for field in by:
-                groupby[field] = "$%s" % str(field)
-
-        elif type(by) is dict:
-            groupby = by
-
-        if groupby:
-            pipeline['_id'] = groupby
-
+        if type(by) is Group:
+            g = by
+        else:
+            g = Group().id(by)
             if count:
-                pipeline['count'] = {'$sum':1}
+                g.count()
 
 
-
-        self._group = pipeline
-
+        self._pipeline.append(g.build())
         return self
 
     def out(self, collection):
@@ -88,9 +73,8 @@ class Query:
         """
         if not type(collection) is str:
             raise ValueError("Collection name needs to be string")
-            
-        self._out = collection
 
+        self._pipeline.append({'$out': collection})
         return self
 
 
@@ -99,23 +83,56 @@ class Query:
             Builds an SOM out of this object 
             for the mongo aggregation pipeline
         """
-        pipeline = []
+        return self._pipeline
 
-        if self._group:
-            pipeline.append({'$group': self._group})
-        
-        if self._match:
-            pipeline.append({'$match': self._match})
+class Group:
+    def __init__(self):
+        self._id = False
+        self._extra = {}
 
-        if self._project:
-            pipeline.append({'$project': self._project})
+    def id(self, name):
+        if type(name) is str:
+            self._id = '$%s' % name
+        elif type(name) is list:
+            _id = {}
+            for field in name:
+                _id[field] = '$%s' % field
+            self._id = _id
 
-        if self._limit:
-            pipeline.append({'$limit': self._limit})
+        return self
 
-        if self._out:
-            pipeline.append({'$out': self._out})
+    def push(self, name, fields):
+        if type(fields) is str:
+            push = '$%s' % fields
 
-        return pipeline
+        if type(fields) is list:
+            push = {}
+            for field in fields:
+                push[field] = '$%s' % field
+
+        elif type(fields) is dict:
+            push = fields
+
+        self._extra[name] = {'$push':push}
+
+        return self
+
+    def count(self, name='count'):
+        self._extra[name] = {'$sum':1}
+
+        return self
+
+    def build(self):
+        output = {}
+        if self._id:
+            output['_id'] = self._id
+            output.update(self._extra)
+
+            print(output)
+
+            return {'$group': output}
+        else:
+            raise ValueError('Nothing set for group stage!')
+
 
 
