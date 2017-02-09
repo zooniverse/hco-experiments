@@ -4,6 +4,7 @@
 class Query:
 
     def __init__(self):
+        self._group = {}
         self._match = {}
         self._limit = 0
         self._project = {}
@@ -31,17 +32,44 @@ class Query:
 
         return self
 
+    def group(self, by, count=False):
+        pipeline = {}
+        groupby = {}
+        if type(by) is str:
+            by = [by]
+
+        if type(by) is list or type(by) is set:
+            for field in by:
+                groupby[field] = "$%s" % str(field)
+
+        elif type(by) is dict:
+            groupby = by
+
+        if groupby:
+            pipeline['_id'] = groupby
+
+            if count:
+                pipeline['count'] = {'$sum':1}
+
+
+
+        self._group = pipeline
+
+        return self
+
     def build(self):
         pipeline = []
 
+        if self._group:
+            pipeline.append({'$group': self._group})
         
-        if len(self._match) > 0:
+        if self._match:
             pipeline.append({'$match': self._match})
 
-        if len(self._project) > 0:
+        if self._project:
             pipeline.append({'$project': self._project})
 
-        if self._limit > 0:
+        if self._limit:
             pipeline.append({'$limit': self._limit})
 
         return pipeline
