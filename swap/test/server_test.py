@@ -32,12 +32,19 @@ def test_classifications_limit():
 
     assert len(list(raw)) == 5
 
-# print(q.build())
-# print(q._project)
-# print(fields)
-# print(type(fields))
+
+def main():
+    q = Query()
+    q.fields(fields).limit(5)
+    print(q.build())
+    print(q._project)
+    print(fields)
+    print(type(fields))
 
 
-# raw = db.classifications.aggregate(q.build())
+    raw = db.classifications.aggregate(q.build())
 
-# pprint(list(raw))
+    pprint(list(raw))
+
+if __name__ == "__main__":
+    main()
