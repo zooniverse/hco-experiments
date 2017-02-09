@@ -5,6 +5,7 @@
 import swap
 from swap.mongo.query import Query
 from pprint import pprint
+import time
 
 # server = swap.Server(.5,.5)
 
@@ -46,5 +47,16 @@ def main():
 
     pprint(list(raw))
 
+def main_duration():
+    server = swap.Server(.5,.5)
+    start = time.time()
+    server.getSubjects()
+    print("--- %s seconds ---" % (time.time() - start))
+
+    server = swap.Server(.5,.5)
+    start = time.time()
+    server.getSubjects2()
+    print("--- %s seconds ---" % (time.time() - start))
+
 if __name__ == "__main__":
-    main()
+    main_duration()

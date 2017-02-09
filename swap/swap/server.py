@@ -14,7 +14,8 @@ class Server:
 
     def __init__(self, p0, epsilon):
         self._db = DB()
-        self.collection = self._db.classifications
+        self.classifications = self._db.classifications
+        self.subjects = self._db.subjects
 
         self.p0 = p0
         self.epsilon = epsilon
@@ -32,23 +33,40 @@ class Server:
         fields = {'user_id', 'classification_id', 'subject_id', \
                   'annotation', 'gold_label'}
         q = Query()
-        q.fields(fields).limit(5)
+        q.fields(fields).limit(5).newField('probability', self.epsilon)
 
 
-        raw = self.collection.aggregate(q.build())
+        classifictaions = self.classifictaions.aggregate(q.build())
 
-        pprint(list(raw))
-
-        for item in classifications:
-                item['probability'] = self.epsilon
 
         return classifications
 
     def getSubjects(self):
-        raw = self.collection.getDistinctSet('subject_id')
-        subjects = {}
-        for subject in raw:
-            subjects[subject] = self.p0
+        """
+            Gets subject data from previously created
+            subject collection
+        """
+        q = Query()
+        q.limit(5)
+
+        subjects = self.subjects.aggregate(q.build())
+
+        return subjects
+
+    def getSubjects_aggregate(self):
+        """
+            Generates subject data by aggregating
+            from classifications
+        """
+        fields = ['subject_id','gold_label','diff']
+        project = {'_id': '$_id.subject_id', \
+                   'gold_label': '$_id.gold_label', \
+                   'diff':'$_id.diff'}
+
+        q = Query()
+        q.group(fields).project(project)
+
+        subjects = self.classifications.aggregate(q.build())
 
         return subjects
 
