@@ -8,11 +8,14 @@ class Query:
         self._match = {}
         self._limit = 0
         self._project = {}
+        self._out = None
 
     def limit(self, num):
         """
             Limits number of results to return
         """
+        if not type(num) is int:
+            raise ValueError('Limit needs to by type int')
         self._limit = num
 
         return self
@@ -32,7 +35,7 @@ class Query:
         self._project[name] = {'$literal': value}
         return self
 
-    def fields(self, fields):
+    def project(self, fields):
         """
             Limits the fields that are returned
         """
@@ -42,6 +45,9 @@ class Query:
         if type(fields) is list or type(fields) is set:
             for field in fields:
                 self._project[field] = 1
+
+        elif type(fields) is dict:
+            self._project = fields
 
         return self
 
@@ -76,6 +82,18 @@ class Query:
 
         return self
 
+    def out(self, collection):
+        """
+            Writes query results to the specified collection
+        """
+        if not type(collection) is str:
+            raise ValueError("Collection name needs to be string")
+            
+        self._out = collection
+
+        return self
+
+
     def build(self):
         """
             Builds an SOM out of this object 
@@ -94,6 +112,9 @@ class Query:
 
         if self._limit:
             pipeline.append({'$limit': self._limit})
+
+        if self._out:
+            pipeline.append({'$out': self._out})
 
         return pipeline
 

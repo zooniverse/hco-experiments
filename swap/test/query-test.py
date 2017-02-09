@@ -61,14 +61,14 @@ def test_add_new_field_build():
 
 def test_add_field():
     q = Query()
-    q.fields('name')
+    q.project('name')
 
     assert 'name' in q._project
     assert q._project['name'] == 1
 
 def test_add_fields():
     q = Query()
-    q.fields(['field1', 'field2', 'field3'])
+    q.project(['field1', 'field2', 'field3'])
 
     assert len(q._project) == 3
     assert q._project['field1'] == 1
@@ -77,16 +77,24 @@ def test_add_fields():
 
 def test_add_fields_set():
     q = Query()
-    q.fields({'field1', 'field2', 'field3'})
+    q.project({'field1', 'field2', 'field3'})
 
     assert len(q._project) == 3
     assert q._project['field1'] == 1
     assert q._project['field2'] == 1
     assert q._project['field3'] == 1
 
+def test_add_fields_dict():
+    q = Query()
+    fields = {'field1':'$field1', 'field2':'$field2'}
+    q.project(fields)
+
+    assert q._project == fields
+
+
 def test_project_build():
     q = Query()
-    q.fields(['field1', 'field2', 'field3'])
+    q.project(['field1', 'field2', 'field3'])
     build = q.build()[0]
 
     assert '$project' in build
@@ -144,3 +152,18 @@ def test_group_not_build():
 
     for i in q.build():
         assert '$group' not in i
+
+################################################################
+# Out
+
+def test_out():
+    q = Query()
+    q.out('collection')
+
+    assert q._out == 'collection'
+
+def test_out_build():
+    q = Query()
+    q.limit(5).out('collection')
+
+    assert q.build()[-1] == {'$out':'collection'}
