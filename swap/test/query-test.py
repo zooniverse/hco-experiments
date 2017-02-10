@@ -3,6 +3,9 @@
 
 from swap.mongo.query import Query
 from swap.mongo.query import Group
+from swap.mongo.query import Sort
+
+from collections import OrderedDict
 
 ################################################################
 # Limit
@@ -139,3 +142,51 @@ def test_group_Group():
     q = Query().group(g)
 
     assert q._pipeline[-1] == g.build()
+
+################################################################
+# Group Class
+
+def test_Sort_one():
+    s = Sort()
+    s.add('field',1)
+
+    assert s._order['field'] == 1
+
+def test_Sort_two_order():
+    s = Sort()
+    s.add('field1',1).add('field2',-1)
+
+    order = list(s._order)
+    assert order[0] == 'field1'
+    assert order[1] == 'field2'
+
+def test_Sort_two_values():
+    s = Sort()
+    s.add('field1',1).add('field2',-1)
+
+    assert s._order['field1'] == 1
+    assert s._order['field2'] == -1
+
+def test_Sort_many_order():
+    s = Sort()
+    s.addMany([('field1',1),('field2',-1)])
+
+    order = list(s._order)
+    assert order[0] == 'field1'
+    assert order[1] == 'field2'
+
+def test_Sort_many_order():
+    s = Sort()
+    s.addMany([('field1',1),('field2',-1)])
+
+    order = list(s._order)
+    assert s._order['field1'] == 1
+    assert s._order['field2'] == -1
+
+def test_Sort_build():
+    fields = [('field1',1),('field2',-1)]
+    s = Sort()
+    s.addMany(fields)
+
+    b = s.build()
+    assert b['$sort'] == OrderedDict(fields)

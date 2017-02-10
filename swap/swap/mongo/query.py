@@ -1,6 +1,8 @@
 ################################################################
 # Class to construct a query dictionary
 
+from collections import OrderedDict
+
 class Query:
 
     def __init__(self):
@@ -65,6 +67,17 @@ class Query:
 
 
         self._pipeline.append(g.build())
+        return self
+
+    def sort(self, s):
+        """
+            Sorts the data via a Sort object
+        """
+        if not type(s) is Sort:
+            raise ValueError("sort must receive a Sort class object")
+
+
+        self._pipeline.append(s.build())
         return self
 
     def out(self, collection):
@@ -160,5 +173,33 @@ class Group:
         else:
             raise ValueError('Nothing set for group stage!')
 
+class Sort:
 
+    def __init__(self):
+        self._order = OrderedDict()
 
+    def add(self, name, order):
+        """
+            Args:
+                name (str) field name
+                order (int) 1 ascending, -1 descending
+            Sorts the aggregation results by the field name
+            in asc/desc order
+        """
+        self._order[name] = order
+        return self
+
+    def addMany(self, order):
+        """
+            Args:
+                order list(tuple(name, order))
+
+            Receives multiple sort commands as list of tuples,
+            where each tuple has the field name and asc/desc order
+        """
+        for name, direction in order:
+            self._order[name] = direction
+        return self
+
+    def build(self):
+        return {'$sort':self._order}
