@@ -43,7 +43,7 @@ class Server:
 
         return classifications
 
-    def getUsers(self):
+    def getClassificationsByUser(self):
         q = Query()
         g = Group().id('user_id').push('classifications',['classification_id','subject_id','annotation'])
         q.group(g).match('_id','',False).limit(5)
