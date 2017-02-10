@@ -40,6 +40,20 @@ def test_users():
     pprint(list(users))
 
 
+def test_get_one_classification():
+    """ Get the first classification
+    """
+    server = swap.Server(0.5,0.5)
+    
+    classification_cursor = server.classifications.find()
+    n_class = classification_cursor.count()
+    current_classification = classification_cursor.next()
+
+    assert n_class > 0
+    assert type(current_classification) == dict
+    assert len(current_classification) > 0
+              
+              
 def main():
     q = Query()
     q.fields(fields).limit(5)
@@ -63,7 +77,38 @@ def main_duration():
     start = time.time()
     server.getSubjects2()
     print("--- %s seconds ---" % (time.time() - start))
+    
+
+              
+def main_duration_iterate_classifications(n_classifications=1000):
+    """ Measure duration to iteratively read N classifications to memory
+        This reads one classification at a time
+    """
+    server = swap.Server(.5,.5)
+    start = time.time()
+    # loop over cursor to retrieve classifications
+    for i in range(0,n_classifications):
+        classification_cursor = server.classifications.find()
+        current_classification = classification_cursor.next()
+    print("--- %s seconds ---" % (time.time() - start))
+    
+    
+def main_duration_batch_classifications(n_classifications=1000,max_batch_size = 1000):
+    """ Meausre time to read N classifications in batches of max size M
+    """
+    server = swap.Server(.5,.5)
+    start = time.time()
+    # initialize curser with limit and max batch size
+    classification_cursor = server.classifications.find().limit(n_classifications).batch_size(min(max_batch_size,n_classifications))
+    # loop over cursor to retrieve classifications
+    for i in range(0,n_classifications):
+        current_classification = classification_cursor.next()
+    print("--- %s seconds ---" % (time.time() - start))
+  
 
 if __name__ == "__main__":
+    main_duration_batch_classifications(n_classifications=1000,max_batch_size=1000)
+    main_duration_iterate_classifications(n_classifications=10)
     #main_duration()
     test_users()
+

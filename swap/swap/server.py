@@ -41,11 +41,10 @@ class Server:
         q.project(fields).limit(5)
 
 
-        classifictaions = self.classifictaions.aggregate(q.build())
+        classifications = self.classifications.aggregate(q.build())
 
 
         return classifications
-
 
 
 
