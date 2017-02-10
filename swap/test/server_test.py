@@ -107,7 +107,6 @@ def main_duration_batch_classifications(n_classifications=1000,max_batch_size = 
   
 
 if __name__ == "__main__":
-
     main_duration_batch_classifications(n_classifications=1000,max_batch_size=1000)
     main_duration_iterate_classifications(n_classifications=10)
     #main_duration()
