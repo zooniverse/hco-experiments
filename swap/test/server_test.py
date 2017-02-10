@@ -35,7 +35,7 @@ def test_classifications_limit():
 
 def test_users():
     server = swap.Server(.5,.5)
-    users = server.getUsers()
+    users = server.getClassificationsByUser()
 
     pprint(list(users))
 

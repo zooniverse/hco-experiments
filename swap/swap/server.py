@@ -31,9 +31,12 @@ class Server:
         return {'classifications': classifications, 'subjects': subjects}
 
     def getClassifications(self):
-        fields = ['user_id', 'classification_id', 'subject_id', \
-                  'annotation', 'gold_label', \
-                  ('probability', self.epsilon)]
+        # fields = ['user_id', 'classification_id', 'subject_id', \
+        #           'annotation', 'gold_label', \
+        #           ('probability', self.epsilon)]
+
+        fields = ['user_name', 'subject_id', 'annotation' \
+                  'gold_label']
         q = Query()
         q.project(fields).limit(5)
 
@@ -43,10 +46,31 @@ class Server:
 
         return classifications
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     def getClassificationsByUser(self):
         q = Query()
         g = Group().id('user_id').push('classifications',['classification_id','subject_id','annotation'])
-        q.group(g).match('_id','',False).limit(5)
+        q.group(g).match('_id','',False)
 
         print(q.build())
 
