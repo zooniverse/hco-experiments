@@ -36,7 +36,7 @@ class Server:
         q.fields(fields).limit(5).newField('probability', self.epsilon)
 
 
-        classifictaions = self.classifictaions.aggregate(q.build())
+        classifications = self.classifications.aggregate(q.build())
 
 
         return classifications
