@@ -38,11 +38,10 @@ class Server:
         fields = ['user_name', 'subject_id', 'annotation' \
                   'gold_label']
         q = Query()
-        q.project(fields).limit(5)
+        q.project(fields)
 
 
         classifications = self.classifications.aggregate(q.build())
-
 
         return classifications
 
@@ -85,7 +84,7 @@ class Server:
             subject collection
         """
         q = Query()
-        q.limit(5)
+        q.match('gold_label',1).limit(5)
 
         subjects = self.subjects.aggregate(q.build())
 

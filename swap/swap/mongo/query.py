@@ -174,31 +174,6 @@ class Group:
 
         return self
 
-    def count(self, name='count'):
-        """
-            Add an extra field counting the number of documents
-            in each group
-        """
-        self._extra[name] = {'$sum':1}
-
-        return self
-
-    def build(self):
-        """
-            Build a dict out of this object for the mongo 
-            aggregation pipeline
-        """
-        output = {}
-        if self._id:
-            output['_id'] = self._id
-            output.update(self._extra)
-
-            print(output)
-
-            return {'$group': output}
-        else:
-            raise ValueError('Nothing set for group stage!')
-
 class Sort:
 
     def __init__(self):
