@@ -86,11 +86,20 @@ class Query:
         return self._pipeline
 
 class Group:
+    """
+        Buils a $group statement in the aggregation pipeline.
+        $group is more complicated than the other commands, 
+        so it deserves its own class 
+    """
     def __init__(self):
         self._id = False
         self._extra = {}
 
     def id(self, name):
+        """
+            Defines the _id field that the documents are
+            grouped by
+        """
         if type(name) is str:
             self._id = '$%s' % name
         elif type(name) is list:
@@ -102,6 +111,15 @@ class Group:
         return self
 
     def push(self, name, fields):
+        """
+            Args:
+                name (str) name of the pushed array
+                fields (list) list of fields to push
+
+            After grouping, pushes an array containing the 
+            specified fields from the documents aggregated into
+            this group.
+        """
         if type(fields) is str:
             push = '$%s' % fields
 
@@ -118,11 +136,19 @@ class Group:
         return self
 
     def count(self, name='count'):
+        """
+            Add an extra field counting the number of documents
+            in each group
+        """
         self._extra[name] = {'$sum':1}
 
         return self
 
     def build(self):
+        """
+            Build a dict out of this object for the mongo 
+            aggregation pipeline
+        """
         output = {}
         if self._id:
             output['_id'] = self._id
