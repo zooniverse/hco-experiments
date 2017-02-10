@@ -1,27 +1,28 @@
 ################################################################
 # SWAP implementation
+# 
 
 #import modules
-import sys
 import _pickle as pickle
-import numpy as np
-import matplotlib.pyplot as plt
 import scipy.io as sio
+import swap.Server
 
-from pymongo import MongoClient
 
-n_classifications=1000
-max_batch_size = 1000
-server = swap.Server(.5,.5)
-# initialize curser with limit and max batch size
-classification_cursor = server.classifications.find().limit(n_classifications).batch_size(min(max_batch_size,n_classifications))
-swappy = SWAP()
-# loop over cursor to retrieve classifications
-for i in range(0,8):
-    current_classification = classification_cursor.next()
-    swappy.processOneClassification(current_classification)
-
-swappy.getUserData()
+# read classifications
+def test_swap():
+    n_classifications=1000
+    max_batch_size = 1000
+    server = swap.Server(.5,.5)
+    # initialize curser with limit and max batch size
+    classification_cursor = server.classifications.find().limit(n_classifications).batch_size(min(max_batch_size,n_classifications))
+    swappy = SWAP()
+    # loop over cursor to retrieve classifications
+    for i in range(0,8):
+        current_classification = classification_cursor.next()
+        swappy.processOneClassification(current_classification)
+    swappy.getUserData()
+    
+    
 
 class SWAP(object):
     """
@@ -37,7 +38,6 @@ class SWAP(object):
         """
             Initialize SWAP instance
             Args:
-                db: (pymongo database) Reference to the MongoClient database
                 p0: Prior probability real - in general this is derived empirically by
                 considering the occurence frequency of interesting objects that are expertly
                 identified within a fiducial dataset. It is required to initialize the likelihood
@@ -64,9 +64,17 @@ class SWAP(object):
         self.gold_updates = True
 
 
-    # update User confusion matrix
+    # update User Data (classification history and probabilities)
     def updateUserData(self,cl):  
-        # check if user is new and initialize
+        """ Update User Data with respect to classifications
+        
+        Parameter:
+        -----------
+        cl: dict
+            Contains all information for a classification
+            
+        """
+        # check if user is new and create in user dictionary if not
         if cl['user_name'] not in self.users:
             self.users[cl['user_name']] = {
                       'annotations':[],
@@ -82,45 +90,34 @@ class SWAP(object):
         current_user['gold_labels'].append(cl['gold_label'])
         current_user['n_classified'] += 1
         
-        # check if label exists and create if not
+        # check if gold label exists and create if not
         if not cl['gold_label'] in current_user['probability_current']:
             current_user['probability_history'][cl['gold_label']] = []
-            current_user['probability_current'][cl['gold_label']] = []
+            current_user['probability_current'][cl['gold_label']] = self.epsilon
             current_user['labels'][cl['gold_label']] = {'n':0,'n_match':0}
-            
+        
+        # check if annotation label exists and create if not
         if not cl['annotation'] in current_user['probability_current']:
             current_user['probability_history'][cl['annotation']] = []
-            current_user['probability_current'][cl['annotation']] = [] 
+            current_user['probability_current'][cl['annotation']] = self.epsilon
             current_user['labels'][cl['annotation']] = {'n':0,'n_match':0}
             
-        # update performance data
+        # update number of subjects of that label seen by user
         current_user['labels'][cl['gold_label']]['n'] += 1
-        n_class = current_user['labels'][cl['gold_label']]['n']
-        current_user['labels'][cl['gold_label']]['n_match'] += 1
-        n_class = current_user['labels'][cl['gold_label']]['n']
-        n_pos = int(cl['gold_label'] == cl['annotation'])
         
-        current_user['probability_history'][cl['gold_label']] = 
-            
+        # update number of matches of that label seen by user
+        if cl['gold_label'] == cl['annotation']:
+            current_user['labels'][cl['gold_label']]['n_match'] += 1
+           
+        # update user probability  
+        n_classified_of_that_label = current_user['labels'][cl['gold_label']]['n']
+        n_correctly_classified = current_user['labels'][cl['gold_label']]['n_match']
+        p_classified_correctly = n_correctly_classified / n_classified_of_that_label
         
-        
-            
-            
-            self.users[]
-            # initialize dictionary for labels
-            label_res = {'n':0,'n_pos':0,'p':self.epsilon}
-            labels = dict()
-            labels[cl['gold_label']] = label_res
-            self.users[cl['user_name']] = {'labels':labels}       
-        # get current entry for user
-        user = self.users[cl['user_name']]
-        # update count of classified subject type
-        user['labels'][cl['gold_label']]['n'] = user['labels'][cl['gold_label']]['n'] + 1
-        # update if annotation matches label
-        if cl['annotation'] == cl['gold_label']:
-            user['labels'][cl['gold_label']]['n_pos'] = user['labels'][cl['gold_label']]['n_pos'] + 1
-        # update success probability
-        user['labels'][cl['gold_label']]['n_pos'] = user['labels'][cl['gold_label']]['n_pos'] / user['labels'][cl['gold_label']]['n']
+        # save updated probability
+        current_user['probability_history'][cl['gold_label']].append(p_classified_correctly)
+        current_user['probability_current'][cl['gold_label']] = p_classified_correctly           
+
         
     
     def getUserData(self):
@@ -128,24 +125,51 @@ class SWAP(object):
     
     # update subject probability
     def updateSubjectData(self,cl):
-        # check if user is new and initialize
+        # check if subject is new and create in user dictionary if yes
         if cl['subject_id'] not in self.subjects:
-            # initialize dictionary for labels
-            label_res = {'n':0,'n_pos':0,'p':self.epsilon}
-            labels = dict()
-            labels[cl['gold_label']] = label_res
-            self.users[cl['user_name']] = {'labels':labels}       
-        # get current entry for user
-        user = self.users[cl['user_name']]
-        # update count of classified subject type
-        user['labels'][cl['gold_label']]['n'] = user['labels'][cl['gold_label']]['n'] + 1
-        # update if annotation matches label
-        if cl['annotation'] == cl['gold_label']:
-            user['labels'][cl['gold_label']]['n_pos'] = user['labels'][cl['gold_label']]['n_pos'] + 1
-        # update success probability
-        user['labels'][cl['gold_label']]['n_pos'] = user['labels'][cl['gold_label']]['n_pos'] / user['labels'][cl['gold_label']]['n']
-
+            self.subjects[cl['subject_id']] = {
+                      'annotations':[],
+                      'gold_labels':[],
+                      'labels':dict(),
+                      'probability_history':dict(),
+                      'n_classified':0,
+                      'probability_current':dict()}
+            
+        # update label data
+        current_user = self.users[cl['user_name']]
+        current_user['annotations'].append(cl['annotation'])
+        current_user['gold_labels'].append(cl['gold_label'])
+        current_user['n_classified'] += 1
         
+        # check if gold label exists and create if not
+        if not cl['gold_label'] in current_user['probability_current']:
+            current_user['probability_history'][cl['gold_label']] = []
+            current_user['probability_current'][cl['gold_label']] = self.epsilon
+            current_user['labels'][cl['gold_label']] = {'n':0,'n_match':0}
+        
+        # check if annotation label exists and create if not
+        if not cl['annotation'] in current_user['probability_current']:
+            current_user['probability_history'][cl['annotation']] = []
+            current_user['probability_current'][cl['annotation']] = self.epsilon
+            current_user['labels'][cl['annotation']] = {'n':0,'n_match':0}
+            
+        # update number of subjects of that label seen by user
+        current_user['labels'][cl['gold_label']]['n'] += 1
+        
+        # update number of matches of that label seen by user
+        if cl['gold_label'] == cl['annotation']:
+            current_user['labels'][cl['gold_label']]['n_match'] += 1
+           
+        # update user probability  
+        n_classified_of_that_label = current_user['labels'][cl['gold_label']]['n']
+        n_correctly_classified = current_user['labels'][cl['gold_label']]['n_match']
+        p_classified_correctly = n_correctly_classified / n_classified_of_that_label
+        
+        # save updated probability
+        current_user['probability_history'][cl['gold_label']].append(p_classified_correctly)
+        current_user['probability_current'][cl['gold_label']] = p_classified_correctly 
+                    
+           
         
     # Process a classification
     def processOneClassification(self,cl):
