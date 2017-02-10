@@ -33,6 +33,12 @@ def test_classifications_limit():
 
     assert len(list(raw)) == 5
 
+def test_users():
+    server = swap.Server(.5,.5)
+    users = server.getUsers()
+
+    pprint(list(users))
+
 
 def main():
     q = Query()
@@ -59,4 +65,5 @@ def main_duration():
     print("--- %s seconds ---" % (time.time() - start))
 
 if __name__ == "__main__":
-    main_duration()
+    #main_duration()
+    test_users()

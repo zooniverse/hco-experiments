@@ -2,156 +2,63 @@
 # Test functions for query class
 
 from swap.mongo.query import Query
+from swap.mongo.query import Group
 
 ################################################################
 # Limit
 def test_limit():
     q = Query()
     q.limit(5)
-    assert q._limit == 5
-
-def test_limit_not_build():
-    q = Query()
-    q.limit(0)
-    build = q.build()
-
-    for item in build:
-        assert '$limit' not in item
-
-def test_limit_build():
-    q = Query()
-    q.limit(5)
-    build = q.build()[0]
-    assert '$limit' in build
-    assert build['$limit'] == 5
+    assert q._pipeline[-1] == {'$limit': 5}
 
 ################################################################
 # Match
-def test_match():
+def test_match_eq():
     q = Query()
     q.match('key', 'value')
-    assert 'key' in q._match
-    assert q._match['key'] == 'value'
+    assert q._pipeline[-1] == {'$match':{'key':'value'}}
 
-def test_match_build():
+def test_match_neq():
     q = Query()
-    q.match('key', 'value')
-    build = q.build()[0]
+    q.match('key', 'value', False)
 
-    assert '$match' in build
-    assert 'key' in build['$match']
-    assert build['$match']['key'] == 'value'
+    assert q._pipeline[-1] == {'$match':{'key':{'$ne':'value'}}}
 
 ################################################################
 # Project
 def test_add_new_field():
     q = Query()
-    q.newField('name', 100)
+    q.project([('name', 100)])
 
-    assert 'name' in q._project
-    assert '$literal' in q._project['name']
-    assert q._project['name']['$literal'] == 100
+    assert q._pipeline[-1] == {'$project': \
+        {'name': {'$literal': 100}}}
 
-def test_add_new_field_build():
-    q = Query()
-    q.newField('name', 100)
-
-    build = q.build()[0]
-    assert build['$project'] == {'name': {'$literal': 100}}
-
-def test_add_field():
+def test_project_str():
     q = Query()
     q.project('name')
 
-    assert 'name' in q._project
-    assert q._project['name'] == 1
+    assert q._pipeline[-1] == {'$project': {'name': 1}}
 
-def test_add_fields():
+def test_add_fields_list():
     q = Query()
-    q.project(['field1', 'field2', 'field3'])
+    fields = ['field1', 'field2', 'field3']
+    q.project(fields)
 
-    assert len(q._project) == 3
-    assert q._project['field1'] == 1
-    assert q._project['field2'] == 1
-    assert q._project['field3'] == 1
+    assert q._pipeline[-1] == {'$project':{'field1':1,'field2':1,'field3':1}}
 
 def test_add_fields_set():
     q = Query()
-    q.project({'field1', 'field2', 'field3'})
+    fields = {'field1', 'field2', 'field3'}
+    q.project(fields)
 
-    assert len(q._project) == 3
-    assert q._project['field1'] == 1
-    assert q._project['field2'] == 1
-    assert q._project['field3'] == 1
+    assert q._pipeline[-1] == {'$project':{'field1':1,'field2':1,'field3':1}}
 
 def test_add_fields_dict():
     q = Query()
     fields = {'field1':'$field1', 'field2':'$field2'}
     q.project(fields)
 
-    assert q._project == fields
-
-
-def test_project_build():
-    q = Query()
-    q.project(['field1', 'field2', 'field3'])
-    build = q.build()[0]
-
-    assert '$project' in build
-    assert 'field1' in build['$project']
-    assert build['$project']['field1'] == 1
-
-    assert 'field2' in build['$project']
-    assert build['$project']['field2'] == 1
-
-    assert 'field3' in build['$project']
-    assert build['$project']['field3'] == 1
-
-################################################################
-# Group
-
-def test_group_str():
-    q = Query()
-    q.group("field")
-
-    assert q._group == {"_id":{"field":"$field"}}
-
-def test_group_list():
-    q = Query()
-    q.group(['field1','field2'])
-
-    assert q._group == {"_id":{'field1':'$field1','field2':'$field2'}}
-
-def test_group_set():
-    q = Query()
-    q.group({'field1','field2'})
-
-    assert q._group == {"_id":{'field1':'$field1','field2':'$field2'}}
-
-def test_group_list():
-    q = Query()
-    q.group(['field1','field2'])
-
-    assert q._group == {"_id":{'field1':'$field1','field2':'$field2'}}
-
-def test_group_count():
-    q = Query()
-    q.group('field',count=True)
-
-    assert q._group == {'_id':{'field':'$field'},'count':{'$sum':1}}
-
-def test_group_build():
-    q = Query()
-    q.group('field')
-
-    assert '$group' in q.build()[0]
-
-def test_group_not_build():
-    q = Query()
-    q.limit(5)
-
-    for i in q.build():
-        assert '$group' not in i
+    assert q._pipeline[-1] == {'$project':fields}
 
 ################################################################
 # Out
@@ -160,10 +67,75 @@ def test_out():
     q = Query()
     q.out('collection')
 
-    assert q._out == 'collection'
+    assert q._pipeline[-1] == {'$out':'collection'}
 
-def test_out_build():
+################################################################
+# Group
+
+def test_group_str():
     q = Query()
-    q.limit(5).out('collection')
+    q.group("field")
 
-    assert q.build()[-1] == {'$out':'collection'}
+    assert q._pipeline[-1] == {'$group':{"_id":"$field"}}
+
+def test_group_list():
+    q = Query()
+    q.group(['field1','field2'])
+
+    assert q._pipeline[-1] == {'$group':{'_id':{'field1':'$field1','field2':'$field2'}}}
+
+def test_group_list():
+    q = Query()
+    q.group(['field1','field2'])
+
+    assert q._pipeline[-1] == {'$group':{"_id":{'field1':'$field1','field2':'$field2'}}}
+
+def test_group_count():
+    q = Query()
+    q.group('field',count=True)
+
+    assert q._pipeline[-1] == {'$group':{'_id':'$field','count':{'$sum':1}}}
+
+################################################################
+# Group Class
+
+def test_Group_str():
+    g = Group().id('field')
+
+    assert g._id == '$field'
+    assert g.build() == {'$group':{'_id':'$field'}}
+
+def test_Group_list():
+    g = Group().id(['field1','field2','field3'])
+
+    _id = {'field1':'$field1','field2':'$field2','field3':'$field3'}
+
+    assert g._id == _id
+    assert g.build() == {'$group':{'_id':_id}}
+
+def test_Group_count():
+    g = Group().id('field').count()
+
+    count = {'$sum':1}
+    assert g._extra['count'] == count
+    assert g.build() == {'$group':{'_id':'$field','count':{'$sum':1}}}
+
+def test_Group_push_one():
+    g = Group().id('field').push('name','pushed')
+
+    assert g._extra['name'] == {'$push':'$pushed'}
+    assert g.build()['$group']['name'] == {'$push':'$pushed'}
+
+def test_Group_push_many():
+    fields = ['field1','field2','field3']
+    g = Group().id('id').push('name', fields)
+
+    assert 'name' in g._extra
+    assert g._extra['name'] == {'$push': \
+        {'field1':'$field1','field2':'$field2','field3':'$field3'}}
+
+def test_group_Group():
+    g = Group().id('id')
+    q = Query().group(g)
+
+    assert q._pipeline[-1] == g.build()
