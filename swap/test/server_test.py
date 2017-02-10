@@ -33,6 +33,12 @@ def test_classifications_limit():
 
     assert len(list(raw)) == 5
 
+def test_users():
+    server = swap.Server(.5,.5)
+    users = server.getUsers()
+
+    pprint(list(users))
+
 
 def test_get_one_classification():
     """ Get the first classification
@@ -101,6 +107,8 @@ def main_duration_batch_classifications(n_classifications=1000,max_batch_size = 
   
 
 if __name__ == "__main__":
-    main_duration()
+
     main_duration_batch_classifications(n_classifications=1000,max_batch_size=1000)
     main_duration_iterate_classifications(n_classifications=10)
+    #main_duration()
+    test_users()
