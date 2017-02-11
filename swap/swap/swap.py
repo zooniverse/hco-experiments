@@ -52,6 +52,17 @@ class SWAP(object):
             Contains all information for a classification
             
         """
+
+
+        # ##Michael @Marco
+        # This looks like it will get pretty complicated pretty quickly.
+        # What if we create another module, similar to agent in the original
+        # swap code, then create a dictionary of agents?
+        #
+        # Then you could initialize the probability_history and probability_current
+        # fields when the object is created
+
+
         # check if user is new and create in user dictionary if not
         if cl['user_name'] not in self.users:
             self.users[cl['user_name']] = {
