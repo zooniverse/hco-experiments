@@ -56,7 +56,7 @@ def processRow(row):
     return row
 
 def upload(rows):
-    db.classifications.addMany(rows)
+    db.classifications.insert_many(rows)
 
 
 
