@@ -9,12 +9,21 @@ import csv
 import sys
 
 def main():
-    path = os.path.dirname(os.path.realpath(__file__))
-    fname = 'SNHunters_classification_dump_20170109_metadata.mat'
-    outfile = 'SNHunters_classification_dump_20170109_metadata.csv'
+    parser = argparse.ArgumentParser()
+    parser.add_argument('file')
+    args = parser.parse_args()
+    print("Using file %s" % args.file)
 
-    data = sio.loadmat('/'.join((path,fname)))
-    outfile = '/'.join((path,outfile))
+    if not os.path.isfile(args.file):
+        raise FileNotFoundError("Couldn't find file at '%s'" % args.file)
+    if args.file.split('.')[-1] != 'mat':
+        raise ValueError("File '%s' not a valid mat file" % args.file)
+
+    file = args.file
+    name = file.split('.')[0]
+    outfile = '.'.join([name, 'csv'])
+
+    data = sio.loadmat(file)
 
     keys = ['classification_id', 'user_name','user_id',\
             'annotation','gold_label','machine_score', \
