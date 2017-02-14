@@ -2,8 +2,10 @@
 # User agent, keeps track of a user's history and
 # score
 
+from swap.agents.agent import Agent
 
-class Agent:
+
+class User(Agent):
 
     def __init__(self, user_name, epsilon):
         self.user_name = user_name
@@ -39,16 +41,6 @@ class Agent:
         prob.calculateScore()
 
     def getHistory(self):
-        pass
-
-class User_Agent(Agent):
-
-    def __init__(self):
-        pass
-
-class Subject_Agent(Agent):
-
-    def __init__(self):
         pass
 
 
