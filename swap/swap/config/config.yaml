@@ -6,5 +6,5 @@ database:
   host: localhost
   port: 27017
   metadata:
-    magnitude: mag
-    magnitude_error: mag_err
+    - mag
+    - mag_err
