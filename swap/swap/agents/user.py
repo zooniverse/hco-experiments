@@ -5,7 +5,7 @@
 
 class Agent:
 
-    def __init__(self, epsilon, user_name):
+    def __init__(self, user_name, epsilon):
         self.user_name = user_name
         self.epsilon = epsilon
 
@@ -41,7 +41,14 @@ class Agent:
     def getHistory(self):
         pass
 
-    def updateProbability(self):
+class User_Agent(Agent):
+
+    def __init__(self):
+        pass
+
+class Subject_Agent(Agent):
+
+    def __init__(self):
         pass
 
 
@@ -68,3 +75,4 @@ class Prob_Tracker:
         self.n_seen += 1
         if matched:
             self.n_matched += 1
+
