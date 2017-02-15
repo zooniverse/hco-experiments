@@ -9,6 +9,9 @@ from swap.agents.tracker import Labeled_Trackers
 
 
 class User(Agent):
+    """
+        Agent to manage subject scores
+    """
 
     def __init__(self, user_name, epsilon):
         self.user_name = user_name
@@ -21,6 +24,13 @@ class User(Agent):
         self.trackers = LabeledTrackers(UTracker, [1, 0], epsilon)
 
     def addClassification(self, cl):
+        """
+            adds a classification and calculates the new score
+
+            Args:
+                cl (dict) classification data from database
+        """
+
         # Increment basic tracking
         annotation = int(cl['annotation'])
         gold = int(cl['gold_label'])
@@ -38,4 +48,9 @@ class User(Agent):
         pass
 
     def getScore(self, label):
+        """
+            Gets the current score from the tracker for the annotation
+            Args:
+                label (int) label of the tracker, i.e. the annotation
+        """
         return self.trackers.getTracker(label).current()
