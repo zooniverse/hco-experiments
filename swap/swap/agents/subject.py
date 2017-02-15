@@ -2,6 +2,8 @@
 # Subject agent, keeps track of a subject's history and
 # score
 
+from swap.agents.tracker import Tracker
+
 
 class Subject(Agent):
 
@@ -9,32 +11,23 @@ class Subject(Agent):
         self.name = subject_id
         self.p0 = p0
 
-        self.annotations = []
-        self.user_probabilities = []
-        self.labels = {}
+        self.annotations = Tracker()
+        self.user_scores = Tracker()
 
-        self.prob_true = Prob_Tracker.Subject(1, self.p0)
-        self.prob_false = Prob_Tracker.Subject(0, self.p0)
-
-        self.current_label = None
-        self.current_score = self.p0
-        self.max_prob_history = [self.p0]
-
-        self.n_seen = 0
+        self.tracker = Tracker(p0)
 
     def addClassification(self, cl, user_agent):
         annotation = int(cl['annotation'])
         s_score = self.getScore()
         u_score = user_agent.getScore(annotation)
 
-        self.annotations.append(annotation)
-        self.user_scores.append(u_score)
-        self.n_seen += 1
+        self.annotations.add(annotation)
+        self.user_scores.add(u_score)
 
         u_score_1 = user_agent.getScore(1)
         u_score_0 = user_agent.getScore(0)
         # s_score already defined ^^^
-        
+
         score = self.calculateScore(annotation, u_score_0,
                                     u_score_1, s_score)
 

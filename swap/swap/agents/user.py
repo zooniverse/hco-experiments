@@ -37,5 +37,5 @@ class User(Agent):
     def getHistory(self):
         pass
 
-    def getCurrentScore(self, label):
+    def getScore(self, label):
         return self.trackers.getTracker(label).current()
