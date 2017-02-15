@@ -46,7 +46,3 @@ class User(Agent):
     # TODO
     def getCurrentScore(self):
         return self.epsilon
-
-
-
-

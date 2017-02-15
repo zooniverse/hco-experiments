@@ -2,6 +2,7 @@
 # Subject agent, keeps track of a subject's history and
 # score
 
+
 class Subject(Agent):
 
     def __init__(self, subject_id, p0):
@@ -37,6 +38,8 @@ class Subject(Agent):
         score = self.calculateScore(annotation, u_score_0,
                                     u_score_1, s_score)
 
+        self.tracker.add(score)
+
 
 
 
@@ -53,6 +56,15 @@ class Subject(Agent):
 
     def getHistory(self):
         pass
+
+    def getLabel(self):
+        if self.getScore() > 0.5:
+            return 1
+        else:
+            return 0
+
+    def getScore(self):
+        return self.tracker.current()
 
     def calculateScore(annotation, u_score_0, u_score_1, s_score):
         """
