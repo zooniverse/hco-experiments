@@ -34,25 +34,11 @@ class Subject(Agent):
         u_score_1 = user_agent.getScore(1)
         u_score_0 = user_agent.getScore(0)
         # s_score already defined ^^^
-
+        
         score = self.calculateScore(annotation, u_score_0,
                                     u_score_1, s_score)
 
         self.tracker.add(score)
-
-
-
-
-        # Decide which tracker to user
-        if cl['gold_label'] == 1:
-            prob = prob_true
-        elif cl['gold_label'] == 0:
-            prob = prob_false
-
-        # Add classification to tracker
-        prob.addClassification(cl['annotation'])
-        # Calculate and store new user probability
-        prob.calculateScore()
 
     def getHistory(self):
         pass

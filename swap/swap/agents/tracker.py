@@ -4,9 +4,12 @@
 
 class Tracker:
 
-    def __init__(self, value):
-        self.history = [value]
+    def __init__(self, value=None):
+        self.history = []
         self.current = value
+
+        if value is not None:
+            history.append(value)
 
         self.n = len(self.history)
 
@@ -20,9 +23,11 @@ class Tracker:
         return self.current
 
 
-class User_Score_Tracker:
+class User_Score_Tracker(Tracker):
 
     def __init__(self, label, epsilon):
+        Tracker.__init__(epsilon)
+
         self.label = label
         self.epsilon = epsilon
 
@@ -31,16 +36,15 @@ class User_Score_Tracker:
         self.n_seen = 0
         self.n_matched = 0
 
-        Tracker.__init__(epsilon)
-
     def calculateScore(self):
         score = self.n_seen / self.n_matched
 
         return score
 
-    def add(self, matched):
+    def add(self, annotation):
         self.n_seen += 1
-        if matched:
+
+        if annotation == label:
             self.n_matched += 1
 
         score = self.calculateScore()

@@ -3,6 +3,8 @@
 # score
 
 from swap.agents.agent import Agent
+from swap.agents.tracker import Tracker
+from swap.agents.tracker import User_Score_Tracker as UTracker
 
 
 class User(Agent):
@@ -11,38 +13,32 @@ class User(Agent):
         self.user_name = user_name
         self.epsilon = epsilon
 
-        self.annotations = []
-        self.gold_labels = []
+        self.annotations = Tracker()
+        self.gold_labels = Tracker()
         self.labels = {}
 
-        self.prob_true = Prob_Tracker(1, self.epsilon)
-        self.prob_false = Prob_Tracker(0, self.epsilon)
-
-        self.n_classified = 0
-
-    def setEpsilon(self, epsilon):
-        pass
+        self.prob_true = UTracker(1, self.epsilon)
+        self.prob_false = UTracker(0, self.epsilon)
 
     def addClassification(self, cl):
         # Increment basic tracking
-        self.annotations.append(cl['annotation'])
-        self.gold_labels.append(cl['gold_label'])
-        self.n_classified += 1
+        annotation = int(cl['annotation'])
+        gold = int(cl['gold_label'])
+
+        self.annotations.add(annotation)
+        self.gold_labels.add(gold)
 
         # Decide which tracker to user
-        if cl['gold_label'] == 1:
-            prob = prob_true
-        elif cl['gold_label'] == 0:
-            prob = prob_false
+        if gold == 1:
+            prob = self.prob_true
+        elif gold == 0:
+            prob = self.prob_false
 
         # Add classification to tracker
-        prob.addClassification(cl['annotation'])
-        # Calculate and store new user probability
-        prob.calculateScore()
+        prob.add(annotation)
 
     def getHistory(self):
         pass
 
-    # TODO
     def getCurrentScore(self):
-        return self.epsilon
+        return -1
