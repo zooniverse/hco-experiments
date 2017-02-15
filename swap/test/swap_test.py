@@ -9,11 +9,12 @@ def test_swap():
     classification_cursor = server.classifications.find().limit(n_classifications).batch_size(min(max_batch_size,n_classifications))
     swappy = SWAP()
     # loop over cursor to retrieve classifications
-    for i in range(0,8):
+    for i in range(0,n_classifications):
         current_classification = classification_cursor.next()
         swappy.processOneClassification(current_classification)
-    swappy.getUserData()
-    swappy.getSubjectData()
+    ud = swappy.getUserData()
+    sd = swappy.getSubjectData()
+    
     
     
 if __name__ == "__main__":
