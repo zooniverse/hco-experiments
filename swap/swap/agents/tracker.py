@@ -49,3 +49,24 @@ class User_Score_Tracker(Tracker):
 
         score = self.calculateScore()
         Tracker.add(score)
+
+
+class Labeled_Trackers:
+
+    def __init__(self, tracker, labels, value):
+        if type(labels) is not List:
+            raise ValueError("Need list of labels to initialize trackers")
+
+        self.trackers = {}
+
+        for label in labels:
+            self.addTracker(tracker, label, value)
+
+    def addTracker(self, tracker_type, label, value):
+        tracker = tracker_type(label, value)
+
+        self.trackers[label] = tracker
+        return tracker
+
+    def getTracker(self, label):
+        return self.trackers[label]

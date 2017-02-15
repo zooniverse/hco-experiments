@@ -5,6 +5,7 @@
 from swap.agents.agent import Agent
 from swap.agents.tracker import Tracker
 from swap.agents.tracker import User_Score_Tracker as UTracker
+from swap.agents.tracker import Labeled_Trackers
 
 
 class User(Agent):
@@ -17,8 +18,7 @@ class User(Agent):
         self.gold_labels = Tracker()
         self.labels = {}
 
-        self.prob_true = UTracker(1, self.epsilon)
-        self.prob_false = UTracker(0, self.epsilon)
+        self.trackers = LabeledTrackers(UTracker, [1, 0], epsilon)
 
     def addClassification(self, cl):
         # Increment basic tracking
@@ -29,10 +29,7 @@ class User(Agent):
         self.gold_labels.add(gold)
 
         # Decide which tracker to user
-        if gold == 1:
-            prob = self.prob_true
-        elif gold == 0:
-            prob = self.prob_false
+        tracker = self.trackers.getTracker(gold)
 
         # Add classification to tracker
         prob.add(annotation)
@@ -40,5 +37,5 @@ class User(Agent):
     def getHistory(self):
         pass
 
-    def getCurrentScore(self):
-        return -1
+    def getCurrentScore(self, label):
+        return self.trackers.getTracker(label).current()
