@@ -33,6 +33,11 @@ class User_Score_Tracker(Tracker):
 
         # FIXME @marco should these values be initialized
         # to epsilon or to zero/empty?
+        # @Michael: Thats a matter of definition. In my view its either epsilon or empty.
+        #           If I am thinking about plotting user histories I'd want epsilon to be 
+        #              the start so it is easier to have epsilon in there.
+        #           On the other hand, the user history has then one entry more than gold labels seen.
+        #            If that is not a problem I would probably initialize with epsilon.
         self.n_seen = 0
         self.n_matched = 0
 
