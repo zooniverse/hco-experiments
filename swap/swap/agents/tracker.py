@@ -26,7 +26,7 @@ class Tracker:
 class User_Score_Tracker(Tracker):
 
     def __init__(self, label, epsilon):
-        Tracker.__init__(epsilon)
+        super().__init__(epsilon)
 
         self.label = label
         self.epsilon = epsilon
@@ -42,36 +42,36 @@ class User_Score_Tracker(Tracker):
         self.n_matched = 0
 
     def calculateScore(self):
-        score = self.n_seen / self.n_matched
+        score = self.n_matched / self.n_seen
 
         return score
 
     def add(self, annotation):
         self.n_seen += 1
 
-        if annotation == label:
+        if annotation == self.label:
             self.n_matched += 1
 
         score = self.calculateScore()
-        Tracker.add(score)
+        super().add(score)
 
 
 class Labeled_Trackers:
 
-    def __init__(self, tracker, labels, value):
-        if type(labels) is not List:
+    def __init__(self, tracker, labels, value=None):
+        if type(labels) is not list:
             raise ValueError("Need list of labels to initialize trackers")
 
         self.trackers = {}
 
         for label in labels:
-            self.addTracker(tracker, label, value)
+            self.add(tracker, label, value)
 
-    def addTracker(self, tracker_type, label, value):
+    def add(self, tracker_type, label, value):
         tracker = tracker_type(label, value)
 
         self.trackers[label] = tracker
         return tracker
 
-    def getTracker(self, label):
+    def get(self, label):
         return self.trackers[label]

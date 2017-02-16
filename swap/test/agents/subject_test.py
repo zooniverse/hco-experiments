@@ -2,8 +2,9 @@
 # Test functions for agent class
 
 from swap.agents.subject import Subject
-
+from swap.agents.user import User
 from swap.agents.tracker import *
+import unittest.mock as mock
 
 # Sample classification
 cl = {
@@ -18,12 +19,27 @@ cl = {
     'machine_score': '0.960535',
     'user_id': '1497743'
     }
+sid = cl['subject_id']
+p0 = .5
 
 
 class TestSubject:
     def test_init(self):
-        s = Subject(cl['subject_id'], .5)
+        s = Subject(sid, p0)
 
-        assert s.annotations is Tracker
-        assert s.user_scores is Tracker
-        assert s.tracker is Tracker
+        assert type(s.annotations) is Tracker
+        assert type(s.user_scores) is Tracker
+        assert type(s.tracker) is Tracker
+
+    def test_add_classification(self):
+        s = Subject(sid, p0)
+        user = User('', .5)
+        user.trackers.get(0).current = .5
+        user.trackers.get(1).current = .5
+        s.addClassification(cl, user)
+        ########
+
+
+
+
+

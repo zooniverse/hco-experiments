@@ -21,7 +21,7 @@ class User(Agent):
         self.gold_labels = Tracker()
         self.labels = {}
 
-        self.trackers = LabeledTrackers(UTracker, [1, 0], epsilon)
+        self.trackers = LabeledTrackers(UTracker, [0, 1], epsilon)
 
     def addClassification(self, cl):
         """
@@ -53,4 +53,4 @@ class User(Agent):
             Args:
                 label (int) label of the tracker, i.e. the annotation
         """
-        return self.trackers.getTracker(label).current()
+        return self.trackers.get(label).current()
