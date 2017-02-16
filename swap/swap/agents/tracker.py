@@ -9,7 +9,7 @@ class Tracker:
         self.current = value
 
         if value is not None:
-            history.append(value)
+            self.history.append(value)
 
         self.n = len(self.history)
 
@@ -19,7 +19,7 @@ class Tracker:
 
         self.n += 1
 
-    def current(self):
+    def getCurrent(self):
         return self.current
 
 

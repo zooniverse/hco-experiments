@@ -3,6 +3,7 @@
 # score
 
 from swap.agents.tracker import Tracker
+from swap.agents.agent import Agent
 
 
 class Subject(Agent):
