@@ -13,6 +13,8 @@ import argparse
 
 db = DB()
 
+_meta_names = Config().database['metadata']
+
 
 def main():
 
@@ -51,8 +53,15 @@ def main():
                 to_upload = []
 
                 count = 0
+    upload(to_upload)
 
 def processRow(row):
+    metadata = {}
+    for m in _meta_names:
+        metadata[m] = row[m]
+        del row[m]
+
+    row['metadata'] = metadata
     return row
 
 def upload(rows):

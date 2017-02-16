@@ -140,11 +140,22 @@ class SWAP(object):
         #user_prob = current_user['probability_current'][cl['annotation']]
         
         # update success probability
+        # TODO: get rid of hard-coded annotation labels
+        if '1' in current_user['probability_current']:
+            user_pos = float(current_user['probability_current']['1'])
+        else:
+            user_pos = self.epsilon
+        if '0' in current_user['probability_current']:
+            user_fail = current_user['probability_current']['0']
+        else:
+            user_fail = self.epsilon
+            
+        # get current subject probability
         sub_pos = current_subject['current_max_prob']
-        user_pos = current_user['probability_current']['1']
+        
+        # calculate subject probability times current user confidence in positive labels
         sub_times_user = float(sub_pos) * float(user_pos)
-        user_fail = current_user['probability_current']['0']
-                    
+                        
         # TODO: change hard-coded annotation labels
         # if positive annotation
         if cl['annotation'] == '1':                                 
@@ -167,8 +178,8 @@ class SWAP(object):
         # update user success probability
         if ((cl['gold_label'] in ('0','1')) and self.gold_updates):
                 self.updateUserData(cl) 
-        # update Subject probability
-        self.updateSubjectData(cl)
+                # update Subject probability
+                self.updateSubjectData(cl)
     
 
 
