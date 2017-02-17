@@ -31,28 +31,29 @@ class Server:
         # max batch size is the number classifications to read from DB
         # during one batch, small numbers (<1000) are inefficient
         max_batch_size = 1e5
-        
-        # get the total number of classifications in the DB
+
+        # get the total number of classifications in the DBD
         n_classifications = self.classifications.count()
         
         # get classifications
         classifications = self.getClassifications()
-        
+
         # determine and set max batch size
-        classifications.batch_size(int(min(max_batch_size,n_classifications)))
-        
-        # loop over classification curser to process 
+        classifications.batch_size(int(min(max_batch_size, n_classifications)))
+
+        # loop over classification curser to process
         # classifications one at a time
-        print("Start: SWAP Processing " + str(n_classifications) + " classifications")
-        for i in range(0,n_classifications):
+        print("Start: SWAP Processing %d classifications" % n_classifications)
+        for i in range(0, n_classifications):
             # read next classification
             current_classification = classifications.next()
             # process classification in swap
             self.swap.processOneClassification(current_classification)
-            if i % 100e3 ==0:
+            if i % 100e3 == 0:
                 print("   " + str(i) + "/" + str(n_classifications))
-        print("Finished: SWAP Processing " + str(i) + "/" + str(n_classifications) + " classifications")
-        
+        print("Finished: SWAP Processing %d/%d classifications" %
+              (i, n_classifications))
+
     def getSWAP(self):
         """ Returns SWAP object """
         return self.swap
@@ -68,7 +69,7 @@ class Server:
         #           'annotation', 'gold_label', \
         #           ('probability', self.epsilon)]
 
-        fields = ['user_name', 'subject_id', 'annotation', \
+        fields = ['user_name', 'subject_id', 'annotation',
                   'gold_label']
         q = Query()
         q.project(fields)
@@ -77,9 +78,9 @@ class Server:
         classifications = self.classifications.aggregate(q.build())
 
         return classifications
-    
+
     def getUsers(self):
-        
+
         g = Group()
         g.id('user_name')
         g.count()
