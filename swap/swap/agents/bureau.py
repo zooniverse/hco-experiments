@@ -22,8 +22,11 @@ class Bureau(object):
         ----------
             agent: agent object
         """
-        
-        pass
+        if not agent.getID() in self.agents:
+            self.agents[agent.getID()] = agent
+        else:
+            raise KeyError("Agent-ID already in bureau, remove first")
+
     
     def getAgent(self,agent_id):
         """ Get agent from bureau
@@ -32,7 +35,17 @@ class Bureau(object):
         ----------
             agent_id: id of agent
         """
+        try:
+            return self.agents[agent_id]
+        except KeyError:
+            print("Error: Agent_id not in Bureau")
+            
         
-        pass
+    def removeAgent(self,agent_id):
+        """ Remove agent from bureau
         
-    
+        Parameter:
+        ----------
+            agent_id: id of agent
+        """
+        self.agents.pop(agent_id, None)
