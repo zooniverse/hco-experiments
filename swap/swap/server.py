@@ -2,8 +2,6 @@
 # Interface between the data structure and SWAP
 # Serves data to SWAP
 
-# Swap isn't ready yet for this to work, but this is the general
-# outline of how server is going to interact with DB and SWAP
 
 from swap import SWAP
 from swap.mongo import DB
@@ -17,13 +15,39 @@ class Server:
         self._db = DB()
         self.classifications = self._db.classifications
         self.subjects = self._db.subjects
-
-        self.p0 = p0
-        self.epsilon = epsilon
+        self.swap = SWAP(p0,epsilon)
 
     def process(self):
-        data = self.getData()
-        swap = SWAP("Args passed to swap")
+        """ Process all classifications in DB with SWAP
+        """
+        # max batch size is the number classifications to read from DB
+        # during one batch, small numbers (<1000) are inefficient
+        max_batch_size = 1e5
+        
+        # get the total number of classifications in the DB
+        n_classifications = db.classifications.count()
+        
+        # get classifications
+        classifications = self.getClassifications()
+        
+        # determine and set max batch size
+        classifications.batch_size(int(min(max_batch_size,n_classifications)))
+        
+        # loop over classification curser to process 
+        # classifications one at a time
+        print("Start: SWAP Processing " + str(n_classifications) + " classifications")
+        for i in range(0,n_classifications):
+            # read next classification
+            current_classification = classifications.next()
+            # process classification in swap
+            self.swap.processOneClassification(current_classification)
+            if i % 100e3 ==0:
+                print("   " + str(i) + "/" + str(n_classifications))
+        print("Finished: SWAP Processing " + str(i) + "/" + str(n_classifications) + " classifications")
+        
+    def getSWAP(self):
+        """ Get SWAP object """
+        return self.swap
 
     def getData(self):
         subjects = self.getSubjects()
@@ -35,7 +59,7 @@ class Server:
         #           'annotation', 'gold_label', \
         #           ('probability', self.epsilon)]
 
-        fields = ['user_name', 'subject_id', 'annotation' \
+        fields = ['user_name', 'subject_id', 'annotation', \
                   'gold_label']
         q = Query()
         q.project(fields)
@@ -44,6 +68,14 @@ class Server:
         classifications = self.classifications.aggregate(q.build())
 
         return classifications
+    
+    def getUsers(self):
+        
+        g = Group()
+        g.id('user_name')
+        g.count()
+        users = self.classifications.aggregate(g.build())
+        return users
 
 
 
