@@ -19,13 +19,21 @@ class Server:
 
     def process(self):
         """ Process all classifications in DB with SWAP
+        
+        Notes:
+        ------
+            Iterates through the classification collection of the
+            database and proccesss each classification one at a time
+            in the order returned by the db.
+            Parameters like max_batch_size are hard-coded.
+            Prints status.
         """
         # max batch size is the number classifications to read from DB
         # during one batch, small numbers (<1000) are inefficient
         max_batch_size = 1e5
         
         # get the total number of classifications in the DB
-        n_classifications = db.classifications.count()
+        n_classifications = self.classifications.count()
         
         # get classifications
         classifications = self.getClassifications()
@@ -46,7 +54,7 @@ class Server:
         print("Finished: SWAP Processing " + str(i) + "/" + str(n_classifications) + " classifications")
         
     def getSWAP(self):
-        """ Get SWAP object """
+        """ Returns SWAP object """
         return self.swap
 
     def getData(self):
@@ -55,6 +63,7 @@ class Server:
         return {'classifications': classifications, 'subjects': subjects}
 
     def getClassifications(self):
+        """ Returns Iterator over all Classifications """
         # fields = ['user_id', 'classification_id', 'subject_id', \
         #           'annotation', 'gold_label', \
         #           ('probability', self.epsilon)]
