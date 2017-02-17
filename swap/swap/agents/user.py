@@ -25,7 +25,7 @@ class User(Agent):
         self.gold_labels = Tracker()
         self.labels = {}
 
-        self.trackers = LabeledTrackers(UTracker, [0, 1], epsilon)
+        self.trackers = Labeled_Trackers(UTracker, [0, 1], epsilon)
 
     def addClassification(self, cl):
         """
