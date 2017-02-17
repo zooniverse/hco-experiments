@@ -87,29 +87,29 @@ class Subject(Agent):
             s: subject score
             u1: user probability annotates 1
             u0: user probability annotates 0
-
-            # FIXME @marco please check these calculations
-
+               
             Calculation when annotation 1
                       s*u1
             -------------------------
-            s*u1 (s*u1 + (1-u0)*(1-s))
+            s*u1 + (1-u0)*(1-s)
 
 
             Calculation when annotation 0
                       s (1-u1)
             -------------------------
-            s*(1-u1) (s*(1-u1) + u0*(1-s))
+            s*(1-u1) + u0*(1-s)
+            
         """
+        
         if annotation == 1:
             a = s_score * u_score_1
             b = 1 - u_score_0
             c = 1 - s_score
 
         elif annotation == 0:
-            a = s_score * (1 - u_score_1)
-            b = u_score_0
-            c = 1 - s_score
+            a = s_score * (1-u_score_1)
+            b = 1 - s_score
+            c = u_score_0
 
-        score = a / (a + (b * c))
+        score = a / (a + b*c)
         return score

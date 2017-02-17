@@ -159,7 +159,7 @@ class SWAP(object):
         # TODO: change hard-coded annotation labels
         # if positive annotation
         if cl['annotation'] == '1':                                 
-            sub_pos_new = sub_times_user / (sub_times_user + (1-user_fail) * (1-sub_pos))
+            sub_pos_new = sub_times_user / (sub_times_user + (1-user_fail))
         # if 
         elif cl['annotation'] == '0':
             sub_pos_new = (sub_pos * (1-user_pos)) / (sub_pos * (1-user_pos) + (user_fail * (1-sub_pos)))

@@ -9,6 +9,7 @@ class Bureau(object):
 
     def __init__(self, agent_type):
         # type of agents, just a string? (e.g. users, subjects, machines,...)
+        # maybe not required because we could look at the agents' subclass
         self.agent_type = agent_type
         
         # dictionary to store all agents, key is agent-ID
