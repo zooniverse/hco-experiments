@@ -49,3 +49,16 @@ class Bureau(object):
             agent_id: id of agent
         """
         self.agents.pop(agent_id, None)
+        
+    def isAgentInBureau(self,agent_id):
+        """ Check if agent is in bureau
+        
+        Parameter:
+        ----------
+            agent_id: id of agent
+            
+        Returns:
+        --------
+            boolean
+        """
+        return agent_id in self.agents
