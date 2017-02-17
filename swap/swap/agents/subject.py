@@ -12,13 +12,11 @@ class Subject(Agent):
     """
 
     def __init__(self, subject_id, p0):
-        
-        
         # initialize Agent class
-        super().__init__(subject_id,p0)
-        
-        #self.name = subject_id
-        #self.p0 = p0
+        super().__init__(subject_id, p0)
+
+        # self.name = subject_id
+        # self.p0 = p0
 
         # Initialize trackers
         self.annotations = Tracker()
@@ -75,7 +73,7 @@ class Subject(Agent):
         """
         return self.tracker.current()
 
-    def calculateScore(annotation, u_score_0, u_score_1, s_score):
+    def calculateScore(self, annotation, u_score_0, u_score_1, s_score):
         """
             Calculates the new score based on the user scores and current
             subject score.

@@ -4,7 +4,8 @@
 from swap.agents.subject import Subject
 from swap.agents.user import User
 from swap.agents.tracker import *
-import unittest.mock as mock
+
+from unittest.mock import patch, MagicMock, call, Mock
 
 # Sample classification
 cl = {
@@ -31,15 +32,31 @@ class TestSubject:
         assert type(s.user_scores) is Tracker
         assert type(s.tracker) is Tracker
 
-    def test_add_classification(self):
+    @patch.object(Tracker, 'add')
+    def test_addcl_updates_annotation_user_score(self, mock):
         s = Subject(sid, p0)
+        s.calculateScore = MagicMock(return_value=100)
+
         user = User('', .5)
-        user.trackers.get(0).current = .5
-        user.trackers.get(1).current = .5
+        user.trackers.get(0)._current = .5
+        user.trackers.get(1)._current = .5
+
         s.addClassification(cl, user)
-        ########
 
+        calls = [call(1), call(.5), call(100)]
+        mock.assert_has_calls(calls)
 
+    @patch.object(Subject, 'calculateScore')
+    def test_addcl_calls_calculateScore(self, mock):
+        s = Subject(sid, 2)
+
+        user = User('', 100)
+        user.trackers.get(0)._current = 3
+        user.trackers.get(1)._current = 4
+
+        s.addClassification(cl, user)
+
+        mock.assert_called_once_with(1, 3, 4, 2)
 
 
 

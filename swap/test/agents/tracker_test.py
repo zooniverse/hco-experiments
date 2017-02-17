@@ -8,24 +8,24 @@ class Test_Tracker:
     def test_init(self):
         t = Tracker()
 
-        assert type(t.history) is list
-        assert t.current is None
+        assert type(t._history) is list
+        assert t._current is None
         assert t.n == 0
 
     def test_init_value(self):
         t = Tracker(.5)
 
-        assert type(t.history) is list
-        assert t.history == [.5]
-        assert t.current is .5
+        assert type(t._history) is list
+        assert t._history == [.5]
+        assert t._current is .5
         assert t.n == 1
 
     def test_add(self):
         t = Tracker()
         t.add(.5)
 
-        assert t.history == [.5]
-        assert t.current == .5
+        assert t._history == [.5]
+        assert t._current == .5
         assert t.n == 1
 
     def test_add_many(self):
@@ -34,8 +34,8 @@ class Test_Tracker:
         for i in items:
             t.add(i)
 
-        assert t.history == items
-        assert t.current == 5
+        assert t._history == items
+        assert t._current == 5
         assert t.n == 5
 
     def test_get_current(self):
@@ -44,7 +44,7 @@ class Test_Tracker:
         for i in items:
             t.add(i)
 
-        assert t.getCurrent() == 1
+        assert t.current() == 1
 
 
 class Test_User_Score_Tracker:
@@ -70,7 +70,7 @@ class Test_User_Score_Tracker:
 
         assert t.n_seen == 1
         assert t.n_matched == 0
-        assert t.getCurrent() == 0
+        assert t.current() == 0
 
     def test_0_add_match(self):
         t = User_Score_Tracker(0, 0.5)
@@ -78,7 +78,7 @@ class Test_User_Score_Tracker:
 
         assert t.n_seen == 1
         assert t.n_matched == 1
-        assert t.getCurrent() == 1
+        assert t.current() == 1
 
     def test_1_add_many(self):
         t = User_Score_Tracker(1, 0.5)
@@ -87,7 +87,7 @@ class Test_User_Score_Tracker:
             t.add(i)
 
         # +1 because epsilon gets added to the history
-        assert len(t.history) == len(annotations) + 1
+        assert len(t._history) == len(annotations) + 1
         assert t.calculateScore() == .5
 
 
@@ -101,7 +101,7 @@ class Test_Labeled_Trackers:
 
         for i in labels:
             assert type(l.trackers[i]) is tracker
-            assert l.trackers[i].getCurrent() == value
+            assert l.trackers[i].current() == value
 
         assert len(l.trackers) == 3
 

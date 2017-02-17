@@ -5,22 +5,22 @@
 class Tracker:
 
     def __init__(self, value=None):
-        self.history = []
-        self.current = value
+        self._history = []
+        self._current = value
 
         if value is not None:
-            self.history.append(value)
+            self._history.append(value)
 
-        self.n = len(self.history)
+        self.n = len(self._history)
 
     def add(self, value):
-        self.history.append(value)
-        self.current = value
+        self._history.append(value)
+        self._current = value
 
         self.n += 1
 
-    def getCurrent(self):
-        return self.current
+    def current(self):
+        return self._current
 
 
 class User_Score_Tracker(Tracker):
