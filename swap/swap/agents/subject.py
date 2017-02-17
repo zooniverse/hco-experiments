@@ -12,8 +12,13 @@ class Subject(Agent):
     """
 
     def __init__(self, subject_id, p0):
-        self.name = subject_id
-        self.p0 = p0
+        
+        
+        # initialize Agent class
+        super().__init__(subject_id,p0)
+        
+        #self.name = subject_id
+        #self.p0 = p0
 
         # Initialize trackers
         self.annotations = Tracker()
