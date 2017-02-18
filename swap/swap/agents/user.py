@@ -14,9 +14,9 @@ class User(Agent):
     """
 
     def __init__(self, user_name, epsilon):
-        
+
         # initialize Agent class
-        super().__init__(user_name,epsilon)
+        super().__init__(user_name, epsilon)
         
         #self.user_name = user_name
         #self.epsilon = epsilon

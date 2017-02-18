@@ -8,18 +8,21 @@ from swap.mongo import DB
 from swap.mongo import Query
 from swap.mongo import Group
 from pprint import pprint
+from swap.config import Config
+
 
 class Server:
 
     def __init__(self, p0, epsilon):
         self._db = DB()
+        self._cfg = Config()
         self.classifications = self._db.classifications
         self.subjects = self._db.subjects
-        self.swap = SWAP(p0,epsilon)
+        self.swap = SWAP(p0, epsilon)
 
     def process(self):
         """ Process all classifications in DB with SWAP
-        
+
         Notes:
         ------
             Iterates through the classification collection of the
@@ -30,18 +33,18 @@ class Server:
         """
         # max batch size is the number classifications to read from DB
         # during one batch, small numbers (<1000) are inefficient
-        max_batch_size = 1e5
+        max_batch_size = float(self._cfg.database['max_batch_size'])
 
-        # get the total number of classifications in the DBD
+        # get the total number of classifications in the DB
         n_classifications = self.classifications.count()
-        
+
         # get classifications
         classifications = self.getClassifications()
 
-        # determine and set max batch size
+        # determine and set batch size
         classifications.batch_size(int(min(max_batch_size, n_classifications)))
 
-        # loop over classification curser to process
+        # loop over classification cursor to process
         # classifications one at a time
         print("Start: SWAP Processing %d classifications" % n_classifications)
         for i in range(0, n_classifications):
@@ -65,16 +68,15 @@ class Server:
 
     def getClassifications(self):
         """ Returns Iterator over all Classifications """
-        # fields = ['user_id', 'classification_id', 'subject_id', \
-        #           'annotation', 'gold_label', \
-        #           ('probability', self.epsilon)]
 
-        fields = ['user_name', 'subject_id', 'annotation',
-                  'gold_label']
+        # fields to project
+        fields = ['user_name', 'subject_id', 'annotation', 'gold_label']
+
+        # Define a query
         q = Query()
         q.project(fields)
 
-
+        # perform query on classification data
         classifications = self.classifications.aggregate(q.build())
 
         return classifications
@@ -87,26 +89,6 @@ class Server:
         users = self.classifications.aggregate(g.build())
         return users
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     def getClassificationsByUser(self):
         q = Query()
         g = Group().id('user_id').push('classifications',['classification_id','subject_id','annotation'])
@@ -117,8 +99,6 @@ class Server:
         users = self.classifications.aggregate(q.build(),allowDiskUse=True)
 
         return users
-
-
 
     def getSubjects(self):
         """

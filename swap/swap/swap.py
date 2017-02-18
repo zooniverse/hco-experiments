@@ -53,7 +53,6 @@ class SWAP(object):
             
         """
 
-
         # ##Michael @Marco
         # This looks like it will get pretty complicated pretty quickly.
         # What if we create another module, similar to agent in the original

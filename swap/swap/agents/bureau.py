@@ -5,8 +5,8 @@
 
 class Bureau(object):
     """ Bureau to keep track of agents
-    
-    Parameter: 
+
+    Parameter:
     ----------
         agent_type: str
             Informative string to indicate agent types in that specific bureau
@@ -18,11 +18,10 @@ class Bureau(object):
         self.agent_type = agent_type
         # dictionary to store all agents, key is agent-ID
         self.agents = dict()
-        
-    
+
     def addAgent(self, agent):
         """ Add agent to bureau
-        
+
         Parameter:
         ----------
             agent: agent object
@@ -32,14 +31,13 @@ class Bureau(object):
         else:
             raise KeyError("Agent-ID already in bureau, remove first")
 
-    
-    def getAgent(self,agent_id):
+    def getAgent(self, agent_id):
         """ Get agent from bureau
-        
+
         Parameter:
         ----------
             agent_id: id of agent
-            
+
         Returns:
         -------
             agent
@@ -48,24 +46,23 @@ class Bureau(object):
             return self.agents[agent_id]
         except KeyError:
             print("Error: Agent_id not in Bureau")
-            
-        
-    def removeAgent(self,agent_id):
+
+    def removeAgent(self, agent_id):
         """ Remove agent from bureau
-        
+
         Parameter:
         ----------
             agent_id: id of agent
         """
         self.agents.pop(agent_id, None)
-        
-    def isAgentInBureau(self,agent_id):
+
+    def isAgentInBureau(self, agent_id):
         """ Check if agent is in bureau
-        
+
         Parameter:
         ----------
             agent_id: id of agent
-            
+
         Returns:
         --------
             boolean

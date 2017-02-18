@@ -5,6 +5,7 @@ database:
   name: swapDB
   host: localhost
   port: 27017
+  max_batch_size: 1e5
   metadata:
     - mag
     - mag_err
