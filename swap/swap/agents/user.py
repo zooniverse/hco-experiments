@@ -17,9 +17,6 @@ class User(Agent):
 
         # initialize Agent class
         super().__init__(user_name, epsilon)
-        
-        #self.user_name = user_name
-        #self.epsilon = epsilon
 
         self.annotations = Tracker()
         self.gold_labels = Tracker()

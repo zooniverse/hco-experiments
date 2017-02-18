@@ -58,5 +58,26 @@ class TestSubject:
 
         mock.assert_called_once_with(1, 3, 4, 2)
 
+    def test_getLabel_1(self):
+        s = Subject(sid, 2)
+        s.getScore = MagicMock(return_value=.51)
 
+        assert s.getLabel() == 1
 
+    def test_getLabel_0(self):
+        s = Subject(sid, 2)
+        s.getScore = MagicMock(return_value=.5)
+
+        assert s.getLabel() == 0
+
+    # Potential outline for unit test to calculate score
+    def test_calculateScore(self):
+        s = Subject(sid, 2)
+
+        annotation = 1
+        u_score_0 = 0
+        u_score_1 = 0
+        s_score = 0
+        score = s.calculateScore(annotation, u_score_0, u_score_1, s_score)
+
+        assert score == 0

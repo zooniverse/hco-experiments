@@ -85,7 +85,7 @@ class Subject(Agent):
             s: subject score
             u1: user probability annotates 1
             u0: user probability annotates 0
-               
+
             Calculation when annotation 1
                       s*u1
             -------------------------
@@ -96,9 +96,9 @@ class Subject(Agent):
                       s (1-u1)
             -------------------------
             s*(1-u1) + u0*(1-s)
-            
+
         """
-        
+
         if annotation == 1:
             a = s_score * u_score_1
             b = 1 - u_score_0
