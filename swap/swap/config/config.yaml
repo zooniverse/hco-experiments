@@ -9,3 +9,14 @@ database:
   metadata:
     - mag
     - mag_err
+csv_types:
+  classification_id: int
+  user_id: int
+  annotation: int
+  gold_label: int
+  object_id: int
+  subject_id: int
+
+  machine_score: float
+  mag: float
+  mag_err: float
