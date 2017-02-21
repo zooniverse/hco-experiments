@@ -31,3 +31,15 @@ class TestUser:
         assert type(u.gold_labels) is Tracker
 
         assert type(u.trackers) is Labeled_Trackers
+
+    @patch.object(Tracker, 'add')
+    def test_addcl_updates_annotation_gold_labels(self, mock):
+        u = User(uid, epsilon)
+        u.annotations.add = MagicMock()
+        u.gold_labels.add = MagicMock()
+        u.trackers.trackers[0].add = MagicMock()
+
+        u.addClassification(cl)
+        u.annotations.add.assert_called_once_with(1)
+        u.gold_labels.add.assert_called_once_with(0)
+        u.trackers.trackers[0].add.assert_called_once_with(1)

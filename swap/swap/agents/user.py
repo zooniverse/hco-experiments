@@ -18,9 +18,7 @@ class User(Agent):
         # initialize Agent class
         super().__init__(user_name, epsilon)
 
-        self.annotations = Tracker()
         self.gold_labels = Tracker()
-        self.labels = {}
 
         self.trackers = Labeled_Trackers(UTracker, [0, 1], epsilon)
 
@@ -40,10 +38,10 @@ class User(Agent):
         self.gold_labels.add(gold)
 
         # Decide which tracker to user
-        tracker = self.trackers.getTracker(gold)
+        tracker = self.trackers.get(gold)
 
         # Add classification to tracker
-        prob.add(annotation)
+        tracker.add(annotation)
 
     def getHistory(self):
         pass

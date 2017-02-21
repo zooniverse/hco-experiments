@@ -19,7 +19,6 @@ class Subject(Agent):
         # self.p0 = p0
 
         # Initialize trackers
-        self.annotations = Tracker()
         self.user_scores = Tracker()
 
         self.tracker = Tracker(p0)

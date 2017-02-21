@@ -56,6 +56,34 @@ class User_Score_Tracker(Tracker):
         super().add(score)
 
 
+class Tracker_Collection:
+
+    def __init__(self):
+        self.trackers = {}
+
+    def add(self, label, tracker):
+        if label in self.trackers:
+            raise NameError('''
+                Tracker with that label already 
+                exists! Remove it first''')
+
+        if type(tracker) is not tracker:
+            raise ValueEr
+
+        self.trackers[label] = tracker
+
+    def remove(self, label):
+        if label in self.trackers:
+            tracker = self.trackers[label]
+            del self.trackers[label]
+
+            return tracker
+
+    def get(self, label):
+        if label in self.trackers:
+            return self.trackers[label]
+
+
 class Labeled_Trackers:
 
     def __init__(self, tracker, labels, value=None):
