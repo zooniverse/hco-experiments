@@ -67,10 +67,10 @@ class Server:
         """ Returns SWAP object """
         return self.swap
 
-    def getData(self):
-        subjects = self.getSubjects()
-        classifications = self.getClassifications()
-        return {'classifications': classifications, 'subjects': subjects}
+    # def getData(self):
+    #     subjects = self.getSubjects()
+    #     classifications = self.getClassifications()
+    #     return {'classifications': classifications, 'subjects': subjects}
 
     def getClassifications(self):
         """ Returns Iterator over all Classifications """
@@ -87,51 +87,51 @@ class Server:
 
         return classifications
 
-    def getUsers(self):
+    # def getUsers(self):
 
-        g = Group()
-        g.id('user_name')
-        g.count()
-        users = self.classifications.aggregate(g.build())
-        return users
+    #     g = Group()
+    #     g.id('user_name')
+    #     g.count()
+    #     users = self.classifications.aggregate(g.build())
+    #     return users
 
-    def getClassificationsByUser(self):
-        q = Query()
-        g = Group().id('user_id').push('classifications',['classification_id','subject_id','annotation'])
-        q.group(g).match('_id','',False)
+    # def getClassificationsByUser(self):
+    #     q = Query()
+    #     g = Group().id('user_id').push('classifications',['classification_id','subject_id','annotation'])
+    #     q.group(g).match('_id','',False)
 
-        print(q.build())
+    #     print(q.build())
 
-        users = self.classifications.aggregate(q.build(),allowDiskUse=True)
+    #     users = self.classifications.aggregate(q.build(),allowDiskUse=True)
 
-        return users
+    #     return users
 
-    def getSubjects(self):
-        """
-            Gets subject data from previously created
-            subject collection
-        """
-        q = Query()
-        q.match('gold_label',1).limit(5)
+    # def getSubjects(self):
+    #     """
+    #         Gets subject data from previously created
+    #         subject collection
+    #     """
+    #     q = Query()
+    #     q.match('gold_label',1).limit(5)
 
-        subjects = self.subjects.aggregate(q.build())
+    #     subjects = self.subjects.aggregate(q.build())
 
-        return subjects
+    #     return subjects
 
-    def getSubjects_aggregate(self):
-        """
-            Generates subject data by aggregating
-            from classifications
-        """
-        fields = ['subject_id','gold_label','diff']
-        project = {'_id': '$_id.subject_id', \
-                   'gold_label': '$_id.gold_label', \
-                   'diff':'$_id.diff'}
+    # def getSubjects_aggregate(self):
+    #     """
+    #         Generates subject data by aggregating
+    #         from classifications
+    #     """
+    #     fields = ['subject_id','gold_label','diff']
+    #     project = {'_id': '$_id.subject_id', \
+    #                'gold_label': '$_id.gold_label', \
+    #                'diff':'$_id.diff'}
 
-        q = Query()
-        q.group(fields).project(project)
+    #     q = Query()
+    #     q.group(fields).project(project)
 
-        subjects = self.classifications.aggregate(q.build())
+    #     subjects = self.classifications.aggregate(q.build())
 
-        return subjects
+    #     return subjects
 
