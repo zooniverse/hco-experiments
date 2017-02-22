@@ -2,12 +2,14 @@
 # Interface between the data structure and SWAP
 # Serves data to SWAP
 
+from pprint import pprint
+import sys
+import progressbar
 
 from swap import SWAP
 from swap.mongo import DB
 from swap.mongo import Query
 from swap.mongo import Group
-from pprint import pprint
 from swap.config import Config
 
 
@@ -47,13 +49,17 @@ class Server:
         # loop over classification cursor to process
         # classifications one at a time
         print("Start: SWAP Processing %d classifications" % n_classifications)
-        for i in range(0, n_classifications):
-            # read next classification
-            current_classification = classifications.next()
-            # process classification in swap
-            self.swap.processOneClassification(current_classification)
-            if i % 100e3 == 0:
-                print("   " + str(i) + "/" + str(n_classifications))
+
+        with progressbar.ProgressBar(max_value=n_classifications) as bar:
+            for i in range(0, n_classifications):
+                # read next classification
+                current_classification = classifications.next()
+                # process classification in swap
+                self.swap.processOneClassification(current_classification)
+
+                bar.update(i)
+                # if i % 100e3 == 0:
+                #     print("   " + str(i) + "/" + str(n_classifications))
         print("Finished: SWAP Processing %d/%d classifications" %
               (i, n_classifications))
 
