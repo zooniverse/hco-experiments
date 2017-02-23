@@ -53,30 +53,34 @@ class SWAP_AGENTS(object):
 
     def updateUserData(self, cl):
         """ Update User Data - Process current classification """
-        # check if agent is in bureau and create new one if not
-        if not self.user_bureau.isAgentInBureau(cl['user_name']):
-            # create new user agent and add to bureau
-            current_user = User(cl['user_name'], self.epsilon)
-            self.user_bureau.addAgent(current_user)
+
+        # Get user agent from bureau or create a new one
+        if self.user_bureau.has(cl['user_name']):
+            user = self.user_bureau.getAgent(cl['user_name'])
         else:
-            current_user = self.user_bureau.getAgent(cl['user_name'])
+            # create new user agent and add to bureau
+            user = User(cl['user_name'], self.epsilon)
+            self.user_bureau.addAgent(user)
+
         # process classification
-        current_user.addClassification(cl)
+        user.addClassification(cl)
 
     def getUserData(self):
         return self.user_bureau
 
     def updateSubjectData(self, cl):
         """ Update Subject Data - Process current classification """
+
         # check if agent is in bureau and create new one if not
-        if not self.subject_bureau.isAgentInBureau(cl['subject_id']):
-            # create new subject agent and add to bureau
-            current_subject = Subject(cl['subject_id'], self.p0)
-            self.subject_bureau.addAgent(current_subject)
+        if self.subject_bureau.has(cl['subject_id']):
+            subject = self.subject_bureau.getAgent(cl['subject_id'])
         else:
-            current_subject = self.subject_bureau.getAgent(cl['subject_id'])
+            # create new subject agent and add to bureau
+            subject = Subject(cl['subject_id'], self.p0)
+            self.subject_bureau.addAgent(subject)
+
         # process classification
-        current_subject.addClassification(cl)
+        subject.addClassification(cl)
 
     def getSubjectData(self):
         return self.subject_bureau
@@ -86,10 +90,9 @@ class SWAP_AGENTS(object):
         # if subject is gold standard and gold_updates are specified,
         # update user success probability
         if (cl['gold_label'] in [0, 1] and self.gold_updates):
-                self.updateUserData(cl)
-                # update Subject probability
-                self.updateSubjectData(cl)
-
+            self.updateUserData(cl)
+        # update Subject probability
+        self.updateSubjectData(cl)
 
 if __name__ == "__main__":
     from swap import Server
@@ -130,5 +133,3 @@ if __name__ == "__main__":
         sd = swappy.getSubjectData()
 
     test_swap()
-
-
