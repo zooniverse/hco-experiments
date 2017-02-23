@@ -85,7 +85,7 @@ class SWAP_AGENTS(object):
     def processOneClassification(self, cl):
         # if subject is gold standard and gold_updates are specified,
         # update user success probability
-        if ((cl['gold_label'] in ('0', '1')) and self.gold_updates):
+        if (cl['gold_label'] in [0, 1] and self.gold_updates):
                 self.updateUserData(cl)
                 # update Subject probability
                 self.updateSubjectData(cl)
