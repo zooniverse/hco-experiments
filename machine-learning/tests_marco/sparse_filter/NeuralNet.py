@@ -4,7 +4,7 @@ import sys # for Capturing
 import numpy as np
 from io import StringIO # for Capturing
 """
-    
+
     Capturing:         goto-line 21
     NeuralNet:         goto-line 42
     NeuralNetPerform:  goto-line 580
@@ -13,7 +13,7 @@ from io import StringIO # for Capturing
     LinearDecoder:     goto-line 862
     SoftMaxClassifier: goto-line 942
     DeepNerualNet:     goto-line 1054
-    
+
 """
 
 np.seterr(all="raise")
@@ -26,11 +26,11 @@ class Capturing(list):
     """
         Taken from:
         http://stackoverflow.com/questions/16571150/how-to-capture-stdout-output-from-a-python-function-call
-        
+
         this is a context manager for capturing print statements as elements of a list.
-        
+
         Usage:
-        
+
         with Capturing() as output:
             do_something(my_object)
     """
@@ -38,67 +38,67 @@ class Capturing(list):
         self._stdout = sys.stdout
         sys.stdout = self._stringio = StringIO()
         return self
-    
+
     def __exit__(self, *args):
         self.extend(self._stringio.getvalue().splitlines())
         sys.stdout = self._stdout
 
 class NeuralNet(object):
-    
+
     """
         object: NeuralNet
         superclass: object
-        
+
     """
-    
+
     def __init__(self, input, targets, architecture={}, LAMBDA=0.0, ALPHA=0.0, classify=False, maxiter=100, saveFile=None):
         """
             Initialise the data attributes of the NeuralNet object.
-            
+
             parameters:
-            
+
                 input: <numpy array> containing the training data with dimensions
-                       nxm, where n is the number of features and m is the number 
-                       of training examples.  The bias unit should not be added 
+                       nxm, where n is the number of features and m is the number
+                       of training examples.  The bias unit should not be added
                        to the input data array before instantiating the NeuralNet.
                        The bias is automatically added to the input array.
 
-                targets: <numpy array> containing the targets for each training example. 
+                targets: <numpy array> containing the targets for each training example.
                          k x m matrix, where k is the number of target values per training
                          example.
-            
-                architecture: <dict> containing the a key-value pair for each hidden 
+
+                architecture: <dict> containing the a key-value pair for each hidden
                               layer of the NerualNet.  Where the keys are integer values
                               corresponding to the index of the hidden layer starting from 1
                               e.g. for the first hidden layer the key is 1.  The values are
                               positive integers defining the number of hidden units per hidden
                               layer, e.g. 200.  architecture should therefore take the form
                               {1:200} for a NeuralNet with 1 hidden layer with 200 logistic units.
-            
+
                 LAMBDA: positive <float> regularising constant.  Determines the degree to which
-                        regularisation is applied.  The larger the value the greater 
+                        regularisation is applied.  The larger the value the greater
                         effect of the regularisation term on the cost function.
 
                 ALPHA: positive <float> learning rate.  Determines the step size toward the global
                        minimum on each iteration of gradient descent.
-            
+
                 classify: <boolean> flag denoting whether this is a classification problem or not.
                           True if it is classification, False otherwise.  If True the targets will
                           be mapped using the indicator function.
-            
+
                 maxiter: positive <int> maximum number of iterations. Passed to scipy.optimize
                          functions.
-            
+
                 saveFile: <.mat file> containing the _hiddensize, _LAMBDA, and _trainedParams
                           from a previously trained NeuralNet object.
-            
+
             returns:
-            
+
                 None
-                
-        """        
+
+        """
         import types
-        # Do some checking of the user input 
+        # Do some checking of the user input
         # do some checking on the architecture passed in
         # check that the architecture is a dictionary.
         assert type(architecture) is dict, \
@@ -127,7 +127,7 @@ class NeuralNet(object):
         assert type(maxiter) is int, \
                "<maxiter> must be an integer: %r is not valid\n" % maxiter
         assert maxiter > 0, \
-               "<maxiter> must be a positive integer: %r is not valid\n" % maxiter  
+               "<maxiter> must be a positive integer: %r is not valid\n" % maxiter
         # intialise the data attributes of the NeuralNet
         # add bias unit to input
         self._input = np.concatenate((np.ones(np.shape(input)[1])[np.newaxis], input), axis=0) # (n+1)xm
@@ -140,8 +140,8 @@ class NeuralNet(object):
             self._indicatorFunction = self.labelsToIndicatorFunction(self._targets) # kxm
         # check if a saved network has been selected
         if saveFile == None:
-            # if there is no saveFile initialise the data attributes 
-            # of the NeuralNet from those given when the Neural Net 
+            # if there is no saveFile initialise the data attributes
+            # of the NeuralNet from those given when the Neural Net
             # instance is created.
             self._architecture = architecture
             # add the number of input units to the architecture not including the bias unit
@@ -160,7 +160,7 @@ class NeuralNet(object):
                 self._architecture[len(list(self._architecture.keys()))] = np.shape(self._targets)[0]
             self._LAMBDA = float(LAMBDA)
             self._ALPHA = float(ALPHA)
-            # if there is no saveFile initialise the trainied params as 
+            # if there is no saveFile initialise the trainied params as
             # None.  This will be used to store parameters once network has
             # been trained.
             self._trainedParams = None
@@ -194,37 +194,37 @@ class NeuralNet(object):
                 print("Is the file in the current path?")
 
     def search(self):
-        
+
         """
             Useful search method, handy way of doing type searching on user defined classes.
-            
+
             parameters:
-            
+
                 None
-            
+
             returns:
-            
+
                 A string matching the name of the user defined class
-            
+
         """
         return "NeuralNet"
-    
+
     def randInitialiseWeights(self, nIn, nOut):
         """
-            Randomly (for symmetry breaking) initialize the weights of a layer with nIn 
+            Randomly (for symmetry breaking) initialize the weights of a layer with nIn
             incoming connections and nOut outgoing connections.
-            
+
             We choose weights uniformly from the interval [-r, r]
-            
+
             parameters:
-            
+
                 nIn: <int> number of units in the previous layer, not including the bias unit.
-            
+
                 nOut: <int> number of units in the next layer.
-            
+
             returns:
-            
-                <numpy-array> of randomly initiaised weights of size nOut x nIn 
+
+                <numpy-array> of randomly initiaised weights of size nOut x nIn
         """
         # Note: The first row corresponds to the parameters for the bias units
         r = np.sqrt(6) / (np.sqrt(nOut + nIn + 1))
@@ -235,18 +235,18 @@ class NeuralNet(object):
             Randomly intialise the weights for the entire NeuralNet.  Calls self.randInitialiseWeights
             to get random weights for each layer, then unravels these weights into a single vector.  The
             vector form is required in order to pass the network weights to the scipy optimisation function.
-            
+
             parameters:
-            
+
                 None
-            
+
             returns:
-            
+
                 intialParams: <numpy-array> vector containg randomly intialised weights for all
                               layers of the NerualNet.
         """
-        
-        # initialise initialParams by initialising the weights for the connection between the input and 
+
+        # initialise initialParams by initialising the weights for the connection between the input and
         # first hidden layer.
         initialParams = np.ravel(self.randInitialiseWeights(self._architecture[0], \
                                                            self._architecture[1]), order="F")
@@ -262,64 +262,64 @@ class NeuralNet(object):
     def reshapeParams(self, params):
         """
             Reshape a vector of the weights of the network into matrices
-            
+
             parameters:
-            
+
                 params: <numpy-array> vector of weight for all connections of the network.
-            
+
             returns:
-            
+
                 thetas: <dict> a dictionary contining the theta matrices corresponding to the
                         connections between each layer of the network.  The keys correspond to
-                        the layer to which the set of weights map the input.  For example the 
-                        key for the theta matrix which maps from the input layer to the first 
+                        the layer to which the set of weights map the input.  For example the
+                        key for the theta matrix which maps from the input layer to the first
                         hidden layer is 1.
         """
 
         thetas = {1:np.reshape(params[0:self._architecture[1] * (self._architecture[0] + 1)], \
                               (self._architecture[1], (self._architecture[0] + 1)), order="F")}
-         
+
         lastIndex = self._architecture[1] * (self._architecture[0] + 1) # index of the last weight for the first layer in the vector
-        
+
         for layer in list(self._architecture.keys())[2:]:
             thetas[layer] = np.reshape(params[lastIndex:lastIndex + (self._architecture[layer] * (self._architecture[layer-1] + 1))], \
                                       (self._architecture[layer], (self._architecture[layer-1] + 1)), order="F")
             lastIndex = lastIndex + (self._architecture[layer] * (self._architecture[layer-1] + 1))
-        
+
         return thetas
-        
+
     def sigmoid(self, z):
         """
             Sigmoid Logistic Function - acts as activation of units/neruons.
             http://www.wolframalpha.com/input/?i=graph+sigmoid+function+from+-5+to+5
-            
+
             parameters:
-            
+
                 z: <numpy-array> or <float> vector of inputs or single value which activates
                    the logistic units.
-            
+
             returns:
 
                 <numpy-array> or <float> vector of activations or single value activation for the
                 the layer.
         """
         return (1/ (1 + np.exp(-z)))
-    
+
     def sigmoidGradient(self, activation):
         """
             Calculates the derivative of the sigmoid activation function.  This derivative can
             be written as :
-            
+
                 sigmoid(z)*(1-sigmoid(z)) => acitvation*(1-activation)
                 http://www.ai.mit.edu/courses/6.892/lecture8-html/sld015.htm
-            
+
             parameters:
-            
+
                 activation: <numpy-array> or <float> vector of activations or single valued activation
                             produced by the sigmoid function.
-            
+
             returns:
-            
+
                 <numpy-array> or <float> the derivative of the sigmoid function.
         """
         return np.multiply(activation, (1 - activation))
@@ -329,23 +329,23 @@ class NeuralNet(object):
             The indicator function maps the targets for a classification problem from
             integers to vectors of 1's and 0's.  For a 3 class problem the targets are
             mapped as shown below:
-            
+
                 target      indicator function
                    1             [1, 0, 0]
                    2             [0, 1, 0]
                    3             [0, 0, 1]
-            
+
             This implementation assumes that labels are indexed from 1 not 0.
-            
+
             parameters:
-            
+
                targets: <numpy-array> 1xm vector of discrete class labels/targets.
-            
+
             returns:
-            
+
                 indicatorFunction: <numpy-array> kxm array, where k is the number of classes
-                                   and m the number of training examples.  The indicator function 
-                                   produces a kx1 vector denoting which class a given training example 
+                                   and m the number of training examples.  The indicator function
+                                   produces a kx1 vector denoting which class a given training example
                                    belongs to.
         """
         # get the number of discrete classes
@@ -356,12 +356,12 @@ class NeuralNet(object):
         for i in range(np.shape(targets)[0]):
             indicatorFunction[i,int(targets[i])] = 1  # vector of 0's except for the index corresponding to the target
         return indicatorFunction.transpose() # transpose so correct for comparison with hypothesis
-        
-    def feedForward(self, thetas, input, regTerm, m):  
 
-        # setup some variables for the calculation        
+    def feedForward(self, thetas, input, regTerm, m):
+
+        # setup some variables for the calculation
         activs = {1:input} # activation of the input layer is the input
-        
+
         ### Forward Propagation ###
         # calculate the mapping of the input between all layers except the output layer.
         # While doing this calculate the regularisation term to avoid looping through layers
@@ -386,61 +386,61 @@ class NeuralNet(object):
             hypothesis[np.where(hypothesis == 0)] = hypothesis[np.where(hypothesis == 0)] + 1e-9
 
         return hypothesis, activs, regTerm
-        
+
     def backProp(self, thetas, hypothesis, activs, targets, m):
         """
             blah
         """
-        deltas = {} # dictionary to store errors for each layer during back prop 
-        grads = {} # dictionary to store gradients for each layer during back prop 
-        
+        deltas = {} # dictionary to store errors for each layer during back prop
+        grads = {} # dictionary to store gradients for each layer during back prop
+
         ### Back Propagation ###
         numLayers = len(list(self._architecture.keys()))
         deltas[numLayers] = np.subtract(hypothesis, targets)
-        
+
         for layer in range(numLayers, 2, -1):
             deltas[layer-1] = np.multiply(np.dot(thetas[layer-1].transpose(), deltas[layer]), \
                                             self.sigmoidGradient(activs[layer-1]))
             deltas[layer-1] = deltas[layer-1][1:,:]
-            
+
         for layer in list(thetas.keys()):
             grad = 1/m * (np.dot(deltas[layer+1], activs[layer].transpose()))
             grad[:,1:] = grad[:,1:] + 1/m * (self._LAMBDA * thetas[layer][:,1:])
             grads[layer] = grad
-    
+
         gradients = np.ravel(grads[1], order="F")
         for layer in list(grads.keys())[1:]:
-            gradients = np.concatenate((gradients, np.ravel(grads[layer], order="F")), axis=0)  
+            gradients = np.concatenate((gradients, np.ravel(grads[layer], order="F")), axis=0)
 
         return gradients
-    
+
     def costFunction(self, params, input, targets):
         """
             Computes the cost and gradient of the NerualNet model.  The implementation
             is vectorized back propagation as discussed in:
-            
+
             https://www.coursera.org/course/ml - Coursera introduction to machine learning
-            
+
             parameters:
-            
+
                 params: <numpy-array> a vector containing the current weights for all connections i
                         the NeuralNet.
-            
+
                 input: <numpy-array> an (n+1)xm array of m training examples each with n features and a bias unit.
-            
+
                 targets: <numpy-array> a kxm array of m trainging examples with k target values for each.
-            
+
             returns:
-            
+
                 cost: <float> the cost of the NerualNet model given the current NeuralNet parameters (weights).
-            
-                gradients: <numpy-array> a vector containing the gradients for each connection of the NerualNet 
+
+                gradients: <numpy-array> a vector containing the gradients for each connection of the NerualNet
                            model.  The gradients are required by optimization algorithms e.g. scipy.fmincg in order
                            to minimise the cost during training.
 
         """
-    
-        
+
+
         # setup some variables for the calculation
         thetas = self.reshapeParams(params) # reshape the vecotr into matrices
         m = float(np.shape(input)[1]) # get the number of training examples
@@ -448,21 +448,21 @@ class NeuralNet(object):
 
         ### Feed the inputs forward though the network
         hypothesis, activations, regTerm = self.feedForward(thetas, input, regTerm, m)
-        
+
         ### Cost Function Calculation ###
         # add the last theta term to the regularisation calulation
         cost = np.sum(np.multiply(-targets, np.log(hypothesis)) - \
                       np.multiply((1-targets), (np.log(1-hypothesis))))
-        
+
         cost = 1/m * (cost + (self._LAMBDA*0.5*regTerm))
-        
+
         ### Backpropagate errors though network ###
         gradients = self.backProp(thetas, hypothesis, activations, targets, m)
 
         return cost, gradients
 
     def computeNumericalGradient(self, func, params, *args):
-            
+
         input, targets = args
         numgrad = np.zeros(np.shape(params))
         perturb = np.zeros(np.shape(params))
@@ -474,19 +474,19 @@ class NeuralNet(object):
             numgrad[i] = (loss2 - loss1) / (2.0 * epsilon)
             perturb[i] = 0
         return numgrad
-    
+
     def checkGradients(self):
-        
+
         def costFunction(params, *args):
             input, targets = args
             cost, grad = self.costFunction(params, input, targets)
             return cost
-        
+
         def costFunctionGradient(params, *args):
             input, targets = args
             cost, grad = self.costFunction(params, input, targets)
             return grad
-        
+
         input = np.copy(self._input[:10,:5])
         self._architecture = {0:9, 1:5, 2:3}
         params = self.initialise()
@@ -498,13 +498,13 @@ class NeuralNet(object):
         print(np.shape(numgrad), np.shape(grad))
         for i in range(len(numgrad)):
             print("%d\t%f\t%f" % (i, numgrad[i], grad[i]))
-        
+
         print("The above two columns you get should be very similar.")
         print("(Left-Your Numerical Gradient, Right-Analytical Gradient)")
-        
+
         print("If your backpropagation implementation is correct, then")
         print("the relative difference will be small (less than 1e-9). ")
-        
+
         diff = numgrad-grad
         print(diff)
 
@@ -529,44 +529,44 @@ class NeuralNet(object):
             # only pass a single training example for each iteration
             costGrad = fprime(x0, input[:,index][:,np.newaxis], targets[:,index][:,np.newaxis])
             x0 = x0 - self._ALPHA*costGrad
-        return x0 
+        return x0
 
     def train(self, retry=3):
         """
             train the network
         """
         from scipy import optimize
-        
+
         def costFunction(params, *args):
             input, targets = args
             cost, grad = self.costFunction(params, input, targets)
             return cost
-                
+
         def costFunctionGradient(params, *args):
             input, targets = args
             cost, grad = self.costFunction(params, input, targets)
             return grad
-        
+
         print()
         print("Training %s..." % self.search())
         print()
-            
+
         try:
             targets = self._indicatorFunction
         except AttributeError:
             targets = self._targets
-            
+
         # attempting to handle the case where the the optimization raises the following warning:
         #        Warning: Desired accuracy not necessarily achieved due to percision loss.
         #
         # This seems to mean that the function was unable to calculate a gradient(?) could mean we
         # have randomly initialised the parmaters in a bad (flat) region of the parameter space. This
-        # seems to be supported by the fact that it usually happpens after 1 iteration.  Trying to solve 
+        # seems to be supported by the fact that it usually happpens after 1 iteration.  Trying to solve
         # it by catching the warning and allowing the network to retry with a new randomly initialised set
         # of parameters a number of times.
-        # Seems the warning is just a print statement not a real warning, so going to have to capture the 
+        # Seems the warning is just a print statement not a real warning, so going to have to capture the
         # the print statement and search for the string and control flow based on that.
-        
+
         args = (self._input, targets)
         counter = 0
         output = [] # list to pass to Capturing to store print statements
@@ -602,7 +602,7 @@ class NeuralNet(object):
         iteration += 1
 
     def predict(self, input):
-        
+
         thetas = self.reshapeParams(self._trainedParams)
         m = int(np.shape(input)[1]) # get the number of examples
         input = np.concatenate((np.tile(1, (1, m)), input), axis=0) # add bias units
@@ -618,7 +618,7 @@ class NeuralNet(object):
         return neuralNetSetupDict
 
     def saveNetwork(self, outputFile):
-        
+
         import scipy.io as sio
         neuralNetSetupDict = self.generateSetupDict()
         sio.savemat(outputFile, neuralNetSetupDict)
@@ -628,25 +628,25 @@ class NeuralNetPerform(NeuralNet):
     """
         object:     NeuralNetPerform
         superclass: NeuralNet
-        
+
         A NeuralNet object with performace indicator methods.
     """
     def __init__(self, input, targets, architecture={}, LAMBDA=0.0, classify=False, maxiter=100, saveFile=None):
         """
-            
+
         """
         NeuralNet.__init__(self, input, targets, architecture, LAMBDA, False, maxiter, saveFile)
 
     def calculatePerformanceIndicators(self, input, labels, hypothesis, threshold):
         hypothesis = np.squeeze(hypothesis)
         labels = np.squeeze(labels)
-        
+
         numberPositives = len(np.where(labels == 1)[0])
         numberNegatives = len(np.where(labels == 0)[0])
-        
+
         positivePredictionsIndices = np.where(hypothesis >= threshold)[0]
         negativePredictionsIndices = np.where(hypothesis < threshold)[0]
-        
+
         truePositivesIndices = np.where(labels[positivePredictionsIndices] == 1)[0]
         trueNegativesIndices = np.where(labels[negativePredictionsIndices] == 0)[0]
         numberTruePositives = len(truePositivesIndices)
@@ -657,14 +657,14 @@ class NeuralNetPerform(NeuralNet):
         #print len(falseNegatives)
 
         FPR = len(falsePositives) / float(numberNegatives) # FPR = FP/N
-        
+
         TPR = numberTruePositives / float(numberPositives) # Recall
 
         try:
             Precision = numberTruePositives / float(numberTruePositives + len(falsePositives))
         except:
             Precision = 1
-    
+
         return FPR, TPR, Precision
 
     def calculateF1Score(self, Precision, Recall):
@@ -674,7 +674,7 @@ class NeuralNetPerform(NeuralNet):
         """
             Generate a plot of false positive rate against false negative rate
             as the threshld is varied.
-        
+
             input - data set on which to calculate ROC curve
             stepSize - how much to vary the threshold on each iteration
             acceptableFPR - the acceptable false positive rate, default to 0.01(1%)
@@ -682,28 +682,28 @@ class NeuralNetPerform(NeuralNet):
             tolerance - used when calculating the false negative rate for the acceptable FPR.
             It is the deviation from the acceptable FPR for which we can get a corresponding
             FNR as the calculated FPR may not be exactly equal to the acceptable FPR chosen.
-        
+
             FNR is the Missed Detection Rate used in Brink et al. 2013 ... I think.
         """
-    
+
         #m = float(np.shape(input)[1])
-    
+
         hypothesis = self.predict(input)
         falsePositiveRates = []
         falseNegativeRates = []
         for threshold in np.arange(0.0,1.0,stepSize):
-        
+
             #print self.calculatePerformanceIndicators(input, labels, hypothesis, threshold)
             FPR, TPR, Precision = self.calculatePerformanceIndicators(input, labels, hypothesis, threshold)
-        
+
             FNR = 1 - TPR
             falsePositiveRates.append(FPR)
             falseNegativeRates.append(FNR)
-        
+
             if (FPR) >= acceptableFPR-tolerance and (FPR) <= acceptableFPR+tolerance:
                 resultingFNR = FNR
                 optThreshold = threshold
-        
+
         if plot:
             import matplotlib.pyplot as plt
             plt.title("ROC Curve")
@@ -724,7 +724,7 @@ class NeuralNetPerform(NeuralNet):
                 print()
             plt.legend()
             plt.show()
-        try:    
+        try:
             return falsePositiveRates, falseNegativeRates, optThreshold, resultingFNR
         except:
             print("\nNo threshold found resulting in specified FPR: %f for LAMBDA: %f" % (acceptableFPR, self._LAMBDA))
@@ -747,17 +747,17 @@ class Autoencoder(NeuralNet):
         return "Autoencoder"
 
     def checkGradients(self):
-        
+
         def costFunction(params, *args):
             input, targets = args
             cost, grad = self.costFunction(params, input, targets)
             return cost
-        
+
         def costFunctionGradient(params, *args):
             input, targets = args
             cost, grad = self.costFunction(params, input, targets)
             return grad
-        
+
         input = np.copy(self._input[:5,:10])
         self._architecture = {0:4, 1:3, 2:4}
         params = self.initialise()
@@ -768,18 +768,18 @@ class Autoencoder(NeuralNet):
         #print np.shape(numgrad), np.shape(grad)
         for i in range(len(numgrad)):
             print("%d\t%f\t%f" % (i, numgrad[i], grad[i]))
-        
+
         print("The above two columns you get should be very similar.")
         print("(Left-Your Numerical Gradient, Right-Analytical Gradient)")
-        
+
         print("If your backpropagation implementation is correct, then")
         print("the relative difference will be small (less than 1e-9). ")
-        
+
         diff = numgrad-grad
         print(diff)
 
     def encode(self, params, input):
-        
+
         """
             blah
         """
@@ -795,16 +795,16 @@ class Autoencoder(NeuralNet):
         return encodedFeatures
 
     def getLearnedFeatures(self):
-        
+
         thetas = self.reshapeParams(self._trainedParams)
         return np.divide(thetas[1][:,1:], np.sqrt(np.sum(np.multiply(thetas[1][:,1:], thetas[1][:,1:]), axis=1)[:,np.newaxis]))
- 
+
     def visualiseLearnedFeatures(self):
         """
             Visualise the features learned by the autoencoder
         """
         import matplotlib.pyplot as plt
-        
+
         extent = np.sqrt(self._architecture[0]) # size of input vector is stored in self._architecture
         # number of rows and columns to plot (number of hidden units also stored in self._architecture)
         plotDims = np.rint(np.sqrt(self._architecture[1]))
@@ -822,7 +822,7 @@ class Autoencoder(NeuralNet):
         input("Program paused. Press enter to continue.")
 
 class SparseAutoencoder(Autoencoder):
-    
+
     """
         object:     SparseAutoencoder
         superclass: Autoencoder
@@ -847,10 +847,10 @@ class SparseAutoencoder(Autoencoder):
                              (self._BETA * sparseDelta)), \
                               self.sigmoidGradient(activs[2][1:,:]))
         #delta2 = delta2[1:,:]
-        
+
         theta2Grad = np.zeros(np.shape(thetas[2]))
         theta1Grad = np.zeros(np.shape(thetas[1]))
-        
+
         #theta2Grad[:,1:] = theta2Grad[:,1:] + (1/m) * np.dot(delta3, activs[2][1:,:].transpose()) + self._LAMBDA * thetas[2][:,1:]
         #theta2Grad[:,0] = theta2Grad[:,0] = (1/m * (np.sum(delta3, axis=1)))
         theta2Grad = theta2Grad + ((1/m) * np.dot(delta3, activs[2].transpose()))
@@ -865,14 +865,14 @@ class SparseAutoencoder(Autoencoder):
         return gradients
 
     def costFunction(self, params, input, targets):
-    
+
         thetas = self.reshapeParams(params)
         m = float(np.shape(input)[1]) # get the number of training examples
         regTerm = 0 # varaible to accumulate regularisation terms
         cost = 0
         ### Feed the inputs forward though the network
         hypothesis, activations, regTerm = self.feedForward(thetas, input, regTerm, m)
-        
+
         ### calculate the cost
         cost = cost + np.sum((0.5/m) * np.multiply((targets - hypothesis), (targets - hypothesis)))
 
@@ -903,12 +903,12 @@ class SparseAutoencoder(Autoencoder):
         return neuralNetSetupDict
 
     def saveNetwork(self, outputFile):
-        
+
         import scipy.io as sio
         neuralNetSetupDict = self.generateSetupDict()
         sio.savemat(outputFile, neuralNetSetupDict)
         print("Trained %s saved in %s" % (self.search(), outputFile))
- 
+
 class LinearDecoder(SparseAutoencoder):
 
     """
@@ -921,15 +921,15 @@ class LinearDecoder(SparseAutoencoder):
     def search(self):
         return "LinearDecoder"
 
-    def feedForward(self, thetas, input, regTerm, m):  
+    def feedForward(self, thetas, input, regTerm, m):
         """
             feed forward for the linear decoder (http://ufldl.stanford.edu/wiki/index.php/Linear_Decoders).
-            
+
             activation function for the output layer is the identity function.
         """
-        # setup some variables for the calculation        
+        # setup some variables for the calculation
         activs = {1:input} # activation of the input layer is the input
-        
+
         ### Forward Propagation ###
         # calculate the mapping of the input between all layers except the output layer.
         # While doing this calculate the regularisation term to avoid looping through layers
@@ -939,7 +939,7 @@ class LinearDecoder(SparseAutoencoder):
             activs[layer+1] = np.concatenate((np.tile(1, (1, m)), self.sigmoid(z)), axis=0) # add bias unit
             regTerm += np.sum(np.multiply(thetas[layer][:,1:], thetas[layer][:,1:]))
         regTerm += np.sum(np.multiply(thetas[list(thetas.keys())[-1]][:,1:], thetas[list(thetas.keys())[-1]][:,1:]))
-    
+
         # calculate the activation of the output layer also known as the hypothesis
         z = np.dot(thetas[list(thetas.keys())[-1]], activs[list(activs.keys())[-1]])
         # For this case of the linear decoder, the activation function for the outout layer
@@ -953,39 +953,39 @@ class LinearDecoder(SparseAutoencoder):
         if 0 in hypothesis:
             # np.log(0) = -inf ( divide by zero encountered in log)
             hypothesis[np.where(hypothesis == 0)] = hypothesis[np.where(hypothesis == 0)] + 1e-9
-        
+
         return hypothesis, activs, regTerm
 
     def backProp(self, thetas, hypothesis, activs, targets, rhoHat, m):
-        
-        # For the case of a linear decoder activation fuction for the output layer is just 
+
+        # For the case of a linear decoder activation fuction for the output layer is just
         # the identity function. The derivative is therefore 1.  The calculation of delta3
         # simplifies to:
         delta3 = -(targets - hypothesis)
-        
+
         # calculate sparsity delta
         if self._BETA != 0:
             sparseDelta = (np.divide(-self._RHO, rhoHat) + \
                            np.divide((1 - self._RHO), (1-rhoHat)))[:,np.newaxis]
-        
+
         delta2 = np.multiply((np.dot(thetas[2][:,1:].transpose(), delta3) + \
                               (self._BETA * sparseDelta)), \
                              self.sigmoidGradient(activs[2][1:,:]))
         #delta2 = delta2[1:,:]
-        
+
         theta2Grad = np.zeros(np.shape(thetas[2]))
         theta1Grad = np.zeros(np.shape(thetas[1]))
-        
+
         #theta2Grad[:,1:] = theta2Grad[:,1:] + (1/m) * np.dot(delta3, activs[2][1:,:].transpose()) + self._LAMBDA * thetas[2][:,1:]
         #theta2Grad[:,0] = theta2Grad[:,0] = (1/m * (np.sum(delta3, axis=1)))
         theta2Grad = theta2Grad + ((1/m) * np.dot(delta3, activs[2].transpose()))
         theta2Grad[:,1:] = theta2Grad[:,1:] + (self._LAMBDA * thetas[2][:,1:])
-        
+
         #theta1Grad[:,1:] = theta1Grad[:,1:] + (1/m) * np.dot(delta2, activs[1][1:,:].transpose()) + self._LAMBDA * thetas[1][:,1:]
         #theta1Grad[:,0] = theta1Grad[:,0] = (1/m * (np.sum(delta2, axis=1)))
         theta1Grad = theta1Grad + ((1/m) * np.dot(delta2, activs[1].transpose()))
         theta1Grad[:,1:] = theta1Grad[:,1:] + (self._LAMBDA * thetas[1][:,1:])
-        
+
         gradients = np.concatenate((np.ravel(theta1Grad, order="F"), np.ravel(theta2Grad, order="F")))
         return gradients
 
@@ -1014,7 +1014,7 @@ class SoftMaxClassifier(NeuralNet):
         return hypothesis
 
     def backProp(self, theta, hypothesis, input, indicatorFunction, m):
-        
+
         thetaGrad = np.zeros(np.shape(theta))
         #print np.shape(hypothesis), np.shape(indicatorFunction), np.shape(input.T)
         #print np.dot((hypothesis - indicatorFunction), input.transpose())
@@ -1043,7 +1043,7 @@ class SoftMaxClassifier(NeuralNet):
         # back propagate errors
         gradients = self.backProp(theta, hypothesis, input, indicatorFunction, m)
         return cost, gradients
-  
+
     def checkGradients(self):
         """
             blah
@@ -1052,12 +1052,12 @@ class SoftMaxClassifier(NeuralNet):
             input, targets = args
             cost, grad = self.costFunction(params, input, targets)
             return cost
-        
+
         def costFunctionGradient(params, *args):
             input, targets = args
             cost, grad = self.costFunction(params, input, targets)
             return grad
-        
+
         input = np.copy(self._input[:6,:5])
         self._architecture = {0:5, 1:3}
         params = self.initialise()
@@ -1068,13 +1068,13 @@ class SoftMaxClassifier(NeuralNet):
         numgrad = self.computeNumericalGradient(costFunction, params, *args)
         for i in range(len(numgrad)):
             print("%d\t%f\t%f" % (i, numgrad[i], grad[i]))
-        
+
         print("The above two columns you get should be very similar.")
         print("(Left-Your Numerical Gradient, Right-Analytical Gradient)")
-        
+
         print("If your backpropagation implementation is correct, then")
         print("the relative difference will be small (less than 1e-9). ")
-        
+
         diff = numgrad-grad
         print(diff)
 
@@ -1083,31 +1083,31 @@ class SoftMaxClassifier(NeuralNet):
             train the network
         """
         from scipy import optimize
-        
+
         def costFunction(params, *args):
             input, targets = args
             cost, grad = self.costFunction(params, input, targets)
             return cost
-        
+
         def costFunctionGradient(params, *args):
             input, targets = args
             cost, grad = self.costFunction(params, input, targets)
             return grad
-        
+
         print()
         print("Training %s..." % self.search())
         print()
 
         args = (self._input, self._indicatorFunction)
         initialParams = self.initialise()
-        
+
         params = optimize.fmin_cg(costFunction, x0=initialParams, fprime=costFunctionGradient, \
                                   args=args, maxiter = self._maxiter)
-        
+
         self._trainedParams = params
-    
+
     def predict(self, input):
-        
+
         theta = self.reshapeParams(self._trainedParams)[1]
         m = int(np.shape(input)[1]) # get the number of examples
         input = np.concatenate((np.tile(1, (1, m)), input), axis=0) # add bias units
@@ -1124,7 +1124,7 @@ class SoftMaxClassifier(NeuralNet):
         return neuralNetSetupDict
 
     def saveNetwork(self, outputFile):
-        
+
         import scipy.io as sio
         neuralNetSetupDict = self.generateSetupDict()
         sio.savemat(outputFile, neuralNetSetupDict)
@@ -1151,17 +1151,17 @@ class SoftMaxOnline(SoftMaxClassifier):
         """
             train the network
         """
-        
+
         def costFunction(params, *args):
             input, targets = args
             cost, grad = self.costFunction(params, input, targets)
             return cost
-        
+
         def costFunctionGradient(params, *args):
             input, targets = args
             cost, grad = self.costFunction(params, input, targets)
             return grad
-        
+
         print()
         print("Training %s..." % self.search())
         print()
@@ -1179,11 +1179,11 @@ class SoftMaxOnline(SoftMaxClassifier):
             # if the classifier hasn't already been trained then we need to randomly
             # initialise the weights.
             initialParams = self.initialise()
-       
-       
+
+
         params = self.stochastic_gradient_descent(costFunction, x0=initialParams, fprime=costFunctionGradient, \
                                    maxiter = self._maxiter, args=args)
-        
+
         self._trainedParams = params
 
 class DeepNeuralNet(NeuralNet):

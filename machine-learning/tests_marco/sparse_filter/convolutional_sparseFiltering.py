@@ -9,6 +9,7 @@ from tests_marco.sparse_filter.SoftMaxOnline import SoftMaxOnline
 from sklearn import svm
 from sklearn.metrics import roc_curve
 from sklearn import preprocessing
+import pickle
 
 from tests_marco.config import config
 
@@ -148,7 +149,7 @@ def convolve_and_pool(dataFile, featuresFile, W, imageDim, patchDim, poolDim, nu
                                        int(np.floor((imageDim-patchDim+1)/poolDim)), \
                                        int(np.floor((imageDim-patchDim+1)/poolDim))))
 
-    for convPart in range(numFeatures/stepSize):
+    for convPart in range(numFeatures // stepSize):
         featureStart = convPart*stepSize
         featureEnd = (convPart+1)*stepSize
         print('Step %d: features %d to %d\n'% (convPart, featureStart, featureEnd))
@@ -232,17 +233,20 @@ def train_linearSVM(C, dataFile, X, Y, testX, testY, pooledFile, imageDim, sgd, 
 
 def train_Softmax(C, dataFile, X, Y, testX, testY, pooledFile, imageDim, sgd, save=True, prefix=""):
 
+    cfg = config.Config()
+    data_path = cfg.paths['data']
+
     if sgd:
         raise NotImplementedError
     else:
         SFC = SoftMaxClassifier(X.T, Y, LAMBDA=C, maxiter=10000)
         print(SFC._architecture)
-        sfcFile = "classifiers/%sSoftMax_lambda%e_%s.pkl" % \
+        sfcFile = data_path + "classifiers/%sSoftMax_lambda%e_%s.pkl" % \
         (prefix, C, pooledFile.split("/")[-1].split(".")[0])
 
     try:
-        #SFC = pickle.load(open(sfcFile, "rb"))
-        SFC = SoftMaxClassifier(saveFile=sfcFile)
+        SFC = pickle.load(open(sfcFile, "rb"))
+        SFC = SoftMaxClassifier(input=None,targets=None,saveFile=sfcFile)
         print("[*] trained classifier found.")
         print("[*] trained classifier loaded.")
     except IOError:
@@ -319,7 +323,7 @@ def cross_validate_Softmax(dataFile, X, Y, pooledFile, imageDim, sgd, save=True,
 
     m = len(np.squeeze(Y))
     CGrid = [0.1, 0.03, 0.01, 0.003, 0.001, 3e-4, 1e-4, 3e-5, 1e-5]
-    kf = KFold(m, n_folds=n_folds, indices=False)
+    kf = KFold(m, n_folds=n_folds)
     mean_FoMs = []
     for C in CGrid:
         fold = 1
@@ -449,18 +453,20 @@ def main():
     sgd = options.sgd
 
     ## TODO: Test by defining arguments
+    if False:
+        cfg = config.Config()
+        data_path = cfg.paths['data']
 
-    cfg = config.Config()
-    data_path = cfg.paths['data']
-
-    dataFile = data_path + "3pi_20x20_skew2_signPreserveNorm.mat"
-    patchesFile = data_path + "patches_stl-10_unlabeled_meansub_20150409_psdb_6x6.mat"
-    imageDim = 20
-    imageChannels = 3
-    patchDim = 6
-    numFeatures = 20
-    poolDim = 5
-    stepSize = 20
+        dataFile = data_path + "3pi_20x20_skew2_signPreserveNorm.mat"
+        patchesFile = data_path + "patches_stl-10_unlabeled_meansub_20150409_psdb_6x6.mat"
+        imageDim = 20
+        imageChannels = 1
+        patchDim = 6
+        numFeatures = 20
+        poolDim = 5
+        stepSize = 20
+        C = 1
+        cv = 3
 
 
     required_arguments = [dataFile, patchesFile, imageDim, imageChannels, \
@@ -497,7 +503,7 @@ def main():
     SF = None
     patches = None
     # added maxiter to filename  24/02/15
-    featuresFile = "features/SF_maxiter%d_L1_%s_%dx%d_k%d_%s_pooled%d.mat" % \
+    featuresFile = data_path + "features/SF_maxiter%d_L1_%s_%dx%d_k%d_%s_pooled%d.mat" % \
     (maxiter, dataFile.split("/")[-1].split(".")[0], patchDim, patchDim, numFeatures, \
     patchesFile.split("/")[-1].split(".")[0], poolDim)
     try:

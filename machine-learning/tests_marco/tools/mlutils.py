@@ -3,32 +3,32 @@
 #########################################################
 
 # Imports for ML code - DEW 24/02/15
-try:
-    import cPickle as pickle
-except:
-    import pickle
 
+import pickle
 import pyfits, time
 import numpy as np
 import scipy.io as sio
 import scipy.signal as sig
 from sklearn import preprocessing
-try:
-    from sparseFilter import SparseFilter
-except ImportError, e:
-    print e
+from tests_marco.sparse_filter import sparseFilter
+
+from tests_marco.config import config
+
+# config
+cfg = config.Config()
+data_path = cfg.paths['data']
 
 def getClassifier():
     """
         clfFile : name of pickled sklearn classifier object.
     """
-    path = "/Users/dew/development/PS1-Real-Bogus/ufldl/sparsefiltering/classifiers/"
+    path = data_path + "classifiers/"
     clfFile = "SVM_linear_C0.010000_SF_maxiter100_L1_3pi_20x20_skew2_signPreserveNorm_test_no_prescaling_6x6_k400_patches_naturalImages_6x6_signPreserveNorm_pooled5.pkl"
     clf = pickle.load(open(path+clfFile, "rb"))
     return clf
 
 def getScaler(dataFile):
-    path = "/Users/dew/development/PS1-Real-Bogus/ufldl/sparsefiltering/scalers/"
+    path = data_path + "scalers/"
     scalerFile = "scaler_%s.pkl" % (dataFile.split("/")[-1].split(".")[0])
     try:
         scaler = pickle.load(open(scalerFile, "rb"))
@@ -42,7 +42,7 @@ def getScaler(dataFile):
     return scaler
 
 def getMinMaxScaler(featuresFile):
-    path = "/Users/dew/development/PS1-Real-Bogus/ufldl/sparsefiltering/scalers/"
+    path = data_path + "scalers/"
     scalerFile = "minMax_scaler_%s.pkl" % (featuresFile.split("/")[-1].split(".")[0])
     try:
         scaler = pickle.load(open(scalerFile, "rb"))
@@ -64,14 +64,14 @@ def getPatches(patchesFile):
 def getSparseFilter(numFeatures, patches, patchesFile, maxiter=100):
     try:
         # added maxiter to filename 24/02/15
-        path = "/Users/dew/development/PS1-Real-Bogus/ufldl/sparsefiltering/trained_sparseFilters/"
+        path = data_path + "trained_sparseFilters/"
         sf_file = "SF_%d_%s_maxiter%d.mat" % \
         (numFeatures, patchesFile.split("/")[-1].split(".")[0], maxiter)
         #print path+sf_file
         SF = SparseFilter(saveFile=path+sf_file)
         #print "[*] Trained sparse filter loaded."
     except IOError:
-        print "[*] Could not find trained sparse filter."
+        print("[*] Could not find trained sparse filter.")
         #print "[+] Training sparse filter ... "
         SF = SparseFilter(k=numFeatures, maxiter=maxiter)
         SF.fit(patches)
@@ -81,17 +81,17 @@ def getSparseFilter(numFeatures, patches, patchesFile, maxiter=100):
     return SF
 
 class TargetImage(object):
-    
+
     def __init__(self, fitsFile, extent=10, extension=1):
         """
             fitsFile: name of File from which to extract the image of the object
-            
+
             The image should be already centred on the object of interest, so can
             find its position by accesing the centre of the array of pixel data.
             The image must also be fpacked as recieved from the postage stamp
             server which means the data is in hdulist extension 1. If the image is
             funpacked the hdulist extension is 0.
-            
+
             self.image: a 2*extent x 2*extent np.array of pixel data centreed on the object
             """
         self.fitsFile = fitsFile.split("/")[-1]
@@ -104,20 +104,20 @@ class TargetImage(object):
         maxY = np.shape(data[1])
         imageCentre = (maxX[0]/2, maxY[0]/2) # changed to int division, to avoid deprecation warning - DEW 24/02/15
         self.image = data[imageCentre[0]-extent: imageCentre[0]+extent, imageCentre[0]-extent: imageCentre[0]+extent]
-    
+
     def getImage(self):
         return self.image
-    
+
     def getObjectFile(self):
         return self.fitsFile
-    
+
     def signPreserveNorm(self):
         """
             This is a sign preserving nomalisation used in Eye.
             Similar to that used by Romano et al. in SVM paper
             except they use log(1+|x|) i.e. don't divide by sigma.
             nomalizes the unraveled image
-            
+
             vectorized on 24/07/13
             """
         #shape = np.shape(self.getObject())
@@ -157,10 +157,10 @@ def pool(poolDim, convolvedFeatures):
     numImages = np.shape(convolvedFeatures)[1]
     numFeatures = np.shape(convolvedFeatures)[0]
     convolvedDim = np.shape(convolvedFeatures)[2]
-    
+
     pooledFeatures = np.zeros((numFeatures, numImages, int(np.floor(convolvedDim/float(poolDim))), \
                                int(np.floor(convolvedDim/float(poolDim)))))
-        
+
     for imageNum in range(numImages):
         for featureNum in range(numFeatures):
             for i in range(int(np.floor(convolvedDim/float(poolDim)))):
@@ -179,7 +179,7 @@ def convolve_and_pool(images, W, imageDim, patchDim, poolDim, numFeatures, stepS
     pooledFeatures = np.zeros((numFeatures,numImages, \
                                int(np.floor((imageDim-patchDim+1)/poolDim)), \
                                int(np.floor((imageDim-patchDim+1)/poolDim))))
-        
+
     for convPart in range(numFeatures/stepSize):
         featureStart = convPart*stepSize
         featureEnd = (convPart+1)*stepSize

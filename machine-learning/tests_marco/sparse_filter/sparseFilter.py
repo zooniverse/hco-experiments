@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 import scipy.io as sio
+from tests_marco.config import config
 
 class SparseFilter(object):
     def __init__(self, k=256, channels=1, maxiter=200, saveFile=None):
@@ -105,7 +106,7 @@ class SparseFilter(object):
         import matplotlib.pyplot as plt
         W = np.reshape(self.trainedW, (self.k, self.n), order="F")
         # each row of W is a learned feature
-        extent = np.sqrt(self.n/self.channels)
+        extent = int(np.sqrt(self.n // self.channels))
         #image = np.zeros((extent,extent,self.channels),dtype="float")
         #print np.shape(image)
         fig = plt.figure(facecolor="w")
@@ -202,7 +203,9 @@ def checkGradients():
     W = np.random.rand(int(k),int(n))
     #print np.shape(W)
     W = np.ravel(W, order="F")
-    dataFile = "../data/naturalImages_patches_8x8.mat"
+    cfg = config.Config()
+    data_path = cfg.paths['data']
+    dataFile = data_path + "naturalImages_patches_8x8.mat"
     data = sio.loadmat(dataFile)
     X = data["patches"][:n,:20]
     args = X, k
@@ -225,9 +228,9 @@ def checkGradients():
 
 def main():
     #checkGradients()
-
-    dataFile = "/Users/dew/development/PS1-Real-Bogus/data/3pi/"+\
-               "3pi_20x20_signPreserveNorm.mat"
+    cfg = config.Config()
+    data_path = cfg.paths['data']
+    dataFile = data_path + "3pi_20x20_skew2_signPreserveNorm.mat"
 
     #dataFile = "/Users/dew/development/PS1-Real-Bogus/data/3pi/"+\
     #                   "patches_3pi_20x20_signPreserveNorm_8x8_10.mat"
@@ -238,7 +241,7 @@ def main():
     X = data["X"].T
     sf = SparseFilter()
     sf.fit(X)
-    sf.saveSF("SF_256_"+dataFile.split("/")[-1].split(".")[0]+".mat")
+    sf.saveSF(data_path + "trained_sparseFilters/SF_256_"+dataFile.split("/")[-1].split(".")[0]+".mat")
     sf.visualiseLearnedFeatures()
 
 if __name__ == "__main__":
