@@ -1,0 +1,5 @@
+################################################################
+# YAML config file to set up vars
+
+paths:
+    data: D:/Studium_GD/Zooniverse/Data/sn_hunters_image_classification/
