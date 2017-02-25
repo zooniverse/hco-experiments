@@ -2,7 +2,7 @@
 
 import sys # for Capturing
 import numpy as np
-from cStringIO import StringIO # for Capturing
+from io import StringIO # for Capturing
 """
     
     Capturing:         goto-line 21
@@ -97,17 +97,17 @@ class NeuralNet(object):
         # Do some checking of the user input 
         # do some checking on the architecture passed in
         # check that the architecture is a dictionary.
-        assert type(architecture) is types.DictType, \
+        assert type(architecture) is dict, \
                "<architecture> must be a dict (e.g. {1:200}): %r is not valid\n" % architecture
         # loop through keys and values to check type and parity
-        for key in architecture.keys():
+        for key in list(architecture.keys()):
             # check keys are positive integers
-            assert type(key) is types.IntType, \
+            assert type(key) is int, \
                    "<architecture> keys must be integers: %r is not a valid key" % key
             assert key > 0, \
                    "<architecture> keys must be positive integers: %r is not valid key\n" % key
             # check values are positive integers
-            assert type(architecture[key]) is types.IntType, \
+            assert type(architecture[key]) is int, \
                    "<architecture> keys must be integers: %r is not a valid key" % architecture[key]
             assert architecture[key] > 0, \
                    "<architecture> keys must be positive integers: %r is not valid key\n" % architecture[key]
@@ -115,10 +115,10 @@ class NeuralNet(object):
         assert LAMBDA >= 0, \
                "<LAMBDA> must be a positive number: %r is not valid\n" % LAMBDA
         # check classify is a boolean
-        assert type(classify) is types.BooleanType, \
+        assert type(classify) is bool, \
                "<classify> must be a boolean: %r is not valid\n" % classify
         # check maxiter is a positive integer
-        assert type(maxiter) is types.IntType, \
+        assert type(maxiter) is int, \
                "<maxiter> must be an integer: %r is not valid\n" % maxiter
         assert maxiter > 0, \
                "<maxiter> must be a positive integer: %r is not valid\n" % maxiter  
@@ -144,14 +144,14 @@ class NeuralNet(object):
             if self._classify == True and len(np.unique(self._targets)) > 2:
                 # if classification problem and more than 2 classes the number of output nodes
                 # is equal to the number of unique labels
-                self._architecture[len(self._architecture.keys())] = len(np.unique(self._targets))
+                self._architecture[len(list(self._architecture.keys()))] = len(np.unique(self._targets))
             elif self._classify == True and len(np.unique(self._targets)) == 2:
                 # else if binary classification use one output node
-                self._architecture[len(self._architecture.keys())] = 1
+                self._architecture[len(list(self._architecture.keys()))] = 1
             elif self._classify == False:
                 # else we have a regression problem and the number of output nodes is equal to the
                 # number of target values per example
-                self._architecture[len(self._architecture.keys())] = np.shape(self._targets)[0]
+                self._architecture[len(list(self._architecture.keys()))] = np.shape(self._targets)[0]
             self._LAMBDA = float(LAMBDA)
             # if there is no saveFile initialise the trainied params as 
             # None.  This will be used to store parameters once network has
@@ -172,7 +172,7 @@ class NeuralNet(object):
                 # Solution seems to be to squeeze the loaded array to remove the redundant dimension.
                 self._trainedParams = np.squeeze(savedNeuralNetSetup["trainedParams"])
                 # loop through all keys insaved network setup
-                for key in savedNeuralNetSetup.keys():
+                for key in list(savedNeuralNetSetup.keys()):
                     # if the key continas the specified string...
                     if "architecture" in key:
                         # ...remove the string from the key name and cast it as an int
@@ -182,9 +182,9 @@ class NeuralNet(object):
                         self._architecture[layerKey] = savedNeuralNetSetup[key]
             # catch the error if saveFile can't be opened and advise user.
             except IOError:
-                print saveFile
-                print "Saved neural network file not found!"
-                print "Is the file in the current path?"
+                print(saveFile)
+                print("Saved neural network file not found!")
+                print("Is the file in the current path?")
 
     def search(self):
         
@@ -244,7 +244,7 @@ class NeuralNet(object):
         initialParams = np.ravel(self.randInitialiseWeights(self._architecture[0], \
                                                            self._architecture[1]), order="F")
         # loop through the remaining layers and intialise the weights
-        for layer in self._architecture.keys()[1:-1]:
+        for layer in list(self._architecture.keys())[1:-1]:
             initialParams = np.concatenate((initialParams, \
                                            np.ravel(self.randInitialiseWeights(self._architecture[layer], \
                                                                                self._architecture[layer+1]), \
@@ -274,7 +274,7 @@ class NeuralNet(object):
          
         lastIndex = self._architecture[1] * (self._architecture[0] + 1) # index of the last weight for the first layer in the vector
         
-        for layer in self._architecture.keys()[2:]:
+        for layer in list(self._architecture.keys())[2:]:
             thetas[layer] = np.reshape(params[lastIndex:lastIndex + (self._architecture[layer] * (self._architecture[layer-1] + 1))], \
                                       (int(self._architecture[layer]), int((self._architecture[layer-1] + 1))), order="F")
             lastIndex = lastIndex + (self._architecture[layer] * (self._architecture[layer-1] + 1))
@@ -360,13 +360,13 @@ class NeuralNet(object):
         # While doing this calculate the regularisation term to avoid looping through layers
         # a second time.
 
-        for layer in thetas.keys()[:-1]:
+        for layer in list(thetas.keys())[:-1]:
             z = np.dot(thetas[layer], activs[layer])
             activs[layer+1] = np.concatenate((np.tile(1, (1, m)), self.sigmoid(z)), axis=0) # add bias unit
             regTerm += np.sum(np.multiply(thetas[layer][:,1:], thetas[layer][:,1:]))
-        regTerm += np.sum(np.multiply(thetas[thetas.keys()[-1]][:,1:], thetas[thetas.keys()[-1]][:,1:]))
+        regTerm += np.sum(np.multiply(thetas[list(thetas.keys())[-1]][:,1:], thetas[list(thetas.keys())[-1]][:,1:]))
         # calculate the activation of the output layer also known as the hypothesis
-        z = np.dot(thetas[thetas.keys()[-1]], activs[activs.keys()[-1]])
+        z = np.dot(thetas[list(thetas.keys())[-1]], activs[list(activs.keys())[-1]])
 
         hypothesis = self.sigmoid(z)
         # checks for numerical instabilities
@@ -388,7 +388,7 @@ class NeuralNet(object):
         grads = {} # dictionary to store gradients for each layer during back prop 
         
         ### Back Propagation ###
-        numLayers = len(self._architecture.keys())
+        numLayers = len(list(self._architecture.keys()))
         deltas[numLayers] = np.subtract(hypothesis, targets)
         
         for layer in range(numLayers, 2, -1):
@@ -396,13 +396,13 @@ class NeuralNet(object):
                                             self.sigmoidGradient(activs[layer-1]))
             deltas[layer-1] = deltas[layer-1][1:,:]
             
-        for layer in thetas.keys():
+        for layer in list(thetas.keys()):
             grad = 1/m * (np.dot(deltas[layer+1], activs[layer].transpose()))
             grad[:,1:] = grad[:,1:] + 1/m * (self._LAMBDA * thetas[layer][:,1:])
             grads[layer] = grad
     
         gradients = np.ravel(grads[1], order="F")
-        for layer in grads.keys()[1:]:
+        for layer in list(grads.keys())[1:]:
             gradients = np.concatenate((gradients, np.ravel(grads[layer], order="F")), axis=0)  
 
         return gradients
@@ -488,18 +488,18 @@ class NeuralNet(object):
         args = (input, targets)
         grad = costFunctionGradient(params, *args)
         numgrad = self.computeNumericalGradient(costFunction, params, *args)
-        print np.shape(numgrad), np.shape(grad)
+        print(np.shape(numgrad), np.shape(grad))
         for i in range(len(numgrad)):
-            print "%d\t%f\t%f" % (i, numgrad[i], grad[i])
+            print("%d\t%f\t%f" % (i, numgrad[i], grad[i]))
         
-        print "The above two columns you get should be very similar."
-        print "(Left-Your Numerical Gradient, Right-Analytical Gradient)"
+        print("The above two columns you get should be very similar.")
+        print("(Left-Your Numerical Gradient, Right-Analytical Gradient)")
         
-        print "If your backpropagation implementation is correct, then"
-        print "the relative difference will be small (less than 1e-9). "
+        print("If your backpropagation implementation is correct, then")
+        print("the relative difference will be small (less than 1e-9). ")
         
         diff = numgrad-grad
-        print diff
+        print(diff)
 
     def train(self, retry=3):
         """
@@ -517,9 +517,9 @@ class NeuralNet(object):
             cost, grad = self.costFunction(params, input, targets)
             return grad
         
-        print
-        print "Training %s..." % self.search()
-        print
+        print()
+        print("Training %s..." % self.search())
+        print()
             
         try:
             targets = self._indicatorFunction
@@ -542,18 +542,18 @@ class NeuralNet(object):
         output = [] # list to pass to Capturing to store print statements
         while counter <= retry:
             if counter > 0:
-                print
-                print "Training %s (Attempt: %d)..." % (self.search(), counter+1)
-                print
+                print()
+                print("Training %s (Attempt: %d)..." % (self.search(), counter+1))
+                print()
             initialParams = self.initialise()
             with Capturing(output) as output:
                 params = optimize.fmin_cg(costFunction, x0=initialParams, fprime=costFunctionGradient, \
                                               args=args, maxiter = self._maxiter)
-            print output[counter]
+            print(output[counter])
             if "Warning" in output[counter]:
                 if counter == retry:
-                    print "Optimisation has failed %d times. Aborting training!" % (counter+1)
-                print "Optimisation failed on attempt number %d!" % (counter+1)
+                    print("Optimisation has failed %d times. Aborting training!" % (counter+1))
+                print("Optimisation failed on attempt number %d!" % (counter+1))
                 counter += 1
                 continue
             self._trainedParams = params
@@ -584,7 +584,7 @@ class NeuralNet(object):
 
     def generateSetupDict(self):
         neuralNetSetupDict = {}
-        for key in self._architecture.keys():
+        for key in list(self._architecture.keys()):
             neuralNetSetupDict["architecture"+str(key)] = self._architecture[key]
         neuralNetSetupDict["LAMBDA"] = self._LAMBDA
         neuralNetSetupDict["trainedParams"] = self._trainedParams
@@ -595,7 +595,7 @@ class NeuralNet(object):
         import scipy.io as sio
         neuralNetSetupDict = self.generateSetupDict()
         sio.savemat(outputFile, neuralNetSetupDict)
-        print "Trained %s saved in %s" % (self.search(), outputFile)
+        print("Trained %s saved in %s" % (self.search(), outputFile))
 
 class NeuralNetPerform(NeuralNet):
     """
@@ -690,18 +690,18 @@ class NeuralNetPerform(NeuralNet):
                          "r--", label="%.1lf%% FNR" % (resultingFNR*100))
                 plt.plot(resultingFNR, acceptableFPR, "ko", label="threshold: %.3lf" % optThreshold)
             except:
-                print "\nNo threshold found resulting in specified FPR: %f for LAMBDA: %f" % (acceptableFPR, self._LAMBDA)
-                print "Setting the optimum threshold and corresponding FNR to 0."
+                print("\nNo threshold found resulting in specified FPR: %f for LAMBDA: %f" % (acceptableFPR, self._LAMBDA))
+                print("Setting the optimum threshold and corresponding FNR to 0.")
                 resultingFNR = 0
                 optThreshold = 0
-                print
+                print()
             plt.legend()
             plt.show()
         try:    
             return falsePositiveRates, falseNegativeRates, optThreshold, resultingFNR
         except:
-            print "\nNo threshold found resulting in specified FPR: %f for LAMBDA: %f" % (acceptableFPR, self._LAMBDA)
-            print "Setting the optimum threshold and corresponding FNR to 0."
+            print("\nNo threshold found resulting in specified FPR: %f for LAMBDA: %f" % (acceptableFPR, self._LAMBDA))
+            print("Setting the optimum threshold and corresponding FNR to 0.")
             resultingFNR = 0
             optThreshold = 0
             return falsePositiveRates, falseNegativeRates, optThreshold, resultingFNR
@@ -712,7 +712,7 @@ class Autoencoder(NeuralNet):
         superclass: NeuralNet
     """
     def __init__(self, input, architecture={}, LAMBDA=0.0, maxiter=100, saveFile=None):
-        assert len(architecture.keys()) < 2, \
+        assert len(list(architecture.keys())) < 2, \
         "Autoencoder can only have 1 hidden layer e.g. {1:25} \n(This may change in future versions.)"
         NeuralNet.__init__(self, input, input, architecture, LAMBDA, False, maxiter, saveFile)
 
@@ -740,16 +740,16 @@ class Autoencoder(NeuralNet):
         numgrad = self.computeNumericalGradient(costFunction, params, *args)
         #print np.shape(numgrad), np.shape(grad)
         for i in range(len(numgrad)):
-            print "%d\t%f\t%f" % (i, numgrad[i], grad[i])
+            print("%d\t%f\t%f" % (i, numgrad[i], grad[i]))
         
-        print "The above two columns you get should be very similar."
-        print "(Left-Your Numerical Gradient, Right-Analytical Gradient)"
+        print("The above two columns you get should be very similar.")
+        print("(Left-Your Numerical Gradient, Right-Analytical Gradient)")
         
-        print "If your backpropagation implementation is correct, then"
-        print "the relative difference will be small (less than 1e-9). "
+        print("If your backpropagation implementation is correct, then")
+        print("the relative difference will be small (less than 1e-9). ")
         
         diff = numgrad-grad
-        print diff
+        print(diff)
 
     def encode(self, params, input):
         
@@ -792,7 +792,7 @@ class Autoencoder(NeuralNet):
             plt.axis("off")
             ax.imshow(image, interpolation="nearest")
         plt.show()
-        raw_input("Program paused. Press enter to continue.")
+        input("Program paused. Press enter to continue.")
 
 class SparseAutoencoder(Autoencoder):
     
@@ -867,7 +867,7 @@ class SparseAutoencoder(Autoencoder):
             blah
         """
         neuralNetSetupDict = {}
-        for key in self._architecture.keys():
+        for key in list(self._architecture.keys()):
             neuralNetSetupDict["architecture"+str(key)] = self._architecture[key]
         neuralNetSetupDict["LAMBDA"] = self._LAMBDA
         neuralNetSetupDict["trainedParams"] = self._trainedParams
@@ -880,7 +880,7 @@ class SparseAutoencoder(Autoencoder):
         import scipy.io as sio
         neuralNetSetupDict = self.generateSetupDict()
         sio.savemat(outputFile, neuralNetSetupDict)
-        print "Trained %s saved in %s" % (self.search(), outputFile)
+        print("Trained %s saved in %s" % (self.search(), outputFile))
  
 class LinearDecoder(SparseAutoencoder):
 
@@ -907,14 +907,14 @@ class LinearDecoder(SparseAutoencoder):
         # calculate the mapping of the input between all layers except the output layer.
         # While doing this calculate the regularisation term to avoid looping through layers
         # a second time.
-        for layer in thetas.keys()[:-1]:
+        for layer in list(thetas.keys())[:-1]:
             z = np.dot(thetas[layer], activs[layer])
             activs[layer+1] = np.concatenate((np.tile(1, (1, m)), self.sigmoid(z)), axis=0) # add bias unit
             regTerm += np.sum(np.multiply(thetas[layer][:,1:], thetas[layer][:,1:]))
-        regTerm += np.sum(np.multiply(thetas[thetas.keys()[-1]][:,1:], thetas[thetas.keys()[-1]][:,1:]))
+        regTerm += np.sum(np.multiply(thetas[list(thetas.keys())[-1]][:,1:], thetas[list(thetas.keys())[-1]][:,1:]))
     
         # calculate the activation of the output layer also known as the hypothesis
-        z = np.dot(thetas[thetas.keys()[-1]], activs[activs.keys()[-1]])
+        z = np.dot(thetas[list(thetas.keys())[-1]], activs[list(activs.keys())[-1]])
         # For this case of the linear decoder, the activation function for the outout layer
         # is the identity fucntion i.e. f(z) = z.
         hypothesis = z
@@ -1035,16 +1035,16 @@ class SoftMaxClassifier(NeuralNet):
         grad = costFunctionGradient(params, *args)
         numgrad = self.computeNumericalGradient(costFunction, params, *args)
         for i in range(len(numgrad)):
-            print "%d\t%f\t%f" % (i, numgrad[i], grad[i])
+            print("%d\t%f\t%f" % (i, numgrad[i], grad[i]))
         
-        print "The above two columns you get should be very similar."
-        print "(Left-Your Numerical Gradient, Right-Analytical Gradient)"
+        print("The above two columns you get should be very similar.")
+        print("(Left-Your Numerical Gradient, Right-Analytical Gradient)")
         
-        print "If your backpropagation implementation is correct, then"
-        print "the relative difference will be small (less than 1e-9). "
+        print("If your backpropagation implementation is correct, then")
+        print("the relative difference will be small (less than 1e-9). ")
         
         diff = numgrad-grad
-        print diff
+        print(diff)
 
     def train(self):
         """
@@ -1062,9 +1062,9 @@ class SoftMaxClassifier(NeuralNet):
             cost, grad = self.costFunction(params, input, targets)
             return grad
         
-        print
-        print "Training %s..." % self.search()
-        print
+        print()
+        print("Training %s..." % self.search())
+        print()
 
         args = (self._input, self._indicatorFunction)
         initialParams = self.initialise()

@@ -21,7 +21,7 @@ def main():
     dataFile = options.dataFile
 
     if dataFile == None:
-        print parser.usage
+        print(parser.usage)
         exit(0)
 
     data = sio.loadmat(dataFile)
@@ -45,7 +45,7 @@ def main():
                 train_x, train_y = X[train], y[train]
                 scaler = preprocessing.StandardScaler().fit(train_x)
                 train_x = scaler.transform(train_x)
-                print "[*]", fold, arch, LAMBDA
+                print("[*]", fold, arch, LAMBDA)
                 file = "cv/NeuralNet_"+dataFile.split("/")[-1].split(".")[0]+\
                        "_arch"+str(arch)+"_lambda%.6f"% (LAMBDA) +"_fold"+str(fold)+".pkl"
                 try:
@@ -63,8 +63,8 @@ def main():
                 FoM = f1_score(y[test], np.array(nn.predict_proba(scaler.transform(X[test]).T) <= .5)[:,0])
                 fold+=1
                 FoMs.append(FoM)
-            print "[+] mean FoM: %.3lf" % (np.mean(np.array(FoMs)))
-            print
+            print("[+] mean FoM: %.3lf" % (np.mean(np.array(FoMs))))
+            print()
 
 if __name__ == "__main__":
     main()

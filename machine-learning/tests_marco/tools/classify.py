@@ -482,7 +482,11 @@ def main():
         cfg = config.Config()
         data_path = cfg.paths['data']
 
-        dataFile = data_path + "3pi_20x20_skew2_signPreserveNorm.mat"
+        dataFiles = data_path + "3pi_20x20_skew2_signPreserveNorm.mat" + "," \
+                    data_path + "3pi_20x20_skew2_signPreserveNorm.mat" + "," \
+                    data_path + "3pi_20x20_skew2_signPreserveNorm.mat"
+
+        classifierFiles =
         patchesFile = data_path + "patches_stl-10_unlabeled_meansub_20150409_psdb_6x6.mat"
         imageDim = 20
         imageChannels = 1

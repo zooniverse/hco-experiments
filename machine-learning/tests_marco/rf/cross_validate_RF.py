@@ -1,11 +1,12 @@
 import optparse, pickle
 import numpy as np
 import scipy.io as sio
-from train_RF import train_RF
+from tests_marco.rf.train_RF import train_RF
 from analyse_RF import measure_FoM
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.cross_validation import KFold
 from sklearn import preprocessing
+from tests_marco.config import config
 
 def main():
 
@@ -17,8 +18,13 @@ def main():
     (options, args) = parser.parse_args()
     dataFile = options.dataFile
 
+    cfg = config.Config()
+    data_path = cfg.paths['data']
+
+    dataFile = data_path + "3pi_20x20_skew2_signPreserveNorm.mat"
+
     if dataFile == None:
-        print parser.usage
+        print(parser.usage)
         exit(0)
 
     data = sio.loadmat(dataFile)
@@ -33,7 +39,7 @@ def main():
     max_features_grid = [10, 25]
     min_samples_leaf_grid = [1, 2, 5]
 
-    kf = KFold(m, n_folds=5, indices=False)
+    kf = KFold(m, n_folds=5)
     fold = 1
     for n_estimators in n_estimators_grid:
         for max_features in max_features_grid:
@@ -41,8 +47,8 @@ def main():
                 fold=1
                 FoMs = []
                 for train, test in kf:
-                    print "[*]", fold, n_estimators, max_features, min_samples_leaf
-                    file = "cv/RF_n_estimators"+str(n_estimators)+"_max_features"+str(max_features)+\
+                    print("[*]", fold, n_estimators, max_features, min_samples_leaf)
+                    file = data_path + "classifiers/cv/RF_n_estimators"+str(n_estimators)+"_max_features"+str(max_features)+\
                            "_min_samples_leaf"+str(min_samples_leaf)+"_"+dataFile.split("/")[-1].split(".")[0]+\
                            "_fold"+str(fold)+".pkl"
                     try:
@@ -55,8 +61,8 @@ def main():
                     FoM, threshold = measure_FoM(X[test], y[test], rf, False)
                     fold+=1
                     FoMs.append(FoM)
-                print "[+] mean FoM: %.3lf" % (np.mean(np.array(FoMs)))
-                print
+                print("[+] mean FoM: %.3lf" % (np.mean(np.array(FoMs))))
+                print()
 
 if __name__ == "__main__":
     main()

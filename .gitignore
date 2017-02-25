@@ -90,6 +90,9 @@ ENV/
 # Rope project settings
 .ropeproject
 
+# 2to3 backups
+.bak
+
 # emacs backup
 *.py~
 .gitignore~

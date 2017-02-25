@@ -1,14 +1,15 @@
 import sys, pickle, warnings
 import numpy as np
 import scipy.io as sio
-from NeuralNet import NeuralNet
+from tests_marco.nn.NeuralNet import NeuralNet
 from sklearn import preprocessing
+from tests_marco.config import config
 
 def train_nn(train_x, train_y, arch, LAMBDA):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         nn = NeuralNet(train_x, train_y, architecture=arch, LAMBDA=LAMBDA, maxiter=10000)
-        print nn._architecture
+        print(nn._architecture)
         nn.train()
     return nn
 
@@ -28,17 +29,20 @@ def main(argv = None):
 
     data = sio.loadmat(dataFile)
 
-    #train_x = np.concatenate((data["X"], data["validX"]))            
-    #train_y = np.squeeze(np.concatenate((data["y"], data["validy"])))                                                                     
+    #train_x = np.concatenate((data["X"], data["validX"]))
+    #train_y = np.squeeze(np.concatenate((data["y"], data["validy"])))
     train_x = data["X"]
     scaler = preprocessing.StandardScaler().fit(train_x)
     train_x = scaler.transform(train_x).T
     train_y = data["y"]
     nn = train_nn(train_x, train_y, arch, LAMBDA)
-    outputFile = open("NerualNet_%s_arch%d_lambda%f.pkl" % \
+    outputFile = open("classifiers/NeuralNet_%s_arch%d_lambda%f.pkl" % \
                       (dataFile.split("/")[-1].split(".")[0], arch[1], LAMBDA), "wb")
 
     pickle.dump(nn, outputFile)
 
 if __name__ == "__main__":
-    main()
+    cfg = config.Config()
+    data_path = cfg.paths['data']
+    dataFile = data_path + "3pi_20x20_skew2_signPreserveNorm.mat"
+    main(['dummy',200,1/400,dataFile])

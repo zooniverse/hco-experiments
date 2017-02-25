@@ -2,9 +2,10 @@ import sys, pickle
 import numpy as np
 import scipy.io as sio
 from sklearn import svm
+from tests_marco.config import config
 
 def train_SVM(X, y, kernel, C, gamma):
-    
+
     svc = svm.SVC(kernel=kernel, \
                   C=C, \
                   gamma=gamma,
@@ -13,13 +14,13 @@ def train_SVM(X, y, kernel, C, gamma):
     svc.fit(X, y)
 
     return svc
-    
+
 
 def main(argv = None):
-    
+
     if argv is None:
         argv = sys.argv
-    
+
     if len(argv) != 5:
         sys.exit("Usage: train_SVM.py <kernel> <C>" +\
                  " <gamma> <.mat file>")
@@ -38,7 +39,7 @@ def main(argv = None):
 
     svm = train_SVM(train_x, train_y, kernel, C, gamma)
 
-    outputFile = open("SVM_kernel"+str(kernel)+\
+    outputFile = open(data_path + "classifiers/SVM_kernel"+str(kernel)+\
                       "_C"+str(C)+\
                       "_gamma"+str(gamma)+\
                       "_"+dataFile.split("/")[-1].split(".")[0]+".pkl", "wb")
@@ -46,4 +47,8 @@ def main(argv = None):
     pickle.dump(svm, outputFile)
 
 if __name__ == "__main__":
-    main()
+    #main()
+    cfg = config.Config()
+    data_path = cfg.paths['data']
+    dataFile = data_path + "3pi_20x20_skew2_signPreserveNorm.mat"
+    main(['dummy','rbf',1,1/400,dataFile])

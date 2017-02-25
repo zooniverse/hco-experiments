@@ -14,10 +14,10 @@ def measure_FoM(X, y, classifier, plot=True):
     fpr, tpr, thresholds = roc_curve(y, pred)
 
     FoM = 1-tpr[np.where(fpr<=0.01)[0][-1]]
-    print "[+] FoM: %.4f" % (FoM)
+    print("[+] FoM: %.4f" % (FoM))
     threshold = thresholds[np.where(fpr<=0.01)[0][-1]]
-    print "[+] threshold: %.4f" % (threshold)
-    print
+    print("[+] threshold: %.4f" % (threshold))
+    print()
 
     if plot:
         font = {"size": 18}
@@ -41,7 +41,7 @@ def measure_FoM(X, y, classifier, plot=True):
         plt.xticks([0, 0.05, 0.10, 0.25, FoM], rotation=70)
 
         locs, labels = plt.xticks()
-        plt.xticks(locs, map(lambda x: "%.3f" % x, locs))
+        plt.xticks(locs, ["%.3f" % x for x in locs])
         plt.show()
     return FoM, threshold
 
@@ -62,20 +62,20 @@ def main():
     classifierFile = options.classifierFile
     dataSet = options.dataSet
 
-    print
+    print()
 
     if dataFile == None or classifierFile == None or dataSet == None:
-        print parser.usage
+        print(parser.usage)
         exit(0)
 
     if dataSet != "training" and dataSet != "test":
-        print "[!] Exiting: data set must be 1 of 'training' or 'test'"
+        print("[!] Exiting: data set must be 1 of 'training' or 'test'")
         exit(0)
 
     try:
         data = sio.loadmat(dataFile)
     except IOError:
-        print "[!] Exiting: %s Not Found" % (dataFile)
+        print("[!] Exiting: %s Not Found" % (dataFile))
         exit(0)
 
     if dataSet == "training":
@@ -88,7 +88,7 @@ def main():
     try:
         classifier = pickle.load(open(classifierFile, "rb"))
     except IOError:
-        print "[!] Exiting: %s Not Found" % (classifierFile)
+        print("[!] Exiting: %s Not Found" % (classifierFile))
         exit(0)
     measure_FoM(X, y, classifier)
 

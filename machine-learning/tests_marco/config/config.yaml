@@ -3,3 +3,4 @@
 
 paths:
     data: D:/Studium_GD/Zooniverse/Data/sn_hunters_image_classification/
+    data_file_standard: 3pi_20x20_skew2_signPreserveNorm.mat

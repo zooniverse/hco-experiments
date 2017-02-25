@@ -5,6 +5,7 @@ from train_SVM import train_SVM
 from analyse_SVM import measure_FoM
 from sklearn import svm
 from sklearn.cross_validation import KFold
+from tests_marco.config import config
 
 def main():
 
@@ -16,8 +17,15 @@ def main():
     (options, args) = parser.parse_args()
     dataFile = options.dataFile
 
+    # TODO: remove only for testing
+    if False:
+        cfg = config.Config()
+        data_path = cfg.paths['data']
+        data_file_standard = cfg.paths['data_file_standard']
+        dataFile = data_path + data_file_standard
+
     if dataFile == None:
-        print parser.usage
+        print(parser.usage)
         exit(0)
 
     data = sio.loadmat(dataFile)
@@ -38,8 +46,8 @@ def main():
                 fold=1
                 FoMs = []
                 for train, test in kf:
-                    print "[*]", fold, kernel, C, gamma
-                    file = "cv/SVM_kernel"+str(kernel)+"_C"+str(C)+\
+                    print("[*]", fold, kernel, C, gamma)
+                    file = data_path + "classifiers/cv/SVM_kernel"+str(kernel)+"_C"+str(C)+\
                            "_gamma"+str(gamma)+"_"+dataFile.split("/")[-1].split(".")[0]+\
                            "_fold"+str(fold)+".pkl"
                     try:
@@ -52,8 +60,8 @@ def main():
                     FoM, threshold = measure_FoM(X[test], y[test], svm, False)
                     fold+=1
                     FoMs.append(FoM)
-                print "[+] mean FoM: %.3lf" % (np.mean(np.array(FoMs)))
-                print
+                print("[+] mean FoM: %.3lf" % (np.mean(np.array(FoMs))))
+                print()
 
 if __name__ == "__main__":
     main()
