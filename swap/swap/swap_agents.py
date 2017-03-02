@@ -42,8 +42,8 @@ class SWAP_AGENTS(object):
         self.epsilon = epsilon  # estimated volunteer performance
 
         # initialize bureaus to manage user / subject agents
-        self.user_bureau = Bureau('users')
-        self.subject_bureau = Bureau('subjects')
+        self.users = Bureau('users')
+        self.subjects = Bureau('subjects')
 
         # Directive to update - if True, then a volunteer agent's posterior
         # probability of containing an interesting object will be updated
@@ -55,35 +55,35 @@ class SWAP_AGENTS(object):
         """ Update User Data - Process current classification """
 
         # Get user agent from bureau or create a new one
-        if self.user_bureau.has(cl['user_name']):
-            user = self.user_bureau.getAgent(cl['user_name'])
+        if self.users.has(cl['user_name']):
+            user = self.users.getAgent(cl['user_name'])
         else:
             # create new user agent and add to bureau
             user = User(cl['user_name'], self.epsilon)
-            self.user_bureau.addAgent(user)
+            self.users.addAgent(user)
 
         # process classification
         user.addClassification(cl)
 
     def getUserData(self):
-        return self.user_bureau
+        return self.users
 
     def updateSubjectData(self, cl):
         """ Update Subject Data - Process current classification """
 
         # check if agent is in bureau and create new one if not
-        if self.subject_bureau.has(cl['subject_id']):
-            subject = self.subject_bureau.getAgent(cl['subject_id'])
+        if self.subjects.has(cl['subject_id']):
+            subject = self.subjects.getAgent(cl['subject_id'])
         else:
             # create new subject agent and add to bureau
             subject = Subject(cl['subject_id'], self.p0)
-            self.subject_bureau.addAgent(subject)
+            self.subjects.addAgent(subject)
 
         # process classification
         subject.addClassification(cl)
 
     def getSubjectData(self):
-        return self.subject_bureau
+        return self.subjects
 
     # Process a classification
     def processOneClassification(self, cl):
