@@ -1,15 +1,8 @@
 #!/usr/bin/env python
 ################################################################
-# Script to test server functionality
+# Script to test control functionality
 
 import swap
-from swap.mongo.query import Query
-from pprint import pprint
-import time
-
-# server = swap.Server(.5,.5)
-
-# print(server.getClassifications())
 
 fields = {'user_id', 'classification_id', 'subject_id',
           'annotation', 'gold_label'}
@@ -37,8 +30,8 @@ db = swap.mongo.DB()
 
 
 # def test_users():
-#     server = swap.Server(.5, .5)
-#     users = server.getClassificationsByUser()
+#     control = swap.Server(.5, .5)
+#     users = control.getClassificationsByUser()
 
 #     pprint(list(users))
 
@@ -46,9 +39,9 @@ db = swap.mongo.DB()
 def test_get_one_classification():
     """ Get the first classification
     """
-    server = swap.Server(0.5, 0.5)
+    control = swap.Control(0.5, 0.5)
 
-    classification_cursor = server.classifications.find()
+    classification_cursor = control.classifications.find()
     n_class = classification_cursor.count()
     current_classification = classification_cursor.next()
 

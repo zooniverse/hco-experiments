@@ -13,7 +13,7 @@ from swap.mongo import Group
 from swap.config import Config
 
 
-class Server:
+class Control:
 
     def __init__(self, p0, epsilon):
         self._db = DB()
@@ -134,4 +134,3 @@ class Server:
     #     subjects = self.classifications.aggregate(q.build())
 
     #     return subjects
-

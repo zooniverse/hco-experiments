@@ -42,8 +42,8 @@ class SWAP_AGENTS(object):
         self.epsilon = epsilon  # estimated volunteer performance
 
         # initialize bureaus to manage user / subject agents
-        self.user_bureau = Bureau('users')
-        self.subject_bureau = Bureau('subjects')
+        self.users = Bureau('users')
+        self.subjects = Bureau('subjects')
 
         # Directive to update - if True, then a volunteer agent's posterior
         # probability of containing an interesting object will be updated
@@ -53,55 +53,58 @@ class SWAP_AGENTS(object):
 
     def updateUserData(self, cl):
         """ Update User Data - Process current classification """
-        # check if agent is in bureau and create new one if not
-        if not self.user_bureau.isAgentInBureau(cl['user_name']):
-            # create new user agent and add to bureau
-            current_user = User(cl['user_name'], self.epsilon)
-            self.user_bureau.addAgent(current_user)
+
+        # Get user agent from bureau or create a new one
+        if self.users.has(cl['user_name']):
+            user = self.users.getAgent(cl['user_name'])
         else:
-            current_user = self.user_bureau.getAgent(cl['user_name'])
+            # create new user agent and add to bureau
+            user = User(cl['user_name'], self.epsilon)
+            self.users.addAgent(user)
+
         # process classification
-        current_user.addClassification(cl)
+        user.addClassification(cl)
 
     def getUserData(self):
-        return self.user_bureau
+        return self.users
 
     def updateSubjectData(self, cl):
         """ Update Subject Data - Process current classification """
+
         # check if agent is in bureau and create new one if not
-        if not self.subject_bureau.isAgentInBureau(cl['subject_id']):
-            # create new subject agent and add to bureau
-            current_subject = Subject(cl['subject_id'], self.p0)
-            self.subject_bureau.addAgent(current_subject)
+        if self.subjects.has(cl['subject_id']):
+            subject = self.subjects.getAgent(cl['subject_id'])
         else:
-            current_subject = self.subject_bureau.getAgent(cl['subject_id'])
+            # create new subject agent and add to bureau
+            subject = Subject(cl['subject_id'], self.p0)
+            self.subjects.addAgent(subject)
+
         # process classification
-        current_subject.addClassification(cl)
+        subject.addClassification(cl)
 
     def getSubjectData(self):
-        return self.subject_bureau
+        return self.subjects
 
     # Process a classification
     def processOneClassification(self, cl):
         # if subject is gold standard and gold_updates are specified,
         # update user success probability
         if (cl['gold_label'] in [0, 1] and self.gold_updates):
-                self.updateUserData(cl)
-                # update Subject probability
-                self.updateSubjectData(cl)
-
+            self.updateUserData(cl)
+        # update Subject probability
+        self.updateSubjectData(cl)
 
 if __name__ == "__main__":
-    from swap import Server
+    from swap import Control
     import time
 
     def test_swap():
         start = time.time()
-        server = Server(.5, .5)
+        control = Control(.5, .5)
         max_batch_size = 1e5
 
         # get classifications
-        classifications = server.getClassifications()
+        classifications = control.getClassifications()
 
         n_classifications = 1e6
 
@@ -123,12 +126,10 @@ if __name__ == "__main__":
         print("Finished: SWAP Processing %d/%d classifications" %
               (i, n_classifications))
 
-        server.process()
+        control.process()
         print("--- %s seconds ---" % (time.time() - start))
-        swappy = server.getSWAP()
+        swappy = control.getSWAP()
         ud = swappy.getUserData()
         sd = swappy.getSubjectData()
 
     test_swap()
-
-

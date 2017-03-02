@@ -18,8 +18,7 @@ cl = {
     'annotation': '1',
     'subject_id': '2149031',
     'machine_score': '0.960535',
-    'user_id': '1497743'
-    }
+    'user_id': '1497743'}
 sid = cl['subject_id']
 p0 = .5
 

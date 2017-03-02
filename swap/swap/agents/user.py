@@ -53,3 +53,17 @@ class User(Agent):
                 label (int) label of the tracker, i.e. the annotation
         """
         return self.trackers.get(label).current()
+
+    def export(self):
+        data = {
+            'gold_labels': self.gold_labels.getHistory()
+        }
+
+        for label, tracker in self.trackers.getAll().items():
+            score = 'score_%s' % label
+            history = 'score_%s_history' % label
+
+            data[score] = tracker.current()
+            data[history] = tracker.getHistory()
+
+        return data
