@@ -48,16 +48,19 @@ class Test_Query:
         fields = ['field1', 'field2', 'field3']
         q.project(fields)
 
-        assert q._pipeline[-1] == {'$project': {'field1': 1,
-                                   'field2': 1, 'field3': 1}}
+        assert q._pipeline[-1] == {
+            '$project': {'field1': 1,
+                         'field2': 1,
+                         'field3': 1}}
 
     def test_add_fields_set(self):
         q = Query()
         fields = {'field1', 'field2', 'field3'}
         q.project(fields)
 
-        assert q._pipeline[-1] == {'$project': {'field1': 1,
-                                   'field2': 1, 'field3': 1}}
+        assert q._pipeline[-1] == {
+            '$project': {'field1': 1,
+                         'field2': 1, 'field3': 1}}
 
     def test_add_fields_dict(self):
         q = Query()
@@ -91,19 +94,13 @@ class Test_Query:
                                    'field1': '$field1',
                                    'field2': '$field2'}}}
 
-    def test_group_list(self):
-        q = Query()
-        q.group(['field1', 'field2'])
-
-        assert q._pipeline[-1] == {'$group': {"_id":
-                                   {'field1': '$field1', 'field2': '$field2'}}}
-
     def test_group_count(self):
         q = Query()
-        q.group('field',count=True)
+        q.group('field', count=True)
 
-        assert q._pipeline[-1] == {'$group': {'_id': '$field',
-                                   'count': {'$sum': 1}}}
+        assert q._pipeline[-1] == {
+            '$group': {'_id': '$field',
+                       'count': {'$sum': 1}}}
 
 
 class Test_Group:
@@ -142,8 +139,9 @@ class Test_Group:
         g = Group().id('id').push('name', fields)
 
         assert 'name' in g._extra
-        assert g._extra['name'] == {'$push': {'field1': '$field1',
-                                    'field2': '$field2', 'field3': '$field3'}}
+        assert g._extra['name'] == {
+            '$push': {'field1': '$field1',
+                      'field2': '$field2', 'field3': '$field3'}}
 
     def test_group_Group(self):
         g = Group().id('id')
@@ -152,7 +150,7 @@ class Test_Group:
         assert q._pipeline[-1] == g.build()
 
 
-class Test_Group:
+class Test_Sort:
     ################################################################
     # Sort Class
 
@@ -185,11 +183,10 @@ class Test_Group:
         assert order[0] == 'field1'
         assert order[1] == 'field2'
 
-    def test_Sort_many_order(self):
+    def test_Sort_many_values(self):
         s = Sort()
         s.addMany([('field1', 1), ('field2', -1)])
 
-        order = list(s._order)
         assert s._order['field1'] == 1
         assert s._order['field2'] == -1
 
