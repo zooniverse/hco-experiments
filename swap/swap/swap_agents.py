@@ -95,16 +95,16 @@ class SWAP_AGENTS(object):
         self.updateSubjectData(cl)
 
 if __name__ == "__main__":
-    from swap import Server
+    from swap import Control
     import time
 
     def test_swap():
         start = time.time()
-        server = Server(.5, .5)
+        control = Control(.5, .5)
         max_batch_size = 1e5
 
         # get classifications
-        classifications = server.getClassifications()
+        classifications = control.getClassifications()
 
         n_classifications = 1e6
 
@@ -126,9 +126,9 @@ if __name__ == "__main__":
         print("Finished: SWAP Processing %d/%d classifications" %
               (i, n_classifications))
 
-        server.process()
+        control.process()
         print("--- %s seconds ---" % (time.time() - start))
-        swappy = server.getSWAP()
+        swappy = control.getSWAP()
         ud = swappy.getUserData()
         sd = swappy.getSubjectData()
 
