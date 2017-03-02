@@ -6,7 +6,7 @@ import abc
 from swap.agents.tracker import Tracker
 
 
-class Agent:
+class Agent(metaclass=abc.ABCMeta):
     """ Agent to represent a classifier (user,machine) or a subject
 
     Parameters:
@@ -28,4 +28,4 @@ class Agent:
 
     @abc.abstractmethod
     def export(self):
-        pass
+        return

@@ -104,9 +104,12 @@ class Subject(Agent):
             c = 1 - s_score
 
         elif annotation == 0:
-            a = s_score * (1-u_score_1)
+            a = s_score * (1 - u_score_1)
             b = 1 - s_score
             c = u_score_0
 
-        score = a / (a + b*c)
+        score = a / (a + b * c)
         return score
+
+    def export(self):
+        pass

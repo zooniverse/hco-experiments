@@ -22,6 +22,12 @@ class Tracker:
     def current(self):
         return self._current
 
+    def getHistory(self):
+        return self._history[:]
+
+    def size(self):
+        return len(self._history)
+
 
 class User_Score_Tracker(Tracker):
 
@@ -63,12 +69,12 @@ class Tracker_Collection:
 
     def add(self, label, tracker):
         if label in self.trackers:
-            raise NameError('''
-                Tracker with that label already 
-                exists! Remove it first''')
+            raise NameError(
+                'Tracker with that label already \
+                exists! Remove it first')
 
         if type(tracker) is not tracker:
-            raise ValueEr
+            raise ValueError
 
         self.trackers[label] = tracker
 
@@ -103,3 +109,6 @@ class Labeled_Trackers:
 
     def get(self, label):
         return self.trackers[label]
+
+    def getAll(self):
+        return self.trackers

@@ -1,6 +1,7 @@
 ################################################################
 # Test functions for user agent class
 
+from pprint import pprint
 from swap.agents.user import User
 from swap.agents.tracker import *
 
@@ -43,3 +44,145 @@ class TestUser:
         u.annotations.add.assert_called_once_with(1)
         u.gold_labels.add.assert_called_once_with(0)
         u.trackers.trackers[0].add.assert_called_once_with(1)
+
+    def test_score_100(self):
+        u = User(uid, epsilon)
+        data = [
+            (1, 1),
+            (1, 1),
+            (1, 1),
+            (1, 1)
+        ]
+
+        for g, a in data:
+            u.addClassification({'annotation': a, 'gold_label': g})
+
+        assert u.getScore(1) == 1
+
+    def test_score_50(self):
+        u = User(uid, epsilon)
+        data = [
+            (1, 1),
+            (1, 1),
+            (1, 0),
+            (1, 0)
+        ]
+
+        for g, a in data:
+            u.addClassification({'annotation': a, 'gold_label': g})
+
+        assert u.getScore(1) == .5
+
+    def test_score_0(self):
+        u = User(uid, epsilon)
+        data = [
+            (1, 0),
+            (1, 0),
+            (1, 0),
+            (1, 0)
+        ]
+
+        for g, a in data:
+            u.addClassification({'annotation': a, 'gold_label': g})
+
+        assert u.getScore(1) == 0
+
+    def test_export_score0(self):
+        u = User(uid, epsilon)
+        data = [
+            (1, 0),
+            (1, 0),
+            (1, 1),
+            (1, 1),
+            (0, 0),
+            (0, 0),
+            (0, 1),
+            (0, 1)
+        ]
+
+        for g, a in data:
+            u.addClassification({'annotation': a, 'gold_label': g})
+
+        export = u.export()
+        pprint(export)
+        assert export['score_0'] == .5
+
+    def test_export_score1(self):
+        u = User(uid, epsilon)
+        data = [
+            (1, 0),
+            (1, 0),
+            (1, 1),
+            (1, 1),
+            (0, 0),
+            (0, 0),
+            (0, 1),
+            (0, 1)
+        ]
+
+        for g, a in data:
+            u.addClassification({'annotation': a, 'gold_label': g})
+
+        export = u.export()
+        pprint(export)
+        assert export['score_1'] == .5
+
+    def test_export_gold_labels(self):
+        u = User(uid, epsilon)
+        data = [
+            (1, 0),
+            (1, 0),
+            (1, 1),
+            (1, 1),
+            (0, 0),
+            (0, 0),
+            (0, 1),
+            (0, 1)
+        ]
+
+        for g, a in data:
+            u.addClassification({'annotation': a, 'gold_label': g})
+
+        export = u.export()
+        pprint(export)
+        assert export['gold_labels'] == [1, 1, 1, 1, 0, 0, 0, 0]
+
+    def test_export_score0_history(self):
+        u = User(uid, epsilon)
+        data = [
+            (1, 0),
+            (1, 0),
+            (1, 1),
+            (1, 1),
+            (0, 0),
+            (0, 0),
+            (0, 1),
+            (0, 1)
+        ]
+
+        for g, a in data:
+            u.addClassification({'annotation': a, 'gold_label': g})
+
+        export = u.export()
+        pprint(export)
+        assert export['score_0_history'] == [.5, 1, 1, 2 / 3, .5]
+
+    def test_export_score1_history(self):
+        u = User(uid, epsilon)
+        data = [
+            (1, 0),
+            (1, 0),
+            (1, 1),
+            (1, 1),
+            (0, 0),
+            (0, 0),
+            (0, 1),
+            (0, 1)
+        ]
+
+        for g, a in data:
+            u.addClassification({'annotation': a, 'gold_label': g})
+
+        export = u.export()
+        pprint(export)
+        assert export['score_1_history'] == [.5, 0, 0, 1 / 3, .5]

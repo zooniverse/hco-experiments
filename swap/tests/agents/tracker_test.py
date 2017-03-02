@@ -46,6 +46,19 @@ class Test_Tracker:
 
         assert t.current() == 1
 
+    def test_size(self):
+        t = Tracker()
+        for i in range(10):
+            t.add(i)
+        assert t.size() == 10
+
+    def test_getHistory(self):
+        t = Tracker()
+        for i in range(10):
+            t.add(i)
+
+        assert t.getHistory() == list(range(10))
+
 
 class Test_User_Score_Tracker:
 
@@ -111,6 +124,14 @@ class Test_Labeled_Trackers:
 
         assert len(l.trackers) == 3
         assert l.trackers[2].label == 2
+
+    def test_getAll(self):
+        tracker = User_Score_Tracker
+        labels = [0, 1, 2]
+        value = .5
+        l = Labeled_Trackers(tracker, labels, value)
+
+        assert l.getAll() == l.trackers
 
 
 
