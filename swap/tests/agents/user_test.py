@@ -1,5 +1,5 @@
 ################################################################
-# Test functions for agent class
+# Test functions for user agent class
 
 from swap.agents.user import User
 from swap.agents.tracker import *
