@@ -25,3 +25,7 @@ class Agent:
     def getID(self):
         """ Returns Agents ID """
         return self.id
+
+    @abc.abstractmethod
+    def export(self):
+        pass
