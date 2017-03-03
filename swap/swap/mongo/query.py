@@ -30,6 +30,16 @@ class Query:
         self._pipeline.append(match)
         return self
 
+    def match_range(self, field, lower, upper):
+        """
+            Limits results to documents where the field 'field'
+            is greater equal 'lower' and less than 'upper'
+        """
+        match_range = {'$match': {field: {'$gte': lower, '$lt': upper}}}
+
+        self._pipeline.append(match_range)
+        return self
+
     def project(self, fields):
         """
             Limits the fields that are returned
@@ -91,7 +101,7 @@ class Query:
 
     def build(self):
         """
-            Builds an SOM out of this object 
+            Builds an SOM out of this object
             for the mongo aggregation pipeline
         """
         return self._pipeline
@@ -99,8 +109,8 @@ class Query:
 class Group:
     """
         Buils a $group statement in the aggregation pipeline.
-        $group is more complicated than the other commands, 
-        so it deserves its own class 
+        $group is more complicated than the other commands,
+        so it deserves its own class
     """
     def __init__(self):
         self._id = False
@@ -128,7 +138,7 @@ class Group:
                 name (str) name of the pushed array
                 fields (list) list of fields to push
 
-            After grouping, pushes an array containing the 
+            After grouping, pushes an array containing the
             specified fields from the documents aggregated into
             this group.
         """
@@ -158,7 +168,7 @@ class Group:
 
     def build(self):
         """
-            Build a dict out of this object for the mongo 
+            Build a dict out of this object for the mongo
             aggregation pipeline
         """
         output = {}

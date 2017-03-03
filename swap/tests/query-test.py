@@ -30,6 +30,15 @@ class Test_Query:
         assert q._pipeline[-1] == {'$match': {'key': {'$ne': 'value'}}}
 
     ################################################################
+    # Match Range
+    def test_match_range(self):
+        q = Query()
+        q.match_range('field', lower=15, higher=20)
+
+        assert q._pipeline[-1] == \
+            {'$match': {'field': {'$gte': 15, '$lt': 20}}}
+
+    ################################################################
     # Project
     def test_add_new_field(self):
         q = Query()

@@ -18,6 +18,7 @@ class Control:
         self._cfg = Config()
         self.classifications = self._db.classifications
         self.subjects = self._db.subjects
+        # self.swap = SWAP_AGENTS(p0, epsilon)
         self.swap = SWAP_AGENTS(p0, epsilon)
 
     def process(self):
@@ -48,18 +49,21 @@ class Control:
         # classifications one at a time
         print("Start: SWAP Processing %d classifications" % n_classifications)
 
-        with progressbar.ProgressBar(max_value=n_classifications) as bar:
-            for i in range(0, n_classifications):
-                # read next classification
-                current_classification = classifications.next()
+        with progressbar.ProgressBar(max_value=progressbar.UnknownLength) \
+                as bar:
+            # Loop over all classifications of the query
+            # Note that the exact size of the query might be lower than
+            # n_classifications if not all classifications are being queried
+            n_class = 1
+            for current_classification in classifications:
                 # process classification in swap
                 self.swap.processOneClassification(current_classification)
-
-                bar.update(i)
+                bar.update(n_class)
+                n_class += 1
                 # if i % 100e3 == 0:
                 #     print("   " + str(i) + "/" + str(n_classifications))
-        print("Finished: SWAP Processing %d/%d classifications" %
-              (i, n_classifications))
+            print("Finished: SWAP Processing %d/%d classifications" %
+                  (n_class, n_classifications))
 
     def getSWAP(self):
         """ Returns SWAP object """
