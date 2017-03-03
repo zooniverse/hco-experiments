@@ -184,7 +184,7 @@ class SWAP(object):
                 # update Subject probability
                 self.updateSubjectData(cl)
     
-    class SWAP_AGENTS(object):
+class SWAP_AGENTS(object):
     """
         SWAP implementation, which calculates and updates a confusion matrix
         for each user as well as the probability that a particular subject
@@ -218,8 +218,8 @@ class SWAP(object):
         self.epsilon = epsilon  # estimated volunteer performance
 
         # initialize bureaus to manage user / subject agents
-        self.users = Bureau('users')
-        self.subjects = Bureau('subjects')
+        self.users = Bureau(User)
+        self.subjects = Bureau(Subject)
 
         # Directive to update - if True, then a volunteer agent's posterior
         # probability of containing an interesting object will be updated
@@ -255,6 +255,8 @@ class SWAP(object):
             subject = Subject(cl['subject_id'], self.p0)
             self.subjects.addAgent(subject)
 
+        self.users.getAgent()
+
         # process classification
         subject.addClassification(cl)
 
@@ -270,42 +272,20 @@ class SWAP(object):
         # update Subject probability
         self.updateSubjectData(cl)
 
-if __name__ == "__main__":
-    from swap import Control
-    import time
+    def getUserAgent(self, agent_id):
+        if self.users.has(agent_id):
+            return self.users.getAgent(agent_id)
+        else:
+            agent = User(agent_id, self.epsilon)
+            self.users.addAgent(agent)
+            return agent
 
-    def test_swap():
-        start = time.time()
-        control = Control(.5, .5)
-        max_batch_size = 1e5
+    def getSubjectAgent(self, agent_id):
+        if self.subjects.has(agent_id):
+            return self.subjects.getAgent(agent_id)
+        else:
+            agent = Subject(agent_id, self.epsilon)
+            self.subjects.addAgent(agent)
+            return agent
 
-        # get classifications
-        classifications = control.getClassifications()
 
-        n_classifications = 1e6
-
-        # determine and set max batch size
-        classifications.batch_size(int(min(max_batch_size, n_classifications)))
-
-        swap = SWAP_AGENTS()
-
-        # loop over classification curser to process
-        # classifications one at a time
-        print("Start: SWAP Processing %d classifications" % n_classifications)
-        for i in range(0, n_classifications):
-            # read next classification
-            current_classification = classifications.next()
-            # process classification in swap
-            swap.processOneClassification(current_classification)
-            if i % 100e3 == 0:
-                print("   " + str(i) + "/" + str(n_classifications))
-        print("Finished: SWAP Processing %d/%d classifications" %
-              (i, n_classifications))
-
-        control.process()
-        print("--- %s seconds ---" % (time.time() - start))
-        swappy = control.getSWAP()
-        ud = swappy.getUserData()
-        sd = swappy.getSubjectData()
-
-    test_swap()
