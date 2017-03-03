@@ -1,6 +1,6 @@
 ################################################################
 # SWAP implementation
-# 
+#
 
 from swap.agents import Bureau
 from swap.agents.subject import Subject
@@ -35,7 +35,7 @@ class SWAP(object):
         # assign class variables from args
         self.p0 = p0  # prior probability real
         self.epsilon = epsilon  # estimated volunteer performance
-        
+
         # dictionaries to save user / subject probabilities
         self.users = dict()
         self.subjects = dict()
@@ -47,14 +47,14 @@ class SWAP(object):
 
 
     # update User Data (classification history and probabilities)
-    def updateUserData(self,cl):  
+    def updateUserData(self,cl):
         """ Update User Data with respect to classifications
-        
+
         Parameter:
         -----------
         cl: dict
             Contains all information for a classification
-            
+
         """
 
         # ##Michael @Marco
@@ -75,46 +75,46 @@ class SWAP(object):
                       'probability_history':dict(),
                       'n_classified':0,
                       'probability_current':dict()}
-            
+
         # update label data
         current_user = self.users[cl['user_name']]
         current_user['annotations'].append(cl['annotation'])
         current_user['gold_labels'].append(cl['gold_label'])
         current_user['n_classified'] += 1
-        
+
         # check if gold label exists and create if not
         if not cl['gold_label'] in current_user['probability_current']:
             current_user['probability_history'][cl['gold_label']] = []
             current_user['probability_current'][cl['gold_label']] = self.epsilon
             current_user['labels'][cl['gold_label']] = {'n':0,'n_match':0}
-        
+
         # check if annotation label exists and create if not
         if not cl['annotation'] in current_user['probability_current']:
             current_user['probability_history'][cl['annotation']] = []
             current_user['probability_current'][cl['annotation']] = self.epsilon
             current_user['labels'][cl['annotation']] = {'n':0,'n_match':0}
-            
+
         # update number of subjects of that label seen by user
         current_user['labels'][cl['gold_label']]['n'] += 1
-        
+
         # update number of matches of that label seen by user
         if cl['gold_label'] == cl['annotation']:
             current_user['labels'][cl['gold_label']]['n_match'] += 1
-           
-        # update user probability  
+
+        # update user probability
         n_classified_of_that_label = current_user['labels'][cl['gold_label']]['n']
         n_correctly_classified = current_user['labels'][cl['gold_label']]['n_match']
         p_classified_correctly = n_correctly_classified / n_classified_of_that_label
-        
+
         # save updated probability
         current_user['probability_history'][cl['gold_label']].append(p_classified_correctly)
-        current_user['probability_current'][cl['gold_label']] = p_classified_correctly           
+        current_user['probability_current'][cl['gold_label']] = p_classified_correctly
 
-        
-    
+
+
     def getUserData(self):
         return self.users
-    
+
     # update subject probability
     def updateSubjectData(self,cl):
         # check if subject is new and create in user dictionary if yes
@@ -126,22 +126,22 @@ class SWAP(object):
                       'current_label':'',
                       'current_max_prob':self.p0,
                       'max_prob_history':[self.p0]}
-            
+
             self.subjects[cl['subject_id']] = current_subject
-            
-            
+
+
         # get current user data
         current_user = self.users[cl['user_name']]
-        
+
         # update current annotation
         current_subject= self.subjects[cl['subject_id']]
         current_subject['annotation_history'].append(cl['annotation'])
         # TODO: if user does not exist there us no current_user (if user has no gold label classification)
         current_subject['user_probabilities'].append(current_user['probability_current'][cl['annotation']])
-        
+
         # add current probability to class label
         #user_prob = current_user['probability_current'][cl['annotation']]
-        
+
         # update success probability
         # TODO: get rid of hard-coded annotation labels
         if '1' in current_user['probability_current']:
@@ -152,18 +152,18 @@ class SWAP(object):
             user_fail = current_user['probability_current']['0']
         else:
             user_fail = self.epsilon
-            
+
         # get current subject probability
         sub_pos = current_subject['current_max_prob']
-        
+
         # calculate subject probability times current user confidence in positive labels
         sub_times_user = float(sub_pos) * float(user_pos)
-                        
+
         # TODO: change hard-coded annotation labels
         # if positive annotation
-        if cl['annotation'] == '1':                                 
+        if cl['annotation'] == '1':
             sub_pos_new = sub_times_user / (sub_times_user + (1-user_fail))
-        # if 
+        # if
         elif cl['annotation'] == '0':
             sub_pos_new = (sub_pos * (1-user_pos)) / (sub_pos * (1-user_pos) + (user_fail * (1-sub_pos)))
 
@@ -173,17 +173,18 @@ class SWAP(object):
         current_subject['max_prob_history'].append(sub_pos_new)
 
     def getSubjectData(self):
-        return self.subjects                          
-        
+        return self.subjects
+
     # Process a classification
     def processOneClassification(self,cl):
-        # if subject is gold standard and gold_updates are specified, 
+        # if subject is gold standard and gold_updates are specified,
         # update user success probability
         if ((cl['gold_label'] in ('0','1')) and self.gold_updates):
-                self.updateUserData(cl) 
+                self.updateUserData(cl)
                 # update Subject probability
                 self.updateSubjectData(cl)
-    
+
+
 class SWAP_AGENTS(object):
     """
         SWAP implementation, which calculates and updates a confusion matrix
@@ -274,5 +275,3 @@ class SWAP_AGENTS(object):
             agent = Subject(agent_id, self.p0)
             self.subjects.addAgent(agent)
             return agent
-
-
