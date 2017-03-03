@@ -80,3 +80,29 @@ class TestSubject:
         score = s.calculateScore(annotation, u_score_0, u_score_1, s_score)
 
         assert score == 0
+
+    # ---------EXPORT TEST------------------------------
+
+    @patch.object(User, 'getScore', side_effect=[.5, .5, .5])
+    def test_export_contents(self, mock):
+        s = Subject(sid, .5)
+        u = User(0, .5)
+
+        s.addClassification({'annotation': 0}, u)
+
+        export = s.export()
+        assert 'user_scores' in export
+        assert 'score' in export
+        assert 'history' in export
+
+    @patch.object(User, 'getScore', side_effect=[.5, .5, .5])
+    def test_export_contents_match(self, mock):
+        s = Subject(sid, .5)
+        u = User(0, .5)
+
+        s.addClassification({'annotation': 0}, u)
+
+        export = s.export()
+        assert export['user_scores'] == [.5]
+        assert export['score'] == .5
+        assert export['history'] == [.5, .5]

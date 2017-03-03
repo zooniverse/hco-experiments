@@ -60,8 +60,8 @@ class User(Agent):
         }
 
         for label, tracker in self.trackers.getAll().items():
-            score = 'score_%s' % label
-            history = 'score_%s_history' % label
+            score = 'score_%s' % str(label)
+            history = 'score_%s_history' % str(label)
 
             data[score] = tracker.current()
             data[history] = tracker.getHistory()
