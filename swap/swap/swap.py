@@ -279,5 +279,3 @@ class SWAP_AGENTS(object):
             agent = Subject(agent_id, self.p0)
             self.subjects.addAgent(agent)
             return agent
-
-
