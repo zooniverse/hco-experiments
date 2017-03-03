@@ -239,8 +239,15 @@ class SWAP_AGENTS(object):
         user = self.getUserAgent(cl['user_name'])
         user.addClassification(cl)
 
+    # Export User Bureau
     def getUserData(self):
+        """ Get User Bureau object """
         return self.users
+
+    # Export User Information
+    def exportUserData(self):
+        """ Exports consolidated user information """
+        return self.users.export()
 
     def updateSubjectData(self, cl):
         """ Update Subject Data - Process current classification """
@@ -252,8 +259,15 @@ class SWAP_AGENTS(object):
         # process classification
         subject.addClassification(cl, user)
 
+    # Export Subject Bureau
     def getSubjectData(self):
+        """ Get Subject Bureau object """
         return self.subjects
+
+    # Export Subject Information
+    def exportSubjectData(self):
+        """ Exports consolidated subject information """
+        return self.subject.export()
 
     # Process a classification
     def processOneClassification(self, cl):
