@@ -97,7 +97,6 @@ class Subject(Agent):
             s*(1-u1) + u0*(1-s)
 
         """
-
         if annotation == 1:
             a = s_score * u_score_1
             b = 1 - u_score_0
@@ -112,7 +111,7 @@ class Subject(Agent):
 
     def export(self):
         data = {
-            'user_scores': self.user_scores,
+            'user_scores': self.user_scores.getHistory(),
             'score': self.tracker.current(),
             'history': self.tracker.getHistory()
         }

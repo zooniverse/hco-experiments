@@ -82,5 +82,6 @@ class Bureau(object):
 
     def export(self):
         data = dict()
-        for agent in self.agents:
-            data[agent.getID()] = agent.export()
+        for name, agent in self.agents.items():
+            data[name] = agent.export()
+        return data
