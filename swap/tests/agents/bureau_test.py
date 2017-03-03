@@ -2,6 +2,7 @@
 # Test functions for bureau class
 
 import pytest
+from pprint import pprint
 from swap.agents.bureau import Bureau
 from swap.agents import Agent
 from swap.agents import User
@@ -67,3 +68,16 @@ class TestBureau:
         b = Bureau(User)
 
         assert b.has(0) is False
+
+    # ---------EXPORT TEST------------------------------
+
+    def test_export_contents(self):
+        b = Bureau(User)
+        for i in range(10):
+            b.addAgent(User(i, .5))
+
+        export = b.export()
+        pprint(export)
+
+        assert b.export()[0] == User(0, .5).export()
+        assert b.export()[5] == User(5, .5).export()
