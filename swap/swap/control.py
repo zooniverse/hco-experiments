@@ -2,14 +2,12 @@
 # Interface between the data structure and SWAP
 # Serves data to SWAP
 
-from pprint import pprint
-import sys
 import progressbar
 
 from swap.swap import SWAP_AGENTS
+from swap.swap import SWAP
 from swap.mongo import DB
 from swap.mongo import Query
-from swap.mongo import Group
 from swap.config import Config
 
 

@@ -6,8 +6,6 @@ from swap.agents import Bureau
 from swap.agents.subject import Subject
 from swap.agents.user import User
 
-from pprint import pprint
-
 class SWAP(object):
     """
         SWAP implementation, which calculates and updates a confusion matrix for each user
@@ -247,7 +245,6 @@ class SWAP_AGENTS(object):
         user = self.getUserAgent(cl['user_name'])
 
         # process classification
-        pprint(cl)
         subject.addClassification(cl, user)
 
     def getSubjectData(self):
