@@ -111,4 +111,10 @@ class Subject(Agent):
         return score
 
     def export(self):
-        pass
+        data = {
+            'user_scores': self.user_scores,
+            'score': self.tracker.current(),
+            'history': self.tracker.getHistory()
+        }
+
+        return data

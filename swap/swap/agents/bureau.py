@@ -80,5 +80,7 @@ class Bureau(object):
         """
         return agent_id in self.agents
 
-    def prepare_db(self):
-        pass
+    def export(self):
+        data = dict()
+        for agent in self.agents:
+            data[agent.getID()] = agent.export()
