@@ -46,7 +46,6 @@ class Subject(Agent):
         # s_score already defined ^^^
 
         # calculate new score
-        print(annotation, u_score_0, u_score_1, s_score)
         score = self.calculateScore(annotation, u_score_0,
                                     u_score_1, s_score)
 
