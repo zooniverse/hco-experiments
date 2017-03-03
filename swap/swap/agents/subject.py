@@ -107,7 +107,7 @@ class Subject(Agent):
             a = s_score * (1 - u_score_1)
             b = 1 - s_score
             c = u_score_0
-
+        print('annotation: %d, u0: %f, u1: %f, s: %f' % (annotation, u_score_0, u_score_1, s_score))
         score = a / (a + b * c)
         return score
 

@@ -6,6 +6,8 @@ from swap.agents import Bureau
 from swap.agents.subject import Subject
 from swap.agents.user import User
 
+from pprint import pprint
+
 class SWAP(object):
     """
         SWAP implementation, which calculates and updates a confusion matrix for each user
@@ -231,14 +233,7 @@ class SWAP_AGENTS(object):
         """ Update User Data - Process current classification """
 
         # Get user agent from bureau or create a new one
-        if self.users.has(cl['user_name']):
-            user = self.users.getAgent(cl['user_name'])
-        else:
-            # create new user agent and add to bureau
-            user = User(cl['user_name'], self.epsilon)
-            self.users.addAgent(user)
-
-        # process classification
+        user = self.getUserAgent(cl['user_name'])
         user.addClassification(cl)
 
     def getUserData(self):
@@ -248,17 +243,12 @@ class SWAP_AGENTS(object):
         """ Update Subject Data - Process current classification """
 
         # check if agent is in bureau and create new one if not
-        if self.subjects.has(cl['subject_id']):
-            subject = self.subjects.getAgent(cl['subject_id'])
-        else:
-            # create new subject agent and add to bureau
-            subject = Subject(cl['subject_id'], self.p0)
-            self.subjects.addAgent(subject)
-
-        self.users.getAgent()
+        subject = self.getSubjectAgent(cl['subject_id'])
+        user = self.getUserAgent(cl['user_name'])
 
         # process classification
-        subject.addClassification(cl)
+        pprint(cl)
+        subject.addClassification(cl, user)
 
     def getSubjectData(self):
         return self.subjects
@@ -270,7 +260,7 @@ class SWAP_AGENTS(object):
         if (cl['gold_label'] in [0, 1] and self.gold_updates):
             self.updateUserData(cl)
         # update Subject probability
-        self.updateSubjectData(cl)
+            self.updateSubjectData(cl)
 
     def getUserAgent(self, agent_id):
         if self.users.has(agent_id):
@@ -284,7 +274,7 @@ class SWAP_AGENTS(object):
         if self.subjects.has(agent_id):
             return self.subjects.getAgent(agent_id)
         else:
-            agent = Subject(agent_id, self.epsilon)
+            agent = Subject(agent_id, self.p0)
             self.subjects.addAgent(agent)
             return agent
 

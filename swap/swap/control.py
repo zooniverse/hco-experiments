@@ -6,7 +6,7 @@ from pprint import pprint
 import sys
 import progressbar
 
-from swap import SWAP
+from swap.swap import SWAP_AGENTS
 from swap.mongo import DB
 from swap.mongo import Query
 from swap.mongo import Group
@@ -20,7 +20,7 @@ class Control:
         self._cfg = Config()
         self.classifications = self._db.classifications
         self.subjects = self._db.subjects
-        self.swap = SWAP(p0, epsilon)
+        self.swap = SWAP_AGENTS(p0, epsilon)
 
     def process(self):
         """ Process all classifications in DB with SWAP

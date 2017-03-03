@@ -1,9 +1,9 @@
-from swap import Server
+from swap import Control
 import time          
 
 def test_swap():
     start = time.time()
-    server = Server(.5,.5)
+    server = Control(.5,.5)
     server.process()
     print("--- %s seconds ---" % (time.time() - start))
     swappy = server.getSWAP()
