@@ -253,6 +253,11 @@ class SWAP_AGENTS(object):
         """ Update Subject Data - Process current classification """
 
         # check if agent is in bureau and create new one if not
+        if not self.subjects.has(cl['subject_id']):
+            # create agent and add to bureau
+            agent = Subject(cl['subject_id'],self.p0,cl['gold_label'])
+            self.subjects.addAgent(agent)
+
         subject = self.getSubjectAgent(cl['subject_id'])
         user = self.getUserAgent(cl['user_name'])
 
@@ -267,7 +272,7 @@ class SWAP_AGENTS(object):
     # Export Subject Information
     def exportSubjectData(self):
         """ Exports consolidated subject information """
-        return self.subject.export()
+        return self.subjects.export()
 
     # Process a classification
     def processOneClassification(self, cl):
@@ -275,7 +280,7 @@ class SWAP_AGENTS(object):
         # update user success probability
         if (cl['gold_label'] in [0, 1] and self.gold_updates):
             self.updateUserData(cl)
-        # update Subject probability
+            # update Subject probability
             self.updateSubjectData(cl)
 
     def getUserAgent(self, agent_id):

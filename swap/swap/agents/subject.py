@@ -11,7 +11,7 @@ class Subject(Agent):
         Agent to manage subject scores
     """
 
-    def __init__(self, subject_id, p0):
+    def __init__(self, subject_id, p0, gold_label):
         # initialize Agent class
         super().__init__(subject_id, p0)
 
@@ -22,6 +22,9 @@ class Subject(Agent):
         self.user_scores = Tracker()
 
         self.tracker = Tracker(p0)
+
+        # store gold label
+        self.gold_label = gold_label
 
     def addClassification(self, cl, user_agent):
         """
@@ -66,6 +69,10 @@ class Subject(Agent):
         else:
             return 0
 
+    def getGoldLabel(self):
+        """ Returns the gold label of the subject """
+        return self.gold_label
+
     def getScore(self):
         """
             Gets the current score from the tracker
@@ -106,14 +113,23 @@ class Subject(Agent):
             a = s_score * (1 - u_score_1)
             b = 1 - s_score
             c = u_score_0
-        score = a / (a + b * c)
+        # Preliminary catch of zero division error
+        # TODO: Figure out how to handle it
+        try:
+            score = a / (a + b * c)
+        # leave score unchanged
+        except ZeroDivisionError:
+            score = s_score
+
         return score
 
     def export(self):
         data = {
             'user_scores': self.user_scores.getHistory(),
             'score': self.tracker.current(),
-            'history': self.tracker.getHistory()
+            'history': self.tracker.getHistory(),
+            'label': self.getLabel(),
+            'gold_label': self.getGoldLabel()
         }
 
         return data
