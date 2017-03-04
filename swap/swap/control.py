@@ -69,6 +69,7 @@ class Control:
         """ Returns SWAP object """
         return self.swap
 
+
     # def getData(self):
     #     subjects = self.getSubjects()
     #     classifications = self.getClassifications()
@@ -83,6 +84,44 @@ class Control:
         # Define a query
         q = Query()
         q.project(fields)
+
+        # perform query on classification data
+        classifications = self.classifications.aggregate(q.build())
+
+        return classifications
+
+
+class MetaDataControl(Control):
+    """ Calls SWAP to process classifications for specific meta data splits
+    """
+
+    def __init__(self, p0, epsilon, meta_data, meta_lower, meta_upper):
+        # initialize control
+        super().__init__(p0, epsilon)
+        # meta data information
+        self.meta_data = meta_data
+        self.meta_lower = meta_lower
+        self.meta_upper = meta_upper
+
+    def getClassifications(self):
+        """ Returns Iterator over all Classifications """
+
+        # fields to project
+        fields = ['user_name', 'subject_id', 'annotation', 'gold_label']
+
+        # if meta data is requested
+        if self.meta_data is not None:
+            meta_data_field = 'metadata' + "." + self.meta_data
+            fields.append('metadata')
+            fields[fields.index('metadata')] = meta_data_field
+
+        # Define a query
+        q = Query()
+        q.project(fields)
+
+        # range query on metadata
+        if self.meta_lower is not None and self.meta_upper is not None:
+            q.match_range(meta_data_field, self.meta_lower, self.meta_upper)
 
         # perform query on classification data
         classifications = self.classifications.aggregate(q.build())
