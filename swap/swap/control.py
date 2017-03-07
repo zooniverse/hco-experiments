@@ -49,12 +49,11 @@ class Control:
         # classifications one at a time
         print("Start: SWAP Processing %d classifications" % n_classifications)
 
-        with progressbar.ProgressBar(max_value=progressbar.UnknownLength) \
-                as bar:
+        n_class = 0
+        with progressbar.ProgressBar(max_value=n_classifications) as bar:
             # Loop over all classifications of the query
             # Note that the exact size of the query might be lower than
             # n_classifications if not all classifications are being queried
-            n_class = 1
             for current_classification in classifications:
                 # process classification in swap
                 self.swap.processOneClassification(current_classification)
