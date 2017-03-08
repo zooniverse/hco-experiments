@@ -12,11 +12,18 @@ class Subject(Agent):
     """
 
     def __init__(self, subject_id, p0, gold_label=-1):
-        # initialize Agent class
-        super().__init__(subject_id, p0)
+        """
+            Initialize a Subject Agent
 
-        # self.name = subject_id
-        # self.p0 = p0
+            Args:
+                subjec_id:  (int) id number
+                p0:         (float) prior subject probability
+                gold_label: (int)
+                    -1 no gold label
+                     0 bogus object
+                     1 real supernova
+        """
+        super().__init__(subject_id, p0)
 
         # Initialize trackers
         self.user_scores = Tracker()
@@ -74,6 +81,15 @@ class Subject(Agent):
         return self.gold_label
 
     def setGoldLabel(self, gold_label):
+        """
+            Set a subject's gold label
+            
+            Args:
+                gold_label: (int)
+                    -1 no gold label
+                     0 bogus object
+                     1 real supernova
+        """
         self.gold_label = gold_label
 
     def getScore(self):
@@ -91,20 +107,22 @@ class Subject(Agent):
                 u_score_0: User's score for annotation 0
                 u_score_1: User's score for annotation 1
                 s_score: Subject's current score
-            s: subject score
-            u1: user probability annotates 1
-            u0: user probability annotates 0
 
-            Calculation when annotation 1
-                      s*u1
-            -------------------------
-            s*u1 + (1-u0)*(1-s)
+            Calculation notes:
+                s: subject score
+                u1: user probability annotates 1
+                u0: user probability annotates 0
+
+                Calculation when annotation 1
+                          s*u1
+                -------------------------
+                s*u1 + (1-u0)*(1-s)
 
 
-            Calculation when annotation 0
-                      s (1-u1)
-            -------------------------
-            s*(1-u1) + u0*(1-s)
+                Calculation when annotation 0
+                          s (1-u1)
+                -------------------------
+                s*(1-u1) + u0*(1-s)
 
         """
         if annotation == 1:
@@ -127,6 +145,16 @@ class Subject(Agent):
         return score
 
     def export(self):
+        """
+            Exports Subject data
+
+            Structure:
+                'user_scores': (list), history of user scores
+                'score': (int),        current subject score
+                'history': (list),     score history
+                'label': (int),        current subject label
+                'gold_label' (int),    current subject gold label
+        """
         data = {
             'user_scores': self.user_scores.getHistory(),
             'score': self.tracker.current(),
