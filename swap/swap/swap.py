@@ -5,6 +5,7 @@
 from swap.agents import Bureau
 from swap.agents.subject import Subject
 from swap.agents.user import User
+from pprint import pprint
 
 class SWAP_OLD(object):
     """
@@ -272,6 +273,9 @@ class SWAP_AGENTS(object):
     def processOneClassification(self, cl):
         # if subject is gold standard and gold_updates are specified,
         # update user success probability
+
+        self.verifyClassification(cl)
+
         if (cl['gold_label'] in [0, 1] and self.gold_updates):
             self.updateUserData(cl)
             # update Subject probability
@@ -301,6 +305,45 @@ class SWAP_AGENTS(object):
             'users': self.users.export(),
             'subjects': self.subjects.export()
         }
+
+    def verifyClassification(self, cl):
+        names = [
+            'user_name',
+            'subject_id',
+            'annotation',
+            'gold_label']
+        for key in names:
+            try:
+                cl[key]
+            except KeyError:
+                raise ClKeyError(key, cl)
+
+        if type(cl['annotation']) is not int:
+            raise ClValueError('annotation', int, cl)
+        if type(cl['gold_label']) is not int:
+            raise ClValueError('gold_label', int, cl)
+
+
+class ClValidationError(ValueError):
+    """
+        Raise when the classification cannot be validated
+    """
+    pass
+
+
+class ClKeyError(KeyError):
+    def __init__(self, key, cl, *args, **kwargs):
+        pprint(cl)
+        msg = 'key %s not found in classification %s' % (key, str(cl))
+        KeyError.__init__(self, msg)
+
+
+class ClValueError(ValueError):
+    def __init__(self, key, _type, cl, *args, **kwargs):
+        pprint(cl)
+        bad_type = type(cl[key])
+        msg = 'key %s should be type %s but is %s' % (key, _type, bad_type)
+        ValueError.__init__(self, msg)
 
 
 SWAP = SWAP_AGENTS
