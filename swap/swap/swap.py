@@ -6,7 +6,7 @@ from swap.agents import Bureau
 from swap.agents.subject import Subject
 from swap.agents.user import User
 
-class SWAP(object):
+class SWAP_OLD(object):
     """
         SWAP implementation, which calculates and updates a confusion matrix for each user
         as well as the probability that a particular subject contains an object of interest.
@@ -252,12 +252,6 @@ class SWAP_AGENTS(object):
     def updateSubjectData(self, cl):
         """ Update Subject Data - Process current classification """
 
-        # check if agent is in bureau and create new one if not
-        if not self.subjects.has(cl['subject_id']):
-            # create agent and add to bureau
-            agent = Subject(cl['subject_id'],self.p0,cl['gold_label'])
-            self.subjects.addAgent(agent)
-
         subject = self.getSubjectAgent(cl['subject_id'])
         user = self.getUserAgent(cl['user_name'])
 
@@ -298,3 +292,12 @@ class SWAP_AGENTS(object):
             agent = Subject(agent_id, self.p0)
             self.subjects.addAgent(agent)
             return agent
+
+    def export(self):
+        return {
+            'users': self.users.export(),
+            'subjects': self.subjects.export()
+        }
+
+
+SWAP = SWAP_AGENTS

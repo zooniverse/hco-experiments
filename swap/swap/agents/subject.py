@@ -11,7 +11,7 @@ class Subject(Agent):
         Agent to manage subject scores
     """
 
-    def __init__(self, subject_id, p0, gold_label):
+    def __init__(self, subject_id, p0, gold_label=-1):
         # initialize Agent class
         super().__init__(subject_id, p0)
 
@@ -72,6 +72,9 @@ class Subject(Agent):
     def getGoldLabel(self):
         """ Returns the gold label of the subject """
         return self.gold_label
+
+    def setGoldLabel(self, gold_label):
+        self.gold_label = gold_label
 
     def getScore(self):
         """

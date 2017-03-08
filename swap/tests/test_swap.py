@@ -1,12 +1,38 @@
 from swap import SWAP
+import pytest
+from pprint import pprint
 
 
+def test_export():
+    swap = SWAP(p0=2e-4, epsilon=1.0)
+
+    cl1 = {
+        'user_name': 'user_1',
+        'subject_id': 'subject_1',
+        'annotation': 1,
+        'gold_label': 1
+    }
+
+    cl2 = {
+        'user_name': 'user_2',
+        'subject_id': 'subject_1',
+        'annotation': 1,
+        'gold_label': 1
+    }
+
+    swap.processOneClassification(cl1)
+    swap.processOneClassification(cl2)
+    pprint(swap.export())
+    assert False
+
+
+@pytest.mark.skip()
 def test_subject_update_perfect_classifier():
 
     swap = SWAP(p0=2e-4, epsilon=1.0)
 
     cl = {
-        'user_name' : 'user_1',
+        'user_name': 'user_1',
         'subject_id': 'subject_1',
         'annotation': '1',
         'gold_label': '1'
@@ -18,10 +44,10 @@ def test_subject_update_perfect_classifier():
     assert swap.getSubjectData()['subject_1']['current_max_prob'] == 1
 
     cl = {
-        'user_name'  : 'user_1',
-        'subject_id' : 'subject_2',
-        'annotation' : '0',
-        'gold_label' : '0'
+        'user_name': 'user_1',
+        'subject_id': 'subject_2',
+        'annotation': '0',
+        'gold_label': '0'
     }
 
     swap.processOneClassification(cl)
@@ -29,7 +55,7 @@ def test_subject_update_perfect_classifier():
 
     assert swap.getSubjectData()['subject_2']['current_max_prob'] == 0
 
-
+@pytest.mark.skip()
 def test_subject_update_obtuse_classifier():
 
     swap = SWAP(p0=2e-4, epsilon=0.0)
@@ -58,7 +84,7 @@ def test_subject_update_obtuse_classifier():
 
     assert swap.getSubjectData()['subject_2']['current_max_prob'] == 0
 
-
+@pytest.mark.skip()
 def my_volunteer_update(user, annotation, gold_label):
         user[gold_label]['tot'] += 1
         if gold_label == annotation:
@@ -67,7 +93,7 @@ def my_volunteer_update(user, annotation, gold_label):
             user[gold_label]['correct'] / float(user[gold_label]['tot'])
         return user
 
-
+@pytest.mark.skip()
 def my_subject_update(p0, user, annotation):
 
     if annotation == '1':
@@ -76,7 +102,7 @@ def my_subject_update(p0, user, annotation):
         S = p0*(1-user['1']['p']) / (p0*(1-user['1']['p']) + (user['0']['p'])*(1-p0))
     return S
 
-
+@pytest.mark.skip()
 def test_subject_update_apply_one_correct_classification():
 
     p0 = 0.2
@@ -102,7 +128,7 @@ def test_subject_update_apply_one_correct_classification():
     user = my_volunteer_update(user, annotation, gold_label)
     assert swap.getSubjectData()['subject_1']['current_max_prob'] == my_subject_update(p0,user,annotation)
 
-
+@pytest.mark.skip()
 def test_subject_update_apply_one_incorrect_classification():
 
     p0 = 0.2
