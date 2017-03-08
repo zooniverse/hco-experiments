@@ -285,11 +285,14 @@ class SWAP_AGENTS(object):
             self.users.addAgent(agent)
             return agent
 
-    def getSubjectAgent(self, agent_id):
+    def getSubjectAgent(self, agent_id, cl=None):
         if self.subjects.has(agent_id):
             return self.subjects.getAgent(agent_id)
         else:
             agent = Subject(agent_id, self.p0)
+            if cl and 'gold_label' in cl:
+                agent.setGoldLabel(cl['gold_label'])
+
             self.subjects.addAgent(agent)
             return agent
 
