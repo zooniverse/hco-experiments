@@ -3,8 +3,17 @@
 
 
 class Tracker:
+    """
+    Keeps track of numbers and how they change
+    """
 
     def __init__(self, value=None):
+        """
+            Initialize a tracker
+
+            Args:
+                value: (optional) initial value.
+        """
         self._history = []
         self._current = value
 
@@ -14,36 +23,55 @@ class Tracker:
         self.n = len(self._history)
 
     def add(self, value):
+        """
+            Add a value to the tracker
+
+            Args:
+                value: value to be added to the tracker
+        """
         self._history.append(value)
         self._current = value
 
         self.n += 1
 
     def current(self):
+        """
+        Get current (most recent) value from tracker
+        """
         return self._current
 
     def getHistory(self):
+        """
+        Get the history of values
+        """
         return self._history[:]
 
     def size(self):
+        """
+        Returns how many values are in the tracker
+        """
         return len(self._history)
 
 
 class User_Score_Tracker(Tracker):
+    """
+        Modified tracker specifically for user scores
+    """
 
     def __init__(self, label, epsilon):
+        """
+            Initialize a user score tracker
+
+            Args:
+                label: label for the tracker,
+                       typically the annotation type
+                epsilon: (float) initial user score value
+        """
         super().__init__(epsilon)
 
         self.label = label
         self.epsilon = epsilon
 
-        # FIXME @marco should these values be initialized
-        # to epsilon or to zero/empty?
-        # @Michael: Thats a matter of definition. In my view its either epsilon or empty.
-        #           If I am thinking about plotting user histories I'd want epsilon to be 
-        #              the start so it is easier to have epsilon in there.
-        #           On the other hand, the user history has then one entry more than gold labels seen.
-        #            If that is not a problem I would probably initialize with epsilon.
         self.n_seen = 0
         self.n_matched = 0
 
@@ -63,11 +91,24 @@ class User_Score_Tracker(Tracker):
 
 
 class Tracker_Collection:
+    """
+    Collection of multiple trackers
+    """
 
     def __init__(self):
+        """
+            Initialize a Tracker Collection
+        """
         self.trackers = {}
 
     def add(self, label, tracker):
+        """
+            Add a tracker to the collection
+
+            Args:
+                label: label, or key, for the tracker
+                tracker: (Tracker) tracker to be added
+        """
         if label in self.trackers:
             raise NameError(
                 'Tracker with that label already \
@@ -79,6 +120,12 @@ class Tracker_Collection:
         self.trackers[label] = tracker
 
     def remove(self, label):
+        """
+            Remove a tracker from the collection
+
+            Args:
+                label: label of tracker that should be removed
+        """
         if label in self.trackers:
             tracker = self.trackers[label]
             del self.trackers[label]
@@ -86,6 +133,12 @@ class Tracker_Collection:
             return tracker
 
     def get(self, label):
+        """
+            Get a tracker from the collection
+
+            Args:
+                label: label of tracker to be fetched
+        """
         if label in self.trackers:
             return self.trackers[label]
 

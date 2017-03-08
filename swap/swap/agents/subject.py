@@ -83,7 +83,7 @@ class Subject(Agent):
     def setGoldLabel(self, gold_label):
         """
             Set a subject's gold label
-            
+
             Args:
                 gold_label: (int)
                     -1 no gold label

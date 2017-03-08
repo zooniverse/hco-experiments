@@ -14,8 +14,13 @@ class User(Agent):
     """
 
     def __init__(self, user_name, epsilon):
+        """
+            Initialize a User Agent
 
-        # initialize Agent class
+            Args:
+                user_id: (int) id number
+                epsilon: (float) prior user probability
+        """
         super().__init__(user_name, epsilon)
 
         self.gold_labels = Tracker()
@@ -49,12 +54,23 @@ class User(Agent):
     def getScore(self, label):
         """
             Gets the current score from the tracker for the annotation
+
             Args:
                 label (int) label of the tracker, i.e. the annotation
         """
         return self.trackers.get(label).current()
 
     def export(self):
+        """
+            Exports Subject data
+
+            Structure:
+                'gold_labels': (list), history of subject gold labels
+                'score_0': (int),      current bogus object score
+                'score_1': (int),      current real object score
+                'score_0_history':     history of score_0
+                'score_1_history':     history of score_1
+        """
         data = {
             'gold_labels': self.gold_labels.getHistory()
         }
