@@ -51,42 +51,6 @@ class SWAP(object):
         # classified by that volunteer.
         self.gold_updates = True
 
-    def updateUserData(self, cl):
-        """ Update User Data - Process current classification """
-
-        # Get user agent from bureau or create a new one
-        user = self.getUserAgent(cl['user_name'])
-        user.addClassification(cl)
-
-    # Export User Bureau
-    def getUserData(self):
-        """ Get User Bureau object """
-        return self.users
-
-    # Export User Information
-    def exportUserData(self):
-        """ Exports consolidated user information """
-        return self.users.export()
-
-    def updateSubjectData(self, cl):
-        """ Update Subject Data - Process current classification """
-
-        subject = self.getSubjectAgent(cl['subject_id'])
-        user = self.getUserAgent(cl['user_name'])
-
-        # process classification
-        subject.addClassification(cl, user)
-
-    # Export Subject Bureau
-    def getSubjectData(self):
-        """ Get Subject Bureau object """
-        return self.subjects
-
-    # Export Subject Information
-    def exportSubjectData(self):
-        """ Exports consolidated subject information """
-        return self.subjects.export()
-
     # Process a classification
     def processOneClassification(self, cl):
         # if subject is gold standard and gold_updates are specified,
@@ -98,6 +62,22 @@ class SWAP(object):
             self.updateUserData(cl)
             # update Subject probability
             self.updateSubjectData(cl)
+
+    def updateUserData(self, cl):
+        """ Update User Data - Process current classification """
+
+        # Get user agent from bureau or create a new one
+        user = self.getUserAgent(cl['user_name'])
+        user.addClassification(cl)
+
+    def updateSubjectData(self, cl):
+        """ Update Subject Data - Process current classification """
+
+        subject = self.getSubjectAgent(cl['subject_id'])
+        user = self.getUserAgent(cl['user_name'])
+
+        # process classification
+        subject.addClassification(cl, user)
 
     def getUserAgent(self, agent_id):
         if self.users.has(agent_id):
@@ -117,6 +97,26 @@ class SWAP(object):
 
             self.subjects.addAgent(agent)
             return agent
+
+    # Export User Bureau
+    def getUserData(self):
+        """ Get User Bureau object """
+        return self.users
+
+    # Export Subject Bureau
+    def getSubjectData(self):
+        """ Get Subject Bureau object """
+        return self.subjects
+
+    # Export User Information
+    def exportUserData(self):
+        """ Exports consolidated user information """
+        return self.users.export()
+
+    # Export Subject Information
+    def exportSubjectData(self):
+        """ Exports consolidated subject information """
+        return self.subjects.export()
 
     def export(self):
         return {
