@@ -73,7 +73,7 @@ class SWAP(object):
     def updateSubjectData(self, cl):
         """ Update Subject Data - Process current classification """
 
-        subject = self.getSubjectAgent(cl['subject_id'])
+        subject = self.getSubjectAgent(cl['subject_id'],cl=cl)
         user = self.getUserAgent(cl['user_name'])
 
         # process classification
