@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from swap.swap import SWAP_AGENTS
 from swap import Control
 import time
 

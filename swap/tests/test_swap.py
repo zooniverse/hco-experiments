@@ -1,4 +1,4 @@
-from swap import SWAP
+from swap.swap import SWAP
 import pytest
 from pprint import pprint
 

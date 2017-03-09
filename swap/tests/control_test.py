@@ -2,7 +2,8 @@
 ################################################################
 # Script to test control functionality
 
-import swap
+import swap.mongo.db
+from swap.control import Control
 
 fields = {'user_id', 'classification_id', 'subject_id',
           'annotation', 'gold_label'}
@@ -39,7 +40,7 @@ db = swap.mongo.DB()
 def test_get_one_classification():
     """ Get the first classification
     """
-    control = swap.Control(0.5, 0.5)
+    control = Control(0.5, 0.5)
 
     classification_cursor = control.classifications.find()
     n_class = classification_cursor.count()
