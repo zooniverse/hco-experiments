@@ -110,7 +110,7 @@ class Test_Labeled_Trackers:
         tracker = User_Score_Tracker
         labels = [0, 1, 2]
         value = .5
-        l = Labeled_Trackers(tracker, labels, value)
+        l = Tracker_Collection.Generate(tracker, labels, value)
 
         for i in labels:
             assert type(l.trackers[i]) is tracker
@@ -119,8 +119,8 @@ class Test_Labeled_Trackers:
         assert len(l.trackers) == 3
 
     def test_add_tracker(self):
-        l = Labeled_Trackers(User_Score_Tracker, [0, 1])
-        l.add(User_Score_Tracker, 2, .5)
+        l = Tracker_Collection.Generate(User_Score_Tracker, [0, 1])
+        l.addNew(User_Score_Tracker, 2, .5)
 
         assert len(l.trackers) == 3
         assert l.trackers[2].label == 2
@@ -129,7 +129,7 @@ class Test_Labeled_Trackers:
         tracker = User_Score_Tracker
         labels = [0, 1, 2]
         value = .5
-        l = Labeled_Trackers(tracker, labels, value)
+        l = Tracker_Collection.Generate(tracker, labels, value)
 
         assert l.getAll() == l.trackers
 

@@ -5,7 +5,7 @@
 from swap.agents.agent import Agent
 from swap.agents.tracker import Tracker
 from swap.agents.tracker import User_Score_Tracker as UTracker
-from swap.agents.tracker import Labeled_Trackers
+from swap.agents.tracker import Tracker_Collection
 
 
 class User(Agent):
@@ -25,7 +25,8 @@ class User(Agent):
 
         self.gold_labels = Tracker()
 
-        self.trackers = Labeled_Trackers(UTracker, [0, 1], epsilon)
+        self.trackers = Tracker_Collection.Generate(
+            UTracker, [0, 1], epsilon)
 
     def addClassification(self, cl):
         """

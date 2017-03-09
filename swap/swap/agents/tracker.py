@@ -114,10 +114,16 @@ class Tracker_Collection:
                 'Tracker with that label already \
                 exists! Remove it first')
 
-        if type(tracker) is not tracker:
+        if not isinstance(tracker, Tracker):
             raise ValueError
 
         self.trackers[label] = tracker
+
+    def addNew(self, tracker_type, label, value):
+        tracker = tracker_type(label, value)
+
+        self.trackers[label] = tracker
+        return tracker
 
     def remove(self, label):
         """
@@ -141,6 +147,20 @@ class Tracker_Collection:
         """
         if label in self.trackers:
             return self.trackers[label]
+
+    def getAll(self):
+        return self.trackers
+
+    def Generate(t_type, labels, value=None):
+        trackers = Tracker_Collection()
+        if type(labels) is not list:
+            raise ValueError("Need list of labels to initialize trackers")
+
+        for label in labels:
+            tracker = t_type(label, value)
+            trackers.add(label, tracker)
+
+        return trackers
 
 
 class Labeled_Trackers:

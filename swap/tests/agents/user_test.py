@@ -31,7 +31,7 @@ class TestUser:
         assert type(u.annotations) is Tracker
         assert type(u.gold_labels) is Tracker
 
-        assert type(u.trackers) is Labeled_Trackers
+        assert type(u.trackers) is Tracker_Collection
 
     @patch.object(Tracker, 'add')
     def test_addcl_updates_annotation_gold_labels(self, mock):
