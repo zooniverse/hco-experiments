@@ -28,4 +28,7 @@ class Agent(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def export(self):
+        """
+            Abstract method to export agent data
+        """
         return

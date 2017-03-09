@@ -53,6 +53,12 @@ class SWAP(object):
 
     # Process a classification
     def processOneClassification(self, cl):
+        """
+            Processes a single classification
+
+            Args:
+                cl: (dict) classification
+        """
         # if subject is gold standard and gold_updates are specified,
         # update user success probability
 
@@ -64,22 +70,42 @@ class SWAP(object):
             self.updateSubjectData(cl)
 
     def updateUserData(self, cl):
-        """ Update User Data - Process current classification """
+        """
+            Update User Data - Process current classification
 
-        # Get user agent from bureau or create a new one
+            Args:
+                cl: (dict) classification
+        """
+
         user = self.getUserAgent(cl['user_name'])
         user.addClassification(cl)
 
     def updateSubjectData(self, cl):
-        """ Update Subject Data - Process current classification """
+        """
+            Pass a classification to the appropriate subject agent
 
-        subject = self.getSubjectAgent(cl['subject_id'],cl=cl)
+            Args:
+                cl: (dict) classification
+        """
+
+        # Get subject and user agents
+        subject = self.getSubjectAgent(cl['subject_id'], cl=cl)
         user = self.getUserAgent(cl['user_name'])
 
-        # process classification
+        # process the classification
         subject.addClassification(cl, user)
 
     def getUserAgent(self, agent_id):
+        """
+            Get a User agent from the Bureau. Creates a new one
+            if it doesn't exist
+
+            Args:
+                agent_id: id for the user
+        """
+
+        # TODO should the bureau generate a new agent, or should
+        # that be handled here..?
         if self.users.has(agent_id):
             return self.users.getAgent(agent_id)
         else:
@@ -88,6 +114,14 @@ class SWAP(object):
             return agent
 
     def getSubjectAgent(self, agent_id, cl=None):
+        """
+            Get a Subject agent from the Bureau. Creates a new one
+            if it doesn't exist
+
+            Args:
+                agent_id: id for the subject
+        """
+
         if self.subjects.has(agent_id):
             return self.subjects.getAgent(agent_id)
         else:
@@ -98,33 +132,41 @@ class SWAP(object):
             self.subjects.addAgent(agent)
             return agent
 
-    # Export User Bureau
     def getUserData(self):
         """ Get User Bureau object """
         return self.users
 
-    # Export Subject Bureau
     def getSubjectData(self):
         """ Get Subject Bureau object """
         return self.subjects
 
-    # Export User Information
+    # ----------------------------------------------------------------
+
     def exportUserData(self):
         """ Exports consolidated user information """
         return self.users.export()
 
-    # Export Subject Information
     def exportSubjectData(self):
         """ Exports consolidated subject information """
         return self.subjects.export()
 
     def export(self):
+        """
+            Export both user and subject data
+        """
         return {
             'users': self.users.export(),
             'subjects': self.subjects.export()
         }
 
     def verifyClassification(self, cl):
+        """
+            Verify classification is compatible with current
+            SWAP version
+
+            Args:
+                cl: (dict) classification
+        """
         names = [
             'user_name',
             'subject_id',
@@ -142,14 +184,11 @@ class SWAP(object):
             raise ClValueError('gold_label', int, cl)
 
 
-class ClValidationError(ValueError):
-    """
-        Raise when the classification cannot be validated
-    """
-    pass
-
-
 class ClKeyError(KeyError):
+    """
+        Raise when a classification is missing a key element
+    """
+
     def __init__(self, key, cl, *args, **kwargs):
         pprint(cl)
         msg = 'key %s not found in classification %s' % (key, str(cl))
@@ -157,6 +196,11 @@ class ClKeyError(KeyError):
 
 
 class ClValueError(ValueError):
+    """
+        Raise when a value in the classification is incorrect,
+        impossible, or is of the wrong type
+    """
+
     def __init__(self, key, _type, cl, *args, **kwargs):
         pprint(cl)
         bad_type = type(cl[key])
