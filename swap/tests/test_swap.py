@@ -34,6 +34,60 @@ def test_export_nonempty():
     assert 'subject_1' in export['subjects']
 
 
+def test_subject_gold_label_1():
+    def make_cl(u, s, a, g):
+        return {
+            'user_name': u,
+            'subject_id': s,
+            'annotation': a,
+            'gold_label': g
+        }
+
+    swap = SWAP(p0=2e-4, epsilon=1.0)
+
+    swap.processOneClassification(make_cl(1, 1, 0, 1))
+    swap.processOneClassification(make_cl(2, 1, 0, 0))
+
+    export = swap.exportSubjectData()
+    pprint(export)
+    assert export[1]['gold_label'] == 1
+
+
+def test_subject_gold_label_0():
+    def make_cl(u, s, a, g):
+        return {
+            'user_name': u,
+            'subject_id': s,
+            'annotation': a,
+            'gold_label': g
+        }
+
+    swap = SWAP(p0=2e-4, epsilon=1.0)
+
+    swap.processOneClassification(make_cl(1, 1, 0, 0))
+    swap.processOneClassification(make_cl(2, 1, 0, 1))
+
+    export = swap.exportSubjectData()
+    pprint(export)
+    assert export[1]['gold_label'] == 0
+
+
+def test_subject_no_gold_label():
+    cl = {
+        'user_name': 1,
+        'subject_id': 1,
+        'annotation': 1
+    }
+
+    swap = SWAP(p0=2e-4, epsilon=1.0)
+
+    swap.processOneClassification(cl)
+
+    export = swap.exportSubjectData()
+    pprint(export)
+    assert export[1]['gold_label'] == -1
+
+
 def test_subject_update_perfect_classifier():
 
     swap = SWAP(p0=2e-4, epsilon=1.0)

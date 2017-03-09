@@ -170,8 +170,7 @@ class SWAP(object):
         names = [
             'user_name',
             'subject_id',
-            'annotation',
-            'gold_label']
+            'annotation']
         for key in names:
             try:
                 cl[key]
@@ -180,8 +179,11 @@ class SWAP(object):
 
         if type(cl['annotation']) is not int:
             raise ClValueError('annotation', int, cl)
-        if type(cl['gold_label']) is not int:
+        if 'gold_label' in cl and type(cl['gold_label']) is not int:
             raise ClValueError('gold_label', int, cl)
+
+
+
 
 
 class ClKeyError(KeyError):
