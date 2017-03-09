@@ -37,8 +37,8 @@ class User(Agent):
         """
 
         # Increment basic tracking
-        annotation = int(cl['annotation'])
-        gold = int(cl['gold_label'])
+        annotation = int(cl.annotation)
+        gold = int(cl.gold())
 
         self.annotations.add(annotation)
         self.gold_labels.add(gold)

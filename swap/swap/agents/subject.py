@@ -41,7 +41,7 @@ class Subject(Agent):
                 cl (dict) classification data from database
                 user_agent (Agent->User)  Agent for the classifying user
         """
-        annotation = int(cl['annotation'])
+        annotation = int(cl.annotation)
         s_score = self.getScore()
         u_score = user_agent.getScore(annotation)
 

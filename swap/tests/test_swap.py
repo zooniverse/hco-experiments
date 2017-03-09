@@ -1,24 +1,13 @@
 from swap.swap import SWAP
-import pytest
+from swap.swap import Classification
 from pprint import pprint
 
 
 def test_export_nonempty():
     swap = SWAP(p0=2e-4, epsilon=1.0)
 
-    cl1 = {
-        'user_name': 'user_1',
-        'subject_id': 'subject_1',
-        'annotation': 1,
-        'gold_label': 1
-    }
-
-    cl2 = {
-        'user_name': 'user_2',
-        'subject_id': 'subject_1',
-        'annotation': 1,
-        'gold_label': 1
-    }
+    cl1 = Classification('user_1', 'subject_1', 1, 1)
+    cl2 = Classification('user_2', 'subject_1', 1, 1)
 
     swap.processOneClassification(cl1)
     swap.processOneClassification(cl2)
@@ -35,18 +24,10 @@ def test_export_nonempty():
 
 
 def test_subject_gold_label_1():
-    def make_cl(u, s, a, g):
-        return {
-            'user_name': u,
-            'subject_id': s,
-            'annotation': a,
-            'gold_label': g
-        }
-
     swap = SWAP(p0=2e-4, epsilon=1.0)
 
-    swap.processOneClassification(make_cl(1, 1, 0, 1))
-    swap.processOneClassification(make_cl(2, 1, 0, 0))
+    swap.processOneClassification(Classification(1, 1, 0, 1))
+    swap.processOneClassification(Classification(2, 1, 0, 0))
 
     export = swap.exportSubjectData()
     pprint(export)
@@ -54,18 +35,10 @@ def test_subject_gold_label_1():
 
 
 def test_subject_gold_label_0():
-    def make_cl(u, s, a, g):
-        return {
-            'user_name': u,
-            'subject_id': s,
-            'annotation': a,
-            'gold_label': g
-        }
-
     swap = SWAP(p0=2e-4, epsilon=1.0)
 
-    swap.processOneClassification(make_cl(1, 1, 0, 0))
-    swap.processOneClassification(make_cl(2, 1, 0, 1))
+    swap.processOneClassification(Classification(1, 1, 0, 0))
+    swap.processOneClassification(Classification(2, 1, 0, 1))
 
     export = swap.exportSubjectData()
     pprint(export)
@@ -73,14 +46,9 @@ def test_subject_gold_label_0():
 
 
 def test_subject_no_gold_label():
-    cl = {
-        'user_name': 1,
-        'subject_id': 1,
-        'annotation': 1
-    }
+    cl = Classification(1, 1, 1)
 
     swap = SWAP(p0=2e-4, epsilon=1.0)
-
     swap.processOneClassification(cl)
 
     export = swap.exportSubjectData()
@@ -89,30 +57,19 @@ def test_subject_no_gold_label():
 
 
 def test_subject_update_perfect_classifier():
+    cl = Classification('user_1', 'subject_1', 1, 1)
 
     swap = SWAP(p0=2e-4, epsilon=1.0)
-
-    cl = {
-        'user_name': 'user_1',
-        'subject_id': 'subject_1',
-        'annotation': 1,
-        'gold_label': 1
-    }
-
     swap.processOneClassification(cl)
+
     export = swap.exportSubjectData()
     pprint(export)
 
     assert export['subject_1']['score'] == 1
 
-    cl = {
-        'user_name': 'user_1',
-        'subject_id': 'subject_2',
-        'annotation': 0,
-        'gold_label': 0
-    }
-
+    cl = Classification('user_1', 'subject_2', 0, 0)
     swap.processOneClassification(cl)
+
     export = swap.exportSubjectData()
     pprint(export)
 
@@ -120,28 +77,17 @@ def test_subject_update_perfect_classifier():
 
 
 def test_subject_update_obtuse_classifier():
+    cl = Classification('user_1', 'subject_1', 0, 1)
 
     swap = SWAP(p0=2e-4, epsilon=0.0)
-
-    cl = {
-        'user_name': 'user_1',
-        'subject_id': 'subject_1',
-        'annotation': 0,
-        'gold_label': 1
-    }
-
     swap.processOneClassification(cl)
+
     export = swap.exportSubjectData()
     pprint(export)
 
     assert export['subject_1']['score'] == 1
 
-    cl = {
-        'user_name': 'user_1',
-        'subject_id': 'subject_2',
-        'annotation': 1,
-        'gold_label': 0
-    }
+    cl = Classification('user_1', 'subject_2', 1, 0)
 
     swap.processOneClassification(cl)
     export = swap.exportSubjectData()
@@ -181,23 +127,18 @@ def test_subject_update_apply_one_correct_classification():
     annotation = 1
     gold_label = 1
 
-    expected_subject_score = predict_subject_score(p0, epsilon, 1, 1)
-    assert expected_subject_score == 1 / 3
+    expected = predict_subject_score(p0, epsilon, 1, 1)
+    assert expected == 1 / 3
 
     swap = SWAP(p0=p0, epsilon=epsilon)
 
-    cl = {
-        'user_name': 'user_1',
-        'subject_id': 'subject_1',
-        'annotation': annotation,
-        'gold_label': gold_label
-    }
+    cl = Classification('user_1', 'subject_1', annotation, gold_label)
 
     swap.processOneClassification(cl)
     export = swap.exportSubjectData()
-    pprint([export, expected_subject_score])
+    pprint([export, expected])
 
-    assert export['subject_1']['score'] == expected_subject_score
+    assert export['subject_1']['score'] == expected
 
 
 def test_subject_update_apply_one_incorrect_classification():
@@ -211,18 +152,14 @@ def test_subject_update_apply_one_incorrect_classification():
 
     swap = SWAP(p0=p0, epsilon=epsilon)
 
-    cl = {
-        'user_name': 'user_1',
-        'subject_id': 'subject_1',
-        'annotation': annotation,
-        'gold_label': gold_label
-    }
+    cl = Classification('user_1', 'subject_1', annotation, gold_label)
 
     swap.processOneClassification(cl)
     export = swap.exportSubjectData()
     pprint([export, expected_subject_score])
 
     assert export['subject_1']['score'] == expected_subject_score
+
 
 def main():
 

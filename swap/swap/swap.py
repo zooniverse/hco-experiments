@@ -57,28 +57,32 @@ class SWAP(object):
             Processes a single classification
 
             Args:
-                cl: (dict) classification
+                cl: (dict,Classification) classification
         """
         # if subject is gold standard and gold_updates are specified,
         # update user success probability
 
-        self.verifyClassification(cl)
+        if not isinstance(cl, Classification):
+            cl = Classification.Generate(cl)
 
-        if (cl['gold_label'] in [0, 1] and self.gold_updates):
-            self.updateUserData(cl)
-            # update Subject probability
-            self.updateSubjectData(cl)
+        # if self.gold_updates and cl.gold() in [0, 1]:
+        # ^ moved gold check downstream to update methods
+        # User and subject agents weren't being created
+        # if the subject's gold label is -1
+        self.updateUserData(cl)
+        self.updateSubjectData(cl)
 
     def updateUserData(self, cl):
         """
             Update User Data - Process current classification
 
             Args:
-                cl: (dict) classification
+                cl: (Classification)
         """
 
-        user = self.getUserAgent(cl['user_name'])
-        user.addClassification(cl)
+        user = self.getUserAgent(cl.user)
+        if self.gold_updates and cl.gold() in [0, 1]:
+            user.addClassification(cl)
 
     def updateSubjectData(self, cl):
         """
@@ -89,11 +93,12 @@ class SWAP(object):
         """
 
         # Get subject and user agents
-        subject = self.getSubjectAgent(cl['subject_id'], cl=cl)
-        user = self.getUserAgent(cl['user_name'])
+        subject = self.getSubjectAgent(cl.subject, cl=cl)
+        user = self.getUserAgent(cl.user)
 
         # process the classification
-        subject.addClassification(cl, user)
+        if self.gold_updates and cl.gold() in [0, 1]:
+            subject.addClassification(cl, user)
 
     def getUserAgent(self, agent_id):
         """
@@ -126,8 +131,8 @@ class SWAP(object):
             return self.subjects.getAgent(agent_id)
         else:
             agent = Subject(agent_id, self.p0)
-            if cl and 'gold_label' in cl:
-                agent.setGoldLabel(cl['gold_label'])
+            if cl:
+                agent.setGoldLabel(cl.gold())
 
             self.subjects.addAgent(agent)
             return agent
@@ -183,7 +188,68 @@ class SWAP(object):
             raise ClValueError('gold_label', int, cl)
 
 
+class Classification:
 
+    def __init__(self, user, subject, annotation,
+                 gold_label=-1, metadata={}):
+
+        if type(annotation) is not int:
+            raise ClValueError('annotation', int)
+
+        if type(gold_label) is not int:
+            raise ClValueError('gold_label', int)
+
+        if type(metadata) is not dict:
+            raise ClValueError('metadata', dict)
+
+        self.user = user
+        self.subject = subject
+        self.annotation = annotation
+        self.gold_label = gold_label
+        self.metadata = metadata
+
+    def gold(self):
+        return self.gold_label
+
+    def Generate(cl):
+        Classification.Validate(cl)
+
+        user = cl['user_name']
+        subject = cl['subject_id']
+        annotation = cl['annotation']
+
+        c = Classification(user, subject, annotation)
+
+        if 'gold_label' in cl:
+            c.gold_label = cl['gold_label']
+
+        if 'metadata' in cl:
+            c.metadata = cl['metadata']
+
+        return c
+
+    def Validate(cl):
+        """
+            Verify classification is compatible with current
+            SWAP version
+
+            Args:
+                cl: (dict) classification
+        """
+        names = [
+            'user_name',
+            'subject_id',
+            'annotation']
+        for key in names:
+            try:
+                cl[key]
+            except KeyError:
+                raise ClKeyError(key, cl)
+
+        if type(cl['annotation']) is not int:
+            raise ClValueError('annotation', int, cl)
+        if 'gold_label' in cl and type(cl['gold_label']) is not int:
+            raise ClValueError('gold_label', int, cl)
 
 
 class ClKeyError(KeyError):
@@ -191,7 +257,7 @@ class ClKeyError(KeyError):
         Raise when a classification is missing a key element
     """
 
-    def __init__(self, key, cl, *args, **kwargs):
+    def __init__(self, key, cl={}, *args, **kwargs):
         pprint(cl)
         msg = 'key %s not found in classification %s' % (key, str(cl))
         KeyError.__init__(self, msg)
@@ -203,7 +269,7 @@ class ClValueError(ValueError):
         impossible, or is of the wrong type
     """
 
-    def __init__(self, key, _type, cl, *args, **kwargs):
+    def __init__(self, key, _type, cl={}, *args, **kwargs):
         pprint(cl)
         bad_type = type(cl[key])
         msg = 'key %s should be type %s but is %s' % (key, _type, bad_type)
