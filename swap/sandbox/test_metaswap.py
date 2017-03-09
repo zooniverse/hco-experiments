@@ -108,11 +108,11 @@ if __name__ == '__main__':
                     name="User_profiles_20_23.pdf")
 
     # Reverse SWAP
-    control2 = MetaDataControl(0.01, 0.5, 'mag', 18, 19)
-    control2.process()
-    plot_swap_subjects(control2.getSWAP(),
-                       title="Subject Tracks - 18-19 Mag",
-                       name="subject_tracks_revSWAP_18_19.pdf")
-    plot_swap_users(control2.getSWAP(),
-                    title="User Profiles - 18-19 Mag",
-                    name="User_profiles_revSWAP_18_19.pdf")
+#    control2 = MetaDataControl(0.01, 0.5, 'mag', 18, 19)
+#    control2.process()
+#    plot_swap_subjects(control2.getSWAP(),
+#                       title="Subject Tracks - 18-19 Mag",
+#                       name="subject_tracks_revSWAP_18_19.pdf")
+#    plot_swap_users(control2.getSWAP(),
+#                    title="User Profiles - 18-19 Mag",
+#                    name="User_profiles_revSWAP_18_19.pdf")

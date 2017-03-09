@@ -162,6 +162,3 @@ class ClValueError(ValueError):
         bad_type = type(cl[key])
         msg = 'key %s should be type %s but is %s' % (key, _type, bad_type)
         ValueError.__init__(self, msg)
-
-
-SWAP_AGENTS = SWAP
