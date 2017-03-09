@@ -120,6 +120,14 @@ class Tracker_Collection:
         self.trackers[label] = tracker
 
     def addNew(self, tracker_type, label, value):
+        """
+            Create a new tracker and add it to the collection
+
+            Args:
+                tracker_type: (type) type of tracker create
+                label: label for the tracker
+                value: initial value for the tracker
+        """
         tracker = tracker_type(label, value)
 
         self.trackers[label] = tracker
@@ -149,39 +157,51 @@ class Tracker_Collection:
             return self.trackers[label]
 
     def getAll(self):
+        """
+            Get all trackers from the collection
+        """
         return self.trackers
 
-    def Generate(t_type, labels, value=None):
+    def Generate(tracker_type, labels, value=None):
+        """
+            Generate a Tracker_Collection and create new
+            Trackers for it with given labels
+
+            Args:
+                t_type: (type) Type of tracker to generate
+                labels: labels for the new trackers
+                value: initial value for the new trackers
+        """
         trackers = Tracker_Collection()
         if type(labels) is not list:
             raise ValueError("Need list of labels to initialize trackers")
 
         for label in labels:
-            tracker = t_type(label, value)
+            tracker = tracker_type(label, value)
             trackers.add(label, tracker)
 
         return trackers
 
 
-class Labeled_Trackers:
+# class Labeled_Trackers:
 
-    def __init__(self, tracker, labels, value=None):
-        if type(labels) is not list:
-            raise ValueError("Need list of labels to initialize trackers")
+#     def __init__(self, tracker, labels, value=None):
+#         if type(labels) is not list:
+#             raise ValueError("Need list of labels to initialize trackers")
 
-        self.trackers = {}
+#         self.trackers = {}
 
-        for label in labels:
-            self.add(tracker, label, value)
+#         for label in labels:
+#             self.add(tracker, label, value)
 
-    def add(self, tracker_type, label, value):
-        tracker = tracker_type(label, value)
+#     def add(self, tracker_type, label, value):
+#         tracker = tracker_type(label, value)
 
-        self.trackers[label] = tracker
-        return tracker
+#         self.trackers[label] = tracker
+#         return tracker
 
-    def get(self, label):
-        return self.trackers[label]
+#     def get(self, label):
+#         return self.trackers[label]
 
-    def getAll(self):
-        return self.trackers
+#     def getAll(self):
+#         return self.trackers
