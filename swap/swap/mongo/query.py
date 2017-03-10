@@ -3,6 +3,7 @@
 
 from collections import OrderedDict
 
+
 class Query:
 
     def __init__(self):

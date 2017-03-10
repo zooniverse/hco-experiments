@@ -20,7 +20,8 @@ class Control:
         self.swap = SWAP(p0, epsilon)
 
     def process(self):
-        """ Process all classifications in DB with SWAP
+        """
+        Process all classifications in DB with SWAP
 
         Notes:
         ------
@@ -30,18 +31,10 @@ class Control:
             Parameters like max_batch_size are hard-coded.
             Prints status.
         """
-        # max batch size is the number classifications to read from DB
-        # during one batch, small numbers (<1000) are inefficient
-        max_batch_size = float(self._cfg.database['max_batch_size'])
-
-        # get the total number of classifications in the DB
-        n_classifications = self.classifications.count()
 
         # get classifications
-        classifications = self.getClassifications()
-
-        # determine and set batch size
-        classifications.batch_size(int(min(max_batch_size, n_classifications)))
+        classifications = self._db.getClassifications()
+        n_classifications = self.classifications.count()
 
         # loop over classification cursor to process
         # classifications one at a time
@@ -66,20 +59,20 @@ class Control:
         """ Returns SWAP object """
         return self.swap
 
-    def getClassifications(self):
-        """ Returns Iterator over all Classifications """
+    # def getClassifications(self):
+    #     """ Returns Iterator over all Classifications """
 
-        # fields to project
-        fields = ['user_name', 'subject_id', 'annotation', 'gold_label']
+    #     # fields to project
+    #     fields = ['user_name', 'subject_id', 'annotation', 'gold_label']
 
-        # Define a query
-        q = Query()
-        q.project(fields)
+    #     # Define a query
+    #     q = Query()
+    #     q.project(fields)
 
-        # perform query on classification data
-        classifications = self.classifications.aggregate(q.build())
+    #     # perform query on classification data
+    #     classifications = self.classifications.aggregate(q.build())
 
-        return classifications
+    #     return classifications
 
 
 class MetaDataControl(Control):
