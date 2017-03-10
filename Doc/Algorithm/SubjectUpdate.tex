@@ -1,0 +1,54 @@
+\documentclass[]{article}
+
+\usepackage{amsmath}
+
+\input{macros.tex}
+
+\begin{document}
+
+\section{Standard implementation}\label{sec:standard_imp}
+Following each classification $C\in\{\LENS,\NOT\}$, the original SWAP algorithm derives the posterior probability that a subject contains a gravitational lens using a simple Bayesian update rule.
+\begin{equation}
+  \label{eq:app:first}
+  \pr(\LENS|C) =
+  \frac{\pr(C|\LENS)\cdot\pr(\LENS)}
+{\left[ \pr(C|\LENS)\cdot\pr(\LENS) + \pr(C|\NOT)\cdot\pr(\NOT) \right]}
+\end{equation}
+
+Where $\pr(C|\LENS)$ and $\pr(C|\NOT)$ are the relevant elements of the classifiers \textit{confusion matrix}.
+
+Na\"ive application of \eqref{eq:app:first} permits the undesirable situation whereby a nominally \textit{perfect} classifier (for whom $\pr(C|\LENS)=1$ and $\pr(C|\NOT)=0$) may immediately promote the posterior probability of a subject to unity with a single $\LENS$ classification. Similarly, a single $\NOT$ classification by this classifier would immediately demote the posterior probability to zero.
+
+Either situation would result in immediate retirement of the subject from the classification set with no possiblity of reinstatement.
+
+\section{Alternative implementations}\label{sec:alternative_imps}
+\subsection{Softening the response to perfect classifiers}
+A simple strategy that would avoid the pathology oulined in $\S$\ref{sec:standard_imp} entails modification of \eqref{eq:app:first} by simple multiplicative scaling of $\pr(C|\LENS)$ and $\pr(C|\NOT)$ such that:
+\begin{align}
+  \label{eq:app:second}
+  &\pr(\LENS|C) = \\ \notag
+  &\frac{\alpha\cdot\pr(C|\LENS)\cdot\pr(\LENS)}
+{\left[ \alpha\cdot\pr(C|\LENS)\cdot\pr(\LENS) + \alpha\cdot\pr(C|\NOT)\cdot\pr(\NOT) \right]}
+\end{align}
+where $\alpha < 1$ is a suitably chosen scalar value.
+
+There are obvious shortcomings for this extremely simple approach, including (but likely not limited to)
+\begin{enumerate}
+  \item If $\alpha$ is excessively small, the number of required number of matching classifications for a subject to pass either of its retirement thresholds may become excessively large.
+  \item Penalizing affirmative ($\LENS$) and negative ($\NOT$) by the same factor may not be appropriate. It may be far easier to affirm the presence of a lens than it is to exclude it.
+  \item The experience of the classifier, quantified by the \textbf{number} ($N_{C}$) of subjects that they have classified is not \textbf{explicitly} accounted for. In the original framework a classifier may obtain a \textit{perfect} confusion matrix after classifying a \textbf{single} gold-standard subject.
+  \item The difficulty of classifying a \textit{particular} subject is not accounted for. If additional \textit{metadata} ($\Theta$), describing properties of the subject image are available, it may be sensible to penalize or promote a classification's weight appropriately.
+\end{enumerate}
+
+Considering these shortcomings alone, a sensible reformulation of \eqref{eq:app:second} might entail replacement of a single scalar-valued $\alpha$ with a pair of scalar-valued \textit{functions} ($\alpha_{\LENS}(N_{C}, \Theta), \beta_{\NOT}(N_{C}, \Theta)$, such that
+
+\begin{align}
+  \label{eq:app:third}
+  & \pr(\LENS|C, N_{C}, \Theta) = \\ \notag
+  & \frac{\alpha_{\LENS}(N_{C}, \Theta)\cdot\pr(C|\LENS)\cdot\pr(\LENS)}
+{\left[ \alpha_{\LENS}(N_{C}, \Theta)\cdot\pr(C|\LENS)\cdot\pr(\LENS) + \beta_{\NOT}(N_{C}, \Theta)\cdot\pr(C|\NOT)\cdot\pr(\NOT) \right]}
+\end{align}
+
+While the functional forms of $\alpha_{\LENS}$ and $\beta_{\NOT}$ are arbitrary, the requirement that $0 \geq \pr(\LENS|C, N_{C}, \Theta) \leq 1$ mandates that $\alpha_{\LENS} < 1$ and $\beta_{\NOT} < 1\;\forall\;N_{C}, \Theta$.
+
+\end{document}
