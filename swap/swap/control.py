@@ -33,7 +33,7 @@ class Control:
         """
 
         # get classifications
-        classifications = self._db.getClassifications()
+        classifications = self.getClassifications()
         n_classifications = self.classifications.count()
 
         # loop over classification cursor to process
@@ -54,6 +54,9 @@ class Control:
                 #     print("   " + str(i) + "/" + str(n_classifications))
             print("Finished: SWAP Processing %d/%d classifications" %
                   (n_class, n_classifications))
+
+    def getClassifications(self):
+        return self._db.getClassifications()
 
     def getSWAP(self):
         """ Returns SWAP object """
