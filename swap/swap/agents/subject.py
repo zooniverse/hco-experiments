@@ -43,17 +43,15 @@ class Subject(Agent):
         """
         annotation = int(cl.annotation)
         s_score = self.getScore()
-        u_score = user_agent.getScore(annotation)
-
-        self.annotations.add(annotation)
-        self.user_scores.add(u_score)
 
         # Get user's 1 and 0 scores
         # TODO @marco I'm not sure of what you added
         # to the main swap code last night (2/14/17)
         u_score_1 = user_agent.getScore(1)
         u_score_0 = user_agent.getScore(0)
-        # s_score already defined ^^^
+
+        self.annotations.add(annotation)
+        self.user_scores.add((u_score_1, u_score_0))
 
         # calculate new score
         score = self.calculateScore(annotation, u_score_0,
