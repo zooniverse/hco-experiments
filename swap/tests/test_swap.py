@@ -3,6 +3,20 @@ from swap.swap import Classification
 from pprint import pprint
 
 
+def test_set_gold():
+    swap = SWAP(p0=2e-4, epsilon=1.0)
+    labels = [0, 0, 0, 0, 1, 1, 1, 1]
+    subjects = [(i + 1, l) for i, l in enumerate(labels)]
+    swap.setGoldSubjects(subjects)
+
+    export = swap.exportSubjectData()
+    pprint(export)
+
+    assert len(export) == 8
+    assert export[1]['gold_label'] == 0
+    assert export[8]['gold_label'] == 1
+
+
 def test_export_nonempty():
     swap = SWAP(p0=2e-4, epsilon=1.0)
 

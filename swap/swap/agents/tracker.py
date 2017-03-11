@@ -76,7 +76,27 @@ class User_Score_Tracker(Tracker):
         self.n_matched = 0
 
     def calculateScore(self):
-        score = self.n_matched / self.n_seen
+        n_matched = self.n_matched
+        n_seen = self.n_seen
+
+        score = n_matched / n_seen
+
+        # TODO TEMPORARY FIX
+        # Prevents a user from receiving a perfect 1.0 score
+        # or a 0.0 score.
+        # If the score is 1, then it is adjusted to:
+        #   n
+        # ------
+        #  n+1
+        # If the score is 0, then it is the complement of that:
+        #       n
+        # 1 - ------
+        #      n+1
+
+        if score == 0:
+            score = 1 - (n_seen / (n_seen + 1))
+        elif score == 1:
+            score = n_seen / (n_seen + 1)
 
         return score
 

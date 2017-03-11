@@ -145,6 +145,24 @@ class SWAP(object):
         """ Get Subject Bureau object """
         return self.subjects
 
+    def setGoldSubjects(self, subjects):
+        """
+            Defines the subjects explicitly that should be
+            treated as gold standards
+
+            Note: To get proper test/train split, the gold_labels
+            still need to be stripped out of the classification dicts.
+            This function is for defining all subjects that are
+            gold on initialization
+
+            Args:
+                subjects: (list: (subject, label)) list of subjects
+        """
+        for subject, label in subjects:
+            # TODO use old swap score or reset with p0 for bootstrap?
+            agent = Subject(subject, self.p0, label)
+            self.subjects.addAgent(agent)
+
     # ----------------------------------------------------------------
 
     def exportUserData(self):
