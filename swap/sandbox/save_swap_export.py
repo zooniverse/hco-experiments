@@ -4,9 +4,55 @@ from swap import Control
 import pickle
 from pprint import pprint
 import matplotlib.pyplot as plt
+import argparse
+import os
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-p', action='store_true',
+        help='Run the SWAP algorithm again, and pickle and save')
+    parser.add_argument(
+        '-s', nargs=1,
+        help='Generate subject track plot and output to filename S')
+    parser.add_argument(
+        '-u', nargs=1,
+        help='Generate user track plots and output to filename U')
+    parser.add_argument(
+        '--output', nargs=1,
+        help='Not instantiated yet')
+    parser.add_argument(
+        'pickle', help='The filename of the pickled SWAP export')
+
+    args = parser.parse_args()
+
+    if args.p:
+        data = run_swap(args.pickle)
+    else:
+        data = load_pickle(args.pickle)
+
+    if args.s:
+        plot_subjects(data, args.s[0])
+
+    if args.u:
+        plot_users(data, args.u[0])
+
+    if args.output:
+        pass
+
+
+
+    print(args)
+
+
+def load_pickle(fname):
+    with open(fname, 'rb') as file:
+        data = pickle.load(file)
+    return data
+
+
+def run_swap(fname):
     control = Control(.01, .5)
     control.process()
 
@@ -14,8 +60,10 @@ def main():
     # with open('log', 'w') as file:
     #     yaml.dump(data, file)
 
-    with open('pickle.pkl', 'wb') as file:
+    with open(fname, 'wb') as file:
         pickle.dump(data, file)
+
+    return data
 
 
 def find_errors():
@@ -28,46 +76,101 @@ def find_errors():
             interest.append(value)
 
     print(len(interest))
-    plot_swap_subjects(data,
-                       title="Subject Tracks",
-                       name="subject_tracks.pdf")
+    plot_subjects(data,
+                  "Subject Tracks",
+                  "subject_tracks.png")
 
     with open('log', 'w') as file:
         pprint(interest, file)
 
 
-def plot_swap_subjects(export, title, name):
+def combine_user_scores(export, fname):
+    data = []
+    for item in export['users'].values():
+        h0 = item['score_0_history']
+        h1 = item['score_1_history']
+
+        h = []
+        for i, v0 in enumerate(h0):
+            if len(h1) <= i:
+                v1 = h1[-1]
+            else:
+                v1 = h1[i]
+            h.append((v0 + v1) / 2)
+        data.append((1, h))
+
+    name = fname.split('.')
+    name[0] += '-combined'
+    name = '.'.join(name)
+
+    plot_tracks(data, 'User Combined Tracks', name, scale='linear')
+
+
+def plot_users(export, fname):
+    def getData(data, n):
+        data = []
+        for item in export['users'].values():
+            h = item['score_%d_history' % n]
+            if len(h) > 7:
+                if len(h) > 20:
+                    data.append((n, h[7:20]))
+                else:
+                    data.append((n, h[7:]))
+        return data
+
+    def plotData(export, n, fname):
+        name = fname.split('.')
+        name[0] += '-%d' % n
+        name = '.'.join(name)
+        plot_tracks(
+            getData(export, n),
+            'User %d Tracks' % n,
+            name, scale='linear')
+
+    plotData(export, 1, fname)
+    plotData(export, 0, fname)
+    combine_user_scores(export, fname)
+
+
+def plot_subjects(export, fname):
+    print(fname)
+    data = [(d['gold_label'], d['history']) for d in export['subjects'].values()]
+    plot_tracks(data, 'Subject Tracks', fname)
+
+
+def plot_tracks(data, title, fname, dpi=600, scale='log'):
     """ Plot subject tracks """
-    subject_data = export['subjects']
-    colourmap = ["#669D31", "#F00200"]
+    cmap = ["#669D31", "#F00200"]
+
     fig = plt.figure()
     ax = fig.add_subplot(111)
+
     count = 0
-    for subject_id in subject_data.keys():
+    for gold, history in data:
         if count == 1000:
             break
-        #print(count)
-        colour = colourmap[subject_data[subject_id]['gold_label']]
-        history = subject_data[subject_id]['history']
-        #print(history)
-        ax.plot([0.01]+history,range(len(history)+1),"-",color=colour,lw=1, alpha=0.1)
-        """
-        if subjectData[subject_id]["gold_label"] == "1":
-            ax.plot([0.01]+history,range(len(history)+1),"-",color=colour,lw=1, alpha=0.5,zorder=1000)
-        else:
-            ax.plot([0.01]+history,range(len(history)+1),"-",color=colour,lw=1, alpha=0.5)
-        """
+
+        ax.plot(
+            [0.01] + history,
+            range(len(history) + 1),
+            "-",
+            color=cmap[gold],
+            lw=1,
+            alpha=0.2)
+
         count += 1
+
     plt.xlim(-0.01, 1.01)
-    ax.set_yscale("log")
+    ax.set_yscale(scale)
     plt.gca().invert_yaxis()
+
     plt.xlabel("P(real)")
     plt.ylabel("number of classificaions")
     plt.title(title)
-    plt.savefig(name)
-    plt.show()
+
+    plt.savefig(fname, dpi=dpi)
+    # plt.show()
 
 
 if __name__ == "__main__":
-    #main()
-    find_errors()
+    main()
