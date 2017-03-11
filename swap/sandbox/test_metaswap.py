@@ -201,16 +201,16 @@ def eval_classifications(y_true, y_pred, pos_label, excl_label=None):
            'roc': {'fpr': fpr, 'tpr': tpr, 'thresholds': thresholds}}
     return res
 
-subs = controls[0].getSWAP().exportSubjectData()
-labs = getLabelReal(subs)
-y_true = labs['actual']
+#subs = controls[0].getSWAP().exportSubjectData()
+#labs = getLabelReal(subs)
+#y_true = labs['actual']
 
 
 
 if __name__ == '__main__':
 
-    # postfix for plots
-    pfx = '_Rev'
+    # postfix for plot names
+    pfx = '_FixBayes'
 
     # function to process one magnitude range
     def processMagRange(lower,upper):
@@ -224,9 +224,9 @@ if __name__ == '__main__':
         plot_swap_users(control.getSWAP(),
                         title="User Profiles - %d-%d Mag" % (lower,upper),
                         name="User_profiles_%d_%d%s.pdf" % (lower,upper,pfx))
-        plot_swap_subject_cm(control.getSWAP(),
-                             title="Subject CM - %d-%d Mag" % (lower,upper),
-                             name="Subject_CM_%d_%d%s.pdf" % (lower,upper,pfx))
+#        plot_swap_subject_cm(control.getSWAP(),
+#                             title="Subject CM - %d-%d Mag" % (lower,upper),
+#                             name="Subject_CM_%d_%d%s.pdf" % (lower,upper,pfx))
         subs = control.getSWAP().exportSubjectData()
         labs = getLabelReal(subs)
         ev =  eval_classifications(y_true=labs['actual'],
@@ -236,8 +236,8 @@ if __name__ == '__main__':
         return control, ev
 
     # Processs different magnitude ranges
-    mag_ranges = [(13,18), (18,19), (19,20), (20,23)]
-    res = [processMagRange(x[0],x[1]) for x in mag_ranges]
+    mag_ranges = [(13, 18), (18, 19), (19, 20), (20, 23)]
+    res = [processMagRange(x[0], x[1]) for x in mag_ranges]
     controls = [x[0] for x in res]
     evals = [x[1] for x in res]
 
