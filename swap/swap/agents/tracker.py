@@ -79,7 +79,22 @@ class User_Score_Tracker(Tracker):
         n_matched = self.n_matched
         n_seen = self.n_seen
 
-        score = n_matched / n_seen
+        # score = n_matched / n_seen
+
+        # TODO: Idea with Bayesian Probability Update
+        # Likelihood is Bernoulli distribution
+        # Prior is Beta distribution (conjugate of Bernoulli)
+        #  - we assume Beta(alpha=2,beta=2) distribution which has mode at 0.5
+        # The posterior distribution is then also a Beta distribution with:
+        # alpha_new = alpha + n_matched, beta_new = beta + n_seen - n_matched
+        # the mode (most likely value) of a Beta distribution is then:
+        # (alpha_new - 1) / (alpha_new + beta_new - 2)
+
+        alpha = 2
+        beta = 2
+        alpha_new = alpha + n_matched
+        beta_new = beta + n_seen - n_matched
+        score = (alpha_new - 1) / (alpha_new + beta_new - 2)
 
         # TODO TEMPORARY FIX
         # Prevents a user from receiving a perfect 1.0 score
@@ -93,10 +108,10 @@ class User_Score_Tracker(Tracker):
         # 1 - ------
         #      n+1
 
-        if score == 0:
-            score = 1 - (n_seen / (n_seen + 1))
-        elif score == 1:
-            score = n_seen / (n_seen + 1)
+#        if score == 0:
+#            score = 1 - (n_seen / (n_seen + 1))
+#        elif score == 1:
+#            score = n_seen / (n_seen + 1)
 
         return score
 
