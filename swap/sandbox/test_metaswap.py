@@ -1,8 +1,10 @@
 # Test meta data splits
-from swap.control import MetaDataControl
+from swap.control import MetaDataControl, Control
 from swap.mongo import Query
 import matplotlib.pyplot as plt
-
+from swap.mongo import DB
+from swap.config import Config
+import pandas as pd
 
 def plot_swap_users(swappy, title, name):
     """ Plot User Skill """
@@ -71,13 +73,23 @@ def plot_swap_subjects(swappy, title, name):
     plt.show()
 
 # Extract labels
-def getLabelReal(subs):
+def getLabelReal(subs, score='score'):
     res = {'actual': [], 'predicted': [], 'prob': []}
     for sub in subs.values():
         res['actual'].append(sub['gold_label'])
         res['predicted'].append(sub['label'])
-        res['prob'].append(sub['score'])
+        res['prob'].append(sub[score])
     return res
+
+
+def getLabelScore(subs, score='score'):
+    res = {'actual': [], 'prob': []}
+    for sub in subs.values():
+        res['actual'].append(sub['gold_label'])
+        res['prob'].append(sub[score])
+    return res
+
+
 
 # From scikit-learn website
 def plot_confusion_matrix(cm, classes,
@@ -206,6 +218,64 @@ def eval_classifications(y_true, y_pred, pos_label, excl_label=None):
 #y_true = labs['actual']
 
 
+def getAllSubjects():
+    """ Function to get all Subjects from the data base
+        Inlcuding all metadata
+    """
+    db = DB()
+    cfg = Config()
+    classifications = db.classifications
+    cl = classifications.find()
+    # Retrieve data per Subject
+    g = Group()
+    g.id(["subject_id", "metadata","gold_label","machine_score"])
+    g.build()
+    sub = db.classifications.aggregate([g.build()], allowDiskUse=True,
+                                       batchSize=int(1e5))
+
+    # read all subjects from data base and store in dictionary
+    subs = dict()
+    for s in sub:
+        # create dictionary
+        sub_dic = {'gold_label':  s['_id']['gold_label'],
+                   'machine_score': s['_id']['machine_score']}
+        # add meta data
+        for k, v in s['_id']['metadata'].items():
+            sub_dic[k] = v
+
+        # add dictionary to current subject
+        subs[s['_id']['subject_id']] = sub_dic
+
+    return subs
+
+
+# create dictionary with all subjects
+def collectSubjectsFromSWAP(control):
+    swap_sub = control.getSWAP().exportSubjectData()
+    subs = dict()
+    for s in swap_sub:
+        # check if subject is in SWAP (no -1 gold labels)
+        if s['_id']['subject_id'] in swap_sub:
+            lab = swap_sub[s['_id']['subject_id']]['label']
+            score = swap_sub[s['_id']['subject_id']]['score']
+        else:
+            lab = None
+            score = None
+
+        # create dictionary
+        sub_dic = {'gold_label':  s['_id']['gold_label'],
+                   'machine_score': s['_id']['machine_score'],
+                   'label': lab,
+                   'score': score}
+        # add meta data
+        for k, v in s['_id']['metadata'].items():
+            sub_dic[k] = v
+
+        # add dictionary to current subject
+        subs[s['_id']['subject_id']] = sub_dic
+
+    return subs
+
 
 if __name__ == '__main__':
 
@@ -219,11 +289,11 @@ if __name__ == '__main__':
         plot_swap_subjects(control.getSWAP(),
                            title="Subject Tracks - %d-%d Mag" %
                                  (lower, upper),
-                           name="subject_tracks_%d_%d%s.pdf" %
+                           name="subject_tracks_mag_%d_%d%s.pdf" %
                                 (lower, upper, pfx))
         plot_swap_users(control.getSWAP(),
                         title="User Profiles - %d-%d Mag" % (lower,upper),
-                        name="User_profiles_%d_%d%s.pdf" % (lower,upper,pfx))
+                        name="User_profiles_mag_%d_%d%s.pdf" % (lower,upper,pfx))
 #        plot_swap_subject_cm(control.getSWAP(),
 #                             title="Subject CM - %d-%d Mag" % (lower,upper),
 #                             name="Subject_CM_%d_%d%s.pdf" % (lower,upper,pfx))
@@ -235,11 +305,82 @@ if __name__ == '__main__':
                                    excl_label=-1)
         return control, ev
 
+    # function to process one seeing range
+    def processSeeingRange(lower,upper):
+        control = MetaDataControl(0.01, 0.5, 'seeing', lower, upper)
+        control.process()
+        plot_swap_subjects(control.getSWAP(),
+                           title="Subject Tracks - %s-%s Seeing" %
+                                 (lower, upper),
+                           name="subject_tracks_seeing_%s_%s%s.pdf" %
+                                (lower, upper, pfx))
+        plot_swap_users(control.getSWAP(),
+                        title="User Profiles - %s-%s Seeing" % (lower,upper),
+                        name="User_profiles_seeing_%s_%s%s.pdf" % (lower,upper,pfx))
+#        plot_swap_subject_cm(control.getSWAP(),
+#                             title="Subject CM - %d-%d Mag" % (lower,upper),
+#                             name="Subject_CM_%d_%d%s.pdf" % (lower,upper,pfx))
+        subs = control.getSWAP().exportSubjectData()
+        labs = getLabelReal(subs)
+        ev =  eval_classifications(y_true=labs['actual'],
+                                   y_pred=labs['prob'],
+                                   pos_label=1,
+                                   excl_label=-1)
+        return control, ev
+
+    # function to process full SWAP
+    def processSWAP():
+        control = Control(0.01, 0.5)
+        control.process()
+        plot_swap_subjects(control.getSWAP(),
+                           title="Subject Tracks - Full",
+                           name="subject_tracks_full_%s.pdf" %
+                                (pfx))
+        plot_swap_users(control.getSWAP(),
+                        title="User Profiles - Full",
+                        name="User_profiles_seeing_%s.pdf" % (pfx))
+#        plot_swap_subject_cm(control.getSWAP(),
+#                             title="Subject CM - %d-%d Mag" % (lower,upper),
+#                             name="Subject_CM_%d_%d%s.pdf" % (lower,upper,pfx))
+        subs = control.getSWAP().exportSubjectData()
+        labs = getLabelReal(subs)
+        ev =  eval_classifications(y_true=labs['actual'],
+                                   y_pred=labs['prob'],
+                                   pos_label=1,
+                                   excl_label=-1)
+        return control, ev
+
+    # Process without meta data splits
+    control_full, eval_full = processSWAP()
+
+
     # Processs different magnitude ranges
     mag_ranges = [(13, 18), (18, 19), (19, 20), (20, 23)]
     res = [processMagRange(x[0], x[1]) for x in mag_ranges]
     controls = [x[0] for x in res]
     evals = [x[1] for x in res]
+
+    # Processs different seeing ranges
+    seeing_ranges = [(2, 3), (3, 3.5), (3.5, 3.9), (3.9, 4.5), (4.5, 14)]
+    res_s = [processSeeingRange(x[0], x[1]) for x in seeing_ranges]
+    controls_s = [x[0] for x in res_s]
+    evals_s = [x[1] for x in res_s]
+
+    # plot ROC curve for full SWAP
+    plt.plot(eval_full['roc']['fpr'], eval_full['roc']['tpr'], lw=2,
+                 color=colors[0],
+                 label='SWAP Full: (auc = %0.2f)' % (eval_full['auc']))
+    # finalize roc curves plot
+    plt.plot([0, 1], [0, 1], linestyle='--', lw=lw, color='k',
+             label='Random')
+    plt.xlim([-0.05, 1.05])
+    plt.ylim([-0.05, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('ROC - Magnitude Ranges')
+    plt.legend(loc="lower right")
+    plt.savefig("ROC_SWAP_full%s.pdf" % (pfx))
+    plt.show()
 
 
     # define some nice colors
@@ -247,7 +388,7 @@ if __name__ == '__main__':
     bmap = brewer2mpl.get_map("Set1","Qualitative",len(evals))
     colors = bmap.mpl_colors
 
-    # plot over all roc curves
+    # plot over all roc curves for magnitude data
     lw = 1
     for i in range(0,len(evals)):
         # plot specific magnitude range
@@ -258,7 +399,7 @@ if __name__ == '__main__':
 
     # finalize roc curves plot
     plt.plot([0, 1], [0, 1], linestyle='--', lw=lw, color='k',
-         label='Random')
+             label='Random')
     plt.xlim([-0.05, 1.05])
     plt.ylim([-0.05, 1.05])
     plt.xlabel('False Positive Rate')
@@ -267,6 +408,32 @@ if __name__ == '__main__':
     plt.legend(loc="lower right")
     plt.savefig("ROC_comparison_magnitudes%s.pdf" % (pfx))
     plt.show()
+
+    # define some nice colors
+    bmap = brewer2mpl.get_map("Set1","Qualitative", len(evals_s))
+    colors = bmap.mpl_colors
+
+    # plot over all roc curves for seeing data
+    lw = 1
+    for i in range(0,len(evals_s)):
+        # plot specific magnitude range
+        plt.plot(evals_s[i]['roc']['fpr'], evals_s[i]['roc']['tpr'], lw=2,
+                 color=colors[i],
+                 label='Seeing: %s-%s (auc = %0.2f)' % (seeing_ranges[i][0],
+                 seeing_ranges[i][1], evals_s[i]['auc']))
+
+    # finalize roc curves plot
+    plt.plot([0, 1], [0, 1], linestyle='--', lw=lw, color='k',
+             label='Random')
+    plt.xlim([-0.05, 1.05])
+    plt.ylim([-0.05, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('ROC - Seeing Ranges')
+    plt.legend(loc="lower right")
+    plt.savefig("ROC_comparison_seeing%s.pdf" % (pfx))
+    plt.show()
+
 
 
     # plot over all confusion matrices
@@ -282,6 +449,82 @@ if __name__ == '__main__':
 
     plt.savefig("CM_comparison_optimal_FoM%s.pdf" % (pfx))
     plt.show()
+
+
+
+    # Collect results for all subjects
+    subs_all = getAllSubjects()
+    subs_full = control_full.getSWAP().exportSubjectData()
+    subs_mag = [c.getSWAP().exportSubjectData() for c in controls]
+    subs_mag2 = [{k:v['score'] for k,v in m.items()} for m in subs_mag]
+    subs_mag = dict()
+    for l in subs_mag2:
+        subs_mag.update(l)
+    subs_s= [c.getSWAP().exportSubjectData() for c in controls_s]
+    subs_s2 = [{k:v['score'] for k,v in m.items()} for m in subs_s]
+    subs_s = dict()
+    for l in subs_s2:
+        subs_s.update(l)
+
+    # Combine subject data with scores
+    for s in subs_all.keys():
+        if s in subs_full:
+            subs_all[s]['swap_full_score'] = subs_full[s]['score']
+        if s in subs_mag:
+            subs_all[s]['swap_mag_score'] = subs_mag[s]
+        else:
+            subs_all[s]['swap_mag_score'] = subs_full[s]['score']
+        if s in subs_s:
+            subs_all[s]['swap_see_score'] = subs_s[s]
+        else:
+            subs_all[s]['swap_see_score'] = subs_full[s]['score']
+
+        subs_all[s]['swap_mean_score'] = (subs_all[s]['swap_full_score'] + \
+                                         subs_all[s]['swap_mag_score'] + \
+                                         subs_all[s]['swap_see_score']) / 3
+
+    # evals
+    scores = ['swap_full_score','swap_mag_score',
+              'swap_see_score','swap_mean_score']
+    labs_full = [getLabelScore(subs_all, score=s) for s in scores]
+
+    evals = [eval_classifications(y_true=labs['actual'],
+                                   y_pred=labs['prob'],
+                                   pos_label=1,
+                                   excl_label=-1) for labs in labs_full]
+
+
+    # Evaluate for different metadata processing
+    bmap = brewer2mpl.get_map("Set1","Qualitative", len(evals))
+    colors = bmap.mpl_colors
+
+    # plot over all roc curves for seeing data
+    lw = 1
+    for i in range(0,len(evals)):
+        # plot specific magnitude range
+        plt.plot(evals[i]['roc']['fpr'], evals[i]['roc']['tpr'], lw=2,
+                 color=colors[i],
+                 label='SWAP: %s (auc = %0.3f)' % (scores[i],evals[i]['auc']))
+
+    # finalize roc curves plot
+    plt.plot([0, 1], [0, 1], linestyle='--', lw=lw, color='k',
+             label='Random')
+    plt.xlim([-0.05, 1.05])
+    plt.ylim([-0.05, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('ROC - Seeing Ranges')
+    plt.legend(loc="lower right")
+    plt.savefig("ROC_comparison_final_all_subjects%s.pdf" % (pfx))
+    plt.show()
+
+
+
+    # create pandas data frame from dictionary
+    psubs = pd.DataFrame.from_dict(subs_all,orient="index")
+
+    # export for analysis in R
+    # psubs.to_csv('D:\Studium_GD\Zooniverse\Data\export\subject_meta_dat.csv')
 
     # Inspect extreme subjects with 1.0 or 0.0 score
     for i in range(0,len(controls)):
