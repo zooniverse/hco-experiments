@@ -115,3 +115,4 @@ data/
 *.sublime-workspace
 *.sublime*
 .Rproj.user
+*.Rhistory
