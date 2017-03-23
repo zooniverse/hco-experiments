@@ -7,6 +7,9 @@ from swap.control import Control
 from swap.mongo.query import Query
 from swap.mongo.db import DB
 from swap.agents.subject import Subject
+from swap.agents.agent import Agent
+from swap.agents.tracker import Tracker
+from swap.agents.bureau import Bureau
 
 from swap import ui
 
@@ -18,10 +21,14 @@ gold_0 = [3624432, 3469678, 3287492, 3627326, 3724438]
 
 class Bootstrap:
 
-    def __init__(self, export=None):
+    def __init__(self, t_low, t_high, export=None):
         golds = gold_0 + gold_1
         self.db = DB()
         self.golds = self.db.getExpertGold(golds)
+        self.t_low = t_low
+        self.t_high = t_high
+
+        self.subjects = Bureau(Bootstrap_Subject)
 
     def step(self):
         pass
@@ -29,8 +36,51 @@ class Bootstrap:
     def next(self):
         pass
 
+    def update_tracking(self, export):
+        bureau = self.bureau
+        for subject, item in export['subjects'].items():
+            if bureau.has(subject):
+                agent = bureau.get(subject)
+            else:
+                agent = Bootstrap_Subject(subject)
+                bureau.addAgent(agent)
+
+            agent.add(item['score'])
+
     def silver_update(self, export):
-        pass
+        golds = self.golds
+        low = self.t_low
+        high = self.t_high
+
+        for subject, item in export['subjects'].items():
+            if subject not in golds:
+                if item['score'] < low:
+                    golds[subject] = 0
+                elif item['score'] > high:
+                    golds[subject] = 1
+
+        self.golds = golds
+
+    def gen_control(self):
+        return BootstrapControl(.01, .5, self.golds.items())
+
+
+class Bootstrap_Subject(Agent):
+    def __init__(self, subject_id, gold_label=-1):
+        super().__init__(subject_id, p0)
+        self.gold = gold_label
+        self.tracker = Tracker()
+
+    def add(self, score):
+        self.tracker.add(score)
+
+    def export(self):
+        data = {
+            'score': self.tracker.current(),
+            'history': self.tracker.getHistory()
+        }
+
+        return data
 
 
 def main():
