@@ -7,11 +7,13 @@ import matplotlib.pyplot as plt
 import argparse
 
 
-def run(control):
+def run(control, callback=None, args=None):
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '-p', action='store_true',
         help='Run the SWAP algorithm again, and pickle and save')
+    parser.add_argument(
+        'pickle', help='The filename of the pickled SWAP export')
     parser.add_argument(
         '-s', nargs=1,
         help='Generate subject track plot and output to filename S')
@@ -19,12 +21,16 @@ def run(control):
         '-u', nargs=1,
         help='Generate user track plots and output to filename U')
     parser.add_argument(
+        '--callback', nargs=2,
+        help='Allows custom functionality via callback to calling module')
+    parser.add_argument(
         '--output', nargs=1,
         help='Not instantiated yet')
-    parser.add_argument(
-        'pickle', help='The filename of the pickled SWAP export')
 
-    args = parser.parse_args()
+    if args:
+        args = parser.parse_args(args)
+    else:
+        args = parser.parse_args()
 
     if args.p:
         data = run_swap(control, args.pickle)
@@ -37,6 +43,9 @@ def run(control):
     if args.u:
         plot_users(data, args.u[0])
 
+    if args.callback and callback:
+        callback(data, *args.callback)
+
     if args.output:
         write_output(data, args.output[0])
 
@@ -47,8 +56,8 @@ def load_pickle(fname):
     return data
 
 
-def run_swap(control, fname):
-    # control = Control(.01, .5)
+def run_swap(control_callback, fname):
+    control = control_callback()
     control.process()
 
     data = control.getSWAP().export()
