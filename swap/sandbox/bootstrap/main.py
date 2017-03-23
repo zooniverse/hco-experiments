@@ -12,6 +12,26 @@ from swap import ui
 
 from pprint import pprint
 
+gold_1 = [3328040, 3313220, 2977121, 2943566, 3317607]
+gold_0 = [3624432, 3469678, 3287492, 3627326, 3724438]
+
+
+class Bootstrap:
+
+    def __init__(self, export=None):
+        golds = gold_0 + gold_1
+        self.db = DB()
+        self.golds = self.db.getExpertGold(golds)
+
+    def step(self):
+        pass
+
+    def next(self):
+        pass
+
+    def silver_update(self, export):
+        pass
+
 
 def main():
     def control_callback():
