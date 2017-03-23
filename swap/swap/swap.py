@@ -52,7 +52,7 @@ class SWAP(object):
         self.gold_updates = True
 
     # Process a classification
-    def processOneClassification(self, cl):
+    def processOneClassification(self, cl, subject=True, user=True):
         """
             Processes a single classification
 
@@ -69,8 +69,10 @@ class SWAP(object):
         # ^ moved gold check downstream to update methods
         # User and subject agents weren't being created
         # if the subject's gold label is -1
-        self.updateUserData(cl)
-        self.updateSubjectData(cl)
+        if user:
+            self.updateUserData(cl)
+        if subject:
+            self.updateSubjectData(cl)
 
     def updateUserData(self, cl):
         """
@@ -97,7 +99,7 @@ class SWAP(object):
         user = self.getUserAgent(cl.user)
 
         # process the classification
-        if self.gold_updates and cl.gold() in [0, 1]:
+        if 1 or self.gold_updates and cl.gold() in [0, 1]:
             subject.addClassification(cl, user)
 
     def getUserAgent(self, agent_id):

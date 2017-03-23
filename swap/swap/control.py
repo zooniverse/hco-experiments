@@ -4,7 +4,7 @@
 
 import progressbar
 
-from swap.swap import SWAP
+from swap.swap import SWAP, Classification
 from swap.mongo import DB
 from swap.mongo import Query
 from swap.config import Config
@@ -34,7 +34,7 @@ class Control:
 
         # get classifications
         classifications = self.getClassifications()
-        n_classifications = self.classifications.count()
+        n_classifications = self._n_classifications()
 
         # loop over classification cursor to process
         # classifications one at a time
@@ -45,15 +45,22 @@ class Control:
             # Loop over all classifications of the query
             # Note that the exact size of the query might be lower than
             # n_classifications if not all classifications are being queried
-            for current_classification in classifications:
+            for cl in classifications:
                 # process classification in swap
-                self.swap.processOneClassification(current_classification)
+                cl = Classification.Generate(cl)
+                self._delegate(cl)
                 bar.update(n_class)
                 n_class += 1
                 # if i % 100e3 == 0:
                 #     print("   " + str(i) + "/" + str(n_classifications))
             print("Finished: SWAP Processing %d/%d classifications" %
                   (n_class, n_classifications))
+
+    def _n_classifications(self):
+        return self.classifications.count()
+
+    def _delegate(self, cl):
+        self.swap.processOneClassification(cl)
 
     def getClassifications(self):
         return self._db.getClassifications()
