@@ -30,21 +30,14 @@ class _DB:
         self.classifications = self._db.classifications
         self.subjects = self._db.subjects
 
-    def getClassifications(self, **kwargs):
+    def getClassifications(self, query=None, **kwargs):
         """ Returns Iterator over all Classifications """
+        # Generate a default query if not specified
+        if query is None:
+            query = Query()
 
-        # fields to project
-        if 'fields' in kwargs:
-            fields = kwargs['fields']
-        # only uses default fields if not explicitly
-        # define in kwargs
-        else:
-            fields = ['user_name', 'subject_id', 'annotation']
-
-            # add gold_label to fields if specified in kwargs
-            gold = kwargs.get('gold', True)
-            if gold:
-                fields.append('gold_label')
+            fields = ['user_name', 'subject_id', 'annotation', 'gold_label']
+            query.project(fields)
 
         # set batch size as specified in kwargs,
         # or default to the config default
@@ -52,15 +45,27 @@ class _DB:
             'batch_size',
             self._cfg.database['max_batch_size'])))
 
-        # Define a query
-        q = Query()
-        q.project(fields)
-
         # perform query on classification data
         classifications = self.classifications.aggregate(
-            q.build(), batchSize=batch_size)
+            query.build(), batchSize=batch_size)
 
         return classifications
+
+    def getExpertGold(self, subjects):
+        query = [
+            {'$group': {'_id': '$subject_id',
+                        'gold': {'$first': '$gold_label'}}},
+            {'$match': {'_id': {'$in': subjects}}}]
+
+        cursor = self.classifications.aggregate(query)
+
+        data = []
+        for item in cursor:
+            data.append((item['_id'], item['gold']))
+
+        return data
+
+
 
     def getUserAgent(self, user_id):
         pass
@@ -82,7 +87,6 @@ class Singleton(type):
         if cls not in cls._instances:
             cls._instances[cls] = super(Singleton, cls)\
                 .__call__(*args, **kwargs)
-        print(cls._instances)
         return cls._instances[cls]
 
 

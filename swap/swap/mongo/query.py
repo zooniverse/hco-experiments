@@ -24,10 +24,16 @@ class Query:
             Limits results to documents where the field 'key'
             matches with value
         """
-        if eq:
-            match = {'$match': {key: value}}
+        if type(value) is list:
+            if eq:
+                match = {'$match': {key: {'$in': value}}}
+            else:
+                match = {'$match': {key: {'$nin': value}}}
         else:
-            match = {'$match': {key: {'$ne': value}}}
+            if eq:
+                match = {'$match': {key: value}}
+            else:
+                match = {'$match': {key: {'$ne': value}}}
         self._pipeline.append(match)
         return self
 

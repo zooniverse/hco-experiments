@@ -16,7 +16,7 @@ class Control:
         self._db = DB()
         self._cfg = Config()
         self.classifications = self._db.classifications
-        self.subjects = self._db.subjects
+        # self.subjects = self._db.subjects
         self.swap = SWAP(p0, epsilon)
 
     def process(self):
