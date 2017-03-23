@@ -59,9 +59,9 @@ class _DB:
 
         cursor = self.classifications.aggregate(query)
 
-        data = []
+        data = {}
         for item in cursor:
-            data.append((item['_id'], item['gold']))
+            data[item['_id']] = item['gold']
 
         return data
 

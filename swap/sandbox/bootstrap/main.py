@@ -14,6 +14,46 @@ from pprint import pprint
 
 
 def main():
+    def control_callback():
+        # TODO allow callback to receive golds as arg
+        return BootstrapControl(.01, .5, golds)
+
+    def suite_callback(data, *args):
+        print(args)
+        if args[0] == 'threshold':
+            args = args[1].split(',')
+
+            high = 0
+            low = 0
+            other = 0
+
+            for subject, item in data['subjects'].items():
+                if item['score'] < float(args[0]):
+                    low += 1
+                elif item['score'] > float(args[1]):
+                    high += 1
+                else:
+                    other += 1
+
+            print('high: %d, low: %d, other: %d' % (high, low, other))
+
+        elif args[0] == 'iterate':
+            args = args[1].split(',')
+            min = float(args[0])
+            max = float(args[1])
+
+            for subject, item in data['subjects'].items():
+                if item['gold_label'] in [0, 1]:
+                    continue
+                if item['score'] < min:
+                    golds.append((subject, 0))
+                elif item['score'] > max:
+                    golds.append((subject, 1))
+
+            print(len(golds))
+            ui.run(control_callback, args=[
+                '-p', 'pickle2.pkl'])
+
     # > db.classifications.aggregate([{$group:{_id:'$subject_id'}},{$sample:{size:5}}])
     gold_subjects = [3328040, 3313220, 2977121, 2943566, 3317607]
     gold_subjects += [3624432, 3469678, 3287492, 3627326, 3724438]
@@ -22,8 +62,7 @@ def main():
     golds = db.getExpertGold(gold_subjects)
     print(golds)
 
-    control = BootstrapControl(.01, .5, golds)
-    ui.run(control)
+    ui.run(control_callback, callback=suite_callback)
 
 
 class BootstrapControl(Control):
@@ -42,6 +81,15 @@ class BootstrapControl(Control):
         golds = [item[0] for item in self.golds]
         return BootstrapCursor(self._db, golds)
 
+    def _n_classifications(self):
+        return super()._n_classifications() * 2
+
+    def _delegate(self, cl):
+        if cl.gold() in [0, 1]:
+            self.swap.processOneClassification(cl, user=True, subject=False)
+        else:
+            self.swap.processOneClassification(cl, user=False, subject=True)
+
 
 class BootstrapCursor:
     def __init__(self, db, golds):
@@ -53,10 +101,15 @@ class BootstrapCursor:
         cursor1 = db.getClassifications(query)
 
         fields = ['user_name', 'subject_id', 'annotation']
-        query = Query().match('subject_id', golds, eq=False)
+        # query = Query().match('subject_id', golds, eq=False)
+        query = Query()
         # query._pipeline.append({'$match': {'classification_id': {'$lt': 1321700}}})
         query.project(fields)
         cursor2 = db.getClassifications(query)
+
+        # with open('test.log', 'w') as file:
+        #     pprint(list(cursor1), file)
+        #     pprint(list(cursor2), file)
 
         self.cursors = (cursor1, cursor2)
         self.state = 0
