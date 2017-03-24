@@ -99,8 +99,7 @@ class SWAP(object):
         user = self.getUserAgent(cl.user)
 
         # process the classification
-        if 1 or self.gold_updates and cl.gold() in [0, 1]:
-            subject.addClassification(cl, user)
+        subject.addClassification(cl, user)
 
     def getUserAgent(self, agent_id):
         """
