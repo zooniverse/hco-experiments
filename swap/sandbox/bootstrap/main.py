@@ -19,6 +19,72 @@ gold_1 = [3328040, 3313220, 2977121, 2943566, 3317607]
 gold_0 = [3624432, 3469678, 3287492, 3627326, 3724438]
 
 
+class Interface(ui.Interface):
+    def __init__(self, golds):
+        super().__init__()
+        self.golds = golds
+
+    def call(self):
+        data = super().call()
+        args = self.getArgs()
+
+        if args.threshold:
+            self.threshold(data, args.threshold)
+
+        return data
+
+
+    def options(self):
+        parser = super().options()
+
+        parser.add_argument(
+            '--threshold', nargs=2,
+            help='Print the number of subjects above or below the threshold')
+
+        parser.add_argument(
+            '--iterate', nargs=3,
+            help='Iterate through SWAP with the specified thresholds')
+
+        return parser
+
+    def _control(self):
+        return BootstrapControl(.01, .5, self.golds)
+
+    def threshold(data, threshold):
+        min = threshold[0]
+        max = threshold[1]
+        high = 0
+        low = 0
+        other = 0
+
+        for subject, item in data['subjects'].items():
+            if item['score'] < float(min):
+                low += 1
+            elif item['score'] > float(max):
+                high += 1
+            else:
+                other += 1
+
+        print('high: %d, low: %d, other: %d' % (high, low, other))
+
+    def iterate(data, threshold):
+        min = float(threshold[0])
+        max = float(threshold[1])
+
+        for subject, item in data['subjects'].items():
+            if item['gold_label'] in [0, 1]:
+                continue
+            if item['score'] < min:
+                golds.append((subject, 0))
+            elif item['score'] > max:
+                golds.append((subject, 1))
+
+        print(len(golds))
+        # TODO
+        # ui.run(control_callback, args=[
+        #     '-p', 'pickle2.pkl'])
+
+
 class Bootstrap:
 
     def __init__(self, t_low, t_high, export=None):
@@ -84,46 +150,6 @@ class Bootstrap_Subject(Agent):
 
 
 def main():
-    def control_callback():
-        # TODO allow callback to receive golds as arg
-        return BootstrapControl(.01, .5, golds)
-
-    def suite_callback(data, *args):
-        print(args)
-        if args[0] == 'threshold':
-            args = args[1].split(',')
-
-            high = 0
-            low = 0
-            other = 0
-
-            for subject, item in data['subjects'].items():
-                if item['score'] < float(args[0]):
-                    low += 1
-                elif item['score'] > float(args[1]):
-                    high += 1
-                else:
-                    other += 1
-
-            print('high: %d, low: %d, other: %d' % (high, low, other))
-
-        elif args[0] == 'iterate':
-            args = args[1].split(',')
-            min = float(args[0])
-            max = float(args[1])
-
-            for subject, item in data['subjects'].items():
-                if item['gold_label'] in [0, 1]:
-                    continue
-                if item['score'] < min:
-                    golds.append((subject, 0))
-                elif item['score'] > max:
-                    golds.append((subject, 1))
-
-            print(len(golds))
-            ui.run(control_callback, args=[
-                '-p', 'pickle2.pkl'])
-
     # > db.classifications.aggregate([{$group:{_id:'$subject_id'}},{$sample:{size:5}}])
     gold_subjects = [3328040, 3313220, 2977121, 2943566, 3317607]
     gold_subjects += [3624432, 3469678, 3287492, 3627326, 3724438]
@@ -131,8 +157,9 @@ def main():
     db = DB()
     golds = db.getExpertGold(gold_subjects)
     print(golds)
+    interface = Interface(golds.items())
 
-    ui.run(control_callback, callback=suite_callback)
+    ui.run(interface)
 
 
 class BootstrapControl(Control):
@@ -174,7 +201,7 @@ class BootstrapCursor:
         # query = Query().match('subject_id', golds, eq=False)
         query = Query()
         # query._pipeline.append({'$match': {'classification_id': {'$lt': 1321700}}})
-        query.project(fields)
+        query.match('subject_id', golds, eq=False).project(fields)
         cursor2 = db.getClassifications(query)
 
         # with open('test.log', 'w') as file:

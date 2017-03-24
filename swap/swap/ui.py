@@ -7,47 +7,71 @@ import matplotlib.pyplot as plt
 import argparse
 
 
-def run(control, callback=None, args=None):
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '-p', action='store_true',
-        help='Run the SWAP algorithm again, and pickle and save')
-    parser.add_argument(
-        'pickle', help='The filename of the pickled SWAP export')
-    parser.add_argument(
-        '-s', nargs=1,
-        help='Generate subject track plot and output to filename S')
-    parser.add_argument(
-        '-u', nargs=1,
-        help='Generate user track plots and output to filename U')
-    parser.add_argument(
-        '--callback', nargs=2,
-        help='Allows custom functionality via callback to calling module')
-    parser.add_argument(
-        '--output', nargs=1,
-        help='Not instantiated yet')
+class Interface:
 
-    if args:
-        args = parser.parse_args(args)
-    else:
-        args = parser.parse_args()
+    def __init__(self):
+        self.args = None
+        self.control = None
 
-    if args.p:
-        data = run_swap(control, args.pickle)
-    else:
-        data = load_pickle(args.pickle)
+    def call(self):
+        args = self.getArgs()
 
-    if args.s:
-        plot_subjects(data, args.s[0])
+        if args.p:
+            data = run_swap(self.getControl(), args.pickle)
+        else:
+            data = load_pickle(args.pickle)
 
-    if args.u:
-        plot_users(data, args.u[0])
+        if args.s:
+            plot_subjects(data, args.s[0])
 
-    if args.callback and callback:
-        callback(data, *args.callback)
+        if args.u:
+            plot_users(data, args.u[0])
 
-    if args.output:
-        write_output(data, args.output[0])
+        if args.output:
+            write_output(data, args.output[0])
+
+        return data
+
+    def getControl(self):
+        if self.control is None:
+            self.control = self._control()
+
+        return self.control
+
+    def _control(self):
+        return Control(.01, .5)
+
+    def getArgs(self):
+        if self.args is None:
+            parser = self.options()
+            args = parser.parse_args()
+            self.args = args
+            return args
+        else:
+            return self.args
+
+    def options(self):
+        parser = argparse.ArgumentParser()
+        parser.add_argument(
+            '-p', action='store_true',
+            help='Run the SWAP algorithm again, and pickle and save')
+        parser.add_argument(
+            'pickle', help='The filename of the pickled SWAP export')
+        parser.add_argument(
+            '-s', nargs=1,
+            help='Generate subject track plot and output to filename S')
+        parser.add_argument(
+            '-u', nargs=1,
+            help='Generate user track plots and output to filename U')
+        parser.add_argument(
+            '--output', nargs=1,
+            help='Not instantiated yet')
+
+        return parser
+
+
+def run(interface=Interface):
+    interface.call()
 
 
 def load_pickle(fname):
@@ -56,8 +80,7 @@ def load_pickle(fname):
     return data
 
 
-def run_swap(control_callback, fname):
-    control = control_callback()
+def run_swap(control, fname):
     control.process()
 
     data = control.getSWAP().export()
@@ -138,7 +161,8 @@ def plot_users(export, fname):
 
 def plot_subjects(export, fname):
     print(fname)
-    data = [(d['gold_label'], d['history']) for d in export['subjects'].values()]
+    data = [(d['gold_label'], d['history'])
+            for d in export['subjects'].values()]
     plot_tracks(data, 'Subject Tracks', fname)
 
 
