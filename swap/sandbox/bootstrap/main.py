@@ -31,6 +31,9 @@ class Interface(ui.Interface):
         if args.threshold:
             self.threshold(data, args.threshold)
 
+        if args.iterate:
+            self.iterate(data, args.iterate)
+
         return data
 
 
@@ -42,32 +45,32 @@ class Interface(ui.Interface):
             help='Print the number of subjects above or below the threshold')
 
         parser.add_argument(
-            '--iterate', nargs=3,
+            '--iterate', nargs=2,
             help='Iterate through SWAP with the specified thresholds')
 
         return parser
 
     def _control(self):
-        return BootstrapControl(.01, .5, self.golds)
+        return BootstrapControl(.12, .5, self.golds.items())
 
-    def threshold(data, threshold):
-        min = threshold[0]
-        max = threshold[1]
+    def threshold(self, data, threshold):
+        min = float(threshold[0])
+        max = float(threshold[1])
         high = 0
         low = 0
         other = 0
 
         for subject, item in data['subjects'].items():
-            if item['score'] < float(min):
+            if item['score'] < min:
                 low += 1
-            elif item['score'] > float(max):
+            elif item['score'] > max:
                 high += 1
             else:
                 other += 1
 
         print('high: %d, low: %d, other: %d' % (high, low, other))
 
-    def iterate(data, threshold):
+    def iterate(self, data, threshold):
         min = float(threshold[0])
         max = float(threshold[1])
 
@@ -75,14 +78,20 @@ class Interface(ui.Interface):
             if item['gold_label'] in [0, 1]:
                 continue
             if item['score'] < min:
-                golds.append((subject, 0))
+                self.golds[subject] = 0
             elif item['score'] > max:
-                golds.append((subject, 1))
+                self.golds[subject] = 1
 
-        print(len(golds))
-        # TODO
-        # ui.run(control_callback, args=[
-        #     '-p', 'pickle2.pkl'])
+        print(len(self.golds))
+
+        self.control = None
+        
+        fname = self.getArgs().pickle
+        fname = fname.split('.')
+        fname[0] += '-i'
+        fname = '.'.join(fname)
+
+        ui.run_swap(self.getControl(), fname)
 
 
 class Bootstrap:
@@ -157,7 +166,7 @@ def main():
     db = DB()
     golds = db.getExpertGold(gold_subjects)
     print(golds)
-    interface = Interface(golds.items())
+    interface = Interface(golds)
 
     ui.run(interface)
 
@@ -201,7 +210,8 @@ class BootstrapCursor:
         # query = Query().match('subject_id', golds, eq=False)
         query = Query()
         # query._pipeline.append({'$match': {'classification_id': {'$lt': 1321700}}})
-        query.match('subject_id', golds, eq=False).project(fields)
+        # query.match('subject_id', golds, eq=False).project(fields)
+        query.project(fields)
         cursor2 = db.getClassifications(query)
 
         # with open('test.log', 'w') as file:
