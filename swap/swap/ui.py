@@ -70,8 +70,11 @@ class Interface:
         return parser
 
 
-def run(interface=Interface):
-    interface.call()
+def run(interface=None):
+    if interface:
+        interface.call()
+    else:
+        Interface().call()
 
 
 def load_pickle(fname):
@@ -130,7 +133,7 @@ def combine_user_scores(export, fname):
     name[0] += '-combined'
     name = '.'.join(name)
 
-    plot_tracks(data, 'User Combined Tracks', name, scale='linear')
+    plot_tracks(data, 'User Combined Tracks', name, scale='log')
 
 
 def plot_users(export, fname):
@@ -154,8 +157,8 @@ def plot_users(export, fname):
             'User %d Tracks' % n,
             name, scale='linear')
 
-    plotData(export, 1, fname)
-    plotData(export, 0, fname)
+    # plotData(export, 1, fname)
+    # plotData(export, 0, fname)
     combine_user_scores(export, fname)
 
 
@@ -184,7 +187,7 @@ def plot_tracks(data, title, fname, dpi=600, scale='log'):
             "-",
             color=cmap[gold],
             lw=1,
-            alpha=0.2)
+            alpha=0.1)
 
         count += 1
 
