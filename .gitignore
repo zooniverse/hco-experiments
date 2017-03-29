@@ -105,6 +105,7 @@ data/
 *.mat
 *.csv
 *.txt
+*.pkl
 !requirements.txt
 
 *dump
