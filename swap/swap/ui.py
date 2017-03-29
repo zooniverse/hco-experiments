@@ -5,6 +5,10 @@ import pickle
 from pprint import pprint
 import matplotlib.pyplot as plt
 import argparse
+import numpy as np
+
+from sklearn.metrics import roc_curve
+from sklearn.metrics import auc
 
 
 class Interface:
@@ -221,10 +225,48 @@ def plot_histogram(data, title, fname, dpi=600):
     plt.xlabel('Smarts')
     plt.ylabel('Probability')
     plt.title(r'$\mathrm{Histogram\ of\ IQ:}\ \mu=100,\ \sigma=15$')
-    plt.axis([40, 160, 0, 0.03])
+    plt.axis([0, 1, 0, 10])
     plt.grid(True)
 
     plt.show()
+
+
+def plot_roc(datasets, title, fname, dpi=600):
+    plt.figure()
+
+    # TODO better way to receive multiple datasets
+    if type(datasets) not in [list, tuple]:
+        datasets = (datasets)
+
+    for data in datasets:
+        y_true = []
+        y_score = []
+
+        for i, t in enumerate(data):
+            y_true.append(t[0])
+            y_score.append(t[1])
+
+        y_true = np.array(y_true)
+        y_score = np.array(y_score)
+
+        # Compute fpr, tpr, thresholds and roc auc
+        fpr, tpr, thresholds = roc_curve(y_true, y_score)
+        roc_auc = auc(y_true, y_score, True)
+        # roc_auc = 0
+
+        # Plot ROC curve
+        plt.plot(fpr, tpr, label='ROC curve (area = %0.3f)' % roc_auc)
+
+    plt.plot([0, 1], [0, 1], 'k--')  # random predictions curve
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.0])
+    plt.xlabel('False Positive Rate or (1 - Specifity)')
+    plt.ylabel('True Positive Rate or (Sensitivity)')
+    plt.title('Receiver Operating Characteristic for %s' % title)
+    plt.legend(loc="lower right")
+
+    # plt.show()
+    plt.savefig(fname, dpi=dpi)
 
 
 def write_output(data, fname):
