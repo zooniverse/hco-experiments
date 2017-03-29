@@ -30,10 +30,11 @@ class Interface(ui.Interface):
 
         save_name = False
         if args.saveb:
-            save_name = args.saveb
+            save_name = args.saveb[0]
 
         if args.loadb:
-            bootstrap = ui.load_pickle(args.loadb)
+            bootstrap = ui.load_pickle(args.loadb[0])
+            bootstrap._deserialize()
 
         if args.threshold:
             self.threshold(data, args.threshold)
@@ -118,9 +119,10 @@ class Interface(ui.Interface):
             ui.plot_subjects(swap, 'iterate-%d.png' % i)
 
         if fname:
+            bootstrap._serialize()
             ui.save_pickle(bootstrap, fname)
 
-        self.plot_bootstrap(bootstrap)
+        # self.plot_bootstrap(bootstrap)
 
     def plot_bootstrap(self, bootstrap):
         plot_data = []
@@ -152,6 +154,12 @@ class Bootstrap:
         self.t_high = t_high
 
         self.bureau = Bureau(Bootstrap_Subject)
+
+    def _serialize(self):
+        del self.db
+
+    def _deserialize(self):
+        self.db = DB()
 
     def step(self):
         control = self.gen_control()

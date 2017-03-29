@@ -16,21 +16,22 @@ class Interface:
     def call(self):
         args = self.getArgs()
 
-        if args.p:
-            swap = run_swap(self.getControl(), args.pickle)
-        else:
-            swap = load_pickle(args.pickle)
+        if args.pickle != '-':
+            if args.p:
+                swap = run_swap(self.getControl(), args.pickle)
+            else:
+                swap = load_pickle(args.pickle)
 
-        if args.s:
-            plot_subjects(swap, args.s[0])
+            if args.s:
+                plot_subjects(swap, args.s[0])
 
-        if args.u:
-            plot_users(swap, args.u[0])
+            if args.u:
+                plot_users(swap, args.u[0])
 
-        if args.output:
-            write_output(swap, args.output[0])
+            if args.output:
+                write_output(swap, args.output[0])
 
-        return swap
+            return swap
 
     def getControl(self):
         if self.control is None:
