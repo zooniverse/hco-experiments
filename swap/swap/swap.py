@@ -183,6 +183,18 @@ class SWAP(object):
             'subjects': self.subjects.export()
         }
 
+    def roc_export(self):
+        bureau = self.subjects
+
+        data = []
+        for s in bureau:
+            gold = s.getGoldLabel()
+            score = s.getScore()
+            if gold != -1:
+                data.append((gold, score))
+
+        return data
+
     def verifyClassification(self, cl):
         """
             Verify classification is compatible with current

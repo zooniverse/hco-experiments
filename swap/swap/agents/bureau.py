@@ -23,7 +23,7 @@ class Bureau(object):
         self.agents = dict()
 
     def __iter__(self):
-        return self.agents
+        return iter(self.agents.values())
 
     def addAgent(self, agent):
         """
