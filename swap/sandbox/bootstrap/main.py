@@ -32,10 +32,9 @@ class Interface(ui.Interface):
             self.threshold(data, args.threshold)
 
         if args.iterate:
-            self.iterate(data, args.iterate)
+            self.iterate(args.iterate)
 
         return data
-
 
     def options(self):
         parser = super().options()
@@ -45,7 +44,7 @@ class Interface(ui.Interface):
             help='Print the number of subjects above or below the threshold')
 
         parser.add_argument(
-            '--iterate', nargs=2,
+            '--iterate', nargs=3,
             help='Iterate through SWAP with the specified thresholds')
 
         return parser
@@ -70,28 +69,50 @@ class Interface(ui.Interface):
 
         print('high: %d, low: %d, other: %d' % (high, low, other))
 
-    def iterate(self, data, threshold):
-        min = float(threshold[0])
-        max = float(threshold[1])
+    # def iterate(self, data, threshold):
+    #     min = float(threshold[0])
+    #     max = float(threshold[1])
 
-        for subject, item in data['subjects'].items():
-            if item['gold_label'] in [0, 1]:
-                continue
-            if item['score'] < min:
-                self.golds[subject] = 0
-            elif item['score'] > max:
-                self.golds[subject] = 1
+    #     for subject, item in data['subjects'].items():
+    #         if item['gold_label'] in [0, 1]:
+    #             continue
+    #         if item['score'] < min:
+    #             self.golds[subject] = 0
+    #         elif item['score'] > max:
+    #             self.golds[subject] = 1
 
-        print(len(self.golds))
+    #     print(len(self.golds))
 
-        self.control = None
+    #     self.control = None
         
-        fname = self.getArgs().pickle
-        fname = fname.split('.')
-        fname[0] += '-i'
-        fname = '.'.join(fname)
+    #     fname = self.getArgs().pickle
+    #     fname = fname.split('.')
+    #     fname[0] += '-i'
+    #     fname = '.'.join(fname)
 
-        ui.run_swap(self.getControl(), fname)
+    #     ui.run_swap(self.getControl(), fname)
+
+    def iterate(self, threshold):
+        low = float(threshold[0])
+        high = float(threshold[1])
+        n = int(threshold[2])
+        bootstrap = Bootstrap(low, high)
+
+        for i in range(n):
+            swap = bootstrap.step()
+            ui.plot_subjects(swap, 'iterate-%d.png' % i)
+
+        plot_data = []
+        for subject, value in bootstrap.export().items():
+            if subject in bootstrap.golds:
+                c = bootstrap.golds[subject]
+            else:
+                c = 2
+
+            history = value['history']
+            plot_data.append((c, history))
+
+        ui.plot_tracks(plot_data, "Test", 'test-2.png', scale='linear')
 
 
 class Bootstrap:
@@ -103,10 +124,19 @@ class Bootstrap:
         self.t_low = t_low
         self.t_high = t_high
 
-        self.subjects = Bureau(Bootstrap_Subject)
+        self.bureau = Bureau(Bootstrap_Subject)
 
     def step(self):
-        pass
+        control = self.gen_control()
+        control.process()
+
+        swap = control.getSWAP()
+        export = swap.export()
+
+        self.silver_update(swap.export())
+        self.update_tracking(export)
+
+        return swap
 
     def next(self):
         pass
@@ -115,7 +145,7 @@ class Bootstrap:
         bureau = self.bureau
         for subject, item in export['subjects'].items():
             if bureau.has(subject):
-                agent = bureau.get(subject)
+                agent = bureau.getAgent(subject)
             else:
                 agent = Bootstrap_Subject(subject)
                 bureau.addAgent(agent)
@@ -139,10 +169,13 @@ class Bootstrap:
     def gen_control(self):
         return BootstrapControl(.01, .5, self.golds.items())
 
+    def export(self):
+        return self.bureau.export()
+
 
 class Bootstrap_Subject(Agent):
     def __init__(self, subject_id, gold_label=-1):
-        super().__init__(subject_id, p0)
+        super().__init__(subject_id, 0)
         self.gold = gold_label
         self.tracker = Tracker()
 

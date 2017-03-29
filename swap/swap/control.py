@@ -12,12 +12,16 @@ from swap.config import Config
 
 class Control:
 
-    def __init__(self, p0, epsilon):
+    def __init__(self, p0, epsilon, swap=None):
         self._db = DB()
         self._cfg = Config()
         self.classifications = self._db.classifications
         # self.subjects = self._db.subjects
-        self.swap = SWAP(p0, epsilon)
+
+        if swap is None:
+            self.swap = SWAP(p0, epsilon)
+        else:
+            self.swap = swap
 
     def process(self):
         """
@@ -68,6 +72,12 @@ class Control:
     def getSWAP(self):
         """ Returns SWAP object """
         return self.swap
+
+    def setSWAP(self, swap):
+        """
+        Set the SWAP object
+        """
+        self.swap = swap
 
     # def getClassifications(self):
     #     """ Returns Iterator over all Classifications """

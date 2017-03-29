@@ -22,6 +22,9 @@ class Bureau(object):
         # dictionary to store all agents, key is agent-ID
         self.agents = dict()
 
+    def __iter__(self):
+        return self.agents
+
     def addAgent(self, agent):
         """
             Add agent to bureau

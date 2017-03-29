@@ -17,20 +17,20 @@ class Interface:
         args = self.getArgs()
 
         if args.p:
-            data = run_swap(self.getControl(), args.pickle)
+            swap = run_swap(self.getControl(), args.pickle)
         else:
-            data = load_pickle(args.pickle)
+            swap = load_pickle(args.pickle)
 
         if args.s:
-            plot_subjects(data, args.s[0])
+            plot_subjects(swap, args.s[0])
 
         if args.u:
-            plot_users(data, args.u[0])
+            plot_users(swap, args.u[0])
 
         if args.output:
-            write_output(data, args.output[0])
+            write_output(swap, args.output[0])
 
-        return data
+        return swap
 
     def getControl(self):
         if self.control is None:
@@ -83,17 +83,18 @@ def load_pickle(fname):
     return data
 
 
+def save_pickle(swap, fname):
+    with open(fname, 'wb') as file:
+        pickle.dump(swap, file)
+
+
 def run_swap(control, fname):
     control.process()
+    swap = control.getSWAP()
 
-    data = control.getSWAP().export()
-    # with open('log', 'w') as file:
-    #     yaml.dump(data, file)
+    save_pickle(swap, fname)
 
-    with open(fname, 'wb') as file:
-        pickle.dump(data, file)
-
-    return data
+    return swap
 
 
 def find_errors():
@@ -114,7 +115,8 @@ def find_errors():
         pprint(interest, file)
 
 
-def combine_user_scores(export, fname):
+def combine_user_scores(swap, fname):
+    export = swap.export()
     data = []
     for item in export['users'].values():
         h0 = item['score_0_history']
@@ -136,7 +138,8 @@ def combine_user_scores(export, fname):
     plot_tracks(data, 'User Combined Tracks', name, scale='log')
 
 
-def plot_users(export, fname):
+def plot_users(swap, fname):
+    export = swap.export()
     def getData(data, n):
         data = []
         for item in export['users'].values():
@@ -162,7 +165,8 @@ def plot_users(export, fname):
     combine_user_scores(export, fname)
 
 
-def plot_subjects(export, fname):
+def plot_subjects(swap, fname):
+    export = swap.export()
     print(fname)
     data = [(d['gold_label'], d['history'])
             for d in export['subjects'].values()]
@@ -171,7 +175,7 @@ def plot_subjects(export, fname):
 
 def plot_tracks(data, title, fname, dpi=600, scale='log'):
     """ Plot subject tracks """
-    cmap = ["#669D31", "#F00200"]
+    cmap = ["#669D31", "#F00200", "#000000"]
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
