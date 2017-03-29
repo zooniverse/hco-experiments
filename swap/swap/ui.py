@@ -178,7 +178,7 @@ def plot_subjects(swap, fname):
     plot_tracks(data, 'Subject Tracks', fname)
 
 
-def plot_tracks(data, title, fname, dpi=600, scale='log'):
+def plot_tracks(data, title, fname, dpi=300, scale='log'):
     """ Plot subject tracks """
     cmap = ["#669D31", "#F00200", "#000000"]
 
@@ -212,7 +212,7 @@ def plot_tracks(data, title, fname, dpi=600, scale='log'):
     # plt.show()
 
 
-def plot_histogram(data, title, fname, dpi=600):
+def plot_histogram(data, title, fname, dpi=300):
     # the histogram of the data
     n, bins, patches = plt.hist(
         data, 50, normed=1,
@@ -231,7 +231,7 @@ def plot_histogram(data, title, fname, dpi=600):
     plt.show()
 
 
-def plot_roc(datasets, title, fname, dpi=600):
+def plot_roc(datasets, title, fname, dpi=300):
     plt.figure()
 
     # TODO better way to receive multiple datasets

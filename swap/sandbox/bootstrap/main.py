@@ -232,6 +232,8 @@ class Bootstrap:
 
         self.bureau = Bureau(Bootstrap_Subject)
 
+        self.metrics = []
+
     def _serialize(self):
         del self.db
 
@@ -247,6 +249,8 @@ class Bootstrap:
 
         self.silver_update(swap.export())
         self.update_tracking(export)
+
+        self.addMetric()
 
         return swap
 
@@ -304,6 +308,15 @@ class Bootstrap:
 
         return data
 
+    def addMetric(self):
+        i = len(self.metrics) + 1
+        metric = Bootstrap_Metric(i, self)
+        self.metrics.append(metric)
+
+    def printMetrics(self):
+        for m in self.metrics:
+            print(m.num_golds())
+
 
 class Bootstrap_Subject(Agent):
     def __init__(self, subject_id, gold_label=-1):
@@ -325,6 +338,23 @@ class Bootstrap_Subject(Agent):
 
     def getScore(self):
         return self.tracker.current()
+
+
+class Bootstrap_Metric:
+    def __init__(self, i, bootstrap):
+        self.iteration = i
+        self.golds = bootstrap.golds
+
+    def num_golds(self):
+        count = [0, 0]
+        golds = self.golds
+
+        for gold in golds.values():
+            count[gold] += 1
+
+        remaining = DB().getNSubjects() - sum(count)
+
+        return (count[0], count[1], remaining)
 
 
 def main():
