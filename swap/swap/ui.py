@@ -83,9 +83,9 @@ def load_pickle(fname):
     return data
 
 
-def save_pickle(swap, fname):
+def save_pickle(object, fname):
     with open(fname, 'wb') as file:
-        pickle.dump(swap, file)
+        pickle.dump(object, file)
 
 
 def run_swap(control, fname):
@@ -205,6 +205,25 @@ def plot_tracks(data, title, fname, dpi=600, scale='log'):
 
     plt.savefig(fname, dpi=dpi)
     # plt.show()
+
+
+def plot_histogram(data, title, fname, dpi=600):
+    # the histogram of the data
+    n, bins, patches = plt.hist(
+        data, 50, normed=1,
+        facecolor='green', alpha=0.75)
+
+    # add a 'best fit' line
+    # y = mlab.normpdf( bins, mu, sigma)
+    # l = plt.plot(bins, y, 'r--', linewidth=1)
+
+    plt.xlabel('Smarts')
+    plt.ylabel('Probability')
+    plt.title(r'$\mathrm{Histogram\ of\ IQ:}\ \mu=100,\ \sigma=15$')
+    plt.axis([40, 160, 0, 0.03])
+    plt.grid(True)
+
+    plt.show()
 
 
 def write_output(data, fname):

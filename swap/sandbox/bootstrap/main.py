@@ -28,11 +28,18 @@ class Interface(ui.Interface):
         data = super().call()
         args = self.getArgs()
 
+        save_name = False
+        if args.saveb:
+            save_name = args.saveb
+
+        if args.loadb:
+            bootstrap = ui.load_pickle(args.loadb)
+
         if args.threshold:
             self.threshold(data, args.threshold)
 
         if args.iterate:
-            self.iterate(args.iterate)
+            self.iterate(args.iterate, save_name)
 
         return data
 
@@ -46,6 +53,14 @@ class Interface(ui.Interface):
         parser.add_argument(
             '--iterate', nargs=3,
             help='Iterate through SWAP with the specified thresholds')
+
+        parser.add_argument(
+            '--loadb', nargs=1,
+            help='load a pickled bootstrap from file')
+
+        parser.add_argument(
+            '--saveb', nargs=1,
+            help='load a pickled bootstrap from file')
 
         return parser
 
@@ -92,7 +107,7 @@ class Interface(ui.Interface):
 
     #     ui.run_swap(self.getControl(), fname)
 
-    def iterate(self, threshold):
+    def iterate(self, threshold, fname=False):
         low = float(threshold[0])
         high = float(threshold[1])
         n = int(threshold[2])
@@ -102,6 +117,12 @@ class Interface(ui.Interface):
             swap = bootstrap.step()
             ui.plot_subjects(swap, 'iterate-%d.png' % i)
 
+        if fname:
+            ui.save_pickle(bootstrap, fname)
+
+        self.plot_bootstrap(bootstrap)
+
+    def plot_bootstrap(self, bootstrap):
         plot_data = []
         for subject, value in bootstrap.export().items():
             if subject in bootstrap.golds:
@@ -113,6 +134,12 @@ class Interface(ui.Interface):
             plot_data.append((c, history))
 
         ui.plot_tracks(plot_data, "Test", 'test-2.png', scale='linear')
+
+        plot_data = []
+        for subject in bootstrap.export().values():
+            plot_data.append(subject['score'])
+
+        ui.plot_histogram(plot_data, None, None)
 
 
 class Bootstrap:
