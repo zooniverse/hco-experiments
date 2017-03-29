@@ -35,12 +35,23 @@ class Interface(ui.Interface):
         if args.loadb:
             bootstrap = ui.load_pickle(args.loadb[0])
             bootstrap._deserialize()
+        else:
+            bootstrap = None
 
         if args.threshold:
             self.threshold(data, args.threshold)
 
         if args.iterate:
-            self.iterate(args.iterate, save_name)
+            bootstrap = self.iterate(args.iterate, save_name)
+
+        if args.histogram and bootstrap:
+            self.plot_bootstrap(bootstrap, args.histogram[0])
+
+        if args.roc and bootstrap:
+            if args.roc[1] != '-':
+                self.roc(bootstrap, args.roc[0], swap_f=args.roc[1])
+            else:
+                self.roc(bootstrap, args.roc[0])
 
         return data
 
@@ -62,6 +73,13 @@ class Interface(ui.Interface):
         parser.add_argument(
             '--saveb', nargs=1,
             help='load a pickled bootstrap from file')
+
+        parser.add_argument(
+            '--histogram', nargs=1,
+            help='Draw a histogram of bootstrap data')
+
+        parser.add_argument(
+            '--roc', nargs=2)
 
         return parser
 
@@ -122,26 +140,85 @@ class Interface(ui.Interface):
             bootstrap._serialize()
             ui.save_pickle(bootstrap, fname)
 
+        return bootstrap
+
         # self.plot_bootstrap(bootstrap)
 
-    def plot_bootstrap(self, bootstrap):
-        plot_data = []
-        for subject, value in bootstrap.export().items():
-            if subject in bootstrap.golds:
-                c = bootstrap.golds[subject]
-            else:
-                c = 2
+    def plot_bootstrap(self, bootstrap, fname):
+        # plot_data = []
+        # for subject, value in bootstrap.export().items():
+        #     if subject in bootstrap.golds:
+        #         c = bootstrap.golds[subject]
+        #     else:
+        #         c = 2
 
-            history = value['history']
-            plot_data.append((c, history))
+        #     history = value['history']
+        #     plot_data.append((c, history))
 
-        ui.plot_tracks(plot_data, "Test", 'test-2.png', scale='linear')
+        # ui.plot_tracks(plot_data, "Test", 'test-2.png', scale='linear')
 
         plot_data = []
         for subject in bootstrap.export().values():
             plot_data.append(subject['score'])
 
+        # print(plot_data)
+
         ui.plot_histogram(plot_data, None, None)
+
+    def roc(self, bootstrap, fname, swap_f=None):
+        data = bootstrap.roc_export()
+
+        swap_data = None
+        if swap_f:
+            swap = ui.load_pickle(swap_f)
+            swap_data = swap.roc_export()
+            ui.plot_roc((data, swap_data), 'Bootstrap', fname)
+        else:
+            ui.plot_roc([data], 'Bootstrap', fname)
+
+    # def roc(self, bootstrap):
+    #     from sklearn.metrics import roc_curve
+    #     from sklearn.metrics import auc
+    #     import numpy as np
+
+    #     bureau = bootstrap.bureau
+
+    #     cursor = DB().classifications.aggregate([
+    #         {'$match': {'gold_label': {'$ne': -1}}},
+    #         {'$group': {'_id': '$subject_id', 'gold':
+    #                     {'$first': '$gold_label'}}},
+    #     ])
+
+    #     y_true = []
+    #     y_score = []
+    #     for item in cursor:
+    #         subject = item['_id']
+    #         if bureau.has(subject):
+    #             bureau.getAgent(subject).gold = item['gold']
+
+    #     data = []
+    #     for s in bureau.export().values():
+    #         if s['gold'] != -1:
+    #             data.append((s['gold'], s['score']))
+
+    #     y_true = np.array([i[0] for i in data])
+    #     y_score = np.array([i[1] for i in data])
+
+    #     # Compute fpr, tpr, thresholds and roc auc
+    #     fpr, tpr, thresholds = roc_curve(y_true, y_score)
+    #     roc_auc = auc(y_true, y_score, True)
+    #     # roc_auc = 0
+
+    #     # Plot ROC curve
+    #     ui.plt.plot(fpr, tpr, label='ROC curve (area = %0.3f)' % roc_auc)
+    #     ui.plt.plot([0, 1], [0, 1], 'k--')  # random predictions curve
+    #     ui.plt.xlim([0.0, 1.0])
+    #     ui.plt.ylim([0.0, 1.0])
+    #     ui.plt.xlabel('False Positive Rate or (1 - Specifity)')
+    #     ui.plt.ylabel('True Positive Rate or (Sensitivity)')
+    #     ui.plt.title('Receiver Operating Characteristic')
+    #     ui.plt.legend(loc="lower right")
+    #     ui.plt.show()
 
 
 class Bootstrap:
@@ -207,6 +284,26 @@ class Bootstrap:
     def export(self):
         return self.bureau.export()
 
+    def roc_export(self):
+        bureau = self.bureau
+        cursor = DB().classifications.aggregate([
+            {'$match': {'gold_label': {'$ne': -1}}},
+            {'$group': {'_id': '$subject_id', 'gold':
+                        {'$first': '$gold_label'}}},
+        ])
+
+        for item in cursor:
+            subject = item['_id']
+            if bureau.has(subject):
+                bureau.getAgent(subject).gold = item['gold']
+
+        data = []
+        for s in bureau:
+            if s.gold != -1:
+                data.append((s.gold, s.getScore()))
+
+        return data
+
 
 class Bootstrap_Subject(Agent):
     def __init__(self, subject_id, gold_label=-1):
@@ -220,10 +317,14 @@ class Bootstrap_Subject(Agent):
     def export(self):
         data = {
             'score': self.tracker.current(),
-            'history': self.tracker.getHistory()
+            'history': self.tracker.getHistory(),
+            'gold': self.gold
         }
 
         return data
+
+    def getScore(self):
+        return self.tracker.current()
 
 
 def main():
