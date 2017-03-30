@@ -44,8 +44,8 @@ class Interface(ui.Interface):
         if args.iterate:
             bootstrap = self.iterate(args.iterate, save_name)
 
-        if args.histogram and bootstrap:
-            self.plot_bootstrap(bootstrap, args.histogram[0])
+        if args.traces and bootstrap:
+            self.plot_bootstrap(bootstrap, args.traces[0])
 
         if args.roc and bootstrap:
             if args.roc[1] != '-':
@@ -65,6 +65,9 @@ class Interface(ui.Interface):
         parser.add_argument(
             '--iterate', nargs=3,
             help='Iterate through SWAP with the specified thresholds')
+
+        parser.add_argument(
+            '--traces', nargs=1)
 
         parser.add_argument(
             '--loadb', nargs=1,
@@ -145,25 +148,25 @@ class Interface(ui.Interface):
         # self.plot_bootstrap(bootstrap)
 
     def plot_bootstrap(self, bootstrap, fname):
-        # plot_data = []
-        # for subject, value in bootstrap.export().items():
-        #     if subject in bootstrap.golds:
-        #         c = bootstrap.golds[subject]
-        #     else:
-        #         c = 2
-
-        #     history = value['history']
-        #     plot_data.append((c, history))
-
-        # ui.plot_tracks(plot_data, "Test", 'test-2.png', scale='linear')
-
         plot_data = []
-        for subject in bootstrap.export().values():
-            plot_data.append(subject['score'])
+        for subject, value in bootstrap.export().items():
+            if subject in bootstrap.golds:
+                c = bootstrap.golds[subject]
+            else:
+                c = 2
 
-        # print(plot_data)
+            history = value['history']
+            plot_data.append((c, history))
 
-        ui.plot_histogram(plot_data, None, None)
+        ui.plot_tracks(plot_data, "Bootstrap Traces", fname, scale='linear')
+
+        # plot_data = []
+        # for subject in bootstrap.export().values():
+        #     plot_data.append(subject['score'])
+
+        # # print(plot_data)
+
+        # ui.plot_histogram(plot_data, None, None)
 
     def roc(self, bootstrap, fname, swap_f=None):
         data = bootstrap.roc_export()
@@ -343,7 +346,10 @@ class Bootstrap_Subject(Agent):
 class Bootstrap_Metric:
     def __init__(self, i, bootstrap):
         self.iteration = i
-        self.golds = bootstrap.golds
+        golds = {}
+        for k, v in bootstrap.golds.items():
+            golds[k] = v
+        self.golds = golds
 
     def num_golds(self):
         count = [0, 0]
