@@ -65,6 +65,12 @@ class _DB:
 
         return data
 
+    def getNSubjects(self):
+        query = [
+            {'$group': {'_id': '', 'num': {'$sum': 1}}}]
+        cursor = self.classifications.aggregate(query)
+
+        return cursor.next()['num']
 
 
     def getUserAgent(self, user_id):

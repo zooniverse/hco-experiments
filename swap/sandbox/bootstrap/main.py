@@ -28,14 +28,32 @@ class Interface(ui.Interface):
         data = super().call()
         args = self.getArgs()
 
+        save_name = False
+        if args.saveb:
+            save_name = args.saveb[0]
+
+        if args.loadb:
+            bootstrap = ui.load_pickle(args.loadb[0])
+            bootstrap._deserialize()
+        else:
+            bootstrap = None
+
         if args.threshold:
             self.threshold(data, args.threshold)
 
         if args.iterate:
-            self.iterate(data, args.iterate)
+            bootstrap = self.iterate(args.iterate, save_name)
+
+        if args.traces and bootstrap:
+            self.plot_bootstrap(bootstrap, args.traces[0])
+
+        if args.roc and bootstrap:
+            if args.roc[1] != '-':
+                self.roc(bootstrap, args.roc[0], swap_f=args.roc[1])
+            else:
+                self.roc(bootstrap, args.roc[0])
 
         return data
-
 
     def options(self):
         parser = super().options()
@@ -45,8 +63,26 @@ class Interface(ui.Interface):
             help='Print the number of subjects above or below the threshold')
 
         parser.add_argument(
-            '--iterate', nargs=2,
+            '--iterate', nargs=3,
             help='Iterate through SWAP with the specified thresholds')
+
+        parser.add_argument(
+            '--traces', nargs=1)
+
+        parser.add_argument(
+            '--loadb', nargs=1,
+            help='load a pickled bootstrap from file')
+
+        parser.add_argument(
+            '--saveb', nargs=1,
+            help='load a pickled bootstrap from file')
+
+        parser.add_argument(
+            '--histogram', nargs=1,
+            help='Draw a histogram of bootstrap data')
+
+        parser.add_argument(
+            '--roc', nargs=2)
 
         return parser
 
@@ -70,28 +106,122 @@ class Interface(ui.Interface):
 
         print('high: %d, low: %d, other: %d' % (high, low, other))
 
-    def iterate(self, data, threshold):
-        min = float(threshold[0])
-        max = float(threshold[1])
+    # def iterate(self, data, threshold):
+    #     min = float(threshold[0])
+    #     max = float(threshold[1])
 
-        for subject, item in data['subjects'].items():
-            if item['gold_label'] in [0, 1]:
-                continue
-            if item['score'] < min:
-                self.golds[subject] = 0
-            elif item['score'] > max:
-                self.golds[subject] = 1
+    #     for subject, item in data['subjects'].items():
+    #         if item['gold_label'] in [0, 1]:
+    #             continue
+    #         if item['score'] < min:
+    #             self.golds[subject] = 0
+    #         elif item['score'] > max:
+    #             self.golds[subject] = 1
 
-        print(len(self.golds))
+    #     print(len(self.golds))
 
-        self.control = None
+    #     self.control = None
         
-        fname = self.getArgs().pickle
-        fname = fname.split('.')
-        fname[0] += '-i'
-        fname = '.'.join(fname)
+    #     fname = self.getArgs().pickle
+    #     fname = fname.split('.')
+    #     fname[0] += '-i'
+    #     fname = '.'.join(fname)
 
-        ui.run_swap(self.getControl(), fname)
+    #     ui.run_swap(self.getControl(), fname)
+
+    def iterate(self, threshold, fname=False):
+        low = float(threshold[0])
+        high = float(threshold[1])
+        n = int(threshold[2])
+        bootstrap = Bootstrap(low, high)
+
+        for i in range(n):
+            swap = bootstrap.step()
+            ui.plot_subjects(swap, 'iterate-%d.png' % i)
+
+        if fname:
+            bootstrap._serialize()
+            ui.save_pickle(bootstrap, fname)
+
+        return bootstrap
+
+        # self.plot_bootstrap(bootstrap)
+
+    def plot_bootstrap(self, bootstrap, fname):
+        plot_data = []
+        for subject, value in bootstrap.export().items():
+            if subject in bootstrap.golds:
+                c = bootstrap.golds[subject]
+            else:
+                c = 2
+
+            history = value['history']
+            plot_data.append((c, history))
+
+        ui.plot_tracks(plot_data, "Bootstrap Traces", fname, scale='linear')
+
+        # plot_data = []
+        # for subject in bootstrap.export().values():
+        #     plot_data.append(subject['score'])
+
+        # # print(plot_data)
+
+        # ui.plot_histogram(plot_data, None, None)
+
+    def roc(self, bootstrap, fname, swap_f=None):
+        data = bootstrap.roc_export()
+
+        swap_data = None
+        if swap_f:
+            swap = ui.load_pickle(swap_f)
+            swap_data = swap.roc_export()
+            ui.plot_roc((data, swap_data), 'Bootstrap', fname)
+        else:
+            ui.plot_roc([data], 'Bootstrap', fname)
+
+    # def roc(self, bootstrap):
+    #     from sklearn.metrics import roc_curve
+    #     from sklearn.metrics import auc
+    #     import numpy as np
+
+    #     bureau = bootstrap.bureau
+
+    #     cursor = DB().classifications.aggregate([
+    #         {'$match': {'gold_label': {'$ne': -1}}},
+    #         {'$group': {'_id': '$subject_id', 'gold':
+    #                     {'$first': '$gold_label'}}},
+    #     ])
+
+    #     y_true = []
+    #     y_score = []
+    #     for item in cursor:
+    #         subject = item['_id']
+    #         if bureau.has(subject):
+    #             bureau.getAgent(subject).gold = item['gold']
+
+    #     data = []
+    #     for s in bureau.export().values():
+    #         if s['gold'] != -1:
+    #             data.append((s['gold'], s['score']))
+
+    #     y_true = np.array([i[0] for i in data])
+    #     y_score = np.array([i[1] for i in data])
+
+    #     # Compute fpr, tpr, thresholds and roc auc
+    #     fpr, tpr, thresholds = roc_curve(y_true, y_score)
+    #     roc_auc = auc(y_true, y_score, True)
+    #     # roc_auc = 0
+
+    #     # Plot ROC curve
+    #     ui.plt.plot(fpr, tpr, label='ROC curve (area = %0.3f)' % roc_auc)
+    #     ui.plt.plot([0, 1], [0, 1], 'k--')  # random predictions curve
+    #     ui.plt.xlim([0.0, 1.0])
+    #     ui.plt.ylim([0.0, 1.0])
+    #     ui.plt.xlabel('False Positive Rate or (1 - Specifity)')
+    #     ui.plt.ylabel('True Positive Rate or (Sensitivity)')
+    #     ui.plt.title('Receiver Operating Characteristic')
+    #     ui.plt.legend(loc="lower right")
+    #     ui.plt.show()
 
 
 class Bootstrap:
@@ -103,10 +233,29 @@ class Bootstrap:
         self.t_low = t_low
         self.t_high = t_high
 
-        self.subjects = Bureau(Bootstrap_Subject)
+        self.bureau = Bureau(Bootstrap_Subject)
+
+        self.metrics = []
+
+    def _serialize(self):
+        del self.db
+
+    def _deserialize(self):
+        self.db = DB()
 
     def step(self):
-        pass
+        control = self.gen_control()
+        control.process()
+
+        swap = control.getSWAP()
+        export = swap.export()
+
+        self.silver_update(swap.export())
+        self.update_tracking(export)
+
+        self.addMetric()
+
+        return swap
 
     def next(self):
         pass
@@ -115,7 +264,7 @@ class Bootstrap:
         bureau = self.bureau
         for subject, item in export['subjects'].items():
             if bureau.has(subject):
-                agent = bureau.get(subject)
+                agent = bureau.getAgent(subject)
             else:
                 agent = Bootstrap_Subject(subject)
                 bureau.addAgent(agent)
@@ -139,10 +288,42 @@ class Bootstrap:
     def gen_control(self):
         return BootstrapControl(.01, .5, self.golds.items())
 
+    def export(self):
+        return self.bureau.export()
+
+    def roc_export(self):
+        bureau = self.bureau
+        cursor = DB().classifications.aggregate([
+            {'$match': {'gold_label': {'$ne': -1}}},
+            {'$group': {'_id': '$subject_id', 'gold':
+                        {'$first': '$gold_label'}}},
+        ])
+
+        for item in cursor:
+            subject = item['_id']
+            if bureau.has(subject):
+                bureau.getAgent(subject).gold = item['gold']
+
+        data = []
+        for s in bureau:
+            if s.gold != -1:
+                data.append((s.gold, s.getScore()))
+
+        return data
+
+    def addMetric(self):
+        i = len(self.metrics) + 1
+        metric = Bootstrap_Metric(i, self)
+        self.metrics.append(metric)
+
+    def printMetrics(self):
+        for m in self.metrics:
+            print(m.num_golds())
+
 
 class Bootstrap_Subject(Agent):
     def __init__(self, subject_id, gold_label=-1):
-        super().__init__(subject_id, p0)
+        super().__init__(subject_id, 0)
         self.gold = gold_label
         self.tracker = Tracker()
 
@@ -152,10 +333,34 @@ class Bootstrap_Subject(Agent):
     def export(self):
         data = {
             'score': self.tracker.current(),
-            'history': self.tracker.getHistory()
+            'history': self.tracker.getHistory(),
+            'gold': self.gold
         }
 
         return data
+
+    def getScore(self):
+        return self.tracker.current()
+
+
+class Bootstrap_Metric:
+    def __init__(self, i, bootstrap):
+        self.iteration = i
+        golds = {}
+        for k, v in bootstrap.golds.items():
+            golds[k] = v
+        self.golds = golds
+
+    def num_golds(self):
+        count = [0, 0]
+        golds = self.golds
+
+        for gold in golds.values():
+            count[gold] += 1
+
+        remaining = DB().getNSubjects() - sum(count)
+
+        return (count[0], count[1], remaining)
 
 
 def main():

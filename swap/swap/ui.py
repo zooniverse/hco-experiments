@@ -5,6 +5,10 @@ import pickle
 from pprint import pprint
 import matplotlib.pyplot as plt
 import argparse
+import numpy as np
+
+from sklearn.metrics import roc_curve
+from sklearn.metrics import auc
 
 
 class Interface:
@@ -16,21 +20,22 @@ class Interface:
     def call(self):
         args = self.getArgs()
 
-        if args.p:
-            data = run_swap(self.getControl(), args.pickle)
-        else:
-            data = load_pickle(args.pickle)
+        if args.pickle != '-':
+            if args.p:
+                swap = run_swap(self.getControl(), args.pickle)
+            else:
+                swap = load_pickle(args.pickle)
 
-        if args.s:
-            plot_subjects(data, args.s[0])
+            if args.s:
+                plot_subjects(swap, args.s[0])
 
-        if args.u:
-            plot_users(data, args.u[0])
+            if args.u:
+                plot_users(swap, args.u[0])
 
-        if args.output:
-            write_output(data, args.output[0])
+            if args.output:
+                write_output(swap, args.output[0])
 
-        return data
+            return swap
 
     def getControl(self):
         if self.control is None:
@@ -83,17 +88,18 @@ def load_pickle(fname):
     return data
 
 
+def save_pickle(object, fname):
+    with open(fname, 'wb') as file:
+        pickle.dump(object, file)
+
+
 def run_swap(control, fname):
     control.process()
+    swap = control.getSWAP()
 
-    data = control.getSWAP().export()
-    # with open('log', 'w') as file:
-    #     yaml.dump(data, file)
+    save_pickle(swap, fname)
 
-    with open(fname, 'wb') as file:
-        pickle.dump(data, file)
-
-    return data
+    return swap
 
 
 def find_errors():
@@ -114,7 +120,8 @@ def find_errors():
         pprint(interest, file)
 
 
-def combine_user_scores(export, fname):
+def combine_user_scores(swap, fname):
+    export = swap.export()
     data = []
     for item in export['users'].values():
         h0 = item['score_0_history']
@@ -136,7 +143,8 @@ def combine_user_scores(export, fname):
     plot_tracks(data, 'User Combined Tracks', name, scale='log')
 
 
-def plot_users(export, fname):
+def plot_users(swap, fname):
+    export = swap.export()
     def getData(data, n):
         data = []
         for item in export['users'].values():
@@ -162,16 +170,17 @@ def plot_users(export, fname):
     combine_user_scores(export, fname)
 
 
-def plot_subjects(export, fname):
+def plot_subjects(swap, fname):
+    export = swap.export()
     print(fname)
     data = [(d['gold_label'], d['history'])
             for d in export['subjects'].values()]
     plot_tracks(data, 'Subject Tracks', fname)
 
 
-def plot_tracks(data, title, fname, dpi=600, scale='log'):
+def plot_tracks(data, title, fname, dpi=300, scale='log'):
     """ Plot subject tracks """
-    cmap = ["#669D31", "#F00200"]
+    cmap = ["#669D31", "#F00200", "#000000"]
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -201,6 +210,63 @@ def plot_tracks(data, title, fname, dpi=600, scale='log'):
 
     plt.savefig(fname, dpi=dpi)
     # plt.show()
+
+
+def plot_histogram(data, title, fname, dpi=300):
+    # the histogram of the data
+    n, bins, patches = plt.hist(
+        data, 50, normed=1,
+        facecolor='green', alpha=0.75)
+
+    # add a 'best fit' line
+    # y = mlab.normpdf( bins, mu, sigma)
+    # l = plt.plot(bins, y, 'r--', linewidth=1)
+
+    plt.xlabel('Smarts')
+    plt.ylabel('Probability')
+    plt.title(r'$\mathrm{Histogram\ of\ IQ:}\ \mu=100,\ \sigma=15$')
+    plt.axis([0, 1, 0, 10])
+    plt.grid(True)
+
+    plt.show()
+
+
+def plot_roc(datasets, title, fname, dpi=300):
+    plt.figure()
+
+    # TODO better way to receive multiple datasets
+    if type(datasets) not in [list, tuple]:
+        datasets = (datasets)
+
+    for data in datasets:
+        y_true = []
+        y_score = []
+
+        for i, t in enumerate(data):
+            y_true.append(t[0])
+            y_score.append(t[1])
+
+        y_true = np.array(y_true)
+        y_score = np.array(y_score)
+
+        # Compute fpr, tpr, thresholds and roc auc
+        fpr, tpr, thresholds = roc_curve(y_true, y_score)
+        roc_auc = auc(y_true, y_score, True)
+        # roc_auc = 0
+
+        # Plot ROC curve
+        plt.plot(fpr, tpr, label='ROC curve (area = %0.3f)' % roc_auc)
+
+    plt.plot([0, 1], [0, 1], 'k--')  # random predictions curve
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.0])
+    plt.xlabel('False Positive Rate or (1 - Specifity)')
+    plt.ylabel('True Positive Rate or (Sensitivity)')
+    plt.title('Receiver Operating Characteristic for %s' % title)
+    plt.legend(loc="lower right")
+
+    # plt.show()
+    plt.savefig(fname, dpi=dpi)
 
 
 def write_output(data, fname):
