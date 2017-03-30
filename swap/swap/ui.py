@@ -6,6 +6,7 @@ from pprint import pprint
 import matplotlib.pyplot as plt
 import argparse
 import numpy as np
+import os
 
 from sklearn.metrics import roc_curve
 from sklearn.metrics import auc
@@ -16,26 +17,24 @@ class Interface:
     def __init__(self):
         self.args = None
         self.control = None
+        self.dir = None
 
     def call(self):
         args = self.getArgs()
 
-        if args.pickle != '-':
-            if args.p:
-                swap = run_swap(self.getControl(), args.pickle)
-            else:
-                swap = load_pickle(args.pickle)
+        if args.dir:
+            _dir = args.dir[0]
+            if not os.path.isdir(_dir):
+                raise ValueError(
+                    '%s Does not point to a valid directory' % _dir)
 
-            if args.s:
-                plot_subjects(swap, args.s[0])
+            if _dir[-1] == '/':
+                _dir = _dir[:-1]
 
-            if args.u:
-                plot_users(swap, args.u[0])
+            self.dir = _dir
 
-            if args.output:
-                write_output(swap, args.output[0])
-
-            return swap
+        if args.roc:
+            self.generate_roc(args.roc)
 
     def getControl(self):
         if self.control is None:
@@ -44,7 +43,7 @@ class Interface:
         return self.control
 
     def _control(self):
-        return Control(.01, .5)
+        return Control(.12, .5)
 
     def getArgs(self):
         if self.args is None:
@@ -57,22 +56,38 @@ class Interface:
 
     def options(self):
         parser = argparse.ArgumentParser()
+
         parser.add_argument(
-            '-p', action='store_true',
-            help='Run the SWAP algorithm again, and pickle and save')
+            '--dir', nargs=1,
+            help='Direct all output to a different directory')
+
         parser.add_argument(
-            'pickle', help='The filename of the pickled SWAP export')
-        parser.add_argument(
-            '-s', nargs=1,
-            help='Generate subject track plot and output to filename S')
-        parser.add_argument(
-            '-u', nargs=1,
-            help='Generate user track plots and output to filename U')
-        parser.add_argument(
-            '--output', nargs=1,
-            help='Not instantiated yet')
+            '--roc', nargs=2, action='append',
+            help='Generate ROC curve from this file')
 
         return parser
+
+    def f(self, fname):
+        if self.dir:
+            return '%s/%s' % (self.dir, fname)
+        else:
+            return fname
+
+    def generate_roc(self, args):
+        print(args)
+        labels = []
+        data = []
+        plot_file = None
+        for label, fname in args:
+            if label == '-':
+                plot_file = self.f(fname)
+                continue
+            obj = load_pickle(fname)
+            labels.append(label)
+            data.append(obj.roc_export())
+
+        title = 'Receiver Operater Characteristic'
+        plot_roc(title, labels, *data, fname=plot_file)
 
 
 def run(interface=None):
@@ -91,33 +106,6 @@ def load_pickle(fname):
 def save_pickle(object, fname):
     with open(fname, 'wb') as file:
         pickle.dump(object, file)
-
-
-def run_swap(control, fname):
-    control.process()
-    swap = control.getSWAP()
-
-    save_pickle(swap, fname)
-
-    return swap
-
-
-def find_errors():
-    with open('pickle.pkl', 'rb') as file:
-        data = pickle.load(file)
-
-    interest = []
-    for key, value in data['subjects'].items():
-        if 1.0 in value['history'] or 0 in value['history']:
-            interest.append(value)
-
-    print(len(interest))
-    plot_subjects(data,
-                  "Subject Tracks",
-                  "subject_tracks.png")
-
-    with open('log', 'w') as file:
-        pprint(interest, file)
 
 
 def combine_user_scores(swap, fname):
@@ -145,6 +133,7 @@ def combine_user_scores(swap, fname):
 
 def plot_users(swap, fname):
     export = swap.export()
+
     def getData(data, n):
         data = []
         for item in export['users'].values():
@@ -231,18 +220,14 @@ def plot_histogram(data, title, fname, dpi=300):
     plt.show()
 
 
-def plot_roc(datasets, title, fname, dpi=300):
-    plt.figure()
+def plot_roc(title, labels, *datasets, fname=None, dpi=300):
+    plt.figure(1)
 
-    # TODO better way to receive multiple datasets
-    if type(datasets) not in [list, tuple]:
-        datasets = (datasets)
-
-    for data in datasets:
+    for i, data in enumerate(datasets):
         y_true = []
         y_score = []
 
-        for i, t in enumerate(data):
+        for t in data:
             y_true.append(t[0])
             y_score.append(t[1])
 
@@ -255,7 +240,7 @@ def plot_roc(datasets, title, fname, dpi=300):
         # roc_auc = 0
 
         # Plot ROC curve
-        plt.plot(fpr, tpr, label='ROC curve (area = %0.3f)' % roc_auc)
+        plt.plot(fpr, tpr, label='%s (area = %0.3f)' % (labels[i], roc_auc))
 
     plt.plot([0, 1], [0, 1], 'k--')  # random predictions curve
     plt.xlim([0.0, 1.0])
@@ -265,11 +250,13 @@ def plot_roc(datasets, title, fname, dpi=300):
     plt.title('Receiver Operating Characteristic for %s' % title)
     plt.legend(loc="lower right")
 
-    # plt.show()
-    plt.savefig(fname, dpi=dpi)
+    if fname:
+        plt.savefig(fname, dpi=dpi)
+    else:
+        plt.show()
 
 
-def write_output(data, fname):
+def write_log(data, fname):
     with open(fname, 'w') as file:
         pprint(data, file)
 
