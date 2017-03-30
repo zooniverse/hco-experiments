@@ -18,6 +18,9 @@ from pprint import pprint
 gold_1 = [3328040, 3313220, 2977121, 2943566, 3317607]
 gold_0 = [3624432, 3469678, 3287492, 3627326, 3724438]
 
+p0 = 0.12
+epsilon = 0.5
+
 
 class Interface(ui.Interface):
     def __init__(self, golds):
@@ -87,7 +90,7 @@ class Interface(ui.Interface):
         return parser
 
     def _control(self):
-        return BootstrapControl(.12, .5, self.golds.items())
+        return BootstrapControl(p0, epsilon, self.golds.items())
 
     def threshold(self, data, threshold):
         min = float(threshold[0])
@@ -286,7 +289,7 @@ class Bootstrap:
         self.golds = golds
 
     def gen_control(self):
-        return BootstrapControl(.01, .5, self.golds.items())
+        return BootstrapControl(p0, epsilon, self.golds.items())
 
     def export(self):
         return self.bureau.export()
@@ -445,16 +448,6 @@ class BootstrapCursor:
         else:
             self.state += 1
             return self.next()
-
-
-def test():
-    swap = Control(.01, .5)
-    db = swap._db
-    golds = [2149031, 2149962]
-
-    cursor = BootstrapCursor(db, golds)
-    for i in cursor:
-        pprint(i)
 
 
 if __name__ == "__main__":
