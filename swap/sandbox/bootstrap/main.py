@@ -13,8 +13,6 @@ from swap.agents.bureau import Bureau
 
 from swap import ui
 
-from pprint import pprint
-
 gold_1 = [3328040, 3313220, 2977121, 2943566, 3317607]
 gold_0 = [3624432, 3469678, 3287492, 3627326, 3724438]
 
@@ -23,9 +21,6 @@ epsilon = 0.5
 
 
 class Interface(ui.Interface):
-    def __init__(self, golds):
-        super().__init__()
-        self.golds = golds
 
     def call(self):
         data = super().call()
@@ -49,12 +44,6 @@ class Interface(ui.Interface):
 
         if args.traces and bootstrap:
             self.plot_bootstrap(bootstrap, args.traces[0])
-
-        if args.roc and bootstrap:
-            if args.roc[1] != '-':
-                self.roc(bootstrap, args.roc[0], swap_f=args.roc[1])
-            else:
-                self.roc(bootstrap, args.roc[0])
 
         return data
 
@@ -84,13 +73,12 @@ class Interface(ui.Interface):
             '--histogram', nargs=1,
             help='Draw a histogram of bootstrap data')
 
-        parser.add_argument(
-            '--roc', nargs=2)
-
         return parser
 
     def _control(self):
-        return BootstrapControl(p0, epsilon, self.golds.items())
+        golds = gold_0 + gold_1
+        golds = DB().getExpertGold(golds)
+        return BootstrapControl(p0, epsilon, golds.items())
 
     def threshold(self, data, threshold):
         min = float(threshold[0])
@@ -109,29 +97,6 @@ class Interface(ui.Interface):
 
         print('high: %d, low: %d, other: %d' % (high, low, other))
 
-    # def iterate(self, data, threshold):
-    #     min = float(threshold[0])
-    #     max = float(threshold[1])
-
-    #     for subject, item in data['subjects'].items():
-    #         if item['gold_label'] in [0, 1]:
-    #             continue
-    #         if item['score'] < min:
-    #             self.golds[subject] = 0
-    #         elif item['score'] > max:
-    #             self.golds[subject] = 1
-
-    #     print(len(self.golds))
-
-    #     self.control = None
-        
-    #     fname = self.getArgs().pickle
-    #     fname = fname.split('.')
-    #     fname[0] += '-i'
-    #     fname = '.'.join(fname)
-
-    #     ui.run_swap(self.getControl(), fname)
-
     def iterate(self, threshold, fname=False):
         low = float(threshold[0])
         high = float(threshold[1])
@@ -144,11 +109,9 @@ class Interface(ui.Interface):
 
         if fname:
             bootstrap._serialize()
-            ui.save_pickle(bootstrap, fname)
+            ui.save_pickle(bootstrap, self.f(fname))
 
         return bootstrap
-
-        # self.plot_bootstrap(bootstrap)
 
     def plot_bootstrap(self, bootstrap, fname):
         plot_data = []
@@ -161,70 +124,8 @@ class Interface(ui.Interface):
             history = value['history']
             plot_data.append((c, history))
 
+        fname = self.f(fname)
         ui.plot_tracks(plot_data, "Bootstrap Traces", fname, scale='linear')
-
-        # plot_data = []
-        # for subject in bootstrap.export().values():
-        #     plot_data.append(subject['score'])
-
-        # # print(plot_data)
-
-        # ui.plot_histogram(plot_data, None, None)
-
-    def roc(self, bootstrap, fname, swap_f=None):
-        data = bootstrap.roc_export()
-
-        swap_data = None
-        if swap_f:
-            swap = ui.load_pickle(swap_f)
-            swap_data = swap.roc_export()
-            ui.plot_roc((data, swap_data), 'Bootstrap', fname)
-        else:
-            ui.plot_roc([data], 'Bootstrap', fname)
-
-    # def roc(self, bootstrap):
-    #     from sklearn.metrics import roc_curve
-    #     from sklearn.metrics import auc
-    #     import numpy as np
-
-    #     bureau = bootstrap.bureau
-
-    #     cursor = DB().classifications.aggregate([
-    #         {'$match': {'gold_label': {'$ne': -1}}},
-    #         {'$group': {'_id': '$subject_id', 'gold':
-    #                     {'$first': '$gold_label'}}},
-    #     ])
-
-    #     y_true = []
-    #     y_score = []
-    #     for item in cursor:
-    #         subject = item['_id']
-    #         if bureau.has(subject):
-    #             bureau.getAgent(subject).gold = item['gold']
-
-    #     data = []
-    #     for s in bureau.export().values():
-    #         if s['gold'] != -1:
-    #             data.append((s['gold'], s['score']))
-
-    #     y_true = np.array([i[0] for i in data])
-    #     y_score = np.array([i[1] for i in data])
-
-    #     # Compute fpr, tpr, thresholds and roc auc
-    #     fpr, tpr, thresholds = roc_curve(y_true, y_score)
-    #     roc_auc = auc(y_true, y_score, True)
-    #     # roc_auc = 0
-
-    #     # Plot ROC curve
-    #     ui.plt.plot(fpr, tpr, label='ROC curve (area = %0.3f)' % roc_auc)
-    #     ui.plt.plot([0, 1], [0, 1], 'k--')  # random predictions curve
-    #     ui.plt.xlim([0.0, 1.0])
-    #     ui.plt.ylim([0.0, 1.0])
-    #     ui.plt.xlabel('False Positive Rate or (1 - Specifity)')
-    #     ui.plt.ylabel('True Positive Rate or (Sensitivity)')
-    #     ui.plt.title('Receiver Operating Characteristic')
-    #     ui.plt.legend(loc="lower right")
-    #     ui.plt.show()
 
 
 class Bootstrap:
@@ -259,9 +160,6 @@ class Bootstrap:
         self.addMetric()
 
         return swap
-
-    def next(self):
-        pass
 
     def update_tracking(self, export):
         bureau = self.bureau
@@ -366,19 +264,6 @@ class Bootstrap_Metric:
         return (count[0], count[1], remaining)
 
 
-def main():
-    # > db.classifications.aggregate([{$group:{_id:'$subject_id'}},{$sample:{size:5}}])
-    gold_subjects = [3328040, 3313220, 2977121, 2943566, 3317607]
-    gold_subjects += [3624432, 3469678, 3287492, 3627326, 3724438]
-
-    db = DB()
-    golds = db.getExpertGold(gold_subjects)
-    print(golds)
-    interface = Interface(golds)
-
-    ui.run(interface)
-
-
 class BootstrapControl(Control):
 
     def __init__(self, p0, epsilon, golds):
@@ -415,16 +300,10 @@ class BootstrapCursor:
         cursor1 = db.getClassifications(query)
 
         fields = ['user_name', 'subject_id', 'annotation']
-        # query = Query().match('subject_id', golds, eq=False)
+
         query = Query()
-        # query._pipeline.append({'$match': {'classification_id': {'$lt': 1321700}}})
-        # query.match('subject_id', golds, eq=False).project(fields)
         query.project(fields)
         cursor2 = db.getClassifications(query)
-
-        # with open('test.log', 'w') as file:
-        #     pprint(list(cursor1), file)
-        #     pprint(list(cursor2), file)
 
         self.cursors = (cursor1, cursor2)
         self.state = 0
@@ -448,6 +327,11 @@ class BootstrapCursor:
         else:
             self.state += 1
             return self.next()
+
+
+def main():
+    interface = Interface()
+    ui.run(interface)
 
 
 if __name__ == "__main__":
