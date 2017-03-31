@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 ################################################################
 # Main entrypoint for the processing algorithm
 
@@ -12,6 +13,7 @@ class Interface(ui.Interface):
         args = self.getArgs()
 
         save_file = False
+        swap = None
         if args.save:
             save_file = args.save[0]
             save_file = self.f(save_file)
@@ -34,7 +36,7 @@ class Interface(ui.Interface):
             fname = self.f(args.output[0])
             ui.write_log(swap, fname)
 
-            return swap
+        return swap
 
     def options(self):
         parser = super().options()
