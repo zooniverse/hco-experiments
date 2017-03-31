@@ -22,6 +22,11 @@ epsilon = 0.5
 
 class Interface(ui.Interface):
 
+    def __init__(self):
+        super().__init__()
+        self.p0 = p0
+        self.epsilon = epsilon
+
     def call(self):
         data = super().call()
         args = self.getArgs()
@@ -73,12 +78,16 @@ class Interface(ui.Interface):
             '--histogram', nargs=1,
             help='Draw a histogram of bootstrap data')
 
+        parser.add_argument(
+            '--broc', nargs=2, action='append',
+            help='Generate ROC curve from this file, bootstrap specific')
+
         return parser
 
     def _control(self):
         golds = gold_0 + gold_1
         golds = DB().getExpertGold(golds)
-        return BootstrapControl(p0, epsilon, golds.items())
+        return BootstrapControl(self.p0, self.epsilon, golds.items())
 
     def threshold(self, data, threshold):
         min = float(threshold[0])
@@ -126,6 +135,19 @@ class Interface(ui.Interface):
 
         fname = self.f(fname)
         ui.plot_tracks(plot_data, "Bootstrap Traces", fname, scale='linear')
+
+    def collect_roc(self, args):
+        labels, data, plot_file = super().collect_roc(args)
+
+        if args.loadb:
+            bootstrap = ui.load_pickle(args.loadb[0])
+            for label, i in args.broc:
+                i = int(i) - 1
+                labels.append(label)
+                data.append(bootstrap.roc_export(i))
+
+        return labels, data, plot_file
+
 
 
 class Bootstrap:
@@ -192,7 +214,7 @@ class Bootstrap:
     def export(self):
         return self.bureau.export()
 
-    def roc_export(self):
+    def roc_export(self, i=None):
         bureau = self.bureau
         cursor = DB().classifications.aggregate([
             {'$match': {'gold_label': {'$ne': -1}}},
@@ -208,7 +230,10 @@ class Bootstrap:
         data = []
         for s in bureau:
             if s.gold != -1:
-                data.append((s.gold, s.getScore()))
+                if i is None:
+                    data.append((s.gold, s.getScore()))
+                else:
+                    data.append((s.gold, s.getHistory()[i]))
 
         return data
 
@@ -242,6 +267,9 @@ class Bootstrap_Subject(Agent):
 
     def getScore(self):
         return self.tracker.current()
+
+    def getHistory(self):
+        return self.tracker.getHistory()
 
 
 class Bootstrap_Metric:
