@@ -114,7 +114,6 @@ class Interface:
                 plot_file = self.f(fname)
                 continue
             obj = load_pickle(fname)
-            print(obj.p0)
             labels.append(label)
             data.append(obj.roc_export())
 

@@ -110,12 +110,12 @@ class Interface(ui.Interface):
         low = float(threshold[0])
         high = float(threshold[1])
         n = int(threshold[2])
-        bootstrap = Bootstrap(low, high)
+        bootstrap = Bootstrap(low, high, self.p0, self.epsilon)
 
         for i in range(n):
             swap = bootstrap.step()
-            fname = self.f('iterate-%d.png' % i)
-            ui.plot_subjects(swap, fname)
+            img = self.f('iterate-%d.png' % i)
+            ui.plot_subjects(swap, img)
 
         if fname:
             bootstrap._serialize()
@@ -153,7 +153,7 @@ class Interface(ui.Interface):
 
 class Bootstrap:
 
-    def __init__(self, t_low, t_high, export=None):
+    def __init__(self, t_low, t_high, p0=p0, epsilon=epsilon, export=None):
         golds = gold_0 + gold_1
         self.db = DB()
         self.golds = self.db.getExpertGold(golds)
@@ -163,6 +163,9 @@ class Bootstrap:
         self.bureau = Bureau(Bootstrap_Subject)
 
         self.metrics = []
+
+        self.p0 = p0
+        self.epsilon = epsilon
 
     def _serialize(self):
         del self.db
@@ -210,7 +213,7 @@ class Bootstrap:
         self.golds = golds
 
     def gen_control(self):
-        return BootstrapControl(p0, epsilon, self.golds.items())
+        return BootstrapControl(self.p0, self.epsilon, self.golds.items())
 
     def export(self):
         return self.bureau.export()
