@@ -18,10 +18,24 @@ class Interface:
         self.args = None
         self.control = None
         self.dir = None
+        self.p0 = 0.12
+        self.epsilon = 0.5
 
     def call(self):
         args = self.getArgs()
 
+        self.o_dir(args)
+
+        if args.roc:
+            self.o_roc(args)
+
+        if args.p0:
+            self.p0 = float(args.p0[0])
+
+        if args.epsilon:
+            self.epsilon = float(args.epsilon[0])
+
+    def o_dir(self, args):
         if args.dir:
             _dir = args.dir[0]
             if not os.path.isdir(_dir):
@@ -33,8 +47,13 @@ class Interface:
 
             self.dir = _dir
 
+    def o_roc(self, args):
         if args.roc:
-            self.generate_roc(args.roc)
+
+            labels, data, plot_file = self.collect_roc(args)
+
+            title = 'Receiver Operater Characteristic'
+            plot_roc(title, labels, *data, fname=plot_file)
 
     def getControl(self):
         if self.control is None:
@@ -43,7 +62,7 @@ class Interface:
         return self.control
 
     def _control(self):
-        return Control(.12, .5)
+        return Control(self.p0, self.epsilon)
 
     def getArgs(self):
         if self.args is None:
@@ -65,6 +84,14 @@ class Interface:
             '--roc', nargs=2, action='append',
             help='Generate ROC curve from this file')
 
+        parser.add_argument(
+            '--p0', nargs=1,
+            help='Define p0')
+
+        parser.add_argument(
+            '--epsilon', nargs=1,
+            help='Define epsilon')
+
         return parser
 
     def f(self, fname):
@@ -73,8 +100,9 @@ class Interface:
         else:
             return fname
 
-    def generate_roc(self, args):
-        print(args)
+    def collect_roc(self, args):
+        args = args.roc
+
         labels = []
         data = []
         plot_file = None
@@ -86,8 +114,7 @@ class Interface:
             labels.append(label)
             data.append(obj.roc_export())
 
-        title = 'Receiver Operater Characteristic'
-        plot_roc(title, labels, *data, fname=plot_file)
+        return labels, data, plot_file
 
 
 def run(interface=None):
