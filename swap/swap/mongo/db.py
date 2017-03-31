@@ -46,8 +46,10 @@ class _DB:
             self._cfg.database['max_batch_size'])))
 
         # perform query on classification data
-        classifications = self.classifications.aggregate(
-            query.build(), batchSize=batch_size)
+        classifications = Cursor(query.build(), self.classifications,
+                                 batchSize=batch_size)
+        # classifications = self.classifications.aggregate(
+        #     query.build(), batchSize=batch_size)
 
         return classifications
 
@@ -71,7 +73,6 @@ class _DB:
         cursor = self.classifications.aggregate(query)
 
         return cursor.next()['num']
-
 
     def getUserAgent(self, user_id):
         pass
@@ -98,3 +99,38 @@ class Singleton(type):
 
 class DB(_DB, metaclass=Singleton):
     pass
+
+
+class Cursor:
+
+    def __init__(self, query, collection, **kwargs):
+        self.query = query
+        self.collection = collection
+        self.cursor = None
+        self.count = None
+
+        if query:
+            self.cursor = collection.aggregate(query, **kwargs)
+
+    def __len__(self):
+        print(1)
+        if self.count is None:
+            self.count = self.getCount()
+
+        return self.count
+
+    def __iter__(self):
+        return self.cursor
+
+    def getCursor(self):
+        return self.cursor
+
+    def getCount(self):
+        query = self.query
+        query += [{'$group': {'_id': 1, 'sum': {'$sum': 1}}}]
+
+        count = self.collection.aggregate(query).next()['sum']
+        return count
+
+    def next(self):
+        return self.cursor.next()

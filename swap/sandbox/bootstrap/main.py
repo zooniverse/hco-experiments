@@ -5,7 +5,7 @@
 
 from swap.control import Control
 from swap.mongo.query import Query
-from swap.mongo.db import DB
+from swap.mongo.db import DB, Cursor
 from swap.agents.subject import Subject
 from swap.agents.agent import Agent
 from swap.agents.tracker import Tracker
@@ -148,7 +148,6 @@ class Interface(ui.Interface):
                 data.append(bootstrap.roc_export(i))
 
         return labels, data, plot_file
-
 
 
 class Bootstrap:
@@ -312,15 +311,15 @@ class BootstrapControl(Control):
         golds = [item[0] for item in self.golds]
         return BootstrapCursor(self._db, golds)
 
-    def _n_classifications(self):
-        golds = [x[0] for x in self.golds]
-        query = [
-            {'$match': {'subject_id': {'$in': golds}}},
-            {'$group': {'_id': 1, 'sum': {'$sum': 1}}}
-        ]
+    # def _n_classifications(self):
+    #     golds = [x[0] for x in self.golds]
+    #     query = [
+    #         {'$match': {'subject_id': {'$in': golds}}},
+    #         {'$group': {'_id': 1, 'sum': {'$sum': 1}}}
+    #     ]
 
-        count = self._db.classifications.aggregate(query).next()['sum']
-        count += self._db.classifications.count()
+    #     count = self._db.classifications.aggregate(query).next()['sum']
+    #     count += self._db.classifications.count()
 
         return count
 
@@ -331,8 +330,9 @@ class BootstrapControl(Control):
             self.swap.processOneClassification(cl, user=False, subject=True)
 
 
-class BootstrapCursor:
+class BootstrapCursor(Cursor):
     def __init__(self, db, golds):
+        super().__init__(None, db.classifications)
         # Create the gold cursor
         # Create the cursor for all remaining classifications
 
@@ -362,12 +362,18 @@ class BootstrapCursor:
         if self.state > 1:
             raise StopIteration()
 
-        cursor = self.cursors[self.state]
-        if cursor.alive:
-            return cursor.next()
-        else:
+        try:
+            return self.cursors[self.state].next()
+        except StopIteration:
             self.state += 1
             return self.next()
+
+    def getCount(self):
+        count = 0
+        for c in self.cursors:
+            count += len(c)
+
+        return count
 
 
 def main():

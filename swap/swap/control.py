@@ -38,7 +38,8 @@ class Control:
 
         # get classifications
         classifications = self.getClassifications()
-        n_classifications = self._n_classifications()
+        n_classifications = len(classifications)
+        # n_classifications = self._n_classifications()
 
         # loop over classification cursor to process
         # classifications one at a time
@@ -56,8 +57,8 @@ class Control:
                 bar.update(n_class)
                 n_class += 1
 
-    def _n_classifications(self):
-        return self.classifications.count()
+    # def _n_classifications(self):
+    #     return self.classifications.count()
 
     def _delegate(self, cl):
         self.swap.processOneClassification(cl)
