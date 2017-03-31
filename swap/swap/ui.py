@@ -55,6 +55,12 @@ class Interface:
             title = 'Receiver Operater Characteristic'
             plot_roc(title, labels, *data, fname=plot_file)
 
+    def save(self, object, fname):
+        save_pickle(object, fname)
+
+    def load(self, fname):
+        return load_pickle(fname)
+
     def getControl(self):
         if self.control is None:
             self.control = self._control()

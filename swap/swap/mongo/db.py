@@ -30,6 +30,8 @@ class _DB:
         self.classifications = self._db.classifications
         self.subjects = self._db.subjects
 
+        self.subject_count = None
+
     def getClassifications(self, query=None, **kwargs):
         """ Returns Iterator over all Classifications """
         # Generate a default query if not specified
@@ -68,11 +70,13 @@ class _DB:
         return data
 
     def getNSubjects(self):
-        query = [
-            {'$group': {'_id': '', 'num': {'$sum': 1}}}]
-        cursor = self.classifications.aggregate(query)
+        if self.subject_count is None:
+            query = [
+                {'$group': {'_id': '', 'num': {'$sum': 1}}}]
+            cursor = self.classifications.aggregate(query)
+            self.subject_count = cursor.next()['num']
 
-        return cursor.next()['num']
+        return self.subject_count
 
     def getUserAgent(self, user_id):
         pass
@@ -113,7 +117,6 @@ class Cursor:
             self.cursor = collection.aggregate(query, **kwargs)
 
     def __len__(self):
-        print(1)
         if self.count is None:
             self.count = self.getCount()
 

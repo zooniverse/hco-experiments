@@ -89,6 +89,13 @@ class Interface(ui.Interface):
         golds = DB().getExpertGold(golds)
         return BootstrapControl(self.p0, self.epsilon, golds.items())
 
+    def save(self, bootstrap, fname):
+        bootstrap._serialize()
+        super().save(bootstrap, self.f(fname))
+
+        with open(self.f('manifest'), 'w') as file:
+            file.write(bootstrap.manifest())
+
     def threshold(self, data, threshold):
         min = float(threshold[0])
         max = float(threshold[1])
@@ -118,8 +125,7 @@ class Interface(ui.Interface):
             ui.plot_subjects(swap, img)
 
         if fname:
-            bootstrap._serialize()
-            ui.save_pickle(bootstrap, self.f(fname))
+            self.save(bootstrap, fname)
 
         return bootstrap
 
@@ -161,18 +167,22 @@ class Bootstrap:
 
         self.bureau = Bureau(Bootstrap_Subject)
 
-        self.metrics = []
+        self.metrics = Bootstrap_Metrics()
 
         self.p0 = p0
         self.epsilon = epsilon
 
+        self.it = 0
+
     def _serialize(self):
-        del self.db
+        self.db = None
 
     def _deserialize(self):
         self.db = DB()
 
     def step(self):
+        self.it += 1
+
         control = self.gen_control()
         control.process()
 
@@ -241,13 +251,23 @@ class Bootstrap:
         return data
 
     def addMetric(self):
-        i = len(self.metrics) + 1
-        metric = Bootstrap_Metric(i, self)
-        self.metrics.append(metric)
+        metric = Bootstrap_Metric(self.it, self)
+        self.metrics.addMetric(metric)
 
     def printMetrics(self):
         for m in self.metrics:
             print(m.num_golds())
+
+    def manifest(self):
+        s = ''
+        s += 'p0:         %f\n' % self.p0
+        s += 'epsilon     %f\n' % self.epsilon
+        s += 'iterations: %d\n' % self.it
+        s += 'thresholds: %f < p < %f\n' % (self.t_low, self.t_high)
+        s += '\n'
+        s += str(self.metrics)
+
+        return s
 
 
 class Bootstrap_Subject(Agent):
@@ -275,13 +295,47 @@ class Bootstrap_Subject(Agent):
         return self.tracker.getHistory()
 
 
+class Bootstrap_Metrics:
+    def __init__(self):
+        self.metrics = []
+
+    def __str__(self):
+        s = ''
+        for metric in self.metrics:
+            s += '%s\n' % str(metric)
+
+        return s
+
+    def __repr__(self):
+        s = ''
+        for metric in self.metrics:
+            s += '%s\n' % repr(metric)
+
+        return s
+
+    def addMetric(self, metric):
+        self.metrics.append(metric)
+
+    def get(self):
+        return self.metrics[:]
+
+
 class Bootstrap_Metric:
-    def __init__(self, i, bootstrap):
-        self.iteration = i
+    def __init__(self, it, bootstrap):
+        self.iteration = it
         golds = {}
         for k, v in bootstrap.golds.items():
             golds[k] = v
         self.golds = golds
+
+    def __str__(self):
+        return '%2d %8d %8d %8d' % \
+               (self.iteration, *self.num_golds())
+
+    def __repr__(self):
+        return str((self.iteration, *self.num_golds()))
+
+    # def __repr__(self):
 
     def num_golds(self):
         count = [0, 0]
@@ -293,6 +347,9 @@ class Bootstrap_Metric:
         remaining = DB().getNSubjects() - sum(count)
 
         return (count[0], count[1], remaining)
+
+    def getGolds(self):
+        return self.golds
 
 
 class BootstrapControl(Control):
@@ -321,7 +378,7 @@ class BootstrapControl(Control):
     #     count = self._db.classifications.aggregate(query).next()['sum']
     #     count += self._db.classifications.count()
 
-        return count
+    #     return count
 
     def _delegate(self, cl):
         if cl.gold() in [0, 1]:
