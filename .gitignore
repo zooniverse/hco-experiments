@@ -109,6 +109,7 @@ data/
 !requirements.txt
 
 *dump
+manifest
 
 
 # Sublime text project files
