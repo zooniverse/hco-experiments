@@ -154,6 +154,7 @@ class Subject(Agent):
                 'gold_label' (int),    current subject gold label
         """
         data = {
+            'subject_id': self.id,
             'user_scores': self.user_scores.getHistory(),
             'score': self.tracker.current(),
             'history': self.tracker.getHistory(),
