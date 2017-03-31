@@ -95,6 +95,8 @@ class Interface:
         return parser
 
     def f(self, fname):
+        if fname == '-':
+            return None
         if self.dir:
             return '%s/%s' % (self.dir, fname)
         else:
@@ -107,10 +109,12 @@ class Interface:
         data = []
         plot_file = None
         for label, fname in args:
+            print(fname)
             if label == '-':
                 plot_file = self.f(fname)
                 continue
             obj = load_pickle(fname)
+            print(obj.p0)
             labels.append(label)
             data.append(obj.roc_export())
 
@@ -135,7 +139,7 @@ def save_pickle(object, fname):
         pickle.dump(object, file)
 
 
-def combine_user_scores(swap, fname):
+def plot_users(swap, fname):
     export = swap.export()
     data = []
     for item in export['users'].values():
@@ -151,39 +155,35 @@ def combine_user_scores(swap, fname):
             h.append((v0 + v1) / 2)
         data.append((1, h))
 
-    name = fname.split('.')
-    name[0] += '-combined'
-    name = '.'.join(name)
-
-    plot_tracks(data, 'User Combined Tracks', name, scale='log')
+    plot_tracks(data, 'User Combined Tracks', fname, scale='log')
 
 
-def plot_users(swap, fname):
-    export = swap.export()
+# def plot_users(swap, fname):
+#     export = swap.export()
 
-    def getData(data, n):
-        data = []
-        for item in export['users'].values():
-            h = item['score_%d_history' % n]
-            if len(h) > 7:
-                if len(h) > 20:
-                    data.append((n, h[7:20]))
-                else:
-                    data.append((n, h[7:]))
-        return data
+#     def getData(data, n):
+#         data = []
+#         for item in export['users'].values():
+#             h = item['score_%d_history' % n]
+#             if len(h) > 7:
+#                 if len(h) > 20:
+#                     data.append((n, h[7:20]))
+#                 else:
+#                     data.append((n, h[7:]))
+#         return data
 
-    def plotData(export, n, fname):
-        name = fname.split('.')
-        name[0] += '-%d' % n
-        name = '.'.join(name)
-        plot_tracks(
-            getData(export, n),
-            'User %d Tracks' % n,
-            name, scale='linear')
+#     def plotData(export, n, fname):
+#         name = fname.split('.')
+#         name[0] += '-%d' % n
+#         name = '.'.join(name)
+#         plot_tracks(
+#             getData(export, n),
+#             'User %d Tracks' % n,
+#             name, scale='linear')
 
-    # plotData(export, 1, fname)
-    # plotData(export, 0, fname)
-    combine_user_scores(export, fname)
+#     # plotData(export, 1, fname)
+#     # plotData(export, 0, fname)
+#     combine_user_scores(export, fname)
 
 
 def plot_subjects(swap, fname):
@@ -224,8 +224,10 @@ def plot_tracks(data, title, fname, dpi=300, scale='log'):
     plt.ylabel("number of classificaions")
     plt.title(title)
 
-    plt.savefig(fname, dpi=dpi)
-    # plt.show()
+    if fname:
+        plt.savefig(fname, dpi=dpi)
+    else:
+        plt.show()
 
 
 def plot_histogram(data, title, fname, dpi=300):
