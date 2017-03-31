@@ -114,7 +114,8 @@ class Interface(ui.Interface):
 
         for i in range(n):
             swap = bootstrap.step()
-            ui.plot_subjects(swap, 'iterate-%d.png' % i)
+            fname = self.f('iterate-%d.png' % i)
+            ui.plot_subjects(swap, fname)
 
         if fname:
             bootstrap._serialize()
@@ -309,7 +310,16 @@ class BootstrapControl(Control):
         return BootstrapCursor(self._db, golds)
 
     def _n_classifications(self):
-        return super()._n_classifications() * 2
+        golds = [x[0] for x in self.golds]
+        query = [
+            {'$match': {'subject_id': {'$in': golds}}},
+            {'$group': {'_id': 1, 'sum': {'$sum': 1}}}
+        ]
+
+        count = self._db.classifications.aggregate(query).next()['sum']
+        count += self._db.classifications.count()
+
+        return count
 
     def _delegate(self, cl):
         if cl.gold() in [0, 1]:
