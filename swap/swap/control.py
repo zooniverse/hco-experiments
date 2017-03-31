@@ -55,10 +55,6 @@ class Control:
                 self._delegate(cl)
                 bar.update(n_class)
                 n_class += 1
-                # if i % 100e3 == 0:
-                #     print("   " + str(i) + "/" + str(n_classifications))
-            print("Finished: SWAP Processing %d/%d classifications" %
-                  (n_class, n_classifications))
 
     def _n_classifications(self):
         return self.classifications.count()
