@@ -19,8 +19,6 @@ library(pROC)
 library(plotROC)
 
 
-
-
 # Plot ROC curve over all subjects but different SWAP processing 
 dat_agg <- filter(dat,gold_label %in% c(0,1))
 dat_agg$gold_label <- factor(dat_agg$gold_label)

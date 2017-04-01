@@ -3,12 +3,11 @@
 # are not equally/linearly better/worse on different meta-data splits
 
 # get data from database
-from swap.swap import SWAP
 from swap.mongo import DB
 from swap.mongo import Query, Group
 from swap.config import Config
-import time
 import numpy as np
+import pandas as pd
 
 # Check data in data base
 db = DB()
@@ -16,21 +15,32 @@ cfg = Config()
 classifications = db.classifications
 
 # get data from db
-fields = ["user_name","subject_id","annotation","gold_label","metadata"]
+fields = ["user_name", "subject_id", "annotation", "gold_label", "metadata"]
 q = Query()
 q.project(fields)
-dat = classifications.aggregate(q.build(),batchSize=int(1e5))
+dat = classifications.aggregate(q.build(), batchSize=int(1e5))
 
 # save data per user
 usr = dict()
+
 
 # convert to magnitude bin
 def mag2bin(val):
     if np.isnan(val):
         return val
     mag_ranges = [(13, 18), (18, 19), (19, 20), (20, 23)]
-    bin_val = min([x[1] for x in mag_ranges if val<=x[1]])
+    bin_val = min([x[1] for x in mag_ranges if val <= x[1]])
     return bin_val
+
+
+# convert seeing to bin
+def seeing2bin(val):
+    if np.isnan(val):
+        return val
+    seeing_ranges = [(2, 3), (3, 3.5), (3.5, 3.9), (3.9, 4.5), (4.5, 14)]
+    bin_val = min([x[1] for x in seeing_ranges if val <= x[1]])
+    return bin_val
+
 
 # Loop over all classifications and update
 for d in dat:
@@ -38,12 +48,14 @@ for d in dat:
     ann = d["annotation"]
     lab = d["gold_label"]
 
-    # ignore -1 labels
-    if lab == -1:
-        next
-
     # define current meta data split
-    meta_split = mag2bin(d["metadata"]["mag"])
+    # meta_split = mag2bin(d["metadata"]["mag"])
+    meta_split = seeing2bin(d["metadata"]["seeing"])
+
+    # ignore -1 labels and missing meta data
+    if any((lab == -1, np.isnan(meta_split))):
+        continue
+
     if user not in usr.keys():
         usr[user] = {}
 
@@ -72,14 +84,22 @@ for d in dat:
     if (lab == 0) & (ann == 0):
         current_user[meta_split]["tn"] = current_user[meta_split]["tn"] + 1
 
-# calc summary stats for each user
 
+# convert to pandas data frame
+psubs = pd.DataFrame.from_dict({(i, j): usr[i][j]
+                                for i in usr.keys()
+                                for j in usr[i].keys()},
+                               orient="index")
+
+# export for analysis in R
+psubs.to_csv(r'D:\Studium_GD\Zooniverse\Data\export\user_performance_seeing.csv',
+             index_label=("user","see_bin"))
 
 
 #usr['HTMAMR38']
 #
 #q = Query()
-#q.match("user_name",'HTMAMR38')
+#q.match("user_name",'022henry')
 #tt = db.classifications.aggregate(q.build())
 #for t in tt:
 #    print(t)
