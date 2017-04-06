@@ -3,6 +3,7 @@
 # Serves data to SWAP
 
 import progressbar
+import copy
 
 from swap.swap import SWAP, Classification
 from swap.mongo import DB
@@ -128,3 +129,41 @@ class MetaDataControl(Control):
         classifications = self.classifications.aggregate(q.build())
 
         return classifications
+
+
+class DummySWAP:
+    def __init__(self):
+        self.data = {}
+
+    def process(self):
+        cursor = self.get_cursor()
+        for item in cursor:
+            score = item['votes'] / item['total']
+            gold = item['gold']
+            subject = item['_id']
+            self.data[subject] = (gold, score)
+
+    def get_cursor(self):
+        cursor = DB().classifications.aggregate([
+            {'$match': {'gold_label': {'$ne': -1}}},
+            {'$group': {
+                '_id': '$subject_id',
+                'gold': {'$first': "$gold_label"},
+                'total': {'$sum': 1},
+                'votes': {'$sum': "$annotation"}}}])
+
+        return cursor
+
+    def export(self):
+        data = {}
+        for subject, item in self.data.items():
+            data[subject] = {'gold': item[0], 'score': item[1]}
+
+        return data
+
+    def roc_export(self):
+        data = []
+        for item in self.data.values():
+            data.append(item)
+
+        return data
