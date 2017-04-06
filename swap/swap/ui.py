@@ -13,8 +13,14 @@ from sklearn.metrics import auc
 
 
 class Interface:
+    """
+        Common CLI interface for repetitive operations
+    """
 
     def __init__(self):
+        """
+            Initialize variables
+        """
         self.args = None
         self.dir = None
 
@@ -26,6 +32,15 @@ class Interface:
         self.the_subparsers = {}
 
     def options(self):
+        """
+            Add command line options
+
+            dir: Save all output to a separate subdirectory
+            -a|--add: Add an object to roc curve generation queue
+            --output: Save roc curve to file
+            --p0: Use custom value for p0
+            --epsilon: Use custom value for epsilon
+        """
         parser = self.parser
 
         roc_parser = self.subparsers.add_parser('roc')
@@ -38,11 +53,13 @@ class Interface:
 
         roc_parser.add_argument(
             '-a', '--add', nargs=2, action='append',
-            help='Pickle files used to generate roc curves')
+            metavar=('label', 'file'),
+            help='Add pickled SWAP object to roc curve')
 
         roc_parser.add_argument(
             '--output', '-o', nargs=1,
-            help='Write plot to file')
+            metavar='file',
+            help='Save plot to file')
 
         parser.add_argument(
             '--dir', nargs=1,
@@ -59,6 +76,9 @@ class Interface:
         return parser
 
     def call(self):
+        """
+            Execute arguments
+        """
         args = self.getArgs()
         print(args)
 
@@ -74,6 +94,12 @@ class Interface:
             args.func(args)
 
     def option_dir(self, args):
+        """
+            Output all plots and pickle files ot a sub directory
+
+            Args:
+                args: command line arguments
+        """
         if args.dir:
             _dir = args.dir[0]
             if not os.path.isdir(_dir):
@@ -86,6 +112,12 @@ class Interface:
             self.dir = _dir
 
     def command_roc(self, args):
+        """
+            Generate a roc curve
+
+            Args:
+                args: command line arguments
+        """
         if args.output:
             output = self.f(args.output[0])
         else:
@@ -98,12 +130,29 @@ class Interface:
         print(args)
 
     def save(self, object, fname):
+        """
+            Pickle and save an object
+
+            Args:
+                object
+                fname
+        """
         save_pickle(object, fname)
 
     def load(self, fname):
+        """
+            Load pickled object from file
+
+            Args:
+                fname
+        """
         return load_pickle(fname)
 
     def getArgs(self):
+        """
+            Commmon method to get arguments and store them in
+            instance variable
+        """
         if self.args is None:
             parser = self.options()
             args = parser.parse_args()
@@ -113,6 +162,13 @@ class Interface:
             return self.args
 
     def f(self, fname):
+        """
+            Ensure directory specified with --dir is in
+            a filename
+
+            Args:
+                fname: filename to modify
+        """
         if fname == '-':
             return None
         if self.dir:
@@ -121,6 +177,13 @@ class Interface:
             return fname
 
     def collect_roc(self, args):
+        """
+            Load objects for roc curve from file
+            and prepare data for roc curve generation
+
+            Args:
+                args: command line arguments
+        """
         data = []
         if args.add:
             for label, fname in args.add:
@@ -132,12 +195,22 @@ class Interface:
 
 
 class SWAPInterface(Interface):
+    """
+        Customized interface to add SWAP operations
+    """
+
     def __init__(self):
+        """
+            Initialize variables
+        """
         super().__init__()
 
         self.control = None
 
     def options(self):
+        """
+            Add command line options
+        """
         parser = super().options()
 
         swap_parser = self.subparsers.add_parser('swap')
@@ -146,10 +219,12 @@ class SWAPInterface(Interface):
 
         swap_parser.add_argument(
             '--save', nargs=1,
+            metavar='file',
             help='The filename where the SWAP object should be stored')
 
         swap_parser.add_argument(
             '--load', nargs=1,
+            metavar='file',
             help='Load a pickled SWAP object')
 
         swap_parser.add_argument(
@@ -158,19 +233,28 @@ class SWAPInterface(Interface):
 
         swap_parser.add_argument(
             '--subject', nargs=1,
+            metavar='file',
             help='Generate subject track plot and output to filename S')
 
         swap_parser.add_argument(
             '--user', nargs=1,
+            metavar='file',
             help='Generate user track plots and output to filename U')
 
         swap_parser.add_argument(
             '--log', nargs=1,
+            metavar='file',
             help='Write the entire SWAP export to file')
 
         return parser
 
     def command_swap(self, args):
+        """
+            Execute SWAP operations
+
+            Args:
+                args: command line arguments
+        """
         swap = None
 
         if args.load:
@@ -197,15 +281,25 @@ class SWAPInterface(Interface):
         return swap
 
     def _control(self):
+        """
+            Create a Control
+        """
         return Control(self.p0, self.epsilon)
 
     def getControl(self):
+        """
+            Returns the Control instance
+            Defines a Control instance if it doesn't exist yet
+        """
         if self.control is None:
             self.control = self._control()
 
         return self.control
 
     def run_swap(self):
+        """
+            Have the Control process all classifications
+        """
         control = self.getControl()
         control.process()
         swap = control.getSWAP()
@@ -214,6 +308,12 @@ class SWAPInterface(Interface):
 
 
 def run(interface=None):
+    """
+        Run the interface
+
+        Args:
+            interface: Custom interface subclass to use
+    """
     if interface:
         interface.call()
     else:
@@ -221,17 +321,31 @@ def run(interface=None):
 
 
 def load_pickle(fname):
+    """
+        Loads a pickled object from file
+    """
     with open(fname, 'rb') as file:
         data = pickle.load(file)
     return data
 
 
 def save_pickle(object, fname):
+    """
+        Pickles and saves an object to file
+    """
     with open(fname, 'wb') as file:
         pickle.dump(object, file)
 
 
 def plot_users(swap, fname):
+    """
+        Generate a trace plot of the average of each user's scores
+        change with each classification
+
+        Args:
+            fname: Save the plot to file.
+                   Shows the plot instead if None
+    """
     export = swap.export()
     data = []
     for item in export['users'].values():
@@ -250,35 +364,11 @@ def plot_users(swap, fname):
     plot_tracks(data, 'User Combined Tracks', fname, scale='log')
 
 
-# def plot_users(swap, fname):
-#     export = swap.export()
-
-#     def getData(data, n):
-#         data = []
-#         for item in export['users'].values():
-#             h = item['score_%d_history' % n]
-#             if len(h) > 7:
-#                 if len(h) > 20:
-#                     data.append((n, h[7:20]))
-#                 else:
-#                     data.append((n, h[7:]))
-#         return data
-
-#     def plotData(export, n, fname):
-#         name = fname.split('.')
-#         name[0] += '-%d' % n
-#         name = '.'.join(name)
-#         plot_tracks(
-#             getData(export, n),
-#             'User %d Tracks' % n,
-#             name, scale='linear')
-
-#     # plotData(export, 1, fname)
-#     # plotData(export, 0, fname)
-#     combine_user_scores(export, fname)
-
-
 def plot_subjects(swap, fname):
+    """
+        Generate a trace plot of how each subject's score changes
+        with each classification
+    """
     export = swap.export()
     print(fname)
     data = [(d['gold_label'], d['history'])
@@ -287,7 +377,18 @@ def plot_subjects(swap, fname):
 
 
 def plot_tracks(data, title, fname, dpi=300, scale='log'):
-    """ Plot subject tracks """
+    """
+        Plot subject tracks
+
+        Args:
+            data: Should be a list of tuples of the form
+                  (gold label, [subject history])
+            title: Title of the plot
+            fname: Save the plot to file.
+                   Shows the plot instead if None
+            dpi: Passed to matplotlib
+            scale: ('log'|'linear')
+    """
     cmap = ["#669D31", "#F00200", "#000000"]
 
     fig = plt.figure()
@@ -323,6 +424,9 @@ def plot_tracks(data, title, fname, dpi=300, scale='log'):
 
 
 def plot_histogram(data, title, fname, dpi=300):
+    """
+        Generate a histogram plot
+    """
     # the histogram of the data
     n, bins, patches = plt.hist(
         data, 50, normed=1,

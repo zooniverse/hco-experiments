@@ -36,27 +36,34 @@ class Interface(ui.Interface):
         boot_parser.set_defaults(func=self.command_boot)
         self.the_subparsers['boot'] = boot_parser
 
-        boot_parser.add_argument(
-            '--threshold', nargs=2,
-            help='Print the number of subjects above or below the threshold')
+        # boot_parser.add_argument(
+        #     '--threshold', nargs=2,
+        #     help='Print the number of subjects above or below the threshold')
 
         boot_parser.add_argument(
             '--iterate', nargs=3,
-            help='Iterate through SWAP with the specified thresholds')
+            metavar=('low', 'high', 'N '),
+            help='Iterate SWAP N times with the ' +
+                 'specified (low, high) thresholds')
 
         boot_parser.add_argument(
-            '--traces', nargs=1)
+            '--traces', nargs=1,
+            metavar='file',
+            help='Generate trace plot of bootstrap iterations')
 
         boot_parser.add_argument(
             '--load', nargs=1,
+            metavar='file',
             help='load a pickled bootstrap from file')
 
         boot_parser.add_argument(
             '--save', nargs=1,
+            metavar='file',
             help='load a pickled bootstrap from file')
 
         boot_parser.add_argument(
             '--histogram', nargs=1,
+            metavar='file',
             help='Draw a histogram of bootstrap data')
 
         roc_parser = self.the_subparsers['roc']
@@ -153,6 +160,7 @@ class Interface(ui.Interface):
                 print(fname)
                 boot = self.load(fname)
                 for i in steps:
+                    print(i)
                     i = int(i)
                     label = '%s-%d' % (label_pre, i)
                     data.append((label, boot.roc_export(i - 1)))
@@ -184,7 +192,7 @@ class Bootstrap:
         self.p0 = p0
         self.epsilon = epsilon
 
-        self.it = 0
+        self.n = 0
 
     def _serialize(self):
         self.db = None
@@ -193,7 +201,7 @@ class Bootstrap:
         self.db = DB()
 
     def step(self):
-        self.it += 1
+        self.n += 1
 
         control = self.gen_control()
         control.process()
@@ -267,7 +275,7 @@ class Bootstrap:
         return data
 
     def addMetric(self, swap):
-        metric = Bootstrap_Metric(self, self.it, swap)
+        metric = Bootstrap_Metric(self, self.n, swap)
         self.metrics.addMetric(metric)
 
     def printMetrics(self):
@@ -278,7 +286,7 @@ class Bootstrap:
         s = ''
         s += 'p0:         %f\n' % self.p0
         s += 'epsilon     %f\n' % self.epsilon
-        s += 'iterations: %d\n' % self.it
+        s += 'iterations: %d\n' % self.n
         s += 'thresholds: %f < p < %f\n' % (self.t_low, self.t_high)
         s += '\n'
         s += str(self.metrics)
@@ -339,8 +347,9 @@ class Bootstrap_Metrics:
 class Bootstrap_Metric:
     def __init__(self, bootstrap, num, swap):
         self.num = num
-        self.silver = bootstrap.silver.items()
+        self.silver = bootstrap.silver.copy()
         self.swap = swap.export()
+        self.iteration = bootstrap.n
 
     def __str__(self):
         return '%2d %8d %8d %8d' % \
