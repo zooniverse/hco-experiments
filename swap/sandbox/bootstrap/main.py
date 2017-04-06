@@ -73,9 +73,6 @@ class Interface(ui.Interface):
         else:
             bootstrap = None
 
-        if args.threshold:
-            self.threshold(data, args.threshold)
-
         if args.iterate:
             bootstrap = self.iterate(args.iterate)
 
@@ -138,8 +135,8 @@ class Interface(ui.Interface):
     def plot_bootstrap(self, bootstrap, fname):
         plot_data = []
         for subject, value in bootstrap.export().items():
-            if subject in bootstrap.golds:
-                c = bootstrap.golds[subject]
+            if subject in bootstrap.silver:
+                c = bootstrap.silver[subject]
             else:
                 c = 2
 
@@ -176,6 +173,7 @@ class Bootstrap:
         golds = gold_0 + gold_1
         self.db = DB()
         self.golds = self.db.getExpertGold(golds)
+        self.silver = self.golds.copy()
         self.t_low = t_low
         self.t_high = t_high
 
@@ -222,21 +220,25 @@ class Bootstrap:
             agent.add(item['score'])
 
     def silver_update(self, export):
-        golds = self.golds
+        silver = {}
         low = self.t_low
         high = self.t_high
 
         for subject, item in export['subjects'].items():
-            if subject not in golds:
+            if subject not in self.golds:
                 if item['score'] < low:
-                    golds[subject] = 0
+                    silver[subject] = 0
                 elif item['score'] > high:
-                    golds[subject] = 1
+                    silver[subject] = 1
 
-        self.golds = golds
+        for subject, gold in self.golds.items():
+            silver[subject] = gold
+
+        self.silver = silver
+        return silver
 
     def gen_control(self):
-        return BootstrapControl(self.p0, self.epsilon, self.golds.items())
+        return BootstrapControl(self.p0, self.epsilon, self.silver.items())
 
     def export(self):
         return self.bureau.export()
@@ -270,7 +272,7 @@ class Bootstrap:
 
     def printMetrics(self):
         for m in self.metrics:
-            print(m.num_golds())
+            print(m.num_silver())
 
     def manifest(self):
         s = ''
@@ -337,31 +339,31 @@ class Bootstrap_Metrics:
 class Bootstrap_Metric:
     def __init__(self, bootstrap, num, swap):
         self.num = num
-        self.golds = copy.deepcopy(bootstrap.golds.items())
+        self.silver = bootstrap.silver.items()
         self.swap = swap.export()
 
     def __str__(self):
         return '%2d %8d %8d %8d' % \
-               (self.iteration, *self.num_golds())
+               (self.iteration, *self.num_silver())
 
     def __repr__(self):
-        return str((self.iteration, *self.num_golds()))
+        return str((self.iteration, *self.num_silver()))
 
     # def __repr__(self):
 
-    def num_golds(self):
+    def num_silver(self):
         count = [0, 0]
-        golds = self.golds
+        silver = self.silver
 
-        for gold in golds.values():
-            count[gold] += 1
+        for silver in silver.values():
+            count[silver] += 1
 
         remaining = DB().getNSubjects() - sum(count)
 
         return (count[0], count[1], remaining)
 
-    def getGolds(self):
-        return self.golds
+    def getsilver(self):
+        return self.silver
 
 
 class BootstrapControl(Control):
