@@ -16,18 +16,19 @@ class Interface:
 
     def __init__(self):
         self.args = None
-        self.control = None
         self.dir = None
+
         self.p0 = 0.12
         self.epsilon = 0.5
+
+        self.parser = argparse.ArgumentParser()
+        self.subparsers = self.parser.add_subparsers()
+        self.the_subparsers = {}
 
     def call(self):
         args = self.getArgs()
 
-        self.o_dir(args)
-
-        if args.roc:
-            self.o_roc(args)
+        self.option_dir(args)
 
         if args.p0:
             self.p0 = float(args.p0[0])
@@ -35,7 +36,9 @@ class Interface:
         if args.epsilon:
             self.epsilon = float(args.epsilon[0])
 
-    def o_dir(self, args):
+        args.func(args)
+
+    def option_dir(self, args):
         if args.dir:
             _dir = args.dir[0]
             if not os.path.isdir(_dir):
@@ -47,28 +50,23 @@ class Interface:
 
             self.dir = _dir
 
-    def o_roc(self, args):
-        if args.roc:
+    def command_roc(self, args):
+        if args.output:
+            output = self.f(args.output[0])
+        else:
+            output = None
 
-            labels, data, plot_file = self.collect_roc(args)
+        data = self.collect_roc(args)
 
-            title = 'Receiver Operater Characteristic'
-            plot_roc(title, labels, *data, fname=plot_file)
+        title = 'Receiver Operater Characteristic'
+        plot_roc(title, *data, fname=output)
+        print(args)
 
     def save(self, object, fname):
         save_pickle(object, fname)
 
     def load(self, fname):
         return load_pickle(fname)
-
-    def getControl(self):
-        if self.control is None:
-            self.control = self._control()
-
-        return self.control
-
-    def _control(self):
-        return Control(self.p0, self.epsilon)
 
     def getArgs(self):
         if self.args is None:
@@ -80,15 +78,27 @@ class Interface:
             return self.args
 
     def options(self):
-        parser = argparse.ArgumentParser()
+        parser = self.parser
+
+        roc_parser = self.subparsers.add_parser('roc')
+        roc_parser.set_defaults(func=self.command_roc)
+        self.the_subparsers['roc'] = roc_parser
+
+        # roc_parser.add_argument(
+        #     'files', nargs='*',
+        #     help='Pickle files used to generate roc curves')
+
+        roc_parser.add_argument(
+            '-a', '--add', nargs=2, action='append',
+            help='Pickle files used to generate roc curves')
+
+        roc_parser.add_argument(
+            '--output', '-o', nargs=1,
+            help='Write plot to file')
 
         parser.add_argument(
             '--dir', nargs=1,
             help='Direct all output to a different directory')
-
-        parser.add_argument(
-            '--roc', nargs=2, action='append',
-            help='Generate ROC curve from this file')
 
         parser.add_argument(
             '--p0', nargs=1,
@@ -109,21 +119,13 @@ class Interface:
             return fname
 
     def collect_roc(self, args):
-        args = args.roc
-
-        labels = []
         data = []
-        plot_file = None
-        for label, fname in args:
+        for label, fname in args.add:
             print(fname)
-            if label == '-':
-                plot_file = self.f(fname)
-                continue
-            obj = load_pickle(fname)
-            labels.append(label)
-            data.append(obj.roc_export())
+            obj = self.load(fname)
+            data.append((label, obj.roc_export()))
 
-        return labels, data, plot_file
+            return data
 
 
 def run(interface=None):
@@ -254,10 +256,10 @@ def plot_histogram(data, title, fname, dpi=300):
     plt.show()
 
 
-def plot_roc(title, labels, *datasets, fname=None, dpi=300):
+def plot_roc(title, *datasets, fname=None, dpi=300):
     plt.figure(1)
 
-    for i, data in enumerate(datasets):
+    for label, data in datasets:
         y_true = []
         y_score = []
 
@@ -274,7 +276,7 @@ def plot_roc(title, labels, *datasets, fname=None, dpi=300):
         # roc_auc = 0
 
         # Plot ROC curve
-        plt.plot(fpr, tpr, label='%s (area = %0.3f)' % (labels[i], roc_auc))
+        plt.plot(fpr, tpr, label='%s (area = %0.3f)' % (label, roc_auc))
 
     plt.plot([0, 1], [0, 1], 'k--')  # random predictions curve
     plt.xlim([0.0, 1.0])

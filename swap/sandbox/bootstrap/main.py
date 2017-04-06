@@ -13,6 +13,8 @@ from swap.agents.bureau import Bureau
 
 from swap import ui
 
+import copy
+
 gold_1 = [3328040, 3313220, 2977121, 2943566, 3317607]
 gold_0 = [3624432, 3469678, 3287492, 3627326, 3724438]
 
@@ -31,10 +33,6 @@ class Interface(ui.Interface):
         data = super().call()
         args = self.getArgs()
 
-        save_name = False
-        if args.saveb:
-            save_name = args.saveb[0]
-
         if args.loadb:
             bootstrap = ui.load_pickle(args.loadb[0])
             bootstrap._deserialize()
@@ -45,10 +43,13 @@ class Interface(ui.Interface):
             self.threshold(data, args.threshold)
 
         if args.iterate:
-            bootstrap = self.iterate(args.iterate, save_name)
+            bootstrap = self.iterate(args.iterate)
 
         if args.traces and bootstrap:
             self.plot_bootstrap(bootstrap, args.traces[0])
+
+        if args.save:
+            self.save(bootstrap, self.save[0])
 
         return data
 
@@ -67,11 +68,11 @@ class Interface(ui.Interface):
             '--traces', nargs=1)
 
         parser.add_argument(
-            '--loadb', nargs=1,
+            '--load', nargs=1,
             help='load a pickled bootstrap from file')
 
         parser.add_argument(
-            '--saveb', nargs=1,
+            '--save', nargs=1,
             help='load a pickled bootstrap from file')
 
         parser.add_argument(
@@ -192,7 +193,7 @@ class Bootstrap:
         self.silver_update(swap.export())
         self.update_tracking(export)
 
-        self.addMetric()
+        self.addMetric(swap)
 
         return swap
 
@@ -250,8 +251,8 @@ class Bootstrap:
 
         return data
 
-    def addMetric(self):
-        metric = Bootstrap_Metric(self.it, self)
+    def addMetric(self, swap):
+        metric = Bootstrap_Metric(self, self.it, swap)
         self.metrics.addMetric(metric)
 
     def printMetrics(self):
@@ -321,12 +322,10 @@ class Bootstrap_Metrics:
 
 
 class Bootstrap_Metric:
-    def __init__(self, it, bootstrap):
-        self.iteration = it
-        golds = {}
-        for k, v in bootstrap.golds.items():
-            golds[k] = v
-        self.golds = golds
+    def __init__(self, bootstrap, num, swap):
+        self.num = num
+        self.golds = copy.deepcopy(bootstrap.golds.items())
+        self.swap = swap.export()
 
     def __str__(self):
         return '%2d %8d %8d %8d' % \
@@ -431,6 +430,14 @@ class BootstrapCursor(Cursor):
             count += len(c)
 
         return count
+
+
+def Bootstrap_Analysis:
+    def __init__(self, bootstrap):
+        pass
+
+    def trace_one(self, subject):
+        pass
 
 
 def main():
