@@ -25,8 +25,42 @@ class Interface:
         self.subparsers = self.parser.add_subparsers()
         self.the_subparsers = {}
 
+    def options(self):
+        parser = self.parser
+
+        roc_parser = self.subparsers.add_parser('roc')
+        roc_parser.set_defaults(func=self.command_roc)
+        self.the_subparsers['roc'] = roc_parser
+
+        # roc_parser.add_argument(
+        #     'files', nargs='*',
+        #     help='Pickle files used to generate roc curves')
+
+        roc_parser.add_argument(
+            '-a', '--add', nargs=2, action='append',
+            help='Pickle files used to generate roc curves')
+
+        roc_parser.add_argument(
+            '--output', '-o', nargs=1,
+            help='Write plot to file')
+
+        parser.add_argument(
+            '--dir', nargs=1,
+            help='Direct all output to a different directory')
+
+        parser.add_argument(
+            '--p0', nargs=1,
+            help='Define p0')
+
+        parser.add_argument(
+            '--epsilon', nargs=1,
+            help='Define epsilon')
+
+        return parser
+
     def call(self):
         args = self.getArgs()
+        print(args)
 
         self.option_dir(args)
 
@@ -36,7 +70,8 @@ class Interface:
         if args.epsilon:
             self.epsilon = float(args.epsilon[0])
 
-        args.func(args)
+        if 'func' in args:
+            args.func(args)
 
     def option_dir(self, args):
         if args.dir:
@@ -77,39 +112,6 @@ class Interface:
         else:
             return self.args
 
-    def options(self):
-        parser = self.parser
-
-        roc_parser = self.subparsers.add_parser('roc')
-        roc_parser.set_defaults(func=self.command_roc)
-        self.the_subparsers['roc'] = roc_parser
-
-        # roc_parser.add_argument(
-        #     'files', nargs='*',
-        #     help='Pickle files used to generate roc curves')
-
-        roc_parser.add_argument(
-            '-a', '--add', nargs=2, action='append',
-            help='Pickle files used to generate roc curves')
-
-        roc_parser.add_argument(
-            '--output', '-o', nargs=1,
-            help='Write plot to file')
-
-        parser.add_argument(
-            '--dir', nargs=1,
-            help='Direct all output to a different directory')
-
-        parser.add_argument(
-            '--p0', nargs=1,
-            help='Define p0')
-
-        parser.add_argument(
-            '--epsilon', nargs=1,
-            help='Define epsilon')
-
-        return parser
-
     def f(self, fname):
         if fname == '-':
             return None
@@ -120,12 +122,13 @@ class Interface:
 
     def collect_roc(self, args):
         data = []
-        for label, fname in args.add:
-            print(fname)
-            obj = self.load(fname)
-            data.append((label, obj.roc_export()))
+        if args.add:
+            for label, fname in args.add:
+                print(fname)
+                obj = self.load(fname)
+                data.append((label, obj.roc_export()))
 
-            return data
+        return data
 
 
 class SWAPInterface(Interface):
@@ -202,12 +205,10 @@ class SWAPInterface(Interface):
 
         return self.control
 
-    def run_swap(self, fname):
+    def run_swap(self):
         control = self.getControl()
         control.process()
         swap = control.getSWAP()
-
-        ui.save_pickle(swap, fname)
 
         return swap
 

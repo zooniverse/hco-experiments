@@ -29,13 +29,47 @@ class Interface(ui.Interface):
         self.p0 = p0
         self.epsilon = epsilon
 
-    def call(self):
-        data = super().call()
-        args = self.getArgs()
+    def options(self):
+        parser = super().options()
 
-        if args.loadb:
-            bootstrap = ui.load_pickle(args.loadb[0])
-            bootstrap._deserialize()
+        boot_parser = self.subparsers.add_parser('boot')
+        boot_parser.set_defaults(func=self.command_boot)
+        self.the_subparsers['boot'] = boot_parser
+
+        boot_parser.add_argument(
+            '--threshold', nargs=2,
+            help='Print the number of subjects above or below the threshold')
+
+        boot_parser.add_argument(
+            '--iterate', nargs=3,
+            help='Iterate through SWAP with the specified thresholds')
+
+        boot_parser.add_argument(
+            '--traces', nargs=1)
+
+        boot_parser.add_argument(
+            '--load', nargs=1,
+            help='load a pickled bootstrap from file')
+
+        boot_parser.add_argument(
+            '--save', nargs=1,
+            help='load a pickled bootstrap from file')
+
+        boot_parser.add_argument(
+            '--histogram', nargs=1,
+            help='Draw a histogram of bootstrap data')
+
+        roc_parser = self.the_subparsers['roc']
+        roc_parser.add_argument(
+            '-b', '--bootstrap', nargs='*', action='append',
+            help='Generate ROC curve from this file, bootstrap specific')
+
+        return parser
+
+    def command_boot(self, args):
+
+        if args.load:
+            bootstrap = self.load(args.load[0])
         else:
             bootstrap = None
 
@@ -46,56 +80,27 @@ class Interface(ui.Interface):
             bootstrap = self.iterate(args.iterate)
 
         if args.traces and bootstrap:
-            self.plot_bootstrap(bootstrap, args.traces[0])
+            fname = self.f(args.traces[0])
+            self.plot_bootstrap(bootstrap, fname)
 
         if args.save:
-            self.save(bootstrap, self.save[0])
+            fname = self.f(args.save[0])
+            self.save(bootstrap, fname)
 
-        return data
+    def save(self, obj, fname):
+        if isinstance(obj, Bootstrap):
+            obj._serialize()
+            with open(self.f('manifest'), 'w') as file:
+                file.write(obj.manifest())
 
-    def options(self):
-        parser = super().options()
+        super().save(obj, fname)
 
-        parser.add_argument(
-            '--threshold', nargs=2,
-            help='Print the number of subjects above or below the threshold')
+    def load(self, fname):
+        obj = super().load(fname)
+        if isinstance(obj, Bootstrap):
+            obj._deserialize()
 
-        parser.add_argument(
-            '--iterate', nargs=3,
-            help='Iterate through SWAP with the specified thresholds')
-
-        parser.add_argument(
-            '--traces', nargs=1)
-
-        parser.add_argument(
-            '--load', nargs=1,
-            help='load a pickled bootstrap from file')
-
-        parser.add_argument(
-            '--save', nargs=1,
-            help='load a pickled bootstrap from file')
-
-        parser.add_argument(
-            '--histogram', nargs=1,
-            help='Draw a histogram of bootstrap data')
-
-        parser.add_argument(
-            '--broc', nargs=2, action='append',
-            help='Generate ROC curve from this file, bootstrap specific')
-
-        return parser
-
-    def _control(self):
-        golds = gold_0 + gold_1
-        golds = DB().getExpertGold(golds)
-        return BootstrapControl(self.p0, self.epsilon, golds.items())
-
-    def save(self, bootstrap, fname):
-        bootstrap._serialize()
-        super().save(bootstrap, self.f(fname))
-
-        with open(self.f('manifest'), 'w') as file:
-            file.write(bootstrap.manifest())
+        return obj
 
     def threshold(self, data, threshold):
         min = float(threshold[0])
@@ -141,20 +146,28 @@ class Interface(ui.Interface):
             history = value['history']
             plot_data.append((c, history))
 
-        fname = self.f(fname)
         ui.plot_tracks(plot_data, "Bootstrap Traces", fname, scale='linear')
 
     def collect_roc(self, args):
-        labels, data, plot_file = super().collect_roc(args)
+        data = super().collect_roc(args)
 
-        if args.loadb:
-            bootstrap = ui.load_pickle(args.loadb[0])
-            for label, i in args.broc:
-                i = int(i) - 1
-                labels.append(label)
-                data.append(bootstrap.roc_export(i))
+        if args.bootstrap:
+            for label_pre, fname, *steps in args.bootstrap:
+                print(fname)
+                boot = self.load(fname)
+                for i in steps:
+                    i = int(i)
+                    label = '%s-%d' % (label_pre, i)
+                    data.append((label, boot.roc_export(i - 1)))
 
-        return labels, data, plot_file
+        # if args.loadb:
+        #     bootstrap = ui.load_pickle(args.loadb[0])
+        #     for label, i in args.broc:
+        #         i = int(i) - 1
+        #         labels.append(label)
+        #         data.append(bootstrap.roc_export(i))
+
+        return data
 
 
 class Bootstrap:
@@ -432,7 +445,7 @@ class BootstrapCursor(Cursor):
         return count
 
 
-def Bootstrap_Analysis:
+class Bootstrap_Analysis:
     def __init__(self, bootstrap):
         pass
 
