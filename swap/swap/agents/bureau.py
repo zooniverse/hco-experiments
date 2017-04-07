@@ -61,6 +61,9 @@ class Bureau(object):
         else:
             raise KeyError("Error: Agent_id not in Bureau")
 
+    def getAgentIds(self):
+        return set(self.agents.keys())
+
     def removeAgent(self, agent_id):
         """ Remove agent from bureau
 
