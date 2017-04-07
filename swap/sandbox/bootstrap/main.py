@@ -29,6 +29,8 @@ class Interface(ui.Interface):
         self.p0 = p0
         self.epsilon = epsilon
 
+        self.last_load = None
+
     def options(self):
         parser = super().options()
 
@@ -42,9 +44,11 @@ class Interface(ui.Interface):
 
         boot_parser.add_argument(
             '--iterate', nargs=3,
-            metavar=('low', 'high', 'N '),
             help='Iterate SWAP N times with the ' +
                  'specified (low, high) thresholds')
+
+        boot_parser.add_argument(
+            '--thresholds', '-t', nargs=3)
 
         boot_parser.add_argument(
             '--traces', nargs=1,
@@ -67,7 +71,7 @@ class Interface(ui.Interface):
             help='Draw a histogram of bootstrap data')
 
         boot_parser.add_argument(
-            '--cm', nargs='*')
+            '--cm', nargs=3)
 
         boot_parser.add_argument(
             '--utraces', nargs='*')
@@ -87,7 +91,7 @@ class Interface(ui.Interface):
             bootstrap = None
 
         if args.iterate:
-            bootstrap = self.iterate(args.iterate)
+            bootstrap = self.iterate(args)
 
         if args.traces and bootstrap:
             fname = self.f(args.traces[0])
@@ -96,7 +100,7 @@ class Interface(ui.Interface):
         if args.cm and bootstrap:
             if len(args.cm) < 2:
                 raise ValueError('Must specify at least one swap level')
-            self.confusion_matrix(bootstrap, args)
+            self.confusion_matrix_err(bootstrap, args)
 
         if args.utraces and bootstrap:
             if len(args.cm) < 2:
@@ -116,16 +120,26 @@ class Interface(ui.Interface):
         super().save(obj, fname)
 
     def load(self, fname):
-        obj = super().load(fname)
-        if isinstance(obj, Bootstrap):
-            obj._deserialize()
+        if self.last_load is not None and \
+                self.last_load[0] == fname:
+            return self.last_load[1]
+        else:
+            self.last_load = None
+            obj = super().load(fname)
+            if isinstance(obj, Bootstrap):
+                obj._deserialize()
 
-        return obj
+            self.last_load = (fname, obj)
 
-    def mod_f(self, f, n):
-        f = f[:]
+            return obj
+
+    def mod_f(self, fname, append):
+        append = str(append)
+
+        f = fname[:]
         i = f.find('.')
-        f = f[:i] + '-%d' % n + f[i:]
+        f = f[:i] + '-%s' % append + f[i:]
+
         return self.f(f)
 
     def threshold(self, data, threshold):
@@ -145,41 +159,68 @@ class Interface(ui.Interface):
 
         print('high: %d, low: %d, other: %d' % (high, low, other))
 
-    def iterate(self, threshold, fname=False):
-        low = float(threshold[0])
-        high = float(threshold[1])
-        n = int(threshold[2])
+    def iterate(self, args):
+        if args.save:
+            fname = args.save[0]
+        else:
+            fname = None
+
+        n = int(args.iterate[0])
+        low = float(args.iterate[1])
+        high = float(args.iterate[2])
+
+        thresholds = {}
+        if args.thresholds:
+            i = int(args.thresholds[0]) - 1
+            low = float(args.thresholds[1])
+            high = float(args.thresholds[2])
+            thresholds[i] = (low, high)
+
         bootstrap = Bootstrap(low, high, self.p0, self.epsilon)
 
         for i in range(n):
+            if i in thresholds:
+                bootstrap.setThreshold(*thresholds[i])
+
             swap = bootstrap.step()
+            if fname:
+                self.save(swap,
+                          self.mod_f(fname, 'swap-%d' % i))
+
             img = self.f('iterate-%d.png' % i)
             ui.plot_subjects(swap, img)
 
-        if fname:
-            self.save(bootstrap, fname)
+        # if fname:
+        #     self.save(bootstrap, fname)
 
         return bootstrap
 
-    def confusion_matrix(self, bootstrap, args):
-        fname = args.cm[-1]
-        levels = args.cm[:-1]
+    def confusion_matrix_err(self, bootstrap, args):
+        level = int(args.cm[0]) - 1
+        swap_name = args.cm[1]
+        fname = self.f(args.cm[2])
 
-        for i in levels:
-            i = int(i)
-            swap = bootstrap.getMetric(i).getSWAP()
-            file = self.mod_f(fname, i)
-            ui.plot_user_cm(swap, file)
+        swap = self.load(swap_name)
+        bswap = bootstrap.getMetric(level).getSWAP()
+
+        data = []
+        for id_ in swap.users.getAgentIds():
+
+            a_user = swap.users.getAgent(id_)
+            b_user = bswap.users.getAgent(id_)
+
+            error = [0, 0]
+            for i in [0, 1]:
+                a = a_user.getScore(i)
+                b = b_user.getScore(i)
+                error[i] = a - b / a
+
+            data.append((*error, 10))
+
+        ui.plot_confusion_matrix(data, "Test", None)
 
     def user_traces(self, bootstrap, args):
-        fname = args.utraces[-1]
-        levels = args.utraces[:-1]
-
-        for i in levels:
-            i = int(i)
-            swap = bootstrap.getMetric(i).getSWAP()
-            file = self.mod_f(fname, i)
-            ui.plot_user_traces(swap, file)
+        pass
 
     def plot_bootstrap(self, bootstrap, fname):
         plot_data = []
@@ -195,26 +236,16 @@ class Interface(ui.Interface):
         ui.plot_tracks(plot_data, "Bootstrap Traces", fname, scale='linear')
 
     def collect_roc(self, args):
-        data = super().collect_roc(args)
+        it = super().collect_roc(args)
+        it.__class__ = Roc_Iterator
 
         if args.bootstrap:
-            for label_pre, fname, *steps in args.bootstrap:
+            for label, fname, *steps in args.bootstrap:
                 print(fname)
-                boot = self.load(fname)
-                for i in steps:
-                    print(i)
-                    i = int(i)
-                    label = '%s-%d' % (label_pre, i)
-                    data.append((label, boot.roc_export(i - 1)))
+                steps = [int(i) - 1 for i in steps]
+                it.addBootObject(label, fname, self.load, steps)
 
-        # if args.loadb:
-        #     bootstrap = ui.load_pickle(args.loadb[0])
-        #     for label, i in args.broc:
-        #         i = int(i) - 1
-        #         labels.append(label)
-        #         data.append(bootstrap.roc_export(i))
-
-        return data
+        return it
 
 
 class Bootstrap:
@@ -242,6 +273,10 @@ class Bootstrap:
     def _deserialize(self):
         self.db = DB()
 
+    def setThreshold(self, low, high):
+        self.t_low = low
+        self.t_high = high
+
     def step(self):
         self.n += 1
 
@@ -254,7 +289,7 @@ class Bootstrap:
         self.silver_update(swap.export())
         self.update_tracking(export)
 
-        self.addMetric(swap)
+        self.addMetric()
 
         return swap
 
@@ -316,8 +351,8 @@ class Bootstrap:
 
         return data
 
-    def addMetric(self, swap):
-        metric = Bootstrap_Metric(self, self.n, swap)
+    def addMetric(self):
+        metric = Bootstrap_Metric(self, self.n)
         self.metrics.addMetric(metric)
 
     def getMetric(self, i):
@@ -393,10 +428,9 @@ class Bootstrap_Metrics:
 
 
 class Bootstrap_Metric:
-    def __init__(self, bootstrap, num, swap):
+    def __init__(self, bootstrap, num):
         self.num = num
         self.silver = bootstrap.silver.copy()
-        self.swap = swap
         self.iteration = bootstrap.n
 
     def __str__(self):
@@ -405,11 +439,6 @@ class Bootstrap_Metric:
 
     def __repr__(self):
         return str((self.iteration, *self.num_silver()))
-
-    # def __repr__(self):
-
-    def getSWAP(self):
-        return self.swap
 
     def num_silver(self):
         count = [0, 0]
@@ -516,7 +545,14 @@ class Bootstrap_Analysis:
 
 
 class Roc_Iterator(ui.Roc_Iterator):
+
+    def addBootObject(self, label, fname, load, iterations=None):
+        if iterations:
+            self.items.append((label, fname, load, iterations))
+
     def next(self):
+        self.__bounds()
+
         item = self.items[self.i]
         if len(item) < 4:
             return super().next()
@@ -524,12 +560,12 @@ class Roc_Iterator(ui.Roc_Iterator):
             self.i += 1
             return self.next()
         else:
-            label, fname, load = item[:2]
+            print(item)
+            label, fname, load = item[:3]
             i = item[3].pop(0)
+            label = '%s-%d' % (label, i + 1)
 
             obj = load(fname)
-
-            self.i += 1
 
             return (label, obj.roc_export(i))
 

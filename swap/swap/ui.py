@@ -184,14 +184,15 @@ class Interface:
             Args:
                 args: command line arguments
         """
-        data = []
+        it = Roc_Iterator()
         if args.add:
             for label, fname in args.add:
                 print(fname)
-                obj = self.load(fname)
-                data.append((label, obj.roc_export()))
+                # obj = self.load(fname)
+                # data.append((label, obj.roc_export()))
+                it.addObject(label, fname, self.load)
 
-        return data
+        return it
 
 
 class SWAPInterface(Interface):
@@ -355,7 +356,7 @@ def plot_user_cm(swap, fname):
 
         data.append((score0, score1, n))
 
-    plot_confustion_matrix(data, "User Confusion Matrices", fname)
+    plot_confusion_matrix(data, "User Confusion Matrices", fname)
 
 
 def plot_user_traces(swap, fname):
@@ -466,42 +467,6 @@ def plot_histogram(data, title, fname, dpi=300):
     plt.show()
 
 
-def plot_roc_functional(title, *datasets, fname=None, dpi=300):
-    plt.figure(1)
-
-    for label, function in datasets:
-        y_true = []
-        y_score = []
-
-        for t in data:
-            y_true.append(t[0])
-            y_score.append(t[1])
-
-        y_true = np.array(y_true)
-        y_score = np.array(y_score)
-
-        # Compute fpr, tpr, thresholds and roc auc
-        fpr, tpr, thresholds = roc_curve(y_true, y_score)
-        roc_auc = auc(y_true, y_score, True)
-        # roc_auc = 0
-
-        # Plot ROC curve
-        plt.plot(fpr, tpr, label='%s (area = %0.3f)' % (label, roc_auc))
-
-    plt.plot([0, 1], [0, 1], 'k--')  # random predictions curve
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.0])
-    plt.xlabel('False Positive Rate or (1 - Specifity)')
-    plt.ylabel('True Positive Rate or (Sensitivity)')
-    plt.title('Receiver Operating Characteristic for %s' % title)
-    plt.legend(loc="lower right")
-
-    if fname:
-        plt.savefig(fname, dpi=dpi)
-    else:
-        plt.show()
-
-
 def plot_roc(title, *datasets, fname=None, dpi=300):
     plt.figure(1)
 
@@ -538,7 +503,7 @@ def plot_roc(title, *datasets, fname=None, dpi=300):
         plt.show()
 
 
-def plot_confustion_matrix(data, title, fname, dpi=300):
+def plot_confusion_matrix(data, title, fname, dpi=300):
     # """ Plot User Skill """
     # # Loop over all users
     # user_data = swappy.exportUserData()
@@ -591,12 +556,8 @@ class Roc_Iterator:
         self.items = []
         self.i = 0
 
-    def addObjects(self, *args):
-        roc_objects = []
-        for item in args:
-            roc_objects.append(item)
-
-        self.items += roc_objects
+    def addObject(self, label, fname, load):
+        self.items.append((label, fname, load))
 
     def __iter__(self):
         return self
@@ -604,7 +565,12 @@ class Roc_Iterator:
     def __next__(self):
         return self.next()
 
+    def __bounds(self):
+        if self.i >= len(self.items):
+            raise StopIteration()
+
     def next(self):
+        self.__bounds()
         if self.i > len(self.items):
             raise StopIteration()
 
