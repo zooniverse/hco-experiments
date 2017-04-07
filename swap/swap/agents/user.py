@@ -28,6 +28,8 @@ class User(Agent):
         self.trackers = Tracker_Collection.Generate(
             UTracker, [0, 1], epsilon)
 
+        self.count = 0
+
     def addClassification(self, cl):
         """
             adds a classification and calculates the new score
@@ -49,6 +51,8 @@ class User(Agent):
         # Add classification to tracker
         tracker.add(annotation)
 
+        self.count += 1
+
     def getHistory(self):
         pass
 
@@ -60,6 +64,9 @@ class User(Agent):
                 label (int) label of the tracker, i.e. the annotation
         """
         return self.trackers.get(label).current()
+
+    def getCount(self):
+        return self.count
 
     def export(self):
         """
