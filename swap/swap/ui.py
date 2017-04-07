@@ -234,12 +234,17 @@ class SWAPInterface(Interface):
         swap_parser.add_argument(
             '--subject', nargs=1,
             metavar='file',
-            help='Generate subject track plot and output to filename S')
+            help='Generate subject track plot and output to file')
+
+        swap_parser.add_argument(
+            '--utraces', nargs=1,
+            metavar='file',
+            help='Generate user track plots and output to file')
 
         swap_parser.add_argument(
             '--user', nargs=1,
             metavar='file',
-            help='Generate user track plots and output to filename U')
+            help='Generate user confusion matrices and outname to file')
 
         swap_parser.add_argument(
             '--log', nargs=1,
@@ -272,7 +277,11 @@ class SWAPInterface(Interface):
 
         if args.user:
             fname = self.f(args.user[0])
-            plot_users(swap, fname)
+            plot_user_cm(swap, fname)
+
+        if args.utraces:
+            fname = self.f(args.user[0])
+            plot_user_traces(swap, fname)
 
         if args.log:
             fname = self.f(args.output[0])
@@ -337,7 +346,19 @@ def save_pickle(object, fname):
         pickle.dump(object, file)
 
 
-def plot_users(swap, fname):
+def plot_user_cm(swap, fname):
+    data = []
+    for user in swap.users:
+        score0 = user.getScore(0)
+        score1 = user.getScore(1)
+        n = user.getCount()
+
+        data.append((score0, score1, n))
+
+    plot_confustion_matrix(data, "User Confusion Matrices", fname)
+
+
+def plot_user_traces(swap, fname):
     """
         Generate a trace plot of the average of each user's scores
         change with each classification
@@ -445,6 +466,42 @@ def plot_histogram(data, title, fname, dpi=300):
     plt.show()
 
 
+def plot_roc_functional(title, *datasets, fname=None, dpi=300):
+    plt.figure(1)
+
+    for label, function in datasets:
+        y_true = []
+        y_score = []
+
+        for t in data:
+            y_true.append(t[0])
+            y_score.append(t[1])
+
+        y_true = np.array(y_true)
+        y_score = np.array(y_score)
+
+        # Compute fpr, tpr, thresholds and roc auc
+        fpr, tpr, thresholds = roc_curve(y_true, y_score)
+        roc_auc = auc(y_true, y_score, True)
+        # roc_auc = 0
+
+        # Plot ROC curve
+        plt.plot(fpr, tpr, label='%s (area = %0.3f)' % (label, roc_auc))
+
+    plt.plot([0, 1], [0, 1], 'k--')  # random predictions curve
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.0])
+    plt.xlabel('False Positive Rate or (1 - Specifity)')
+    plt.ylabel('True Positive Rate or (Sensitivity)')
+    plt.title('Receiver Operating Characteristic for %s' % title)
+    plt.legend(loc="lower right")
+
+    if fname:
+        plt.savefig(fname, dpi=dpi)
+    else:
+        plt.show()
+
+
 def plot_roc(title, *datasets, fname=None, dpi=300):
     plt.figure(1)
 
@@ -479,6 +536,84 @@ def plot_roc(title, *datasets, fname=None, dpi=300):
         plt.savefig(fname, dpi=dpi)
     else:
         plt.show()
+
+
+def plot_confustion_matrix(data, title, fname, dpi=300):
+    # """ Plot User Skill """
+    # # Loop over all users
+    # user_data = swappy.exportUserData()
+    # # all users
+    # unique_users = user_data.keys()
+    # # max classifications
+    # max_class = 0
+    # # number of user processed
+    # counter = 0
+    # for user in unique_users:
+    #     n_class_user = len(user_data[user]['gold_labels'])
+    #     max_class = max(max_class, n_class_user)
+    #     plt.plot(user_data[user]['score_1_history'][-1],
+    #              user_data[user]['score_0_history'][-1], "o",
+    #              ms=(n_class_user)/500,
+    #              color="#3F88C5", alpha=0.5)
+
+    for item in data:
+        plt.plot(item[1], item[0],
+                 'o', ms=item[2] / 500,
+                 color="#3F88C5", alpha=0.5)
+
+    # Quadrant labels
+    plt.text(0.03, 0.03, "Obtuse")
+    plt.text(0.75, 0.03, "Optimistic")
+    plt.text(0.03, 0.95, "Pessimistic")
+    plt.text(0.8, 0.95, "Astute")
+
+    # Quadrant divider lines
+    plt.plot([0.5, 0.5], [0, 1], "k--", lw=1)
+    plt.plot([0, 1], [0.5, 0.5], "k--", lw=1)
+    plt.plot([0, 1], [1, 0], "k-", lw=1)
+
+    # Axis labels
+    plt.xlabel("P(\'real\'|real)")
+    plt.ylabel("P(\'bogus\'|bogus)")
+    plt.axes().set_aspect('equal')
+
+    # Plot Title
+    plt.title(title)
+
+    if fname:
+        plt.savefig(fname, dpi=dpi)
+    else:
+        plt.show()
+
+
+class Roc_Iterator:
+    def __init__(self):
+        self.items = []
+        self.i = 0
+
+    def addObjects(self, *args):
+        roc_objects = []
+        for item in args:
+            roc_objects.append(item)
+
+        self.items += roc_objects
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        return self.next()
+
+    def next(self):
+        if self.i > len(self.items):
+            raise StopIteration()
+
+        label, fname, load = self.items[self.i]
+
+        obj = load(fname)
+        self.i += 1
+
+        return (label, obj.roc_export())
 
 
 def write_log(data, fname):

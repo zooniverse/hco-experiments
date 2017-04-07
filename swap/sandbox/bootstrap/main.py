@@ -66,6 +66,12 @@ class Interface(ui.Interface):
             metavar='file',
             help='Draw a histogram of bootstrap data')
 
+        boot_parser.add_argument(
+            '--cm', nargs='*')
+
+        boot_parser.add_argument(
+            '--utraces', nargs='*')
+
         roc_parser = self.the_subparsers['roc']
         roc_parser.add_argument(
             '-b', '--bootstrap', nargs='*', action='append',
@@ -87,6 +93,16 @@ class Interface(ui.Interface):
             fname = self.f(args.traces[0])
             self.plot_bootstrap(bootstrap, fname)
 
+        if args.cm and bootstrap:
+            if len(args.cm) < 2:
+                raise ValueError('Must specify at least one swap level')
+            self.confusion_matrix(bootstrap, args)
+
+        if args.utraces and bootstrap:
+            if len(args.cm) < 2:
+                raise ValueError('Must specify at least one swap level')
+            self.user_traces(bootstrap, args)
+
         if args.save:
             fname = self.f(args.save[0])
             self.save(bootstrap, fname)
@@ -105,6 +121,12 @@ class Interface(ui.Interface):
             obj._deserialize()
 
         return obj
+
+    def mod_f(self, f, n):
+        f = f[:]
+        i = f.find('.')
+        f = f[:i] + '-%d' % n + f[i:]
+        return self.f(f)
 
     def threshold(self, data, threshold):
         min = float(threshold[0])
@@ -138,6 +160,26 @@ class Interface(ui.Interface):
             self.save(bootstrap, fname)
 
         return bootstrap
+
+    def confusion_matrix(self, bootstrap, args):
+        fname = args.cm[-1]
+        levels = args.cm[:-1]
+
+        for i in levels:
+            i = int(i)
+            swap = bootstrap.getMetric(i).getSWAP()
+            file = self.mod_f(fname, i)
+            ui.plot_user_cm(swap, file)
+
+    def user_traces(self, bootstrap, args):
+        fname = args.utraces[-1]
+        levels = args.utraces[:-1]
+
+        for i in levels:
+            i = int(i)
+            swap = bootstrap.getMetric(i).getSWAP()
+            file = self.mod_f(fname, i)
+            ui.plot_user_traces(swap, file)
 
     def plot_bootstrap(self, bootstrap, fname):
         plot_data = []
@@ -278,6 +320,9 @@ class Bootstrap:
         metric = Bootstrap_Metric(self, self.n, swap)
         self.metrics.addMetric(metric)
 
+    def getMetric(self, i):
+        return self.metrics.get(i)
+
     def printMetrics(self):
         for m in self.metrics:
             print(m.num_silver())
@@ -340,15 +385,18 @@ class Bootstrap_Metrics:
     def addMetric(self, metric):
         self.metrics.append(metric)
 
-    def get(self):
-        return self.metrics[:]
+    def get(self, i=None):
+        if i is None:
+            return self.metrics[:]
+        else:
+            return self.metrics[i]
 
 
 class Bootstrap_Metric:
     def __init__(self, bootstrap, num, swap):
         self.num = num
         self.silver = bootstrap.silver.copy()
-        self.swap = swap.export()
+        self.swap = swap
         self.iteration = bootstrap.n
 
     def __str__(self):
@@ -359,6 +407,9 @@ class Bootstrap_Metric:
         return str((self.iteration, *self.num_silver()))
 
     # def __repr__(self):
+
+    def getSWAP(self):
+        return self.swap
 
     def num_silver(self):
         count = [0, 0]
@@ -462,6 +513,25 @@ class Bootstrap_Analysis:
 
     def trace_one(self, subject):
         pass
+
+
+class Roc_Iterator(ui.Roc_Iterator):
+    def next(self):
+        item = self.items[self.i]
+        if len(item) < 4:
+            return super().next()
+        elif len(item[3]) == 0:
+            self.i += 1
+            return self.next()
+        else:
+            label, fname, load = item[:2]
+            i = item[3].pop(0)
+
+            obj = load(fname)
+
+            self.i += 1
+
+            return (label, obj.roc_export(i))
 
 
 def main():
