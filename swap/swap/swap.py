@@ -146,7 +146,7 @@ class SWAP(object):
         """ Get Subject Bureau object """
         return self.subjects
 
-    def setGoldSubjects(self, subjects):
+    def setGoldLabels(self, golds):
         """
             Defines the subjects explicitly that should be
             treated as gold standards
@@ -157,11 +157,11 @@ class SWAP(object):
             gold on initialization
 
             Args:
-                subjects: (list: (subject, label)) list of subjects
+                subjects: (list: (subject, gold)) list of subjects
         """
-        for subject, label in subjects:
+        for subject, gold in golds:
             # TODO use old swap score or reset with p0 for bootstrap?
-            agent = Subject(subject, self.p0, label)
+            agent = Subject(subject, self.p0, gold)
             self.subjects.addAgent(agent)
 
     # ----------------------------------------------------------------

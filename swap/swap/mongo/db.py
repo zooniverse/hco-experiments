@@ -42,7 +42,7 @@ class _DB:
         if query is None:
             query = Query()
 
-            fields = ['user_name', 'subject_id', 'annotation', 'gold_label']
+            fields = ['user_name', 'subject_id', 'annotation']
             query.project(fields)
 
         # set batch size as specified in kwargs,
@@ -72,6 +72,21 @@ class _DB:
             data[item['_id']] = item['gold']
 
         return data
+
+    def getAllGolds(self):
+        query = [
+            {'$group': {'_id': '$subject_id',
+                        'gold': {'$first': '$gold_label'}}}]
+
+        return Cursor(query, self.classifications)
+
+    def getRandomGoldSample(self, size):
+        query = [
+            {'$group': {'_id': '$subject_id',
+                        'gold': {'$first': '$gold_label'}}},
+            {'$sample': size}]
+
+        return Cursor(query, self.classifications)
 
     def getNSubjects(self):
         if self.subject_count is None:

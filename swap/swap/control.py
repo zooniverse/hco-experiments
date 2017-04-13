@@ -3,24 +3,28 @@
 # Serves data to SWAP
 
 import progressbar
-import copy
 
 from swap.swap import SWAP, Classification
 from swap.mongo import DB
 from swap.mongo import Query
 from swap.config import Config
 
+db = DB()
+
 
 class Control:
 
-    def __init__(self, p0, epsilon, swap=None):
+    def __init__(self, p0, epsilon, swap=None, train_size=None):
         self._db = DB()
         self._cfg = Config()
         self.classifications = self._db.classifications
-        # self.subjects = self._db.subjects
+
+        # Number of subjects with expert labels for a
+        # test/train split
+        self.train_size = train_size
 
         if swap is None:
-            self.swap = SWAP(p0, epsilon)
+            self.swap = self.initSwap(p0, epsilon)
         else:
             self.swap = swap
 
@@ -64,8 +68,28 @@ class Control:
     def _delegate(self, cl):
         self.swap.processOneClassification(cl)
 
+    def initSwap(self, p0, epsilon):
+        swap = SWAP(p0, epsilon)
+
+        golds = self.getGoldLabels()
+        swap.setGoldLabels(golds)
+
+        return swap
+
+    def getGoldLabels(self):
+        if self.train_size is None:
+            cursor = db.getAllGolds()
+        else:
+            cursor = db.getRandomGoldSample(self.train_size)
+
+        golds = []
+        for item in cursor:
+            golds.append((item['_id'], item['gold']))
+
+        return golds
+
     def getClassifications(self):
-        return self._db.getClassifications()
+        return db.getClassifications()
 
     def getSWAP(self):
         """ Returns SWAP object """
@@ -144,7 +168,7 @@ class DummySWAP:
             self.data[subject] = (gold, score)
 
     def get_cursor(self):
-        cursor = DB().classifications.aggregate([
+        cursor = db.classifications.aggregate([
             {'$match': {'gold_label': {'$ne': -1}}},
             {'$group': {
                 '_id': '$subject_id',
