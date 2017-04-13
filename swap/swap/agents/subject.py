@@ -137,7 +137,8 @@ class Subject(Agent):
         try:
             score = a / (a + b * c)
         # leave score unchanged
-        except ZeroDivisionError:
+        except ZeroDivisionError as e:
+            print(e)
             score = s_score
 
         return score
