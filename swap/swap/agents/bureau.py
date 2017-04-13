@@ -91,3 +91,6 @@ class Bureau(object):
         for name, agent in self.agents.items():
             data[name] = agent.export()
         return data
+
+    def __str__(self):
+        return '\n'.join([str(item) for item in self.agents.values()])

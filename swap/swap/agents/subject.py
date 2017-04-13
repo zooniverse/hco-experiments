@@ -164,3 +164,7 @@ class Subject(Agent):
         }
 
         return data
+
+    def __str__(self):
+        return 'id: %s score: %.2f gold label: %d' % \
+            (self.id, self.getScore(), self.getGoldLabel())
