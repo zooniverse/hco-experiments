@@ -2,12 +2,12 @@
 ################################################################
 # Script to test control functionality
 
-import swap.mongo.db
+from swap.mongo.db import DB
 from swap.control import Control
+from unittest.mock import patch, MagicMock, call, Mock
 
 fields = {'user_id', 'classification_id', 'subject_id',
           'annotation', 'gold_label'}
-db = swap.mongo.DB()
 
 
 # def test_classifications_projection():
@@ -49,3 +49,29 @@ def test_get_one_classification():
     assert n_class > 0
     assert type(current_classification) == dict
     assert len(current_classification) > 0
+
+
+def test_with_train_split():
+    db = DB()
+    old = db.getRandomGoldSample
+    mock = MagicMock(return_value=[])
+    db.getRandomGoldSample = mock
+
+    Control(.5, .5, train_size=100)
+
+    mock.assert_called_with(100)
+
+    db.getRandomGoldSample = old
+
+
+def test_without_train_split():
+    db = DB()
+    old = db.getAllGolds
+    mock = MagicMock(return_value=[])
+    db.getAllGolds = mock
+
+    Control(.5, .5)
+
+    mock.assert_called_with()
+
+    db.getAllGolds = old

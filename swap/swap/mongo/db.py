@@ -119,6 +119,9 @@ class Singleton(type):
                 .__call__(*args, **kwargs)
         return cls._instances[cls]
 
+    def _reset_instances(cls):
+        cls._instances = {}
+
 
 class DB(_DB, metaclass=Singleton):
     pass

@@ -46,7 +46,7 @@ def test_set_golds():
     bureau = swap.getSubjectData()
     print(bureau)
     for id_, gold in golds:
-        assert bureau.has(id_)
+        assert id_ in bureau
         assert bureau.getAgent(id_).gold == gold
 
 
