@@ -111,7 +111,7 @@ class Bootstrap:
         for s in bureau:
             if s.gold != -1:
                 if i is None:
-                    data.append((s.gold, s.getScore()))
+                    data.append((s.gold, s.score))
                 else:
                     data.append((s.gold, s.getHistory()[i]))
 

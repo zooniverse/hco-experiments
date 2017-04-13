@@ -194,8 +194,8 @@ class SWAP(object):
 
         data = []
         for s in bureau:
-            gold = s.getGoldLabel()
-            score = s.getScore()
+            gold = s.gold
+            score = s.score
             if gold != -1:
                 data.append((gold, score))
 

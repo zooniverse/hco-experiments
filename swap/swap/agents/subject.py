@@ -33,6 +33,31 @@ class Subject(Agent):
         # store gold label
         self.gold_label = gold_label
 
+    @property
+    def score(self):
+        """
+            Score getter function
+        """
+        return self.tracker.current()
+
+    @score.setter
+    def score(self, score):
+        self.tracker.add(score)
+
+    @property
+    def label(self):
+        """
+            Gets the current label of the subject based on its score
+        """
+        if self.score > 0.5:
+            return 1
+        else:
+            return 0
+
+    @property
+    def gold(self):
+        return self.gold_label
+
     def addClassification(self, cl, user_agent):
         """
             adds a classification and calculates the new score
@@ -42,7 +67,7 @@ class Subject(Agent):
                 user_agent (Agent->User)  Agent for the classifying user
         """
         annotation = int(cl.annotation)
-        s_score = self.getScore()
+        s_score = self.score
 
         # Get user's 1 and 0 scores
         # TODO @marco I'm not sure of what you added
@@ -60,23 +85,18 @@ class Subject(Agent):
         # add score to tracker
         self.tracker.add(score)
 
-    def getHistory(self):
-        # I'm envioning this for diagnostics and making the plots
-        # for experiments, but not sure what this will entail
-        pass
+    # def getLabel(self):
+    #     """
+    #         Gets the current label of the subject based on its score
+    #     """
+    #     if self.getScore() > 0.5:
+    #         return 1
+    #     else:
+    #         return 0
 
-    def getLabel(self):
-        """
-            Gets the current label of the subject based on its score
-        """
-        if self.getScore() > 0.5:
-            return 1
-        else:
-            return 0
-
-    def getGoldLabel(self):
-        """ Returns the gold label of the subject """
-        return self.gold_label
+    # def getGoldLabel(self):
+    #     """ Returns the gold label of the subject """
+    #     return self.gold_label
 
     def setGoldLabel(self, gold_label):
         """
@@ -159,12 +179,12 @@ class Subject(Agent):
             'user_scores': self.user_scores.getHistory(),
             'score': self.tracker.current(),
             'history': self.tracker.getHistory(),
-            'label': self.getLabel(),
-            'gold_label': self.getGoldLabel()
+            'label': self.label,
+            'gold_label': self.gold
         }
 
         return data
 
     def __str__(self):
         return 'id: %s score: %.2f gold label: %d' % \
-            (self.id, self.getScore(), self.getGoldLabel())
+            (self.id, self.score, self.gold)

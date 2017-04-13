@@ -47,7 +47,7 @@ def test_set_golds():
     print(bureau)
     for id_, gold in golds:
         assert bureau.has(id_)
-        assert bureau.getAgent(id_).getGoldLabel() == gold
+        assert bureau.getAgent(id_).gold == gold
 
 
 def test_doesnt_override_golds():
@@ -60,7 +60,7 @@ def test_doesnt_override_golds():
 
     swap.processOneClassification(Classification(0, 2, 0, 1))
     print(bureau.getAgent(1))
-    assert bureau.getAgent(2).getGoldLabel() == 0
+    assert bureau.getAgent(2).gold == 0
 
 
 def test_subject_gold_label_1():
