@@ -63,7 +63,7 @@ class SWAP(object):
         # update user success probability
 
         if not isinstance(cl, Classification):
-            cl = Classification.Generate(cl)
+            cl = Classification.generate(cl)
 
         # if self.gold_updates and cl.gold() in [0, 1]:
         # ^ moved gold check downstream to update methods
@@ -184,6 +184,12 @@ class SWAP(object):
         }
 
     def roc_export(self):
+        """
+            Exports subject classification data in a suitable form
+            for generating a roc curve. Data consolidated into list of tuples
+            Each tuble takes the form:
+                (true label, probability)
+        """
         bureau = self.subjects
 
         data = []
@@ -220,9 +226,20 @@ class SWAP(object):
 
 
 class Classification:
+    """
+        Object to represent each individual classification
+    """
 
     def __init__(self, user, subject, annotation,
                  gold_label=-1, metadata={}):
+        """
+            Args:
+                user:       user name of the classifying user
+                subject:    id number of the subject being classified
+                annotation: label assigned by the user
+                gold_label: (optional) expert assigned label
+                metadata:   (optional) any additional metadata associated
+        """
 
         if type(annotation) is not int:
             raise ClValueError('annotation', int)
@@ -240,9 +257,17 @@ class Classification:
         self.metadata = metadata
 
     def gold(self):
+        """
+            Get the gold label
+        """
         return self.gold_label
 
-    def Generate(cl):
+    @staticmethod
+    def generate(cl):
+        """
+            Static generator method. Generates a classification
+            object from a classification in dictionary form
+        """
         Classification.Validate(cl)
 
         user = cl['user_name']

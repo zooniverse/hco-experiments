@@ -9,7 +9,7 @@ from swap.swap import Classification
 from unittest.mock import patch, MagicMock, call, Mock
 
 # Sample classification
-cl = Classification.Generate({
+cl = Classification.generate({
     'user_name': 'HTMAMR38',
     'metadata': {'mag_err': 0.1, 'mag': 20.666},
     'gold_label': 0,
