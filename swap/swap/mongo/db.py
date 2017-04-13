@@ -26,11 +26,15 @@ class _DB:
 
         self._client = MongoClient('%s:%d' % (host, port))
         self._db = self._client[db_name]
+        self.batch_size = int(eval(self._cfg.database['max_batch_size']))
 
         self.classifications = self._db.classifications
         self.subjects = self._db.subjects
 
         self.subject_count = None
+
+    def setBatchSize(self, size):
+        self.batch_size = size
 
     def getClassifications(self, query=None, **kwargs):
         """ Returns Iterator over all Classifications """
@@ -43,9 +47,9 @@ class _DB:
 
         # set batch size as specified in kwargs,
         # or default to the config default
-        batch_size = int(eval(kwargs.get(
+        batch_size = kwargs.get(
             'batch_size',
-            self._cfg.database['max_batch_size'])))
+            self.batch_size)
 
         # perform query on classification data
         classifications = Cursor(query.build(), self.classifications,
