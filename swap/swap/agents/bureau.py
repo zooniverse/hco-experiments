@@ -20,10 +20,11 @@ class Bureau(object):
         # or Bureau(User) etc. ?
         self.agent_type = agent_type
         # dictionary to store all agents, key is agent-ID
-        self.agents = dict()
+        self._agents = dict()
 
-    def __iter__(self):
-        return iter(self.agents.values())
+    @property
+    def agents(self):
+        return self._agents.copy()
 
     def addAgent(self, agent):
         """
@@ -45,6 +46,9 @@ class Bureau(object):
         else:
             raise KeyError("Agent-ID already in bureau, remove first")
 
+    def add(self, agent):
+        self.addAgent(agent)
+
     def getAgent(self, agent_id):
         """ Get agent from bureau
 
@@ -60,6 +64,9 @@ class Bureau(object):
             return self.agents[agent_id]
         else:
             raise KeyError("Error: Agent_id not in Bureau")
+
+    def get(self, agent_id):
+        return self.getAgent(agent_id)
 
     def getAgentIds(self):
         return set(self.agents.keys())
@@ -91,6 +98,12 @@ class Bureau(object):
         for name, agent in self.agents.items():
             data[name] = agent.export()
         return data
+
+    def __iter__(self):
+        return iter(self.agents.values())
+
+    def __contains__(self, item):
+        return self.has(item)
 
     def __str__(self):
         return '\n'.join([str(item) for item in self.agents.values()])
