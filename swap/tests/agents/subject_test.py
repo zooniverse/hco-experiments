@@ -43,7 +43,7 @@ class TestSubject:
 
         s.addClassification(cl, user)
 
-        calls = [call(1), call(.5), call(100)]
+        calls = [call(1), call((.5, .5)), call(100)]
         mock.assert_has_calls(calls)
 
     @patch.object(Subject, 'calculateScore')
@@ -106,6 +106,6 @@ class TestSubject:
         s.addClassification(cl, u)
 
         export = s.export()
-        assert export['user_scores'] == [.5]
+        assert export['user_scores'] == [(.5, .5)]
         assert export['score'] == .5
         assert export['history'] == [.5, .5]

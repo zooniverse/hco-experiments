@@ -45,7 +45,7 @@ class TestUser:
         u.gold_labels.add.assert_called_once_with(0)
         u.trackers.trackers[0].add.assert_called_once_with(1)
 
-    def test_score_100(self):
+    def test_score_all_correct(self):
         u = User(uid, epsilon)
         data = [
             (1, 1),
@@ -57,9 +57,9 @@ class TestUser:
         for g, a in data:
             u.addClassification(Classification(0, 0, a, g))
 
-        assert u.getScore(1) == 1
+        assert u.getScore(1) == 5 / 6
 
-    def test_score_50(self):
+    def test_score_half_correct(self):
         u = User(uid, epsilon)
         data = [
             (1, 1),
@@ -71,9 +71,9 @@ class TestUser:
         for g, a in data:
             u.addClassification(Classification(0, 0, a, g))
 
-        assert u.getScore(1) == .5
+        assert u.getScore(1) == 3 / 6
 
-    def test_score_0(self):
+    def test_score_0_correct(self):
         u = User(uid, epsilon)
         data = [
             (1, 0),
@@ -85,7 +85,7 @@ class TestUser:
         for g, a in data:
             u.addClassification(Classification(0, 0, a, g))
 
-        assert u.getScore(1) == 0
+        assert u.getScore(1) == 1 / 6
 
     def test_export_score0(self):
         u = User(uid, epsilon)
@@ -165,7 +165,7 @@ class TestUser:
 
         export = u.export()
         pprint(export)
-        assert export['score_0_history'] == [.5, 1, 1, 2 / 3, .5]
+        assert export['score_0_history'] == [.5, 2/3, 3/4, 3/5, 3/6]
 
     def test_export_score1_history(self):
         u = User(uid, epsilon)
@@ -185,4 +185,4 @@ class TestUser:
 
         export = u.export()
         pprint(export)
-        assert export['score_1_history'] == [.5, 0, 0, 1 / 3, .5]
+        assert export['score_1_history'] == [.5, 1 / 3, 1 / 4, 2 / 5, 3 / 6]

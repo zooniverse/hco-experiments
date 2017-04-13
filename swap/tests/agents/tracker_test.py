@@ -75,7 +75,7 @@ class Test_User_Score_Tracker:
         t.n_seen = 100
         t.n_matched = 40
 
-        assert t.calculateScore() == .4
+        assert t.calculateScore() == 41 / 102
 
     def test_0_add_mismatch(self):
         t = User_Score_Tracker(0, 0.5)
@@ -83,7 +83,7 @@ class Test_User_Score_Tracker:
 
         assert t.n_seen == 1
         assert t.n_matched == 0
-        assert t.current() == 0
+        assert t.current() == 1 / 3
 
     def test_0_add_match(self):
         t = User_Score_Tracker(0, 0.5)
@@ -91,7 +91,7 @@ class Test_User_Score_Tracker:
 
         assert t.n_seen == 1
         assert t.n_matched == 1
-        assert t.current() == 1
+        assert t.current() == 2 / 3
 
     def test_1_add_many(self):
         t = User_Score_Tracker(1, 0.5)

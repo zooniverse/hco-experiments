@@ -141,8 +141,8 @@ def test_subject_update_apply_one_correct_classification():
     annotation = 1
     gold_label = 1
 
-    expected = predict_subject_score(p0, epsilon, 1, 1)
-    assert expected == 1 / 3
+    expected = predict_subject_score(p0, epsilon, epsilon, 1)
+    assert expected == 1 / 5
 
     swap = SWAP(p0=p0, epsilon=epsilon)
 
@@ -162,7 +162,7 @@ def test_subject_update_apply_one_incorrect_classification():
     annotation = 0
     gold_label = 1
 
-    expected_subject_score = predict_subject_score(p0, epsilon, 0, 0)
+    expected_subject_score = predict_subject_score(p0, epsilon, epsilon, 0)
 
     swap = SWAP(p0=p0, epsilon=epsilon)
 
