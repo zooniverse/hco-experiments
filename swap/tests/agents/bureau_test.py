@@ -62,12 +62,12 @@ class TestBureau:
         agent = User(0, 0)
         b.addAgent(agent)
 
-        assert b.has(agent.getID()) is True
+        assert agent in b
 
     def test_has_false(self):
         b = Bureau(User)
 
-        assert b.has(0) is False
+        assert 0 not in b
 
     # ---------EXPORT TEST------------------------------
 

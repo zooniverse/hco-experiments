@@ -62,7 +62,7 @@ class Bootstrap:
     def update_tracking(self, export):
         bureau = self.bureau
         for subject, item in export['subjects'].items():
-            if bureau.has(subject):
+            if subject in bureau:
                 agent = bureau.getAgent(subject)
             else:
                 agent = Bootstrap_Subject(subject)
@@ -104,7 +104,7 @@ class Bootstrap:
 
         for item in cursor:
             subject = item['_id']
-            if bureau.has(subject):
+            if subject in bureau:
                 bureau.getAgent(subject).gold = item['gold']
 
         data = []

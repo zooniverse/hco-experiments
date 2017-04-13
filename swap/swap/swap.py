@@ -112,7 +112,7 @@ class SWAP(object):
 
         # TODO should the bureau generate a new agent, or should
         # that be handled here..?
-        if self.users.has(agent_id):
+        if agent_id in self.users:
             return self.users.getAgent(agent_id)
         else:
             agent = User(agent_id, self.epsilon)
@@ -128,7 +128,7 @@ class SWAP(object):
                 agent_id: id for the subject
         """
 
-        if self.subjects.has(agent_id):
+        if agent_id in self.subjects:
             return self.subjects.getAgent(agent_id)
         else:
             agent = Subject(agent_id, self.p0)
