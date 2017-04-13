@@ -69,10 +69,10 @@ class SWAP(object):
         # ^ moved gold check downstream to update methods
         # User and subject agents weren't being created
         # if the subject's gold label is -1
-        if user:
-            self.updateUserData(cl)
         if subject:
             self.updateSubjectData(cl)
+        if user:
+            self.updateUserData(cl)
 
     def updateUserData(self, cl):
         """
