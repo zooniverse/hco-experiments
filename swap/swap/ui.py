@@ -1,5 +1,6 @@
 ################################################################
 
+import swap
 from swap.control import Control
 import pickle
 from pprint import pprint
@@ -273,7 +274,7 @@ class SWAPInterface(Interface):
             swap = self.load(args.load[0])
 
         if args.run:
-            swap = self.run_swap()
+            swap = self.run_swap(args)
 
         if args.save:
             self.save(swap, self.f(args.save[0]))
@@ -304,14 +305,14 @@ class SWAPInterface(Interface):
         if train is None:
             return Control(self.p0, self.epsilon)
         else:
-            return Control(self.p0, self.epsilon, train=train)
+            return Control(self.p0, self.epsilon, train_size=train)
 
     def run_swap(self, args):
         """
             Have the Control process all classifications
         """
         if args.train:
-            train = args.train[0]
+            train = int(args.train[0])
         else:
             train = None
 

@@ -84,7 +84,7 @@ class _DB:
         query = [
             {'$group': {'_id': '$subject_id',
                         'gold': {'$first': '$gold_label'}}},
-            {'$sample': size}]
+            {'$sample': {'size': size}}]
 
         return Cursor(query, self.classifications)
 

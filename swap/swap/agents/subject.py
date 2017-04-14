@@ -110,6 +110,9 @@ class Subject(Agent):
         """
         self.gold_label = gold_label
 
+    def hasGold(self):
+        return self.gold in [0, 1]
+
     def getScore(self):
         """
             Gets the current score from the tracker

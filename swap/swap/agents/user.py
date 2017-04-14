@@ -29,7 +29,7 @@ class User(Agent):
 
         self.count = 0
 
-    def addClassification(self, cl):
+    def addClassification(self, cl, gold):
         """
             adds a classification and calculates the new score
 
@@ -39,7 +39,6 @@ class User(Agent):
 
         # Increment basic tracking
         annotation = int(cl.annotation)
-        gold = int(cl.gold())
 
         self.annotations.add(annotation)
         self.gold_labels.add(gold)

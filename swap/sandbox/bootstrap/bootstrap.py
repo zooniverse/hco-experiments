@@ -250,7 +250,7 @@ class BootstrapControl(Control):
     #     return count
 
     def _delegate(self, cl):
-        if cl.gold() in [0, 1]:
+        if cl.isGold():
             self.swap.processOneClassification(cl, user=True, subject=False)
         else:
             self.swap.processOneClassification(cl, user=False, subject=True)

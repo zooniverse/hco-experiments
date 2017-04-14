@@ -7,6 +7,8 @@ from swap.agents.subject import Subject
 from swap.agents.user import User
 from pprint import pprint
 
+from swap.mongo.db import DB
+
 
 class SWAP(object):
     """
@@ -51,6 +53,14 @@ class SWAP(object):
         # classified by that volunteer.
         self.gold_updates = True
 
+        # Directive to use gold labels from classification
+        # if true, assigns the gold_label from the classification
+        # whenever a new subject is created
+        #
+        # Useful to ignore gold_labels when doing a test/train split
+        # without properly sanitizing gold labels from classifications
+        self.gold_from_cl = False
+
     # Process a classification
     def processOneClassification(self, cl, subject=True, user=True):
         """
@@ -83,8 +93,9 @@ class SWAP(object):
         """
 
         user = self.getUserAgent(cl.user)
-        if self.gold_updates and cl.gold() in [0, 1]:
-            user.addClassification(cl)
+        subject = self.getSubjectAgent(cl.subject)
+        if self.gold_updates and subject.hasGold():
+            user.addClassification(cl, subject.gold)
 
     def updateSubjectData(self, cl):
         """
@@ -132,8 +143,8 @@ class SWAP(object):
             return self.subjects.getAgent(agent_id)
         else:
             agent = Subject(agent_id, self.p0)
-            if cl:
-                agent.setGoldLabel(cl.gold())
+            if self.gold_from_cl and cl.isGold():
+                agent.setGoldLabel(cl.gold)
 
             self.subjects.addAgent(agent)
             return agent
@@ -161,8 +172,11 @@ class SWAP(object):
         """
         for subject, gold in golds:
             # TODO use old swap score or reset with p0 for bootstrap?
-            agent = Subject(subject, self.p0, gold)
-            self.subjects.addAgent(agent)
+            if subject in self.subjects:
+                self.subjects.get(subject).setGoldLabel(gold)
+            else:
+                agent = Subject(subject, self.p0, gold)
+                self.subjects.addAgent(agent)
 
     # ----------------------------------------------------------------
 
@@ -190,13 +204,14 @@ class SWAP(object):
             Each tuble takes the form:
                 (true label, probability)
         """
-        bureau = self.subjects
+        cursor = DB().getAllGolds()
 
         data = []
-        for s in bureau:
-            gold = s.gold
-            score = s.score
-            if gold != -1:
+        for item in cursor:
+            id_ = item['_id']
+            gold = item['gold']
+            if gold in [0, 1]:
+                score = self.subjects.get(id_).score
                 data.append((gold, score))
 
         return data
@@ -253,14 +268,34 @@ class Classification:
         self.user = user
         self.subject = subject
         self.annotation = annotation
-        self.gold_label = gold_label
+
+        self.gold_label = None
+        self.gold = gold_label
+
         self.metadata = metadata
 
+    @property
     def gold(self):
         """
             Get the gold label
         """
-        return self.gold_label
+        if self.gold_label is not None:
+            return self.gold_label
+        else:
+            return False
+
+    @gold.setter
+    def gold(self, gold):
+        if gold in [0, 1]:
+            self.gold_label = gold
+        else:
+            self.gold_label = None
+
+    def isGold(self):
+        if self.gold is not None:
+            return True
+        else:
+            return False
 
     @staticmethod
     def generate(cl):
