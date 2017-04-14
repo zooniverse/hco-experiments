@@ -4,7 +4,8 @@
 
 from swap.mongo.db import DB
 from swap.control import Control
-from unittest.mock import patch, MagicMock, call, Mock
+from unittest.mock import MagicMock
+import pytest
 
 fields = {'user_id', 'classification_id', 'subject_id',
           'annotation', 'gold_label'}
@@ -37,6 +38,7 @@ fields = {'user_id', 'classification_id', 'subject_id',
 #     pprint(list(users))
 
 
+@pytest.mark.skip(reason='Takes too long')
 def test_get_one_classification():
     """ Get the first classification
     """

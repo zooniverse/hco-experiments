@@ -40,7 +40,7 @@ class TestUser:
         u.gold_labels.add = MagicMock()
         u.trackers.trackers[0].add = MagicMock()
 
-        u.addClassification(cl)
+        u.addClassification(cl, cl.gold)
         u.annotations.add.assert_called_once_with(1)
         u.gold_labels.add.assert_called_once_with(0)
         u.trackers.trackers[0].add.assert_called_once_with(1)
@@ -55,7 +55,7 @@ class TestUser:
         ]
 
         for g, a in data:
-            u.addClassification(Classification(0, 0, a, g))
+            u.addClassification(Classification(0, 0, a), g)
 
         assert u.getScore(1) == 5 / 6
 
@@ -69,7 +69,7 @@ class TestUser:
         ]
 
         for g, a in data:
-            u.addClassification(Classification(0, 0, a, g))
+            u.addClassification(Classification(0, 0, a), g)
 
         assert u.getScore(1) == 3 / 6
 
@@ -83,7 +83,7 @@ class TestUser:
         ]
 
         for g, a in data:
-            u.addClassification(Classification(0, 0, a, g))
+            u.addClassification(Classification(0, 0, a), g)
 
         assert u.getScore(1) == 1 / 6
 
@@ -101,7 +101,7 @@ class TestUser:
         ]
 
         for g, a in data:
-            u.addClassification(Classification(0, 0, a, g))
+            u.addClassification(Classification(0, 0, a), g)
 
         export = u.export()
         pprint(export)
@@ -121,7 +121,7 @@ class TestUser:
         ]
 
         for g, a in data:
-            u.addClassification(Classification(0, 0, a, g))
+            u.addClassification(Classification(0, 0, a), g)
 
         export = u.export()
         pprint(export)
@@ -141,7 +141,7 @@ class TestUser:
         ]
 
         for g, a in data:
-            u.addClassification(Classification(0, 0, a, g))
+            u.addClassification(Classification(0, 0, a), g)
 
         export = u.export()
         pprint(export)
@@ -161,7 +161,7 @@ class TestUser:
         ]
 
         for g, a in data:
-            u.addClassification(Classification(0, 0, a, g))
+            u.addClassification(Classification(0, 0, a), g)
 
         export = u.export()
         pprint(export)
@@ -181,7 +181,7 @@ class TestUser:
         ]
 
         for g, a in data:
-            u.addClassification(Classification(0, 0, a, g))
+            u.addClassification(Classification(0, 0, a), g)
 
         export = u.export()
         pprint(export)

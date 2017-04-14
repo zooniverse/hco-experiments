@@ -50,6 +50,22 @@ def test_set_golds():
         assert bureau.getAgent(id_).gold == gold
 
 
+def test_classification_without_gold():
+    swap = SWAP(.5, .5)
+    golds = [(1, 1), (2, 0), (3, 0)]
+    swap.setGoldLabels(golds)
+
+    cl = Classification('user', 1, 0)
+    swap.processOneClassification(cl)
+
+    bureau = swap.getUserData()
+    agent = bureau.get('user')
+
+    print(agent.export())
+    assert len(agent.export()['score_1_history']) == 2
+    assert len(agent.export()['score_0_history']) == 1
+
+
 def test_doesnt_override_golds():
     swap = SWAP()
     golds = [(1, 1), (2, 0), (3, 0)]
@@ -65,6 +81,7 @@ def test_doesnt_override_golds():
 
 def test_subject_gold_label_1():
     swap = SWAP(p0=2e-4, epsilon=1.0)
+    swap.gold_from_cl = True
 
     swap.processOneClassification(Classification(1, 1, 0, 1))
     swap.processOneClassification(Classification(2, 1, 0, 0))
@@ -76,6 +93,7 @@ def test_subject_gold_label_1():
 
 def test_subject_gold_label_0():
     swap = SWAP(p0=2e-4, epsilon=1.0)
+    swap.gold_from_cl = True
 
     swap.processOneClassification(Classification(1, 1, 0, 0))
     swap.processOneClassification(Classification(2, 1, 0, 1))
