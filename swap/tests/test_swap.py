@@ -221,6 +221,16 @@ def test_subject_update_apply_one_incorrect_classification():
     assert export['subject_1']['score'] == expected_subject_score
 
 
+class Test_Classification:
+    def test_classification_gold_init(self):
+        cl = Classification(0, 0, 0)
+
+        print(cl)
+        print(cl.gold_label)
+        assert cl.isGold() is False
+        assert cl.gold is False
+
+
 def main():
 
     test_subject_update_perfect_classifier()
