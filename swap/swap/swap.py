@@ -292,10 +292,15 @@ class Classification:
             self.gold_label = None
 
     def isGold(self):
-        if self.gold is not None:
+        if self.gold_label is not None:
             return True
         else:
             return False
+
+    def __str__(self):
+        return 'user %s subject %s annotation %d gold %s' % \
+            (str(self.user), str(self.subject),
+             self.annotation, str(self.gold))
 
     @staticmethod
     def generate(cl):

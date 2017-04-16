@@ -224,14 +224,16 @@ class Bootstrap_Metric:
 class BootstrapControl(Control):
 
     def __init__(self, p0, epsilon, golds):
-        super().__init__(p0, epsilon)
         self.golds = golds
 
-        bureau = self.swap.subjects
-        for subject, label in golds:
-            agent = Subject(subject, p0, label)
-            bureau.addAgent(agent)
-        self.swap.subjects = bureau
+        super().__init__(p0, epsilon)
+
+        # bureau = self.swap.subjects
+        # print(bureau)
+        # for subject, label in golds:
+        #     agent = Subject(subject, p0, label)
+        #     bureau.addAgent(agent)
+        # self.swap.subjects = bureau
 
     def getClassifications(self):
         golds = [item[0] for item in self.golds]
@@ -254,6 +256,9 @@ class BootstrapControl(Control):
             self.swap.processOneClassification(cl, user=True, subject=False)
         else:
             self.swap.processOneClassification(cl, user=False, subject=True)
+
+    def getGoldLabels(self):
+        return self.golds
 
 
 class BootstrapCursor(Cursor):
