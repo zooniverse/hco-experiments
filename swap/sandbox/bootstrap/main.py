@@ -106,7 +106,6 @@ class Interface(ui.Interface):
 
     def save(self, obj, fname):
         if isinstance(obj, Bootstrap):
-            obj._serialize()
             with open(self.f('manifest'), 'w') as file:
                 file.write(obj.manifest())
 
@@ -118,10 +117,8 @@ class Interface(ui.Interface):
             return self.last_load[1]
         else:
             self.last_load = None
-            obj = super().load(fname)
-            if isinstance(obj, Bootstrap):
-                obj._deserialize()
 
+            obj = super().load(fname)
             self.last_load = (fname, obj)
 
             return obj

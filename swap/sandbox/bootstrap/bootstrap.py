@@ -3,9 +3,8 @@
 # Recursive swap implementation to bootstrap silver-standard
 # subject labels
 from swap.control import Control
-from swap.mongo.query import Query
-from swap.mongo.db import DB, Cursor
-from swap.agents.subject import Subject
+from swap.db import Cursor, Query
+import swap.db.classifications as db
 from swap.agents.agent import Agent
 from swap.agents.tracker import Tracker
 from swap.agents.bureau import Bureau
@@ -18,8 +17,7 @@ class Bootstrap:
 
     def __init__(self, t_low, t_high, p0, epsilon, export=None):
         golds = gold_0 + gold_1
-        self.db = DB()
-        self.golds = self.db.getExpertGold(golds)
+        self.golds = db.getExpertGold(golds)
         self.silver = self.golds.copy()
         self.t_low = t_low
         self.t_high = t_high
@@ -32,12 +30,6 @@ class Bootstrap:
         self.epsilon = epsilon
 
         self.n = 0
-
-    def _serialize(self):
-        self.db = None
-
-    def _deserialize(self):
-        self.db = DB()
 
     def setThreshold(self, low, high):
         self.t_low = low
@@ -96,7 +88,7 @@ class Bootstrap:
 
     def roc_export(self, i=None):
         bureau = self.bureau
-        cursor = DB().classifications.aggregate([
+        cursor = db.aggregate([
             {'$match': {'gold_label': {'$ne': -1}}},
             {'$group': {'_id': '$subject_id', 'gold':
                         {'$first': '$gold_label'}}},
@@ -213,7 +205,7 @@ class Bootstrap_Metric:
         for silver in silver.values():
             count[silver] += 1
 
-        remaining = DB().getNSubjects() - sum(count)
+        remaining = db.getNSubjects() - sum(count)
 
         return (count[0], count[1], remaining)
 
@@ -237,7 +229,7 @@ class BootstrapControl(Control):
 
     def getClassifications(self):
         golds = [item[0] for item in self.golds]
-        return BootstrapCursor(self._db, golds)
+        return BootstrapCursor(golds)
 
     # def _n_classifications(self):
     #     golds = [x[0] for x in self.golds]
@@ -262,8 +254,8 @@ class BootstrapControl(Control):
 
 
 class BootstrapCursor(Cursor):
-    def __init__(self, db, golds):
-        super().__init__(None, db.classifications)
+    def __init__(self, golds):
+        super().__init__(None, db.collection)
         # Create the gold cursor
         # Create the cursor for all remaining classifications
 

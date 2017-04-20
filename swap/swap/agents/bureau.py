@@ -70,9 +70,6 @@ class Bureau(object):
     def get(self, agent_id):
         return self.getAgent(agent_id)
 
-    def getAgentIds(self):
-        return set(self._agents.keys())
-
     def removeAgent(self, agent_id):
         """ Remove agent from bureau
 
@@ -97,6 +94,9 @@ class Bureau(object):
 
     # ----------------------------------------------------------------
 
+    def getAgentIds(self):
+        return set(self.agents.keys())
+
     def stats(self):
         """
             Calculates the mean, standard deviation, and median
@@ -106,12 +106,12 @@ class Bureau(object):
 
     def export(self):
         data = dict()
-        for name, agent in self._agents.items():
+        for name, agent in self.agents.items():
             data[name] = agent.export()
         return data
 
     def __iter__(self):
-        return iter(self._agents.values())
+        return iter(self.agents.values())
 
     def __contains__(self, item):
         if isinstance(item, Agent):
