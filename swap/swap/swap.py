@@ -7,7 +7,7 @@ from swap.agents.subject import Subject
 from swap.agents.user import User
 from pprint import pprint
 
-from swap.mongo.db import DB
+from swap.db import classifications as db
 
 
 class SWAP(object):
@@ -223,7 +223,7 @@ class SWAP(object):
             Each tuble takes the form:
                 (true label, probability)
         """
-        cursor = DB().getAllGolds()
+        cursor = db.getAllGolds()
 
         data = []
         for item in cursor:

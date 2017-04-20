@@ -2,7 +2,7 @@
 ################################################################
 # Script to test control functionality
 
-from swap.mongo.db import DB
+import swap.db.classifications as db
 from swap.control import Control
 from unittest.mock import MagicMock
 import pytest
@@ -38,23 +38,22 @@ fields = {'user_id', 'classification_id', 'subject_id',
 #     pprint(list(users))
 
 
-@pytest.mark.skip(reason='Takes too long')
+# @pytest.mark.skip(reason='Takes too long')
 def test_get_one_classification():
     """ Get the first classification
     """
     control = Control(0.5, 0.5)
 
-    classification_cursor = control.classifications.find()
-    n_class = classification_cursor.count()
-    current_classification = classification_cursor.next()
+    cursor = control.getClassifications()
+    n_class = len(cursor)
+    cl = cursor.next()
 
     assert n_class > 0
-    assert type(current_classification) == dict
-    assert len(current_classification) > 0
+    assert type(cl) == dict
+    assert len(cl) > 0
 
 
 def test_with_train_split():
-    db = DB()
     old = db.getRandomGoldSample
     mock = MagicMock(return_value=[])
     db.getRandomGoldSample = mock
@@ -67,7 +66,6 @@ def test_with_train_split():
 
 
 def test_without_train_split():
-    db = DB()
     old = db.getAllGolds
     mock = MagicMock(return_value=[])
     db.getAllGolds = mock

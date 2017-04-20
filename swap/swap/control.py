@@ -5,19 +5,15 @@
 import progressbar
 
 from swap.swap import SWAP, Classification
-from swap.mongo import DB
-from swap.mongo import Query
+import swap.db.classifications as db
+from swap.db import DB, Query
 from swap.config import Config
-
-db = DB()
 
 
 class Control:
 
     def __init__(self, p0, epsilon, swap=None, train_size=None):
-        self._db = DB()
         self._cfg = Config()
-        self.classifications = self._db.classifications
 
         # Number of subjects with expert labels for a
         # test/train split
@@ -62,9 +58,6 @@ class Control:
                 bar.update(n_class)
                 n_class += 1
 
-    # def _n_classifications(self):
-    #     return self.classifications.count()
-
     def _delegate(self, cl):
         self.swap.processOneClassification(cl)
 
@@ -101,21 +94,6 @@ class Control:
         """
         self.swap = swap
 
-    # def getClassifications(self):
-    #     """ Returns Iterator over all Classifications """
-
-    #     # fields to project
-    #     fields = ['user_name', 'subject_id', 'annotation', 'gold_label']
-
-    #     # Define a query
-    #     q = Query()
-    #     q.project(fields)
-
-    #     # perform query on classification data
-    #     classifications = self.classifications.aggregate(q.build())
-
-    #     return classifications
-
 
 class MetaDataControl(Control):
     """ Calls SWAP to process classifications for specific meta data splits
@@ -150,7 +128,7 @@ class MetaDataControl(Control):
             q.match_range(meta_data_field, self.meta_lower, self.meta_upper)
 
         # perform query on classification data
-        classifications = self.classifications.aggregate(q.build())
+        classifications = DB().classifications.aggregate(q.build())
 
         return classifications
 
@@ -168,7 +146,7 @@ class DummySWAP:
             self.data[subject] = (gold, score)
 
     def get_cursor(self):
-        cursor = db.classifications.aggregate([
+        cursor = DB().classifications.aggregate([
             {'$match': {'gold_label': {'$ne': -1}}},
             {'$group': {
                 '_id': '$subject_id',
