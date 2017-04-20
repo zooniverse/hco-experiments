@@ -13,9 +13,8 @@ import pymongo
 class Test_DB:
 
     def test_get_classifications_1(self):
-        db = DB()
         mock = MagicMock()
-        db.classifications = mock
+        dbcl.collection = mock
 
         q = Query().project(
             ['user_name', 'subject_id', 'annotation'])
@@ -34,12 +33,11 @@ class Test_DB:
 
     #     db.getClassifications(gold=False)
 
-        mock.aggregate.assert_called_with(q.build(), batchSize=100000)
+    #     mock.aggregate.assert_called_with(q.build(), batchSize=100000)
 
     def test_get_classifications_3(self):
-        db = DB()
         mock = MagicMock()
-        db.classifications = mock
+        dbcl.collection = mock
 
         q = Query().project(
             ['a', 'b', 'c'])
@@ -49,10 +47,10 @@ class Test_DB:
         mock.aggregate.assert_called_with(q.build(), batchSize=100000)
 
     def test_batch_size(self):
-        db = DB()
         mock = MagicMock()
-        db.classifications = mock
+        dbcl.collection = mock
 
+        db = DB()
         db.setBatchSize(42)
 
         q = Query().project(

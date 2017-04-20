@@ -5,6 +5,8 @@ from swap.db import DB, Cursor
 from swap.db.query import Query
 
 subject_count = None
+collection = DB().classifications
+aggregate = collection.aggregate
 
 
 def getClassifications(query=None, **kwargs):
@@ -24,7 +26,7 @@ def getClassifications(query=None, **kwargs):
         batch_size = DB().batch_size
 
     # perform query on classification data
-    classifications = Cursor(query.build(), DB().classifications,
+    classifications = Cursor(query.build(), collection,
                              batchSize=batch_size)
     # classifications = self.classifications.aggregate(
     #     query.build(), batchSize=batch_size)
@@ -38,7 +40,7 @@ def getExpertGold(subjects):
                     'gold': {'$first': '$gold_label'}}},
         {'$match': {'_id': {'$in': subjects}}}]
 
-    cursor = DB().classifications.aggregate(query)
+    cursor = aggregate(query)
 
     data = {}
     for item in cursor:
@@ -52,7 +54,7 @@ def getAllGolds():
         {'$group': {'_id': '$subject_id',
                     'gold': {'$first': '$gold_label'}}}]
 
-    return Cursor(query, DB().classifications)
+    return Cursor(query, collection)
 
 
 def getRandomGoldSample(size):
@@ -61,7 +63,7 @@ def getRandomGoldSample(size):
                     'gold': {'$first': '$gold_label'}}},
         {'$sample': {'size': size}}]
 
-    return Cursor(query, DB().classifications)
+    return Cursor(query, collection)
 
 
 def getNSubjects():
@@ -69,7 +71,7 @@ def getNSubjects():
     if subject_count is None:
         query = [
             {'$group': {'_id': '', 'num': {'$sum': 1}}}]
-        cursor = DB().classifications.aggregate(query)
+        cursor = aggregate(query)
         subject_count = cursor.next()['num']
 
     return subject_count

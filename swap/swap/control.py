@@ -128,7 +128,7 @@ class MetaDataControl(Control):
             q.match_range(meta_data_field, self.meta_lower, self.meta_upper)
 
         # perform query on classification data
-        classifications = DB().classifications.aggregate(q.build())
+        classifications = db.aggregate(q.build())
 
         return classifications
 
@@ -146,7 +146,7 @@ class DummySWAP:
             self.data[subject] = (gold, score)
 
     def get_cursor(self):
-        cursor = DB().classifications.aggregate([
+        cursor = db.aggregate([
             {'$match': {'gold_label': {'$ne': -1}}},
             {'$group': {
                 '_id': '$subject_id',
