@@ -1,5 +1,7 @@
 ################################################################
 # Mongo client
+# !! DEPRECATED !!
+# Use swap.db instead
 
 from swap.config import Config
 from swap.mongo.query import Query
