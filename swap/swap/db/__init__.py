@@ -1,8 +1,8 @@
 ################################################################
 # Mongo client
 
+from swap.db.query import Query
 from swap.config import Config
-from swap.mongo.query import Query
 from pymongo import MongoClient
 
 
