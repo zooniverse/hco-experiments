@@ -1,13 +1,14 @@
 from swap.swap import SWAP
 from swap.swap import Classification
 from pprint import pprint
+import pytest
 
 
 def test_set_gold():
     swap = SWAP(p0=2e-4, epsilon=1.0)
     labels = [0, 0, 0, 0, 1, 1, 1, 1]
     subjects = [(i + 1, l) for i, l in enumerate(labels)]
-    swap.setGoldSubjects(subjects)
+    swap.setGoldLabels(subjects)
 
     export = swap.exportSubjectData()
     pprint(export)
@@ -37,8 +38,50 @@ def test_export_nonempty():
     assert 'subject_1' in export['subjects']
 
 
+def test_set_golds():
+    swap = SWAP()
+    golds = [(1, 1), (2, 0), (3, 0)]
+    swap.setGoldLabels(golds)
+
+    bureau = swap.getSubjectData()
+    print(bureau)
+    for id_, gold in golds:
+        assert id_ in bureau
+        assert bureau.getAgent(id_).gold == gold
+
+
+def test_classification_without_gold():
+    swap = SWAP(.5, .5)
+    golds = [(1, 1), (2, 0), (3, 0)]
+    swap.setGoldLabels(golds)
+
+    cl = Classification('user', 1, 0)
+    swap.processOneClassification(cl)
+
+    bureau = swap.getUserData()
+    agent = bureau.get('user')
+
+    print(agent.export())
+    assert len(agent.export()['score_1_history']) == 2
+    assert len(agent.export()['score_0_history']) == 1
+
+
+def test_doesnt_override_golds():
+    swap = SWAP()
+    golds = [(1, 1), (2, 0), (3, 0)]
+    swap.setGoldLabels(golds)
+
+    bureau = swap.getSubjectData()
+    print(bureau)
+
+    swap.processOneClassification(Classification(0, 2, 0, 1))
+    print(bureau.getAgent(1))
+    assert bureau.getAgent(2).gold == 0
+
+
 def test_subject_gold_label_1():
     swap = SWAP(p0=2e-4, epsilon=1.0)
+    swap.gold_from_cl = True
 
     swap.processOneClassification(Classification(1, 1, 0, 1))
     swap.processOneClassification(Classification(2, 1, 0, 0))
@@ -50,6 +93,7 @@ def test_subject_gold_label_1():
 
 def test_subject_gold_label_0():
     swap = SWAP(p0=2e-4, epsilon=1.0)
+    swap.gold_from_cl = True
 
     swap.processOneClassification(Classification(1, 1, 0, 0))
     swap.processOneClassification(Classification(2, 1, 0, 1))
@@ -70,6 +114,7 @@ def test_subject_no_gold_label():
     assert export[1]['gold_label'] == -1
 
 
+@pytest.mark.skip()
 def test_subject_update_perfect_classifier():
     cl = Classification('user_1', 'subject_1', 1, 1)
 
@@ -90,6 +135,7 @@ def test_subject_update_perfect_classifier():
     assert export['subject_2']['score'] == 0
 
 
+@pytest.mark.skip()
 def test_subject_update_obtuse_classifier():
     cl = Classification('user_1', 'subject_1', 0, 1)
 
@@ -173,6 +219,16 @@ def test_subject_update_apply_one_incorrect_classification():
     pprint([export, expected_subject_score])
 
     assert export['subject_1']['score'] == expected_subject_score
+
+
+class Test_Classification:
+    def test_classification_gold_init(self):
+        cl = Classification(0, 0, 0)
+
+        print(cl)
+        print(cl.gold_label)
+        assert cl.isGold() is False
+        assert cl.gold is False
 
 
 def main():

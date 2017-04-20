@@ -62,7 +62,7 @@ class Bootstrap:
     def update_tracking(self, export):
         bureau = self.bureau
         for subject, item in export['subjects'].items():
-            if bureau.has(subject):
+            if subject in bureau:
                 agent = bureau.getAgent(subject)
             else:
                 agent = Bootstrap_Subject(subject)
@@ -104,14 +104,14 @@ class Bootstrap:
 
         for item in cursor:
             subject = item['_id']
-            if bureau.has(subject):
+            if subject in bureau:
                 bureau.getAgent(subject).gold = item['gold']
 
         data = []
         for s in bureau:
             if s.gold != -1:
                 if i is None:
-                    data.append((s.gold, s.getScore()))
+                    data.append((s.gold, s.score))
                 else:
                     data.append((s.gold, s.getHistory()[i]))
 
@@ -224,14 +224,16 @@ class Bootstrap_Metric:
 class BootstrapControl(Control):
 
     def __init__(self, p0, epsilon, golds):
-        super().__init__(p0, epsilon)
         self.golds = golds
 
-        bureau = self.swap.subjects
-        for subject, label in golds:
-            agent = Subject(subject, p0, label)
-            bureau.addAgent(agent)
-        self.swap.subjects = bureau
+        super().__init__(p0, epsilon)
+
+        # bureau = self.swap.subjects
+        # print(bureau)
+        # for subject, label in golds:
+        #     agent = Subject(subject, p0, label)
+        #     bureau.addAgent(agent)
+        # self.swap.subjects = bureau
 
     def getClassifications(self):
         golds = [item[0] for item in self.golds]
@@ -250,10 +252,13 @@ class BootstrapControl(Control):
     #     return count
 
     def _delegate(self, cl):
-        if cl.gold() in [0, 1]:
+        if cl.isGold():
             self.swap.processOneClassification(cl, user=True, subject=False)
         else:
             self.swap.processOneClassification(cl, user=False, subject=True)
+
+    def getGoldLabels(self):
+        return self.golds
 
 
 class BootstrapCursor(Cursor):

@@ -2,6 +2,8 @@
 # Keeps track of all user and subject agents
 # - Initial class to test SWAP
 
+from swap.agents.agent import Agent
+
 
 class Bureau(object):
     """ Bureau to keep track of agents
@@ -20,10 +22,11 @@ class Bureau(object):
         # or Bureau(User) etc. ?
         self.agent_type = agent_type
         # dictionary to store all agents, key is agent-ID
-        self.agents = dict()
+        self._agents = dict()
 
-    def __iter__(self):
-        return iter(self.agents.values())
+    @property
+    def agents(self):
+        return self._agents.copy()
 
     def addAgent(self, agent):
         """
@@ -40,10 +43,13 @@ class Bureau(object):
                 (type(agent), self.agent_type))
 
         # Add agent to collection
-        if not agent.getID() in self.agents:
-            self.agents[agent.getID()] = agent
+        if not agent.getID() in self._agents:
+            self._agents[agent.getID()] = agent
         else:
             raise KeyError("Agent-ID already in bureau, remove first")
+
+    def add(self, agent):
+        self.addAgent(agent)
 
     def getAgent(self, agent_id):
         """ Get agent from bureau
@@ -56,13 +62,16 @@ class Bureau(object):
         -------
             agent
         """
-        if agent_id in self.agents:
-            return self.agents[agent_id]
+        if agent_id in self._agents:
+            return self._agents[agent_id]
         else:
             raise KeyError("Error: Agent_id not in Bureau")
 
+    def get(self, agent_id):
+        return self.getAgent(agent_id)
+
     def getAgentIds(self):
-        return set(self.agents.keys())
+        return set(self._agents.keys())
 
     def removeAgent(self, agent_id):
         """ Remove agent from bureau
@@ -71,7 +80,7 @@ class Bureau(object):
         ----------
             agent_id: id of agent
         """
-        del self.agents[agent_id]
+        del self._agents[agent_id]
 
     def has(self, agent_id):
         """ Check if agent is in bureau
@@ -84,10 +93,24 @@ class Bureau(object):
         --------
             boolean
         """
-        return agent_id in self.agents
+        return agent_id in self._agents
 
     def export(self):
         data = dict()
-        for name, agent in self.agents.items():
+        for name, agent in self._agents.items():
             data[name] = agent.export()
         return data
+
+    def __iter__(self):
+        return iter(self._agents.values())
+
+    def __contains__(self, item):
+        if isinstance(item, Agent):
+            id_ = item.getID()
+        else:
+            id_ = item
+
+        return self.has(id_)
+
+    def __str__(self):
+        return '\n'.join([str(item) for item in self._agents.values()])

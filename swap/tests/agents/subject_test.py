@@ -60,15 +60,15 @@ class TestSubject:
 
     def test_getLabel_1(self):
         s = Subject(sid, 2)
-        s.getScore = MagicMock(return_value=.51)
+        s.score = .51
 
-        assert s.getLabel() == 1
+        assert s.label == 1
 
     def test_getLabel_0(self):
         s = Subject(sid, 2)
-        s.getScore = MagicMock(return_value=.5)
+        s.score = .5
 
-        assert s.getLabel() == 0
+        assert s.label == 0
 
     # Potential outline for unit test to calculate score
     def test_calculateScore(self):

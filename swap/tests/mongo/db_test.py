@@ -17,7 +17,7 @@ class Test_DB:
         db.classifications = mock
 
         q = Query().project(
-            ['user_name', 'subject_id', 'annotation', 'gold_label'])
+            ['user_name', 'subject_id', 'annotation'])
 
         db.getClassifications()
 

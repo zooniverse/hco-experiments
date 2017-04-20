@@ -1,5 +1,6 @@
 ################################################################
 
+import swap
 from swap.control import Control
 import pickle
 from pprint import pprint
@@ -252,6 +253,12 @@ class SWAPInterface(Interface):
             metavar='file',
             help='Write the entire SWAP export to file')
 
+        swap_parser.add_argument(
+            '--train', nargs=1,
+            metavar='n',
+            help='Run swap with a test/train split. Restricts sample size' +
+                 ' of gold labels to \'n\'')
+
         return parser
 
     def command_swap(self, args):
@@ -267,7 +274,7 @@ class SWAPInterface(Interface):
             swap = self.load(args.load[0])
 
         if args.run:
-            swap = self.run_swap()
+            swap = self.run_swap(args)
 
         if args.save:
             self.save(swap, self.f(args.save[0]))
@@ -290,27 +297,26 @@ class SWAPInterface(Interface):
 
         return swap
 
-    def _control(self):
-        """
-            Create a Control
-        """
-        return Control(self.p0, self.epsilon)
-
-    def getControl(self):
+    def getControl(self, train=None):
         """
             Returns the Control instance
             Defines a Control instance if it doesn't exist yet
         """
-        if self.control is None:
-            self.control = self._control()
+        if train is None:
+            return Control(self.p0, self.epsilon)
+        else:
+            return Control(self.p0, self.epsilon, train_size=train)
 
-        return self.control
-
-    def run_swap(self):
+    def run_swap(self, args):
         """
             Have the Control process all classifications
         """
-        control = self.getControl()
+        if args.train:
+            train = int(args.train[0])
+        else:
+            train = None
+
+        control = self.getControl(train)
         control.process()
         swap = control.getSWAP()
 

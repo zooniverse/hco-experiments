@@ -2,6 +2,7 @@
 # Test functions for tracker classes
 
 from swap.agents.tracker import *
+from swap.agents.user import User_Score_Tracker
 
 
 class Test_Tracker:
