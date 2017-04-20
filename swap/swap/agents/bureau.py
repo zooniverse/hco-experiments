@@ -95,6 +95,15 @@ class Bureau(object):
         """
         return agent_id in self._agents
 
+    # ----------------------------------------------------------------
+
+    def stats(self):
+        """
+            Calculates the mean, standard deviation, and median
+            of scores in this bureau
+        """
+        return self.agent_type.stats(self)
+
     def export(self):
         data = dict()
         for name, agent in self._agents.items():

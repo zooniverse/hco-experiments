@@ -2,7 +2,8 @@
 # User agent, keeps track of a user's history and
 # score
 
-from swap.agents.agent import Agent
+
+from swap.agents.agent import Agent, Stats, Stat
 from swap.agents.tracker import Tracker
 from swap.agents.tracker import Tracker_Collection
 
@@ -93,6 +94,19 @@ class User(Agent):
     def __str__(self):
         return 'id: %s score 0: %.2f score 1: %.2f' % \
             (self.getID(), self.getScore(0), self.getScore(1))
+
+    @staticmethod
+    def stats(bureau):
+        """
+            Calculate the mean, standard deviation, and median
+            of the scores in a bureau containing Users
+        """
+        stats = Stats()
+        for i in [0, 1]:
+            p = [agent.getScore(i) for agent in bureau]
+            stats.addNew(i, p)
+
+        return stats
 
 
 class User_Score_Tracker(Tracker):

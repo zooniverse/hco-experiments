@@ -180,6 +180,24 @@ class SWAP(object):
 
     # ----------------------------------------------------------------
 
+    def stats_export(self):
+        """
+            Consolidate all the statistical data from the bureaus
+        """
+        user = self.users.stats().export()
+        subject = self.subjects.stats().export()
+
+        return {'user': user, 'subject': subject}
+
+    def stats_str(self):
+        """
+            Consolidate all the statistical data from the bureaus
+            into a string
+        """
+        s = '%s\n' % str(self.users.stats())
+        s += str(self.subjects.stats())
+        return s
+
     def exportUserData(self):
         """ Exports consolidated user information """
         return self.users.export()
@@ -194,7 +212,8 @@ class SWAP(object):
         """
         return {
             'users': self.users.export(),
-            'subjects': self.subjects.export()
+            'subjects': self.subjects.export(),
+            'stats': self.stats_export()
         }
 
     def roc_export(self):

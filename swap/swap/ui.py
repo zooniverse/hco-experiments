@@ -1,6 +1,5 @@
 ################################################################
 
-import swap
 from swap.control import Control
 import pickle
 from pprint import pprint
@@ -259,6 +258,10 @@ class SWAPInterface(Interface):
             help='Run swap with a test/train split. Restricts sample size' +
                  ' of gold labels to \'n\'')
 
+        swap_parser.add_argument(
+            '--stats', action='store_true',
+            help='Display run statistics')
+
         return parser
 
     def command_swap(self, args):
@@ -294,6 +297,9 @@ class SWAPInterface(Interface):
         if args.log:
             fname = self.f(args.output[0])
             write_log(swap, fname)
+
+        if args.stats:
+            print(swap.stats_str())
 
         return swap
 
@@ -489,7 +495,7 @@ def plot_roc(title, *datasets, fname=None, dpi=300):
 
         # Compute fpr, tpr, thresholds and roc auc
         fpr, tpr, thresholds = roc_curve(y_true, y_score)
-        roc_auc = auc(y_true, y_score, True)
+        roc_auc = auc(fpr, tpr, True)
         # roc_auc = 0
 
         # Plot ROC curve
