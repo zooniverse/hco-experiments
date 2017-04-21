@@ -1,0 +1,111 @@
+#########################################
+# Import Data
+# - meta data
+# - annotations
+# - images
+# SS data from: http://datadryad.org/resource/doi:10.5061/dryad.5pt92
+#########################################
+
+#########################
+# load modules
+#########################
+
+import numpy as np
+import pandas as pd
+import os
+import requests
+
+
+#########################
+# Parameters
+#########################
+
+path = "D:/Studium_GD/Zooniverse/Data/snapshot_serengeti/"
+path_images = path + 'images/'
+path_gold = path + "annotations/gold_standard_data.csv"
+path_consensus = path + "annotations/consensus_data.csv"
+path_image_links = path + "image_links/all_images.csv"
+image_url = "https://snapshotserengeti.s3.msi.umn.edu/"
+
+
+#########################
+# Read Meta Data
+#########################
+
+# CaptureEventID, NumSpecies, Species, Count, CaptureEventID
+#
+dat_gold = pd.read_csv(path_gold)
+
+# CaptureEventID, NumImages, DateTime, SiteID, LocationX, LocationY,
+# NumSpecies, Species, Count, Standing, Resting, Moving, Eating, Interacting,
+# Babies, NumClassifications, NumVotes, NumBlanks, Evenness
+
+dat_consensus = pd.read_csv(path_consensus)
+
+# CaptureEventID, URL_Info
+dat_image_links = pd.read_csv(path_image_links)
+
+
+#########################
+# Print Statistics
+#########################
+
+# extract some statistics
+print("-------- Gold Label Stats ---------------------------")
+print("Number of identified species events: %s" % (dat_gold.shape[0]))
+nunique = dat_gold.apply(lambda x: len(x.unique()))
+print("Number of different species: %s" % (nunique['Species']))
+tt = dat_gold.groupby(dat_gold.CaptureEventID).count()
+print("Number of distinct capture events: %s" % (tt.shape[0]))
+
+
+print("-------- Annotation Stats (Consensus)-----------------")
+print("Number of identified species events: %s" % (dat_consensus.shape[0]))
+nunique = dat_consensus.apply(lambda x: len(x.unique()))
+print("Number of different species: %s" % (nunique['Species']))
+print("Number of different locations: %s" % (nunique['SiteID']))
+tt = dat_consensus.groupby(dat_consensus.CaptureEventID).count()
+print("Number of distinct capture events: %s" % (tt.shape[0]))
+
+
+print("-------- Image Link Stats-----------------")
+print("Number of images: %s" % (dat_image_links.shape[0]))
+tt = dat_image_links['URL_Info'].apply(lambda x: x.split("/")[0])
+print("Number of images per season")
+tt.groupby(tt).count()
+
+print("-------- Gold Label and Season-----------------")
+# inner join images with gold label data
+dat_gold_images = pd.merge(dat_gold, dat_image_links, how='inner',
+                           left_on='CaptureEventID',
+                           right_on='CaptureEventID')
+
+tt = dat_gold_images['URL_Info'].apply(lambda x: x.split("/")[0])
+print("Number of images per season")
+tt.groupby(tt).count()
+
+
+#########################
+# Get Image Data
+#########################
+
+# function to download an image
+def get_image_URL(url, output_image_name, path_output):
+    img_data = requests.get(url).content
+    with open(path_output + output_image_name, 'wb') as handler:
+        handler.write(img_data)
+
+# test
+image_path = "S4/R10/R10_R2/S4_R10_R2_IMAG0553.JPG"
+image_name = image_path.split("/")[3]
+get_image_URL(url=image_url + image_path,
+              output_image_name=image_name,
+              path_output=path_images)
+
+
+# test over several files
+for image_path in dat_gold_images['URL_Info'][0:100]:
+    image_name = image_path.split("/")[3]
+    get_image_URL(url=image_url + image_path,
+                  output_image_name=image_name,
+                  path_output=path_images)
