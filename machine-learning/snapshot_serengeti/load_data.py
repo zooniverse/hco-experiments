@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 import os
 import requests
+import random as rand
 
 
 #########################
@@ -83,6 +84,52 @@ dat_gold_images = pd.merge(dat_gold, dat_image_links, how='inner',
 tt = dat_gold_images['URL_Info'].apply(lambda x: x.split("/")[0])
 print("Number of images per season")
 tt.groupby(tt).count()
+
+# animal species
+dat_consensus.groupby(dat_consensus.Species).CaptureEventID.count()
+dat_gold_images.groupby(dat_gold_images.Species).CaptureEventID.count()
+
+
+#########################
+# Find specific images
+#########################
+
+# function to choose a random image from a set of urls
+def choose_random(df, image_urls, n_samples=1):
+    # get capture ids
+    captures = df['CaptureEventID']
+    n_rows = captures.shape[0]
+    # choose random capture event
+    ii = rand.sample(range(0, n_rows), min(n_samples, n_rows))
+    # loop over all samples
+    for i in ii:
+        cap_id = captures.iloc[i]
+        # get image link
+        image_path = image_urls[image_urls['CaptureEventID'] == cap_id].iloc[0]
+        image_path = image_path['URL_Info']
+        image_name = image_path.split("/")[3]
+        # get image
+        get_image_URL(url=image_url + image_path,
+                      output_image_name=image_name,
+                      path_output=path_images)
+
+# find images from babies
+babies = dat_consensus[dat_consensus.Babies > 0.9]
+choose_random(babies, dat_image_links, n_samples=10)
+
+# find images with low consensus
+low_consensus = dat_consensus[(dat_consensus.Evenness > 0.8) &
+                              (dat_consensus.NumVotes > 20)]
+choose_random(low_consensus, dat_image_links, n_samples=10)
+
+# find eating animals
+eating = dat_consensus[dat_consensus.Eating > 0.9]
+choose_random(eating, dat_image_links, n_samples=10)
+
+# find lions
+lions = dat_consensus[(dat_consensus.Species == 'lionFemale') |
+                      (dat_consensus.Species == 'lionMale')]
+choose_random(lions, dat_image_links, n_samples=10)
 
 
 #########################
