@@ -3,6 +3,7 @@
 #
 
 from swap.agents import Bureau
+from swap.agents.agent import Stats
 from swap.agents.subject import Subject
 from swap.agents.user import User
 from pprint import pprint
@@ -180,23 +181,23 @@ class SWAP(object):
 
     # ----------------------------------------------------------------
 
-    def stats_export(self):
+    @property
+    def stats(self):
         """
             Consolidate all the statistical data from the bureaus
         """
-        user = self.users.stats().export()
-        subject = self.subjects.stats().export()
+        stats = Stats()
+        stats.add('user', self.users.stats())
+        stats.add('subject', self.subjects.stats())
 
-        return {'user': user, 'subject': subject}
+        return stats
 
     def stats_str(self):
         """
             Consolidate all the statistical data from the bureaus
             into a string
         """
-        s = '%s\n' % str(self.users.stats())
-        s += str(self.subjects.stats())
-        return s
+        return str(self.stats)
 
     def exportUserData(self):
         """ Exports consolidated user information """
@@ -213,7 +214,7 @@ class SWAP(object):
         return {
             'users': self.users.export(),
             'subjects': self.subjects.export(),
-            'stats': self.stats_export()
+            'stats': self.stats.export()
         }
 
     def roc_export(self):

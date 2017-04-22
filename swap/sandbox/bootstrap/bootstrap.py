@@ -47,7 +47,7 @@ class Bootstrap:
         self.silver_update(swap.export())
         self.update_tracking(export)
 
-        self.addMetric()
+        self.addMetric(swap)
 
         return swap
 
@@ -109,8 +109,8 @@ class Bootstrap:
 
         return data
 
-    def addMetric(self):
-        metric = Bootstrap_Metric(self, self.n)
+    def addMetric(self, swap):
+        metric = Bootstrap_Metric(self, swap, self.n)
         self.metrics.addMetric(metric)
 
     def getMetric(self, i):
@@ -162,11 +162,16 @@ class Bootstrap_Metrics:
         self.metrics = []
 
     def __str__(self):
-        s = ''
+        boot = ''
+        stats = ''
         for metric in self.metrics:
-            s += '%s\n' % str(metric)
+            boot += '%s\n' % str(metric)
 
-        return s
+            stats += 'Stats round %d\n' % metric.num
+            stats += '=============\n'
+            stats += str(metric.stats)
+
+        return '%s\n\n%s' % (boot, stats)
 
     def __repr__(self):
         s = ''
@@ -186,10 +191,11 @@ class Bootstrap_Metrics:
 
 
 class Bootstrap_Metric:
-    def __init__(self, bootstrap, num):
+    def __init__(self, bootstrap, swap, num):
         self.num = num
         self.silver = bootstrap.silver.copy()
         self.iteration = bootstrap.n
+        self.stats = swap.stats
 
     def __str__(self):
         return '%2d %8d %8d %8d' % \

@@ -44,7 +44,11 @@ class Agent(metaclass=abc.ABCMeta):
         return
 
 
-class Stat:
+class BaseStat:
+    pass
+
+
+class Stat(BaseStat):
     def __init__(self, data):
         self.mean = st.mean(data)
         self.median = st.median(data)
@@ -60,25 +64,62 @@ class Stat:
             (self.mean, self.median, self.stdev)
 
 
+class MultiStat(BaseStat):
+    def __init__(self, *data):
+        stats = {}
+        for label, p in data:
+            stats[label] = Stat(p)
+        self.stats = stats
+
+    def add(self, label, stat):
+        self.stats[label] = stat
+
+        return self
+
+    def addNew(self, label, data):
+        self.add(label, Stat(data))
+
+    def export(self):
+        export = {}
+        for label, stat in self.stats.items():
+            export[label] = stat.export()
+
+        return export
+
+    def __str__(self):
+        s = ''
+        for label, stat in self.stats.items():
+            s += 'stat %s %s\n' % (str(label), str(stat))
+        return s
+
+
 class Stats:
     def __init__(self):
         self.stats = {}
 
-    def add(self, key, stat):
-        self.stats[key] = stat
+    def add(self, name, stat):
+        if not isinstance(stat, BaseStat):
+            raise TypeError('Stat must be of type BaseStat')
+        self.stats[name] = stat
 
         return self
 
-    def addNew(self, key, data):
-        self.add(key, Stat(data))
+    def get(self, name):
+        if name not in self.stats:
+            raise KeyError('%s not a valid stat name' % name)
+        return self.stats[name]
 
     def export(self):
         export = {}
-        for key, stat in self.stats.items():
-            export[key] = stat.export()
+        for name, stat in self.stats.items():
+            export[name] = stat.export()
 
     def __str__(self):
         s = ''
-        for key, stat in self.stats.items():
-            s += 'stat %s %s\n' % (str(key), str(stat))
+        for name, stat in self.stats.items():
+            name = str(name)
+            s += '%s\n' % name
+            s += ''.join(['-' for c in name])
+            s += '\n'
+            s += '%s\n' % str(stat)
         return s

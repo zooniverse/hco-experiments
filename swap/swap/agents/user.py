@@ -3,7 +3,7 @@
 # score
 
 
-from swap.agents.agent import Agent, Stats, Stat
+from swap.agents.agent import Agent, MultiStat
 from swap.agents.tracker import Tracker
 from swap.agents.tracker import Tracker_Collection
 
@@ -101,12 +101,12 @@ class User(Agent):
             Calculate the mean, standard deviation, and median
             of the scores in a bureau containing Users
         """
-        stats = Stats()
+        data = []
         for i in [0, 1]:
             p = [agent.getScore(i) for agent in bureau]
-            stats.addNew(i, p)
+            data.append((i, p))
 
-        return stats
+        return MultiStat(*data)
 
 
 class User_Score_Tracker(Tracker):
