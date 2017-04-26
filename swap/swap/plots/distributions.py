@@ -10,7 +10,7 @@ from scipy.signal import argrelextrema
 import seaborn as sns
 
 
-def plot_kernel_density(data):
+def plot_kde(data):
     bw = 1.06 * st.stdev(data) / (len(data) ** .2)
     kde = KernelDensity(kernel='gaussian', bandwidth=bw).fit(
         np.array(data).reshape(-1, 1))
@@ -58,7 +58,7 @@ def plot_seaborn_density_split(swap, cutoff=1):
     plt.xlabel('Probability')
 
 
-def plot_probability_density(data, fname, swap=None, cutoff=1):
+def plot_pdf(data, fname, swap=None, cutoff=1):
     cut_data = np.array([x for x in data if x < cutoff])
 
     plots = ['density', 'kde']
@@ -71,7 +71,7 @@ def plot_probability_density(data, fname, swap=None, cutoff=1):
         elif f == 'split':
             plot_seaborn_density_split(swap, cutoff)
         elif f == 'kde':
-            plot_kernel_density(data)
+            plot_kde(data)
 
     plt.suptitle('Probability Density Function')
     plt.tight_layout()

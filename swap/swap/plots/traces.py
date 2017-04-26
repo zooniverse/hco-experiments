@@ -3,7 +3,7 @@
 import matplotlib.pyplot as plt
 
 
-def plot_user_traces(swap, fname):
+def plot_user(swap, fname):
     """
         Generate a trace plot of the average of each user's scores
         change with each classification

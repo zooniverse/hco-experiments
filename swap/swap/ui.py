@@ -3,13 +3,10 @@
 from swap.control import Control
 import pickle
 from pprint import pprint
-import matplotlib.pyplot as plt
 import argparse
-import numpy as np
 import os
 
-from swap.plots.traces import *
-from swap.plots.distributions import *
+import swap.plots as plots
 
 
 class Interface:
@@ -126,7 +123,7 @@ class Interface:
         data = self.collect_roc(args)
 
         title = 'Receiver Operater Characteristic'
-        plot_roc(title, *data, fname=output)
+        plots.plot_roc(title, *data, fname=output)
         print(args)
 
     def save(self, object, fname):
@@ -288,15 +285,15 @@ class SWAPInterface(Interface):
 
         if args.subject:
             fname = self.f(args.subject[0])
-            plot_subjects(swap, fname)
+            plots.traces.plot_subjects(swap, fname)
 
         if args.user:
             fname = self.f(args.user[0])
-            plot_user_cm(swap, fname)
+            plots.plot_user_cm(swap, fname)
 
         if args.utraces:
             fname = self.f(args.user[0])
-            plot_user_traces(swap, fname)
+            plots.traces.plot_user(swap, fname)
 
         if args.log:
             fname = self.f(args.output[0])
@@ -307,8 +304,8 @@ class SWAPInterface(Interface):
 
         if args.dist:
             data = [s.getScore() for s in swap.subjects]
-            plot_probability_density(data, self.f(args.dist[0]), swap,
-                                     cutoff=float(args.dist[1]))
+            plots.plot_pdf(data, self.f(args.dist[0]), swap,
+                           cutoff=float(args.dist[1]))
 
         return swap
 
@@ -366,124 +363,6 @@ def save_pickle(object, fname):
     """
     with open(fname, 'wb') as file:
         pickle.dump(object, file)
-
-
-def plot_user_cm(swap, fname):
-    data = []
-    for user in swap.users:
-        score0 = user.getScore(0)
-        score1 = user.getScore(1)
-        n = user.getCount()
-
-        data.append((score0, score1, n))
-
-    plot_confusion_matrix(data, "User Confusion Matrices", fname)
-
-
-def plot_histogram(data, title, fname, dpi=300):
-    """
-        Generate a histogram plot
-    """
-    # the histogram of the data
-    n, bins, patches = plt.hist(
-        data, 50, normed=1,
-        facecolor='green', alpha=0.75)
-
-    # add a 'best fit' line
-    # y = mlab.normpdf( bins, mu, sigma)
-    # l = plt.plot(bins, y, 'r--', linewidth=1)
-
-    plt.xlabel('Smarts')
-    plt.ylabel('Probability')
-    plt.title(r'$\mathrm{Histogram\ of\ IQ:}\ \mu=100,\ \sigma=15$')
-    plt.axis([0, 1, 0, 10])
-    plt.grid(True)
-
-    plt.show()
-
-
-def plot_roc(title, *datasets, fname=None, dpi=300):
-    plt.figure(1)
-
-    for label, data in datasets:
-        y_true = []
-        y_score = []
-
-        for t in data:
-            y_true.append(t[0])
-            y_score.append(t[1])
-
-        y_true = np.array(y_true)
-        y_score = np.array(y_score)
-
-        # Compute fpr, tpr, thresholds and roc auc
-        fpr, tpr, thresholds = roc_curve(y_true, y_score)
-        roc_auc = auc(fpr, tpr, True)
-        # roc_auc = 0
-
-        # Plot ROC curve
-        plt.plot(fpr, tpr, label='%s (area = %0.3f)' % (label, roc_auc))
-
-    plt.plot([0, 1], [0, 1], 'k--')  # random predictions curve
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.0])
-    plt.xlabel('False Positive Rate or (1 - Specifity)')
-    plt.ylabel('True Positive Rate or (Sensitivity)')
-    plt.title('Receiver Operating Characteristic for %s' % title)
-    plt.legend(loc="lower right")
-
-    if fname:
-        plt.savefig(fname, dpi=dpi)
-    else:
-        plt.show()
-
-
-def plot_confusion_matrix(data, title, fname, dpi=300):
-    # """ Plot User Skill """
-    # # Loop over all users
-    # user_data = swappy.exportUserData()
-    # # all users
-    # unique_users = user_data.keys()
-    # # max classifications
-    # max_class = 0
-    # # number of user processed
-    # counter = 0
-    # for user in unique_users:
-    #     n_class_user = len(user_data[user]['gold_labels'])
-    #     max_class = max(max_class, n_class_user)
-    #     plt.plot(user_data[user]['score_1_history'][-1],
-    #              user_data[user]['score_0_history'][-1], "o",
-    #              ms=(n_class_user)/500,
-    #              color="#3F88C5", alpha=0.5)
-
-    for item in data:
-        plt.plot(item[1], item[0],
-                 'o', ms=item[2] / 500,
-                 color="#3F88C5", alpha=0.5)
-
-    # Quadrant labels
-    plt.text(0.03, 0.03, "Obtuse")
-    plt.text(0.75, 0.03, "Optimistic")
-    plt.text(0.03, 0.95, "Pessimistic")
-    plt.text(0.8, 0.95, "Astute")
-
-    # Quadrant divider lines
-    plt.plot([0.5, 0.5], [0, 1], "k--", lw=1)
-    plt.plot([0, 1], [0.5, 0.5], "k--", lw=1)
-    plt.plot([0, 1], [1, 0], "k-", lw=1)
-
-    # Axis labels
-    plt.xlabel("P(\'real\'|real)")
-    plt.ylabel("P(\'bogus\'|bogus)")
-    plt.axes().set_aspect('equal')
-
-    # Plot Title
-    plt.title(title)
-
-    if fname:
-        plt.savefig(fname, dpi=dpi)
-    else:
-        plt.show()
 
 
 class Roc_Iterator:
