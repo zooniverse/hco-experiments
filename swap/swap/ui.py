@@ -8,14 +8,8 @@ import argparse
 import numpy as np
 import os
 
-from sklearn.metrics import roc_curve
-from sklearn.metrics import auc
-from sklearn.cluster import KMeans
-from sklearn.neighbors.kde import KernelDensity
-import statistics as st
-from scipy.signal import argrelextrema
-
-import seaborn as sns
+from swap.plots.traces import *
+from swap.plots.distributions import *
 
 
 class Interface:
@@ -386,92 +380,6 @@ def plot_user_cm(swap, fname):
     plot_confusion_matrix(data, "User Confusion Matrices", fname)
 
 
-def plot_user_traces(swap, fname):
-    """
-        Generate a trace plot of the average of each user's scores
-        change with each classification
-
-        Args:
-            fname: Save the plot to file.
-                   Shows the plot instead if None
-    """
-    export = swap.export()
-    data = []
-    for item in export['users'].values():
-        h0 = item['score_0_history']
-        h1 = item['score_1_history']
-
-        h = []
-        for i, v0 in enumerate(h0):
-            if len(h1) <= i:
-                v1 = h1[-1]
-            else:
-                v1 = h1[i]
-            h.append((v0 + v1) / 2)
-        data.append((1, h))
-
-    plot_tracks(data, 'User Combined Tracks', fname, scale='log')
-
-
-def plot_subjects(swap, fname):
-    """
-        Generate a trace plot of how each subject's score changes
-        with each classification
-    """
-    export = swap.export()
-    print(fname)
-    data = [(d['gold_label'], d['history'])
-            for d in export['subjects'].values()]
-    plot_tracks(data, 'Subject Tracks', fname)
-
-
-def plot_tracks(data, title, fname, dpi=300, scale='log'):
-    """
-        Plot subject tracks
-
-        Args:
-            data: Should be a list of tuples of the form
-                  (gold label, [subject history])
-            title: Title of the plot
-            fname: Save the plot to file.
-                   Shows the plot instead if None
-            dpi: Passed to matplotlib
-            scale: ('log'|'linear')
-    """
-    cmap = ["#669D31", "#F00200", "#000000"]
-
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-
-    count = 0
-    for gold, history in data:
-        if count == 1000:
-            break
-
-        ax.plot(
-            [0.01] + history,
-            range(len(history) + 1),
-            "-",
-            color=cmap[gold],
-            lw=1,
-            alpha=0.1)
-
-        count += 1
-
-    plt.xlim(-0.01, 1.01)
-    ax.set_yscale(scale)
-    plt.gca().invert_yaxis()
-
-    plt.xlabel("P(real)")
-    plt.ylabel("number of classificaions")
-    plt.title(title)
-
-    if fname:
-        plt.savefig(fname, dpi=dpi)
-    else:
-        plt.show()
-
-
 def plot_histogram(data, title, fname, dpi=300):
     """
         Generate a histogram plot
@@ -574,78 +482,6 @@ def plot_confusion_matrix(data, title, fname, dpi=300):
 
     if fname:
         plt.savefig(fname, dpi=dpi)
-    else:
-        plt.show()
-
-
-def plot_kernel_density(data):
-    kde = KernelDensity(kernel='gaussian', bandwidth=.027).fit(
-        np.array(data).reshape(-1, 1))
-    s = np.linspace(0, 1)
-    e = kde.score_samples(s.reshape(-1, 1))
-    plt.plot(s, e)
-
-    mi, ma = argrelextrema(e, np.less)[0], argrelextrema(e, np.greater)[0]
-    print("Minima: %s" % s[mi])
-    print("Maxima: %s" % s[ma])
-
-    plt.plot(s[:mi[0] + 1], e[:mi[0] + 1], 'r',
-             s[mi[0]:mi[1] + 1], e[mi[0]:mi[1] + 1], 'g',
-             s[mi[1]:], e[mi[1]:], 'b',
-             s[ma], e[ma], 'go',
-             s[mi], e[mi], 'ro')
-
-    plt.xlabel('Probability')
-
-
-def plot_jenks_breaks(data):
-    import jenkspy
-    breaks = jenkspy.jenks_breaks(np.array(data).reshape(-1, 1), nb_class=3)
-    print(breaks)
-    for x in breaks:
-        plt.plot([x], [5], 'o')
-
-
-def plot_seaborn_density(data):
-    sns.distplot(data)
-    plt.ylabel('Number of subjects')
-    plt.xlabel('Probability')
-
-
-def plot_seaborn_density_split(swap, cutoff=1):
-    roc = swap.roc_export()
-    roc = [item for item in roc if item[1] < cutoff]
-    b0 = [item[1] for item in roc if item[0] == 0]
-    b1 = [item[1] for item in roc if item[0] == 1]
-
-    sns.distplot(np.array(b0), kde_kws={'label': 'Real 0'})
-    sns.distplot(np.array(b1), kde_kws={'label': 'Real 1'})
-
-    plt.ylabel('Number of subjects')
-    plt.xlabel('Probability')
-
-
-def plot_probability_density(data, fname, swap=None, cutoff=1):
-    cut_data = np.array([x for x in data if x < cutoff])
-
-    plots = ['density', 'kde']
-    n = len(plots)
-
-    for i, f in enumerate(plots):
-        plt.subplot(n, 1, i + 1)
-        if f == 'density':
-            plot_seaborn_density(cut_data)
-        elif f == 'split':
-            plot_seaborn_density_split(swap, cutoff)
-        elif f == 'kde':
-            plot_kernel_density(data)
-
-    plt.suptitle('Probability Density Function')
-    plt.tight_layout()
-    plt.subplots_adjust(top=0.93)
-
-    if fname:
-        plt.savefig(fname, dpi=300)
     else:
         plt.show()
 
