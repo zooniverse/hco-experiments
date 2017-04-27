@@ -76,9 +76,9 @@ class Interface(ui.Interface):
             help='Generate ROC curve from this file, bootstrap specific')
 
         roc_parser.add_argument(
-            '-s', '--silver', nargs='*', action='append',
-            help='Generate ROC curve from this file, ' +
-                 'bootstrap specific, silver standard only')
+            '-s', '--silver-only', nargs=2,
+            help='Generate roc curves only considering the silver ' +
+                 'subjects in this file and round')
 
         return parser
 
@@ -233,24 +233,28 @@ class Interface(ui.Interface):
         plots.traces.plot_tracks(plot_data, "Bootstrap Traces",
                                  fname, scale='linear')
 
+    def get_silvers(self, fname, round_):
+        boot = self.load(fname)
+        silvers = boot.metrics.get(round_).getSilverNames()
+        return silvers
+
     def collect_roc(self, args):
         it = super().collect_roc(args)
         it.__class__ = Roc_Iterator
+
+        if args.silver_only:
+            print("Silver only:")
+            silver_fname = args.silver_only[0]
+            silver_round = int(args.silver_only[1])
+            silvers = self.get_silvers(silver_fname, silver_round)
+
+            it.silver_only(silvers)
 
         if args.bootstrap:
             for label, fname, *steps in args.bootstrap:
                 print(fname)
                 steps = [int(i) - 1 for i in steps]
                 it.addBootObject(label, fname, self.load, steps)
-
-        if args.silver:
-            print("Silver only:")
-            for label, fname, *steps in args.silver:
-                print(fname)
-                steps = [int(i) - 1 for i in steps]
-
-                it.addBootObject(label, fname, self.load,
-                                 steps, silver_only=True)
 
         return it
 
@@ -261,6 +265,15 @@ class Roc_Iterator(ui.Roc_Iterator):
                       iterations=None, silver_only=False):
         if iterations:
             self.items.append((label, fname, load, iterations, silver_only))
+
+    def silver_only(self, silver_labels):
+        self.silvers = silver_labels
+
+    def _get_export(self, obj, *args, **kwargs):
+        if isinstance(obj, Bootstrap):
+            return obj.roc_export(*args, labels=self.silvers, **kwargs)
+        else:
+            return obj.roc_export(labels=self.silvers)
 
     def next(self):
         self.__bounds()
@@ -279,7 +292,7 @@ class Roc_Iterator(ui.Roc_Iterator):
 
             obj = load(fname)
 
-            return (label, obj.roc_export(i, silver=item[4]))
+            return (label, self._get_export(obj, i))
 
 
 def main():

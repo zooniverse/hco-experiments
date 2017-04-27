@@ -405,6 +405,9 @@ class Roc_Iterator:
         if self.i >= len(self.items):
             raise StopIteration()
 
+    def _get_export(self, obj):
+        return obj.roc_export()
+
     def next(self):
         self.__bounds()
         if self.i > len(self.items):
@@ -415,7 +418,7 @@ class Roc_Iterator:
         obj = load(fname)
         self.i += 1
 
-        return (label, obj.roc_export())
+        return (label, self._get_export(obj))
 
 
 def write_log(data, fname):

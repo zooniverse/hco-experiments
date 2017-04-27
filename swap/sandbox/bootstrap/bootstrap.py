@@ -86,7 +86,7 @@ class Bootstrap:
     def export(self):
         return self.bureau.export()
 
-    def roc_export(self, i=None, silver=False):
+    def roc_export(self, i=None, labels=None):
         bureau = self.bureau
         cursor = db.aggregate([
             {'$match': {'gold_label': {'$ne': -1}}},
@@ -100,9 +100,8 @@ class Bootstrap:
                 bureau.getAgent(subject).gold = item['gold']
 
         data = []
-        if silver:
-            silver_names = self.metrics.get(i).getSilverNames()
-            iter_ = bureau.iter_ids(silver_names)
+        if labels:
+            iter_ = bureau.iter_ids(labels)
         else:
             iter_ = bureau
         for s in iter_:

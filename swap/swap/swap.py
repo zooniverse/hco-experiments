@@ -217,12 +217,16 @@ class SWAP(object):
             'stats': self.stats.export()
         }
 
-    def roc_export(self):
+    def roc_export(self, labels=None):
         """
             Exports subject classification data in a suitable form
             for generating a roc curve. Data consolidated into list of tuples
             Each tuble takes the form:
                 (true label, probability)
+
+            Args:
+                labels: List of subject ids. Limits roc export to these
+                        subjects
         """
         cursor = db.getAllGolds()
 
@@ -230,7 +234,8 @@ class SWAP(object):
         for item in cursor:
             id_ = item['_id']
             gold = item['gold']
-            if gold in [0, 1]:
+            if (labels is None or id_ in labels) and \
+                    gold in [0, 1]:
                 score = self.subjects.get(id_).score
                 data.append((gold, score))
 
