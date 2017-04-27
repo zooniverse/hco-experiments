@@ -11,9 +11,21 @@ from swap.config import Config
 
 
 class Control:
+    """
+        Gets classifications from database and feeds them to SWAP
+    """
 
     def __init__(self, p0, epsilon, swap=None, train_size=None):
         self._cfg = Config()
+        """
+            Initialize control
+
+            Args:
+                p0:              prior subject probability
+                epsilon: (float) initial user score
+                train_size: (int) size of gold label sample for
+                    test/train split
+        """
 
         # Number of subjects with expert labels for a
         # test/train split
@@ -59,6 +71,12 @@ class Control:
                 n_class += 1
 
     def _delegate(self, cl):
+        """
+        Method to allow subclasses to override how classifications
+        are handed to swap
+
+        cl: (Classification)
+        """
         self.swap.processOneClassification(cl)
 
     def initSwap(self, p0, epsilon):

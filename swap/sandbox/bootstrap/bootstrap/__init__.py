@@ -5,9 +5,12 @@
 from swap.control import Control
 from swap.db import Cursor, Query
 import swap.db.classifications as db
-from swap.agents.agent import Agent, Accuracy
+from swap.agents.agent import Agent
 from swap.agents.tracker import Tracker
 from swap.agents.bureau import Bureau
+
+from bootstrap.analysis import Metric, Metrics
+
 
 gold_1 = [3328040, 3313220, 2977121, 2943566, 3317607]
 gold_0 = [3624432, 3469678, 3287492, 3627326, 3724438]
@@ -24,7 +27,7 @@ class Bootstrap:
 
         self.bureau = Bureau(Bootstrap_Subject)
 
-        self.metrics = Bootstrap_Metrics()
+        self.metrics = Metrics()
 
         self.p0 = p0
         self.epsilon = epsilon
@@ -87,6 +90,16 @@ class Bootstrap:
         return self.bureau.export()
 
     def roc_export(self, i=None, labels=None):
+        """
+        Exports list of tuples (gold, score). Useful when
+        generating roc curves or evaluating performance
+
+        i: (int) round number (0 based)
+        labels: (list) list of subject identifiers. Use when limiting
+                which subjects are in export
+        """
+
+        # Get real gold labels from database
         bureau = self.bureau
         cursor = db.aggregate([
             {'$match': {'gold_label': {'$ne': -1}}},
@@ -114,10 +127,20 @@ class Bootstrap:
         return data
 
     def addMetric(self, swap):
-        metric = Bootstrap_Metric(self, swap, self.n)
+        """
+        Creates a new metric for the current round from SWAP
+
+        swap: (SWAP)
+        """
+        metric = Metric(self, swap, self.n)
         self.metrics.addMetric(metric)
 
     def getMetric(self, i):
+        """
+        Gets a metric for a round
+
+        i: (int) round number of metric (0 based)
+        """
         return self.metrics.get(i)
 
     def printMetrics(self):
@@ -125,6 +148,11 @@ class Bootstrap:
             print(m.num_silver())
 
     def manifest(self):
+        """
+        Generates a text manifest. Contains relevant information on the
+        bootstrap run, including whatever parameters were used, and
+        statistical information on each run.
+        """
         s = ''
         s += 'p0:         %f\n' % self.p0
         s += 'epsilon     %f\n' % self.epsilon
@@ -161,129 +189,27 @@ class Bootstrap_Subject(Agent):
         return self.tracker.getHistory()
 
 
-class Bootstrap_Metrics:
-    def __init__(self):
-        self.metrics = []
-
-    def __str__(self):
-        boot = ''
-        stats = ''
-        thresholds = 'Thresholds\n' + \
-                     '=========='
-        for metric in self.metrics:
-            boot += '%s\n' % str(metric)
-
-            stats += 'Stats round %d\n' % metric.num
-            stats += '=============\n'
-            stats += str(metric.stats) + '\n'
-            stats += 'Accuracy\n' + \
-                     '--------\n'
-            stats += str(metric.accuracy)
-
-            thresholds += '%d %f < p < %f\n' % (metric.num, *metric.thresholds)
-
-        return '%s\n\n%s\n\n%s' % (thresholds, boot, stats)
-
-    def __repr__(self):
-        s = ''
-        for metric in self.metrics:
-            s += '%s\n' % repr(metric)
-
-        return s
-
-    def addMetric(self, metric):
-        self.metrics.append(metric)
-
-    def get(self, i=None):
-        if i is None:
-            return self.metrics[:]
-        else:
-            return self.metrics[i]
-
-
-class Bootstrap_Metric:
-    def __init__(self, bootstrap, swap, num):
-        self.num = num
-        self.silver = bootstrap.silver.copy()
-        self.iteration = bootstrap.n
-        self.stats = swap.stats
-        self.accuracy = self.silver_accuracy()
-
-        self.thresholds = (bootstrap.t_low, bootstrap.t_high)
-
-    def __str__(self):
-        return '%2d %8d %8d %8d' % \
-               (self.iteration, *self.num_silver())
-
-    def __repr__(self):
-        return str((self.iteration, *self.num_silver()))
-
-    def num_silver(self):
-        count = [0, 0]
-        silver = self.silver
-
-        for silver in silver.values():
-            count[silver] += 1
-
-        remaining = db.getNSubjects() - sum(count)
-
-        return (count[0], count[1], remaining)
-
-    def getsilver(self):
-        return self.silver
-
-    def getSilverNames(self):
-        return list(self.silver)
-
-    def silver_accuracy(self):
-        accuracy = Accuracy()
-        silvers = self.silver
-        real = db.getExpertGold(list(silvers))
-
-        match = {0: 0, 1: 0, -1: 0}
-        n = {0: 0, 1: 0, -1: 0}
-        for id_, gold in real.items():
-            if silvers[id_] == gold:
-                match[gold] += 1
-            n[gold] += 1
-
-        for label in match:
-            accuracy.add(label, match[label], n[label])
-
-        return accuracy
-
-
 class BootstrapControl(Control):
+    """
+    Feeds classifications to swap, Bootstrap specific method
+    """
 
     def __init__(self, p0, epsilon, golds):
+        """
+            golds: (dict) dictionary of gold labels
+        """
         self.golds = golds
-
         super().__init__(p0, epsilon)
-
-        # bureau = self.swap.subjects
-        # print(bureau)
-        # for subject, label in golds:
-        #     agent = Subject(subject, p0, label)
-        #     bureau.addAgent(agent)
-        # self.swap.subjects = bureau
 
     def getClassifications(self):
         golds = [item[0] for item in self.golds]
         return BootstrapCursor(golds)
 
-    # def _n_classifications(self):
-    #     golds = [x[0] for x in self.golds]
-    #     query = [
-    #         {'$match': {'subject_id': {'$in': golds}}},
-    #         {'$group': {'_id': 1, 'sum': {'$sum': 1}}}
-    #     ]
-
-    #     count = self._db.classifications.aggregate(query).next()['sum']
-    #     count += self._db.classifications.count()
-
-    #     return count
-
     def _delegate(self, cl):
+        """
+        Determines if swap should only consider each classification for
+        user score updates or subject score updates.
+        """
         if cl.isGold():
             self.swap.processOneClassification(cl, user=True, subject=False)
         else:
@@ -294,22 +220,29 @@ class BootstrapControl(Control):
 
 
 class BootstrapCursor(Cursor):
+    """
+    Combines two cursors into a single continuous iterator.
+    The first cursor contains all relevant silver labels,
+    and is used to score the users each round. The
+    second cursor contains all classifications, and
+    is used to score the subjects each round
+    """
+
     def __init__(self, golds):
         super().__init__(None, db.collection)
-        # Create the gold cursor
-        # Create the cursor for all remaining classifications
 
+        # Create a cursor for gold label classifications
         fields = ['user_name', 'subject_id', 'annotation', 'gold_label']
         query = Query().match('subject_id', golds).project(fields)
-        cursor1 = db.getClassifications(query)
+        gold_cursor = db.getClassifications(query)
 
+        # Create a cursor for all classifications
         fields = ['user_name', 'subject_id', 'annotation']
-
         query = Query()
         query.project(fields)
-        cursor2 = db.getClassifications(query)
+        reg_cursor = db.getClassifications(query)
 
-        self.cursors = (cursor1, cursor2)
+        self.cursors = (gold_cursor, reg_cursor)
         self.state = 0
 
     def __iter__(self):
@@ -321,7 +254,6 @@ class BootstrapCursor(Cursor):
     def next(self):
         # First iterate through gold cursor
         # Iterate through other cursor once gold is depleted
-        # http://anandology.com/python-practice-book/iterators.html#the-iteration-protocol
         if self.state > 1:
             raise StopIteration()
 
@@ -337,11 +269,3 @@ class BootstrapCursor(Cursor):
             count += len(c)
 
         return count
-
-
-class Bootstrap_Analysis:
-    def __init__(self, bootstrap):
-        pass
-
-    def trace_one(self, subject):
-        pass
