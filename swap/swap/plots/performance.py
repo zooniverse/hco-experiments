@@ -2,6 +2,7 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
+import math
 
 from sklearn.metrics import roc_curve
 from sklearn.metrics import auc
@@ -123,3 +124,45 @@ def plot_confusion_matrix(data, title, fname, dpi=300):
         plt.savefig(fname, dpi=dpi)
     else:
         plt.show()
+
+
+def p_diff(base, other, fname, load):
+    def score(swap, id_):
+        return swap.subjects.get(id_).getScore()
+
+    # Configure subplots in 'n x n' square grid
+    n = math.ceil(math.sqrt(len(other)))
+
+    for i, item in enumerate(other):
+        label = item[1]
+        o_swap = load(item[0])
+
+        # Select the right subplot position
+        plt.subplot(n, n, i + 1)
+
+        data = []
+        for id_ in base.subjects.getAgentIds():
+            if o_swap.subjects.has(id_):
+                a = score(base, id_)
+                b = score(o_swap, id_)
+                data.append((a, b))
+
+        scatter_plot(data, label)
+        print(label)
+
+    plt.tight_layout()
+    plt.subplots_adjust(top=0.93)
+
+    if fname:
+        plt.savefig(fname, dpi=300)
+    else:
+        plt.show()
+
+
+def scatter_plot(data, title):
+    x = [i[0] for i in data]
+    y = [i[1] for i in data]
+    plt.plot(x, y, 'o', alpha=.5, ms=1)
+
+    # Plot Title
+    plt.title(title)

@@ -263,6 +263,10 @@ class SWAPInterface(Interface):
             '--dist', nargs=2,
             help='Show distribution plot')
 
+        swap_parser.add_argument(
+            '--diff', nargs='*',
+            help='Visualize performance difference between swap outputs')
+
         return parser
 
     def command_swap(self, args):
@@ -307,6 +311,9 @@ class SWAPInterface(Interface):
             plots.plot_pdf(data, self.f(args.dist[0]), swap,
                            cutoff=float(args.dist[1]))
 
+        if args.diff:
+            self.difference(args)
+
         return swap
 
     def getControl(self, train=None):
@@ -333,6 +340,17 @@ class SWAPInterface(Interface):
         swap = control.getSWAP()
 
         return swap
+
+    def difference(self, args):
+        base = load_pickle(args.diff[0])
+        fname = self.f(args.diff[-1])
+
+        items = args.diff[1:-1]
+        items = [tuple(items[i: i + 2]) for i in range(0, len(items), 2)]
+        print(items)
+
+        # other = [load_pickle(x) for x in args.diff[1:]]
+        plots.performance.p_diff(base, items, fname, self.load)
 
 
 def run(interface=None):
