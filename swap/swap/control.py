@@ -89,13 +89,14 @@ class Control:
 
     def getGoldLabels(self):
         if self.train_size is None:
-            cursor = db.getAllGolds()
+            db_golds = db.getAllGolds()
         else:
-            cursor = db.getRandomGoldSample(self.train_size)
+            db_golds = db.getRandomGoldSample(self.train_size)
 
+        print(type(db_golds))
         golds = []
-        for item in cursor:
-            golds.append((item['_id'], item['gold']))
+        for id_, gold in db_golds.items():
+            golds.append((id_, gold))
 
         return golds
 

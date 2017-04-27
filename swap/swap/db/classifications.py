@@ -34,6 +34,17 @@ def getClassifications(query=None, **kwargs):
     return classifications
 
 
+def goldFromCursor(cursor):
+    data = {}
+    for item in cursor:
+        id_ = item['_id']
+        gold = item['gold']
+
+        data[id_] = gold
+
+    return data
+
+
 def getExpertGold(subjects):
     query = [
         {'$group': {'_id': '$subject_id',
@@ -41,12 +52,7 @@ def getExpertGold(subjects):
         {'$match': {'_id': {'$in': subjects}}}]
 
     cursor = aggregate(query)
-
-    data = {}
-    for item in cursor:
-        data[item['_id']] = item['gold']
-
-    return data
+    return goldFromCursor(cursor)
 
 
 def getAllGolds():
@@ -54,7 +60,8 @@ def getAllGolds():
         {'$group': {'_id': '$subject_id',
                     'gold': {'$first': '$gold_label'}}}]
 
-    return Cursor(query, collection)
+    cursor = aggregate(query)
+    return goldFromCursor(cursor)
 
 
 def getRandomGoldSample(size):
@@ -63,7 +70,8 @@ def getRandomGoldSample(size):
                     'gold': {'$first': '$gold_label'}}},
         {'$sample': {'size': size}}]
 
-    return Cursor(query, collection)
+    cursor = aggregate(query)
+    return goldFromCursor(cursor)
 
 
 def getNSubjects():

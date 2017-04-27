@@ -228,12 +228,10 @@ class SWAP(object):
                 labels: List of subject ids. Limits roc export to these
                         subjects
         """
-        cursor = db.getAllGolds()
+        db_golds = db.getAllGolds()
 
         data = []
-        for item in cursor:
-            id_ = item['_id']
-            gold = item['gold']
+        for id_, gold in db_golds.items():
             if (labels is None or id_ in labels) and \
                     gold in [0, 1]:
                 score = self.subjects.get(id_).score
