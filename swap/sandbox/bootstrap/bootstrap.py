@@ -5,7 +5,7 @@
 from swap.control import Control
 from swap.db import Cursor, Query
 import swap.db.classifications as db
-from swap.agents.agent import Agent
+from swap.agents.agent import Agent, Accuracy
 from swap.agents.tracker import Tracker
 from swap.agents.bureau import Bureau
 
@@ -164,14 +164,21 @@ class Bootstrap_Metrics:
     def __str__(self):
         boot = ''
         stats = ''
+        thresholds = 'Thresholds\n' + \
+                     '=========='
         for metric in self.metrics:
             boot += '%s\n' % str(metric)
 
             stats += 'Stats round %d\n' % metric.num
             stats += '=============\n'
-            stats += str(metric.stats)
+            stats += str(metric.stats) + '\n'
+            stats += 'Accuracy\n' + \
+                     '--------\n'
+            stats += str(metric.accuracy)
 
-        return '%s\n\n%s' % (boot, stats)
+            thresholds += '%d %f < p < %f\n' % (metric.num, *metric.thresholds)
+
+        return '%s\n\n%s\n\n%s' % (thresholds, boot, stats)
 
     def __repr__(self):
         s = ''
@@ -196,6 +203,9 @@ class Bootstrap_Metric:
         self.silver = bootstrap.silver.copy()
         self.iteration = bootstrap.n
         self.stats = swap.stats
+        self.accuracy = self.silver_accuracy()
+
+        self.thresholds = (bootstrap.t_low, bootstrap.t_high)
 
     def __str__(self):
         return '%2d %8d %8d %8d' % \
@@ -217,6 +227,23 @@ class Bootstrap_Metric:
 
     def getsilver(self):
         return self.silver
+
+    def silver_accuracy(self):
+        accuracy = Accuracy()
+        silvers = self.silver
+        real = db.getExpertGold(list(silvers))
+
+        match = {0: 0, 1: 0, -1: 0}
+        n = {0: 0, 1: 0, -1: 0}
+        for id_, gold in real.items():
+            if silvers[id_] == gold:
+                match[gold] += 1
+            n[gold] += 1
+
+        for label in match:
+            accuracy.add(label, match[label], n[label])
+
+        return accuracy
 
 
 class BootstrapControl(Control):

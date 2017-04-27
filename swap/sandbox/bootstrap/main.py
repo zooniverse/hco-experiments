@@ -5,6 +5,7 @@
 from bootstrap import *
 
 from swap import ui
+import swap.plots as plots
 
 import copy
 
@@ -178,7 +179,7 @@ class Interface(ui.Interface):
                           self.mod_f(fname, 'swap-%d' % i))
 
             img = self.f('iterate-%d.png' % i)
-            ui.plot_subjects(swap, img)
+            plots.traces.plot_subjects(swap, img)
 
         # if fname:
         #     self.save(bootstrap, fname)
@@ -207,7 +208,7 @@ class Interface(ui.Interface):
 
             data.append((*error, 10))
 
-        ui.plot_confusion_matrix(data, "Test", None)
+        plots.plot_confusion_matrix(data, "Test", None)
 
     def user_traces(self, bootstrap, args):
         pass
@@ -223,7 +224,8 @@ class Interface(ui.Interface):
             history = value['history']
             plot_data.append((c, history))
 
-        ui.plot_tracks(plot_data, "Bootstrap Traces", fname, scale='linear')
+        plots.traces.plot_tracks(plot_data, "Bootstrap Traces",
+                                 fname, scale='linear')
 
     def collect_roc(self, args):
         it = super().collect_roc(args)

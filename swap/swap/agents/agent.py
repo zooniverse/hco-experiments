@@ -123,3 +123,38 @@ class Stats:
             s += '\n'
             s += '%s\n' % str(stat)
         return s
+
+
+class Accuracy:
+    def __init__(self):
+        self.stats = {}
+
+    def add(self, label, matched, n):
+        self.stats[label] = (matched, n)
+
+    def total(self):
+        matched = 0
+        total = 0
+        for m, n in self.stats.values():
+            matched += m
+            total += n
+        return matched, total
+
+    def score(self, num, den):
+        try:
+            return num / den
+        except ZeroDivisionError:
+            return 0
+
+    def __str__(self):
+        s = ''
+        format_ = '%5s %6d / %6d %2.2f\n'
+        for label in self.stats:
+            m, n = self.stats[label]
+            s += format_ % (str(label), m, n, self.score(m, n))
+
+        total = self.total()
+        total_score = self.score(*total)
+        s += format_ % ('total', *total, total_score)
+
+        return s
