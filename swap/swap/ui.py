@@ -370,9 +370,13 @@ def load_pickle(fname):
     """
         Loads a pickled object from file
     """
-    with open(fname, 'rb') as file:
-        data = pickle.load(file)
-    return data
+    try:
+        with open(fname, 'rb') as file:
+            data = pickle.load(file)
+        return data
+    except Exception as e:
+        print('Error load file %s' % fname)
+        raise e
 
 
 def save_pickle(object, fname):

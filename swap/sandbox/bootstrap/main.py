@@ -75,6 +75,11 @@ class Interface(ui.Interface):
             '-b', '--bootstrap', nargs='*', action='append',
             help='Generate ROC curve from this file, bootstrap specific')
 
+        roc_parser.add_argument(
+            '-s', '--silver', nargs='*', action='append',
+            help='Generate ROC curve from this file, ' +
+                 'bootstrap specific, silver standard only')
+
         return parser
 
     def command_boot(self, args):
@@ -160,6 +165,7 @@ class Interface(ui.Interface):
         low = float(args.iterate[1])
         high = float(args.iterate[2])
 
+        # TODO doesn't work
         thresholds = {}
         if args.thresholds:
             i = int(args.thresholds[0]) - 1
@@ -237,14 +243,24 @@ class Interface(ui.Interface):
                 steps = [int(i) - 1 for i in steps]
                 it.addBootObject(label, fname, self.load, steps)
 
+        if args.silver:
+            print("Silver only:")
+            for label, fname, *steps in args.silver:
+                print(fname)
+                steps = [int(i) - 1 for i in steps]
+
+                it.addBootObject(label, fname, self.load,
+                                 steps, silver_only=True)
+
         return it
 
 
 class Roc_Iterator(ui.Roc_Iterator):
 
-    def addBootObject(self, label, fname, load, iterations=None):
+    def addBootObject(self, label, fname, load,
+                      iterations=None, silver_only=False):
         if iterations:
-            self.items.append((label, fname, load, iterations))
+            self.items.append((label, fname, load, iterations, silver_only))
 
     def next(self):
         self.__bounds()
@@ -263,7 +279,7 @@ class Roc_Iterator(ui.Roc_Iterator):
 
             obj = load(fname)
 
-            return (label, obj.roc_export(i))
+            return (label, obj.roc_export(i, silver=item[4]))
 
 
 def main():
