@@ -156,3 +156,13 @@ for image_path in dat_gold_images['URL_Info'][0:100]:
     get_image_URL(url=image_url + image_path,
                   output_image_name=image_name,
                   path_output=path_images)
+
+
+
+###############################
+# List images on disk
+###############################
+
+img_names = os.listdir(path_images)
+img_paths = [path_images + x for x in img_names]
+
