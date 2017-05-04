@@ -101,16 +101,11 @@ class Bootstrap:
 
         # Get real gold labels from database
         bureau = self.bureau
-        cursor = db.aggregate([
-            {'$match': {'gold_label': {'$ne': -1}}},
-            {'$group': {'_id': '$subject_id', 'gold':
-                        {'$first': '$gold_label'}}},
-        ])
+        golds = db.getExpertGold()
 
-        for item in cursor:
-            subject = item['_id']
-            if subject in bureau:
-                bureau.getAgent(subject).gold = item['gold']
+        for id_, gold in golds.items():
+            if id_ in bureau:
+                bureau.getAgent(id_).gold = gold
 
         data = []
         if labels:
