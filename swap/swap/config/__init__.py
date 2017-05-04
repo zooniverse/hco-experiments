@@ -1,1 +1,6 @@
-from .config import Config
+################################################################
+#
+
+from swap.config.config import Config
+
+assert Config

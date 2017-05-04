@@ -13,7 +13,7 @@ import argparse
 
 db = DB()
 config = Config()
-_meta_names = config.database['metadata']
+_meta_names = config.database.metadata
 
 
 def main():
@@ -59,20 +59,20 @@ def main():
 def processRow(row):
     # Convert types specified in config
     # anything not in config is interpreted as str
-    for key, t in config.csv_types.items():
+    for key, type_ in config.csv_types.items():
         value = row[key]
-        # print(key, t, value)
 
-        if value == '' and t in ['int', 'float']:
+        # Replace cells that should be a number with 0
+        # Except user_id, which gets -1 if empty
+        if value == '' and type_ in [int, float]:
             if key == 'user_id':
-                value = -1
+                row[key] = -1
             else:
-                value = 0
+                row[key] = 0
 
-        if t == 'int':
-            row[key] = int(value)
-        elif t == 'float':
-            row[key] = float(value)
+        # Cast value to the expected type
+        if type(row[key]) is not type_:
+            row[key] = type_(value)
 
     metadata = {}
     for m in _meta_names:

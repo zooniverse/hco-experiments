@@ -6,8 +6,7 @@ import progressbar
 
 from swap.swap import SWAP, Classification
 import swap.db.classifications as db
-from swap.db import DB, Query
-from swap.config import Config
+from swap.db import Query
 
 
 class Control:
@@ -16,7 +15,6 @@ class Control:
     """
 
     def __init__(self, p0, epsilon, swap=None, train_size=None):
-        self._cfg = Config()
         """
             Initialize control
 
