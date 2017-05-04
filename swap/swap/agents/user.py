@@ -52,9 +52,6 @@ class User(Agent):
 
         self.count += 1
 
-    def getHistory(self):
-        pass
-
     def getScore(self, label):
         """
             Gets the current score from the tracker for the annotation

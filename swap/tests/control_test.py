@@ -5,7 +5,7 @@
 import swap.db.classifications as db
 from swap.control import Control
 from unittest.mock import MagicMock
-import pytest
+# import pytest
 
 fields = {'user_id', 'classification_id', 'subject_id',
           'annotation', 'gold_label'}

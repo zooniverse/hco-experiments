@@ -3,10 +3,11 @@
 
 from pprint import pprint
 from swap.agents.user import User
+from swap.agents.bureau import Bureau
 from swap.agents.tracker import *
 from swap.swap import Classification
 
-from unittest.mock import patch, MagicMock, call, Mock
+from unittest.mock import patch, MagicMock
 
 # Sample classification
 cl = Classification.generate({
@@ -186,3 +187,14 @@ class TestUser:
         export = u.export()
         pprint(export)
         assert export['score_1_history'] == [.5, 1 / 3, 1 / 4, 2 / 5, 3 / 6]
+
+    def test_bureau_stats(self):
+        b = Bureau(User)
+        b.add(User(0, .5))
+        b.add(User(1, .25))
+        b.add(User(2, .75))
+
+        s = b.stats()
+        assert 0 in s.stats
+        assert 1 in s.stats
+        assert len(s.stats) == 2

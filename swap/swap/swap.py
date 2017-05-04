@@ -11,7 +11,7 @@ from pprint import pprint
 from swap.db import classifications as db
 
 
-class SWAP(object):
+class SWAP:
     """
         SWAP implementation, which calculates and updates a confusion matrix
         for each user as well as the probability that a particular subject
@@ -239,29 +239,6 @@ class SWAP(object):
 
         return data
 
-    def verifyClassification(self, cl):
-        """
-            Verify classification is compatible with current
-            SWAP version
-
-            Args:
-                cl: (dict) classification
-        """
-        names = [
-            'user_name',
-            'subject_id',
-            'annotation']
-        for key in names:
-            try:
-                cl[key]
-            except KeyError:
-                raise ClKeyError(key, cl)
-
-        if type(cl['annotation']) is not int:
-            raise ClValueError('annotation', int, cl)
-        if 'gold_label' in cl and type(cl['gold_label']) is not int:
-            raise ClValueError('gold_label', int, cl)
-
 
 class Classification:
     """
@@ -280,13 +257,13 @@ class Classification:
         """
 
         if type(annotation) is not int:
-            raise ClValueError('annotation', int)
+            raise ClValueError('annotation', int, annotation)
 
         if type(gold_label) is not int:
-            raise ClValueError('gold_label', int)
+            raise ClValueError('gold_label', int, gold_label)
 
         if type(metadata) is not dict:
-            raise ClValueError('metadata', dict)
+            raise ClValueError('metadata', dict, metadata)
 
         self.user = user
         self.subject = subject
@@ -388,8 +365,12 @@ class ClValueError(ValueError):
         impossible, or is of the wrong type
     """
 
-    def __init__(self, key, _type, cl={}, *args, **kwargs):
-        pprint(cl)
-        bad_type = type(cl[key])
+    def __init__(self, key, _type, value, *args, **kwargs):
+        if type(value) is dict:
+            kwargs['cl'] = value
+            value = value[key]
+        if 'cl' in kwargs:
+            pprint(kwargs['cl'])
+        bad_type = type(value)
         msg = 'key %s should be type %s but is %s' % (key, _type, bad_type)
         ValueError.__init__(self, msg)
