@@ -6,7 +6,7 @@ from swap.agents.user import User
 from swap.agents.tracker import *
 from swap.swap import Classification
 
-from unittest.mock import patch, MagicMock, call, Mock
+from unittest.mock import patch, MagicMock, call
 
 # Sample classification
 cl = Classification.generate({
@@ -81,6 +81,13 @@ class TestSubject:
         score = s.calculateScore(annotation, u_score_0, u_score_1, s_score)
 
         assert score == 0
+
+    def test_set_gold_label(self):
+        s = Subject(1, 0)
+        assert s.gold == -1
+
+        s.setGoldLabel(1)
+        assert s.gold == 1
 
     # ---------EXPORT TEST------------------------------
 

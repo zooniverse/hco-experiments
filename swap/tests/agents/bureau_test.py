@@ -4,9 +4,12 @@
 import pytest
 from pprint import pprint
 from swap.agents.bureau import Bureau
+from swap.agents.bureau import AgentIterator
 from swap.agents import Agent
 from swap.agents import User
 from swap.agents import Subject
+
+import unittest
 
 
 class TestBureau:
@@ -81,3 +84,34 @@ class TestBureau:
 
         assert b.export()[0] == User(0, .5).export()
         assert b.export()[5] == User(5, .5).export()
+
+
+class TestAgentIterator(unittest.TestCase):
+
+    def getBureau(self):
+        b = Bureau(Subject)
+        for i in range(5):
+            b.add(Subject(i, .12))
+
+        return b
+
+    def test_next(self):
+        b = self.getBureau()
+        a = AgentIterator(b, [1, 3])
+
+        assert next(a).getID() == 1
+        assert next(a).getID() == 3
+        with self.assertRaises(StopIteration):
+            a.next()
+
+    def test_length(self):
+        b = self.getBureau()
+        a = AgentIterator(b, [1, 2])
+
+        assert len(a) == 2
+
+    def test_iter(self):
+        b = self.getBureau()
+        a = AgentIterator(b, [1, 2])
+
+        assert iter(a) == a

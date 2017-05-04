@@ -129,6 +129,11 @@ class Bureau(object):
 
 
 class AgentIterator:
+    """
+        Custom iterator to iterate through agents in a bureau
+        according to a list of ids
+    """
+
     def __init__(self, bureau, ids):
         self.bureau = bureau
         self.ids = ids

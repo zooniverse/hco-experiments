@@ -49,6 +49,10 @@ class BaseStat:
 
 
 class Stat(BaseStat):
+    """
+        Keeps track of statistics in a dataset
+    """
+
     def __init__(self, data):
         self.mean = st.mean(data)
         self.median = st.median(data)
@@ -65,6 +69,11 @@ class Stat(BaseStat):
 
 
 class MultiStat(BaseStat):
+    """
+        Keeps track of statistics for multiple classes in a single
+        category. For example, the 0 and 1 scores of each user agent.
+    """
+
     def __init__(self, *data):
         stats = {}
         for label, p in data:
@@ -94,6 +103,10 @@ class MultiStat(BaseStat):
 
 
 class Stats:
+    """
+        A collection of multiple BaseStat objects
+    """
+
     def __init__(self):
         self.stats = {}
 
@@ -126,13 +139,32 @@ class Stats:
 
 
 class Accuracy:
+    """
+        Class to keep track of accuracy for multiple classes
+    """
+
     def __init__(self):
         self.stats = {}
 
     def add(self, label, matched, n):
+        """
+
+            label:   Label of class (0, 1 for SNHunters)
+            matched: Number of correct matchings
+            n:       Number of total matchings
+        """
+
+        if matched > n:
+            raise ValueError('Number of correct matches greater ' +
+                             'than total number of matches: %d > %d' %
+                             (matched, n))
         self.stats[label] = (matched, n)
 
     def total(self):
+        """
+            Returns the total accuracy accross all trackers:
+                Sum of all numerators and denominators
+        """
         matched = 0
         total = 0
         for m, n in self.stats.values():
@@ -141,6 +173,10 @@ class Accuracy:
         return matched, total
 
     def score(self, num, den):
+        """
+            Gets numerical representation of an accuracy fraction.
+            Returns 0 if dividing by 0
+        """
         try:
             return num / den
         except ZeroDivisionError:

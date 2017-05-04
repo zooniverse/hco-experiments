@@ -1,8 +1,13 @@
 ################################################################
 # Test functions for stats classes
 
-from swap.agents.agent import Stat, MultiStat, Stats
+from swap.agents.agent import Stat
+from swap.agents.agent import MultiStat
+# from swap.agents.agent import Stats
+from swap.agents.agent import Accuracy
 import statistics
+
+import unittest
 
 
 class Test_Stat:
@@ -62,3 +67,26 @@ class Test_Multistat:
         m.addNew(1, self.data1)
 
         assert 1 in m.export()
+
+
+class Test_Accuracy(unittest.TestCase):
+
+    def test_add(self):
+        a = Accuracy()
+        a.add(0, 1, 10)
+
+        assert 0 in a.stats
+        assert a.stats[0] == (1, 10)
+
+    def test_add_invalid(self):
+        a = Accuracy()
+        with self.assertRaises(ValueError):
+            a.add(0, 10, 1)
+
+    def test_score(self):
+        a = Accuracy()
+        assert a.score(1, 10) == .1
+
+    def test_score_0(self):
+        a = Accuracy()
+        assert a.score(10, 0) == 0
