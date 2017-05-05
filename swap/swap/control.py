@@ -14,7 +14,7 @@ class Control:
         Gets classifications from database and feeds them to SWAP
     """
 
-    def __init__(self, p0, epsilon, swap=None, train_size=None):
+    def __init__(self, p0, epsilon, swap=None):
         """
             Initialize control
 
@@ -27,7 +27,7 @@ class Control:
 
         # Number of subjects with expert labels for a
         # test/train split
-        self.train_size = train_size
+        self.gold_getter = GoldGetter()
 
         if swap is None:
             self.swap = self.initSwap(p0, epsilon)
@@ -86,17 +86,7 @@ class Control:
         return swap
 
     def getGoldLabels(self):
-        if self.train_size is None:
-            db_golds = db.getAllGolds()
-        else:
-            db_golds = db.getRandomGoldSample(self.train_size)
-
-        print(type(db_golds))
-        golds = []
-        for id_, gold in db_golds.items():
-            golds.append((id_, gold))
-
-        return golds
+        return self.gold_getter.golds
 
     def getClassifications(self):
         return db.getClassifications()
@@ -186,3 +176,39 @@ class DummySWAP:
             data.append(item)
 
         return data
+
+
+class GoldGetter:
+
+    def __init__(self):
+        self._golds = None
+        self.all()
+
+    def _getter(func):
+        def wrapper(self, *args, **kwargs):
+            getter = func(self, *args, **kwargs)
+            self.getter = getter
+            self._golds = None
+            return getter
+        return wrapper
+
+    @_getter
+    def all(self):
+        return lambda: db.getAllGolds(type_=tuple)
+
+    @_getter
+    def random(self, size):
+        return lambda: db.getRandomGoldSample(size, type_=tuple)
+
+    @_getter
+    def subjects(self, subject_ids):
+        return lambda: db.getExpertGold(subject_ids, type_=tuple)
+
+    @property
+    def golds(self):
+        if self._golds is None:
+            self._golds = self.getter()
+        return self._golds
+
+    def __iter__(self):
+        return self.golds

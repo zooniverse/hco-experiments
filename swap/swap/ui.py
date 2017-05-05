@@ -321,10 +321,11 @@ class SWAPInterface(Interface):
             Returns the Control instance
             Defines a Control instance if it doesn't exist yet
         """
-        if train is None:
-            return Control(self.p0, self.epsilon)
-        else:
-            return Control(self.p0, self.epsilon, train_size=train)
+        control = Control(self.p0, self.epsilon)
+        if train is not None:
+            control.gold_getter.random(train)
+
+        return control
 
     def run_swap(self, args):
         """

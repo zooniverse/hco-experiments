@@ -2,10 +2,11 @@
 ################################################################
 # Script to test control functionality
 
-import swap.db.classifications as db
+import swap.db.classifications as dbcl
 from swap.control import Control
+from swap.control import GoldGetter
 from unittest.mock import MagicMock
-# import pytest
+import pytest
 
 fields = {'user_id', 'classification_id', 'subject_id',
           'annotation', 'gold_label'}
@@ -14,7 +15,7 @@ fields = {'user_id', 'classification_id', 'subject_id',
 # def test_classifications_projection():
 #     q = Query()
 #     q.fields(['user_id', 'classification_id'])
-#     raw = db.classifications.aggregate(q.build())
+#     raw = dbcl.classifications.aggregate(q.build())
 
 #     item = raw.next()
 
@@ -26,7 +27,7 @@ fields = {'user_id', 'classification_id', 'subject_id',
 # def test_classifications_limit():
 #     q = Query()
 #     q.fields(fields).limit(5)
-#     raw = db.classifications.aggregate(q.build())
+#     raw = dbcl.classifications.aggregate(q.build())
 
 #     assert len(list(raw)) == 5
 
@@ -38,7 +39,7 @@ fields = {'user_id', 'classification_id', 'subject_id',
 #     pprint(list(users))
 
 
-# @pytest.mark.skip(reason='Takes too long')
+@pytest.mark.skip(reason='Takes too long')
 def test_get_one_classification():
     """ Get the first classification
     """
@@ -54,24 +55,55 @@ def test_get_one_classification():
 
 
 def test_with_train_split():
-    old = db.getRandomGoldSample
-    mock = MagicMock(return_value={})
-    db.getRandomGoldSample = mock
+    old = dbcl.getRandomGoldSample
+    mock = MagicMock(return_value=[])
+    dbcl.getRandomGoldSample = mock
 
-    Control(.5, .5, train_size=100)
+    c = Control(.5, .5, mock)
+    c.gold_getter.random(100)
+    c.getGoldLabels()
 
-    mock.assert_called_with(100)
+    mock.assert_called_with(100, type_=tuple)
 
-    db.getRandomGoldSample = old
+    dbcl.getRandomGoldSample = old
 
 
 def test_without_train_split():
-    old = db.getAllGolds
+    old = dbcl.getAllGolds
     mock = MagicMock(return_value={})
-    db.getAllGolds = mock
+    dbcl.getAllGolds = mock
 
-    Control(.5, .5)
+    c = Control(.5, .5, mock)
+    c.getGoldLabels()
 
-    mock.assert_called_with()
+    mock.assert_called_with(type_=tuple)
 
-    db.getAllGolds = old
+    dbcl.getAllGolds = old
+
+
+class TestGoldGetter:
+
+    def test_wrapper_golds_to_None(self):
+        old = dbcl.getAllGolds
+        dbcl.getAllGolds = MagicMock(return_value=[])
+
+        gg = GoldGetter()
+        gg._golds = {}
+        gg.all()
+
+        assert gg._golds is None
+
+        dbcl.getAllGolds = old
+
+    def test_wrapper_getter(self):
+        old = dbcl.getAllGolds
+        dbcl.getAllGolds = MagicMock(return_value=[])
+
+        gg = GoldGetter()
+        gg._golds = {}
+        gg.all()
+
+        print(type(gg.getter))
+        assert callable(gg.getter)
+
+        dbcl.getAllGolds = old

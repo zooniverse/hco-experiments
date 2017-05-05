@@ -34,44 +34,52 @@ def getClassifications(query=None, **kwargs):
     return classifications
 
 
-def goldFromCursor(cursor):
-    data = {}
-    for item in cursor:
-        id_ = item['_id']
-        gold = item['gold']
+def goldFromCursor(cursor, type_=dict):
+    if type_ is dict:
+        data = {}
+        for item in cursor:
+            id_ = item['_id']
+            gold = item['gold']
 
-        data[id_] = gold
+            data[id_] = gold
+    elif type_ is tuple:
+        data = []
+        for item in cursor:
+            data.append((item['_id'], item['gold']))
+    else:
+        raise TypeError("type_ '%s' invalid type!" % str(type_))
 
     return data
 
 
-def getExpertGold(subjects):
+def getExpertGold(subjects, *args, type_=dict):
     query = [
         {'$group': {'_id': '$subject_id',
                     'gold': {'$first': '$gold_label'}}},
         {'$match': {'_id': {'$in': subjects}}}]
 
     cursor = aggregate(query)
-    return goldFromCursor(cursor)
+    return goldFromCursor(cursor, type_)
 
 
-def getAllGolds():
+def getAllGolds(*args, type_=dict):
     query = [
         {'$group': {'_id': '$subject_id',
                     'gold': {'$first': '$gold_label'}}}]
 
     cursor = aggregate(query)
-    return goldFromCursor(cursor)
+    return goldFromCursor(cursor, type_)
 
 
-def getRandomGoldSample(size):
+def getRandomGoldSample(size, *args, type_=dict):
+    print(1)
     query = [
         {'$group': {'_id': '$subject_id',
                     'gold': {'$first': '$gold_label'}}},
         {'$sample': {'size': size}}]
 
     cursor = aggregate(query)
-    return goldFromCursor(cursor)
+    return goldFromCursor(cursor, type_)
 
 
 def getNSubjects():

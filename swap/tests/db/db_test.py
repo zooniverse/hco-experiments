@@ -96,3 +96,22 @@ class TestClassifications:
         assert kwargs['batchSize'] == 50
 
         dbcl.collection = old
+
+    def test_gold_from_cursor_dict(self):
+        data = [(1, 1), (2, 1), (3, 0), (4, 0)]
+        cursor = [{'_id': i[0], 'gold': i[1]} for i in data]
+
+        labels = dbcl.goldFromCursor(cursor, type_=dict)
+        print('labels: %s, data: %s' % (str(labels), str(data)))
+        for id_, gold in data:
+            assert labels[id_] == gold
+
+    def test_gold_from_cursor_tuple(self):
+        data = [(1, 1), (2, 1), (3, 0), (4, 0)]
+        cursor = [{'_id': i[0], 'gold': i[1]} for i in data]
+
+        labels = dbcl.goldFromCursor(cursor, type_=tuple)
+        print('labels: %s, data: %s' % (str(labels), str(data)))
+        print(labels)
+        for i, item in enumerate(data):
+            assert labels[i] == item
