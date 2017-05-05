@@ -1,9 +1,9 @@
 ################################################################
 # Test functions for query class
 
-from swap.mongo.query import Query
-from swap.mongo.query import Group
-from swap.mongo.query import Sort
+from swap.db.query import Query
+from swap.db.query import Group
+from swap.db.query import Sort
 
 from collections import OrderedDict
 
@@ -33,7 +33,7 @@ class Test_Query:
     # Match Range
     def test_match_range(self):
         q = Query()
-        q.match_range('field', lower=15, higher=20)
+        q.match_range('field', lower=15, upper=20)
 
         assert q._pipeline[-1] == \
             {'$match': {'field': {'$gte': 15, '$lt': 20}}}
