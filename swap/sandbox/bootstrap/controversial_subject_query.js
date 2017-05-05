@@ -32,3 +32,38 @@ db.classifications.aggregate([
         '$limit': 100
     }
 ])
+
+db.classifications.aggregate([
+    {
+        '$group':{
+            '_id':'$subject_id',
+            'total':{'$sum':1},
+            'real':{'$sum':{'$cond':[{'$eq':['$annotation',1]},1,0]}},
+            'bogus':{'$sum':{'$cond':[{'$eq':['$annotation',0]},1,0]}}
+        }
+    },
+    {
+        '$project':{
+            '_id':1,'real':1,'bogus':1,'total':1,'consensus':{
+                '$cond':[
+                    {'$gt':['$real','$bogus']},
+                    {'$pow':[{'$abs':{'$subtract':['$real','$bogus']}},{'$subtract':[1,{'$divide':['$bogus','$real']}]}]},
+                    {'$pow':[{'$abs':{'$subtract':['$real','$bogus']}},{'$subtract':[1,{'$divide':['$real','$bogus']}]}]}
+                ]
+            }
+        }
+    },
+    {
+        '$match':{
+            'total': {'$lt': 50}
+        }
+    },
+    {
+        '$sort':{
+            'controv':-1
+        }
+    },
+    {
+        '$limit': 100
+    }
+])

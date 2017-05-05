@@ -7,6 +7,7 @@ import progressbar
 from swap.swap import SWAP, Classification
 import swap.db.classifications as db
 from swap.db import Query
+import swap.config.controversial as cv
 
 
 class Control:
@@ -29,10 +30,10 @@ class Control:
         # test/train split
         self.gold_getter = GoldGetter()
 
-        if swap is None:
-            self.swap = self.initSwap(p0, epsilon)
-        else:
-            self.swap = swap
+        self.p0 = p0
+        self.epsilon = epsilon
+
+        self.swap = swap
 
     def process(self):
         """
@@ -46,6 +47,8 @@ class Control:
             Parameters like max_batch_size are hard-coded.
             Prints status.
         """
+
+        self.init_swap()
 
         # get classifications
         classifications = self.getClassifications()
@@ -77,12 +80,16 @@ class Control:
         """
         self.swap.processOneClassification(cl)
 
-    def initSwap(self, p0, epsilon):
-        swap = SWAP(p0, epsilon)
+    def init_swap(self):
+        if self.swap is None:
+            swap = SWAP(self.p0, self.epsilon)
+        else:
+            swap = self.swap
 
         golds = self.getGoldLabels()
         swap.setGoldLabels(golds)
 
+        self.swap = swap
         return swap
 
     def getGoldLabels(self):
@@ -203,6 +210,22 @@ class GoldGetter:
     @_getter
     def subjects(self, subject_ids):
         return lambda: db.getExpertGold(subject_ids, type_=tuple)
+
+    @_getter
+    def controversial(self, order, size):
+        def f():
+            subjects = cv.get_controversial(size)
+            return db.getExpertGold(subjects, type_=tuple)
+        return f
+
+    @_getter
+    def extremes(self, size):
+        def f():
+            controv = cv.get_controversial(size)
+            consensus = cv.get_consensus(size)
+
+            return db.getExpertGold(controv + consensus, type_=tuple)
+        return f
 
     @property
     def golds(self):

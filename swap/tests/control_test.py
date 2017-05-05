@@ -107,3 +107,11 @@ class TestGoldGetter:
         assert callable(gg.getter)
 
         dbcl.getAllGolds = old
+
+    def test_getter_propagation(self):
+        c = Control(0.5, 0.5)
+        c.gold_getter.getter = lambda: [(1, 1), (2, 0)]
+
+        c.init_swap()
+        assert c.swap.subjects.get(1).gold == 1
+        assert c.swap.subjects.get(2).gold == 0

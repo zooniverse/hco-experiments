@@ -233,7 +233,8 @@ class SWAP:
         data = []
         for id_, gold in db_golds.items():
             if (labels is None or id_ in labels) and \
-                    gold in [0, 1]:
+                    gold in [0, 1] and \
+                    id_ in self.subjects:
                 score = self.subjects.get(id_).score
                 data.append((gold, score))
 

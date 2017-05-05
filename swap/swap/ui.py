@@ -256,6 +256,18 @@ class SWAPInterface(Interface):
                  ' of gold labels to \'n\'')
 
         swap_parser.add_argument(
+            '--controversial', nargs=1,
+            metavar='n',
+            help='Run swap with a test/train split, using the most/least' +
+                 'controversial subjects')
+
+        swap_parser.add_argument(
+            '--extremes', nargs=1,
+            metavar='n',
+            help='Run swap with a test/train split, using the most' +
+                 'controversial subjects and subjects with most consensus')
+
+        swap_parser.add_argument(
             '--stats', action='store_true',
             help='Display run statistics')
 
@@ -316,14 +328,12 @@ class SWAPInterface(Interface):
 
         return swap
 
-    def getControl(self, train=None):
+    def getControl(self):
         """
             Returns the Control instance
             Defines a Control instance if it doesn't exist yet
         """
         control = Control(self.p0, self.epsilon)
-        if train is not None:
-            control.gold_getter.random(train)
 
         return control
 
@@ -331,12 +341,21 @@ class SWAPInterface(Interface):
         """
             Have the Control process all classifications
         """
+        control = self.getControl()
+
+        # Random test/train split
         if args.train:
             train = int(args.train[0])
-        else:
-            train = None
+            control.gold_getter.random(train)
 
-        control = self.getControl(train)
+        if args.controversial:
+            size = int(args.controversial[0])
+            control.gold_getter.controversial(size)
+
+        if args.extremes:
+            size = int(args.extremes[0])
+            control.gold_getter.extremes(size)
+
         control.process()
         swap = control.getSWAP()
 
