@@ -110,6 +110,9 @@ class Bureau(object):
             data[name] = agent.export()
         return data
 
+    def iter_ids(self, ids):
+        return AgentIterator(self, ids)
+
     def __iter__(self):
         return iter(self.agents.values())
 
@@ -123,3 +126,33 @@ class Bureau(object):
 
     def __str__(self):
         return '\n'.join([str(item) for item in self._agents.values()])
+
+
+class AgentIterator:
+    """
+        Custom iterator to iterate through agents in a bureau
+        according to a list of ids
+    """
+
+    def __init__(self, bureau, ids):
+        self.bureau = bureau
+        self.ids = ids
+        self.index = 0
+
+    def next(self):
+        index = self.index
+        if index >= len(self):
+            raise StopIteration
+        else:
+            agent = self.bureau.get(self.ids[index])
+            self.index += 1
+            return agent
+
+    def __iter__(self):
+        return self
+
+    def __len__(self):
+        return len(self.ids)
+
+    def __next__(self):
+        return self.next()

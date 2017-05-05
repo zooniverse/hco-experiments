@@ -74,11 +74,11 @@ class Tracker_Collection:
         """
         if label in self.trackers:
             raise NameError(
-                'Tracker with that label already \
-                exists! Remove it first')
+                'Tracker with that label already' +
+                'exists! Remove it first')
 
         if not isinstance(tracker, Tracker):
-            raise ValueError
+            raise TypeError
 
         self.trackers[label] = tracker
 

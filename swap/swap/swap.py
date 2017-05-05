@@ -3,6 +3,7 @@
 #
 
 from swap.agents import Bureau
+from swap.agents.agent import Stats
 from swap.agents.subject import Subject
 from swap.agents.user import User
 from pprint import pprint
@@ -10,7 +11,7 @@ from pprint import pprint
 from swap.db import classifications as db
 
 
-class SWAP(object):
+class SWAP:
     """
         SWAP implementation, which calculates and updates a confusion matrix
         for each user as well as the probability that a particular subject
@@ -180,23 +181,23 @@ class SWAP(object):
 
     # ----------------------------------------------------------------
 
-    def stats_export(self):
+    @property
+    def stats(self):
         """
             Consolidate all the statistical data from the bureaus
         """
-        user = self.users.stats().export()
-        subject = self.subjects.stats().export()
+        stats = Stats()
+        stats.add('user', self.users.stats())
+        stats.add('subject', self.subjects.stats())
 
-        return {'user': user, 'subject': subject}
+        return stats
 
     def stats_str(self):
         """
             Consolidate all the statistical data from the bureaus
             into a string
         """
-        s = '%s\n' % str(self.users.stats())
-        s += str(self.subjects.stats())
-        return s
+        return str(self.stats)
 
     def exportUserData(self):
         """ Exports consolidated user information """
@@ -213,50 +214,30 @@ class SWAP(object):
         return {
             'users': self.users.export(),
             'subjects': self.subjects.export(),
-            'stats': self.stats_export()
+            'stats': self.stats.export()
         }
 
-    def roc_export(self):
+    def roc_export(self, labels=None):
         """
             Exports subject classification data in a suitable form
             for generating a roc curve. Data consolidated into list of tuples
             Each tuble takes the form:
                 (true label, probability)
+
+            Args:
+                labels: List of subject ids. Limits roc export to these
+                        subjects
         """
-        cursor = db.getAllGolds()
+        db_golds = db.getAllGolds()
 
         data = []
-        for item in cursor:
-            id_ = item['_id']
-            gold = item['gold']
-            if gold in [0, 1]:
+        for id_, gold in db_golds.items():
+            if (labels is None or id_ in labels) and \
+                    gold in [0, 1]:
                 score = self.subjects.get(id_).score
                 data.append((gold, score))
 
         return data
-
-    def verifyClassification(self, cl):
-        """
-            Verify classification is compatible with current
-            SWAP version
-
-            Args:
-                cl: (dict) classification
-        """
-        names = [
-            'user_name',
-            'subject_id',
-            'annotation']
-        for key in names:
-            try:
-                cl[key]
-            except KeyError:
-                raise ClKeyError(key, cl)
-
-        if type(cl['annotation']) is not int:
-            raise ClValueError('annotation', int, cl)
-        if 'gold_label' in cl and type(cl['gold_label']) is not int:
-            raise ClValueError('gold_label', int, cl)
 
 
 class Classification:
@@ -276,13 +257,13 @@ class Classification:
         """
 
         if type(annotation) is not int:
-            raise ClValueError('annotation', int)
+            raise ClValueError('annotation', int, annotation)
 
         if type(gold_label) is not int:
-            raise ClValueError('gold_label', int)
+            raise ClValueError('gold_label', int, gold_label)
 
         if type(metadata) is not dict:
-            raise ClValueError('metadata', dict)
+            raise ClValueError('metadata', dict, metadata)
 
         self.user = user
         self.subject = subject
@@ -384,8 +365,12 @@ class ClValueError(ValueError):
         impossible, or is of the wrong type
     """
 
-    def __init__(self, key, _type, cl={}, *args, **kwargs):
-        pprint(cl)
-        bad_type = type(cl[key])
+    def __init__(self, key, _type, value, *args, **kwargs):
+        if type(value) is dict:
+            kwargs['cl'] = value
+            value = value[key]
+        if 'cl' in kwargs:
+            pprint(kwargs['cl'])
+        bad_type = type(value)
         msg = 'key %s should be type %s but is %s' % (key, _type, bad_type)
         ValueError.__init__(self, msg)

@@ -6,14 +6,24 @@ import progressbar
 
 from swap.swap import SWAP, Classification
 import swap.db.classifications as db
-from swap.db import DB, Query
-from swap.config import Config
+from swap.db import Query
 
 
 class Control:
+    """
+        Gets classifications from database and feeds them to SWAP
+    """
 
     def __init__(self, p0, epsilon, swap=None, train_size=None):
-        self._cfg = Config()
+        """
+            Initialize control
+
+            Args:
+                p0:              prior subject probability
+                epsilon: (float) initial user score
+                train_size: (int) size of gold label sample for
+                    test/train split
+        """
 
         # Number of subjects with expert labels for a
         # test/train split
@@ -59,6 +69,12 @@ class Control:
                 n_class += 1
 
     def _delegate(self, cl):
+        """
+        Method to allow subclasses to override how classifications
+        are handed to swap
+
+        cl: (Classification)
+        """
         self.swap.processOneClassification(cl)
 
     def initSwap(self, p0, epsilon):
@@ -71,13 +87,14 @@ class Control:
 
     def getGoldLabels(self):
         if self.train_size is None:
-            cursor = db.getAllGolds()
+            db_golds = db.getAllGolds()
         else:
-            cursor = db.getRandomGoldSample(self.train_size)
+            db_golds = db.getRandomGoldSample(self.train_size)
 
+        print(type(db_golds))
         golds = []
-        for item in cursor:
-            golds.append((item['_id'], item['gold']))
+        for id_, gold in db_golds.items():
+            golds.append((id_, gold))
 
         return golds
 

@@ -1,5 +1,8 @@
 from swap.swap import SWAP
+from swap.swap import ClValueError
+from swap.swap import ClKeyError
 from swap.swap import Classification
+
 from pprint import pprint
 import pytest
 
@@ -229,6 +232,10 @@ class Test_Classification:
         print(cl.gold_label)
         assert cl.isGold() is False
         assert cl.gold is False
+
+    def test_init_type_errors(self):
+        with pytest.raises(ClValueError):
+            Classification(1, 1, '1')
 
 
 def main():

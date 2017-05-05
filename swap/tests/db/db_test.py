@@ -80,3 +80,19 @@ class Test_Cursor:
         c = Cursor(query, db.classifications)
 
         assert isinstance(c.getCursor(), pymongo.command_cursor.CommandCursor)
+
+
+class TestClassifications:
+
+    def test_batch_size(self):
+        old = dbcl.collection
+
+        mock = MagicMock()
+        dbcl.collection = mock
+        dbcl.getClassifications(batch_size=50)
+
+        args, kwargs = mock.aggregate.call_args
+        assert 'batchSize' in kwargs
+        assert kwargs['batchSize'] == 50
+
+        dbcl.collection = old

@@ -22,13 +22,13 @@ class _DB:
         self._cfg = config
 
         # Get database configuration from config file
-        host = config.database['host']
-        db_name = config.database['name']
-        port = config.database['port']
+        host = config.database.host
+        db_name = config.database.name
+        port = config.database.port
 
         self._client = MongoClient('%s:%d' % (host, port))
         self._db = self._client[db_name]
-        self.batch_size = int(eval(self._cfg.database['max_batch_size']))
+        self.batch_size = int(self._cfg.database.max_batch_size)
 
         self.classifications = self._db.classifications
         self.subjects = self._db.subjects

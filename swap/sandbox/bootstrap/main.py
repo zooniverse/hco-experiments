@@ -5,11 +5,10 @@
 from bootstrap import *
 
 from swap import ui
+import swap.plots as plots
 
 import copy
 
-gold_1 = [3328040, 3313220, 2977121, 2943566, 3317607]
-gold_0 = [3624432, 3469678, 3287492, 3627326, 3724438]
 
 p0 = 0.12
 epsilon = 0.5
@@ -73,6 +72,11 @@ class Interface(ui.Interface):
         roc_parser.add_argument(
             '-b', '--bootstrap', nargs='*', action='append',
             help='Generate ROC curve from this file, bootstrap specific')
+
+        roc_parser.add_argument(
+            '-s', '--silver-only', nargs=2,
+            help='Generate roc curves only considering the silver ' +
+                 'subjects in this file and round')
 
         return parser
 
@@ -159,6 +163,7 @@ class Interface(ui.Interface):
         low = float(args.iterate[1])
         high = float(args.iterate[2])
 
+        # TODO doesn't work
         thresholds = {}
         if args.thresholds:
             i = int(args.thresholds[0]) - 1
@@ -178,7 +183,7 @@ class Interface(ui.Interface):
                           self.mod_f(fname, 'swap-%d' % i))
 
             img = self.f('iterate-%d.png' % i)
-            ui.plot_subjects(swap, img)
+            plots.traces.plot_subjects(swap, img)
 
         # if fname:
         #     self.save(bootstrap, fname)
@@ -207,7 +212,7 @@ class Interface(ui.Interface):
 
             data.append((*error, 10))
 
-        ui.plot_confusion_matrix(data, "Test", None)
+        plots.plot_confusion_matrix(data, "Test", None)
 
     def user_traces(self, bootstrap, args):
         pass
@@ -223,11 +228,25 @@ class Interface(ui.Interface):
             history = value['history']
             plot_data.append((c, history))
 
-        ui.plot_tracks(plot_data, "Bootstrap Traces", fname, scale='linear')
+        plots.traces.plot_tracks(plot_data, "Bootstrap Traces",
+                                 fname, scale='linear')
+
+    def get_silvers(self, fname, round_):
+        boot = self.load(fname)
+        silvers = boot.metrics.get(round_).getSilverNames()
+        return silvers
 
     def collect_roc(self, args):
         it = super().collect_roc(args)
         it.__class__ = Roc_Iterator
+
+        if args.silver_only:
+            print("Silver only:")
+            silver_fname = args.silver_only[0]
+            silver_round = int(args.silver_only[1])
+            silvers = self.get_silvers(silver_fname, silver_round)
+
+            it.silver_only(silvers)
 
         if args.bootstrap:
             for label, fname, *steps in args.bootstrap:
@@ -240,9 +259,19 @@ class Interface(ui.Interface):
 
 class Roc_Iterator(ui.Roc_Iterator):
 
-    def addBootObject(self, label, fname, load, iterations=None):
+    def addBootObject(self, label, fname, load,
+                      iterations=None, silver_only=False):
         if iterations:
-            self.items.append((label, fname, load, iterations))
+            self.items.append((label, fname, load, iterations, silver_only))
+
+    def silver_only(self, silver_labels):
+        self.silvers = silver_labels
+
+    def _get_export(self, obj, *args, **kwargs):
+        if isinstance(obj, Bootstrap):
+            return obj.roc_export(*args, labels=self.silvers, **kwargs)
+        else:
+            return obj.roc_export(labels=self.silvers)
 
     def next(self):
         self.__bounds()
@@ -261,7 +290,7 @@ class Roc_Iterator(ui.Roc_Iterator):
 
             obj = load(fname)
 
-            return (label, obj.roc_export(i))
+            return (label, self._get_export(obj, i))
 
 
 def main():

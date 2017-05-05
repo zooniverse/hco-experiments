@@ -44,7 +44,15 @@ class Agent(metaclass=abc.ABCMeta):
         return
 
 
-class Stat:
+class BaseStat:
+    pass
+
+
+class Stat(BaseStat):
+    """
+        Keeps track of statistics in a dataset
+    """
+
     def __init__(self, data):
         self.mean = st.mean(data)
         self.median = st.median(data)
@@ -60,25 +68,129 @@ class Stat:
             (self.mean, self.median, self.stdev)
 
 
-class Stats:
-    def __init__(self):
-        self.stats = {}
+class MultiStat(BaseStat):
+    """
+        Keeps track of statistics for multiple classes in a single
+        category. For example, the 0 and 1 scores of each user agent.
+    """
 
-    def add(self, key, stat):
-        self.stats[key] = stat
+    def __init__(self, *data):
+        stats = {}
+        for label, p in data:
+            stats[label] = Stat(p)
+        self.stats = stats
+
+    def add(self, label, stat):
+        self.stats[label] = stat
 
         return self
 
-    def addNew(self, key, data):
-        self.add(key, Stat(data))
+    def addNew(self, label, data):
+        self.add(label, Stat(data))
 
     def export(self):
         export = {}
-        for key, stat in self.stats.items():
-            export[key] = stat.export()
+        for label, stat in self.stats.items():
+            export[label] = stat.export()
+
+        return export
 
     def __str__(self):
         s = ''
-        for key, stat in self.stats.items():
-            s += 'stat %s %s\n' % (str(key), str(stat))
+        for label, stat in self.stats.items():
+            s += 'stat %s %s\n' % (str(label), str(stat))
+        return s
+
+
+class Stats:
+    """
+        A collection of multiple BaseStat objects
+    """
+
+    def __init__(self):
+        self.stats = {}
+
+    def add(self, name, stat):
+        if not isinstance(stat, BaseStat):
+            raise TypeError('Stat must be of type BaseStat')
+        self.stats[name] = stat
+
+        return self
+
+    def get(self, name):
+        if name not in self.stats:
+            raise KeyError('%s not a valid stat name' % name)
+        return self.stats[name]
+
+    def export(self):
+        export = {}
+        for name, stat in self.stats.items():
+            export[name] = stat.export()
+
+    def __str__(self):
+        s = ''
+        for name, stat in self.stats.items():
+            name = str(name)
+            s += '%s\n' % name
+            s += ''.join(['-' for c in name])
+            s += '\n'
+            s += '%s\n' % str(stat)
+        return s
+
+
+class Accuracy:
+    """
+        Class to keep track of accuracy for multiple classes
+    """
+
+    def __init__(self):
+        self.stats = {}
+
+    def add(self, label, matched, n):
+        """
+
+            label:   Label of class (0, 1 for SNHunters)
+            matched: Number of correct matchings
+            n:       Number of total matchings
+        """
+
+        if matched > n:
+            raise ValueError('Number of correct matches greater ' +
+                             'than total number of matches: %d > %d' %
+                             (matched, n))
+        self.stats[label] = (matched, n)
+
+    def total(self):
+        """
+            Returns the total accuracy accross all trackers:
+                Sum of all numerators and denominators
+        """
+        matched = 0
+        total = 0
+        for m, n in self.stats.values():
+            matched += m
+            total += n
+        return matched, total
+
+    def score(self, num, den):
+        """
+            Gets numerical representation of an accuracy fraction.
+            Returns 0 if dividing by 0
+        """
+        try:
+            return num / den
+        except ZeroDivisionError:
+            return 0
+
+    def __str__(self):
+        s = ''
+        format_ = '%5s %6d / %6d %2.2f\n'
+        for label in self.stats:
+            m, n = self.stats[label]
+            s += format_ % (str(label), m, n, self.score(m, n))
+
+        total = self.total()
+        total_score = self.score(*total)
+        s += format_ % ('total', *total, total_score)
+
         return s

@@ -5,7 +5,7 @@
 import swap.db.classifications as db
 from swap.control import Control
 from unittest.mock import MagicMock
-import pytest
+# import pytest
 
 fields = {'user_id', 'classification_id', 'subject_id',
           'annotation', 'gold_label'}
@@ -55,7 +55,7 @@ def test_get_one_classification():
 
 def test_with_train_split():
     old = db.getRandomGoldSample
-    mock = MagicMock(return_value=[])
+    mock = MagicMock(return_value={})
     db.getRandomGoldSample = mock
 
     Control(.5, .5, train_size=100)
@@ -67,7 +67,7 @@ def test_with_train_split():
 
 def test_without_train_split():
     old = db.getAllGolds
-    mock = MagicMock(return_value=[])
+    mock = MagicMock(return_value={})
     db.getAllGolds = mock
 
     Control(.5, .5)

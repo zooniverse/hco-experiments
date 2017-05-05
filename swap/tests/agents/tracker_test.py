@@ -4,6 +4,8 @@
 from swap.agents.tracker import *
 from swap.agents.user import User_Score_Tracker
 
+import pytest
+
 
 class Test_Tracker:
     def test_init(self):
@@ -105,34 +107,59 @@ class Test_User_Score_Tracker:
         assert t.calculateScore() == .5
 
 
-class Test_Labeled_Trackers:
+class TestTrackerCollection:
 
     def test_init_User_Tracker(self):
         tracker = User_Score_Tracker
         labels = [0, 1, 2]
         value = .5
-        l = Tracker_Collection.Generate(tracker, labels, value)
+        tc = Tracker_Collection.Generate(tracker, labels, value)
 
         for i in labels:
-            assert type(l.trackers[i]) is tracker
-            assert l.trackers[i].current() == value
+            assert type(tc.trackers[i]) is tracker
+            assert tc.trackers[i].current() == value
 
-        assert len(l.trackers) == 3
+        assert len(tc.trackers) == 3
 
-    def test_add_tracker(self):
-        l = Tracker_Collection.Generate(User_Score_Tracker, [0, 1])
-        l.addNew(User_Score_Tracker, 2, .5)
+    def test_add(self):
+        tc = Tracker_Collection.Generate(User_Score_Tracker, [0, 1])
+        tc.addNew(User_Score_Tracker, 2, .5)
 
-        assert len(l.trackers) == 3
-        assert l.trackers[2].label == 2
+        assert len(tc.trackers) == 3
+        assert tc.trackers[2].label == 2
+
+    def test_remove(self):
+        t = Tracker()
+        tc = Tracker_Collection()
+        tc.add(1, t)
+        tc.add(2, t)
+
+        ret = tc.remove(2)
+        assert 1 in tc.trackers
+        assert 2 not in tc.trackers
+        assert ret == t
 
     def test_getAll(self):
         tracker = User_Score_Tracker
         labels = [0, 1, 2]
         value = .5
-        l = Tracker_Collection.Generate(tracker, labels, value)
+        tc = Tracker_Collection.Generate(tracker, labels, value)
 
-        assert l.getAll() == l.trackers
+        assert tc.getAll() == tc.trackers
 
+    def test_tracker_name_error(self):
+        t = Tracker()
+        tc = Tracker_Collection()
+        tc.add(1, t)
+        with pytest.raises(NameError):
+            tc.add(1, t)
 
+    def test_tracker_type_error(self):
+        t = object()
+        tc = Tracker_Collection()
+        with pytest.raises(TypeError):
+            tc.add(1, t)
 
+    def test_generator_value_error(self):
+        with pytest.raises(ValueError):
+            Tracker_Collection.Generate(None, None)
