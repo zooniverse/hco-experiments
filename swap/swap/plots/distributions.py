@@ -10,6 +10,16 @@ from scipy.signal import argrelextrema
 import seaborn as sns
 
 
+def _plot(func):
+    def wrapper(fname, *args, **kwargs):
+        func(*args, **kwargs)
+        if fname:
+            plt.savefig(fname, dpi=300)
+        else:
+            plt.show()
+    return wrapper
+
+
 def plot_kde(data):
     bw = 1.06 * st.stdev(data) / (len(data) ** .2)
     kde = KernelDensity(kernel='gaussian', bandwidth=bw).fit(
@@ -56,6 +66,58 @@ def plot_seaborn_density_split(swap, cutoff=1):
 
     plt.ylabel('Number of subjects')
     plt.xlabel('Probability')
+
+
+@_plot
+def plot_class_histogram(swap):
+    roc = swap.roc_export()
+    # b0 = [item[1] for item in roc if item[0] == 0]
+    # b1 = [item[1] for item in roc if item[0] == 1]
+
+    b0 = []
+    b1 = []
+    bins = [[0, 0, 0] for i in range(25)]
+
+    for gold, p in roc:
+        bin_ = int(p * 100 / 4)
+        if bin_ == 25:
+            bin_ -= 1
+
+        # print(bin_, gold, p)
+
+        if gold == 0:
+            b0.append(p)
+            bins[bin_][1] += 1
+            bins[bin_][2] += 1
+        elif gold == 1:
+            b1.append(p)
+
+            bins[bin_][0] += 1
+            bins[bin_][1] += 1
+
+    ax = plt.subplot(111)
+    ax.hist([b0, b1], 25, histtype='bar',
+            label=['bogus', 'real'], stacked=True)
+    ax.legend()
+
+    ax.set_yscale('log')
+    bins = np.array(bins)
+    print(bins)
+
+    line_x = []
+    line_y = []
+    for i, bin_ in enumerate(bins):
+        line_x.append(i * .04 + .02)
+        line_y.append(bin_[0] / bin_[1])
+
+    ax2 = ax.twinx()
+    ax2.plot(line_x, line_y, color='red')
+    ax2.axis([0, 1, 0, 1])
+
+    ax.set_ylabel('frequency')
+    ax2.set_ylabel('% real in bin')
+    plt.xlabel('probability')
+    # plt.title('Multiclass Probability Distribution')
 
 
 def plot_pdf(data, fname, swap=None, cutoff=1):

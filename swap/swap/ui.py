@@ -245,6 +245,11 @@ class SWAPInterface(Interface):
             help='Generate user confusion matrices and outname to file')
 
         swap_parser.add_argument(
+            '--hist', nargs=1,
+            metavar='file',
+            help='Generate multiclass histogram plot')
+
+        swap_parser.add_argument(
             '--log', nargs=1,
             metavar='file',
             help='Write the entire SWAP export to file')
@@ -262,8 +267,14 @@ class SWAPInterface(Interface):
                  'controversial subjects')
 
         swap_parser.add_argument(
-            '--extremes', nargs=1,
+            '--consensus', nargs=1,
             metavar='n',
+            help='Run swap with a test/train split, using the most/least' +
+                 'consensus subjects')
+
+        swap_parser.add_argument(
+            '--extremes', nargs=2,
+            metavar='controversial consensus',
             help='Run swap with a test/train split, using the most' +
                  'controversial subjects and subjects with most consensus')
 
@@ -306,6 +317,10 @@ class SWAPInterface(Interface):
         if args.user:
             fname = self.f(args.user[0])
             plots.plot_user_cm(swap, fname)
+
+        if args.hist:
+            fname = self.f(args.hist[0])
+            plots.plot_class_histogram(fname, swap)
 
         if args.utraces:
             fname = self.f(args.user[0])
@@ -352,9 +367,14 @@ class SWAPInterface(Interface):
             size = int(args.controversial[0])
             control.gold_getter.controversial(size)
 
+        if args.consensus:
+            size = int(args.consensus[0])
+            control.gold_getter.consensus(size)
+
         if args.extremes:
-            size = int(args.extremes[0])
-            control.gold_getter.extremes(size)
+            controversial = int(args.extremes[0])
+            consensus = int(args.extremes[1])
+            control.gold_getter.extremes(controversial, consensus)
 
         control.process()
         swap = control.getSWAP()

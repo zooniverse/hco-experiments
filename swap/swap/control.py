@@ -212,17 +212,24 @@ class GoldGetter:
         return lambda: db.getExpertGold(subject_ids, type_=tuple)
 
     @_getter
-    def controversial(self, order, size):
+    def controversial(self, size):
         def f():
             subjects = cv.get_controversial(size)
             return db.getExpertGold(subjects, type_=tuple)
         return f
 
     @_getter
-    def extremes(self, size):
+    def consensus(self, size):
         def f():
-            controv = cv.get_controversial(size)
             consensus = cv.get_consensus(size)
+            return db.getExpertGold(consensus, type_=tuple)
+        return f
+
+    @_getter
+    def extremes(self, n_controv, max_consensus):
+        def f():
+            controv = cv.get_controversial(n_controv)
+            consensus = cv.get_max_consensus(max_consensus)
 
             return db.getExpertGold(controv + consensus, type_=tuple)
         return f
