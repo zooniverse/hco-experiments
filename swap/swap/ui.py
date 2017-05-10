@@ -272,11 +272,17 @@ class SWAPInterface(Interface):
             help='Run swap with a test/train split, using the most/least' +
                  'consensus subjects')
 
-        swap_parser.add_argument(
-            '--extremes', nargs=2,
-            metavar='controversial consensus',
-            help='Run swap with a test/train split, using the most' +
-                 'controversial subjects and subjects with most consensus')
+        # swap_parser.add_argument(
+        #     '--extremes', nargs=2,
+        #     metavar='controversial consensus',
+        #     help='Run swap with a test/train split, using the most' +
+        #          'controversial subjects and subjects with most consensus')
+
+        # swap_parser.add_argument(
+        #     '--extreme-min', nargs=2,
+        #     metavar='controversial consensus',
+        #     help='Run swap with a test/train split, using the most' +
+        #          'controversial subjects and subjects with most consensus')
 
         swap_parser.add_argument(
             '--stats', action='store_true',
@@ -371,10 +377,15 @@ class SWAPInterface(Interface):
             size = int(args.consensus[0])
             control.gold_getter.consensus(size)
 
-        if args.extremes:
-            controversial = int(args.extremes[0])
-            consensus = int(args.extremes[1])
-            control.gold_getter.extremes(controversial, consensus)
+        # if args.extremes:
+        #     controversial = int(args.extremes[0])
+        #     consensus = int(args.extremes[1])
+        #     control.gold_getter.extremes(controversial, consensus)
+
+        # if args.extreme_min:
+        #     controversial = int(args.extreme_min[0])
+        #     consensus = int(args.extreme_min[1])
+        #     control.gold_getter.extreme_min(controversial, consensus)
 
         control.process()
         swap = control.getSWAP()

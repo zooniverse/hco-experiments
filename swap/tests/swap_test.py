@@ -10,7 +10,10 @@ import pytest
 def test_set_gold():
     swap = SWAP(p0=2e-4, epsilon=1.0)
     labels = [0, 0, 0, 0, 1, 1, 1, 1]
-    subjects = [(i + 1, l) for i, l in enumerate(labels)]
+    subjects = {}
+    for i, l in enumerate(labels):
+        subjects[i + 1] = l
+
     swap.setGoldLabels(subjects)
 
     export = swap.exportSubjectData()
@@ -43,19 +46,19 @@ def test_export_nonempty():
 
 def test_set_golds():
     swap = SWAP()
-    golds = [(1, 1), (2, 0), (3, 0)]
+    golds = {1: 1, 2: 0, 3: 0}
     swap.setGoldLabels(golds)
 
     bureau = swap.getSubjectData()
     print(bureau)
-    for id_, gold in golds:
+    for id_, gold in golds.items():
         assert id_ in bureau
         assert bureau.getAgent(id_).gold == gold
 
 
 def test_classification_without_gold():
     swap = SWAP(.5, .5)
-    golds = [(1, 1), (2, 0), (3, 0)]
+    golds = {1: 1, 2: 0, 3: 0}
     swap.setGoldLabels(golds)
 
     cl = Classification('user', 1, 0)
@@ -71,7 +74,7 @@ def test_classification_without_gold():
 
 def test_doesnt_override_golds():
     swap = SWAP()
-    golds = [(1, 1), (2, 0), (3, 0)]
+    golds = {1: 1, 2: 0, 3: 0}
     swap.setGoldLabels(golds)
 
     bureau = swap.getSubjectData()

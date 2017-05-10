@@ -39,7 +39,7 @@ fields = {'user_id', 'classification_id', 'subject_id',
 #     pprint(list(users))
 
 
-@pytest.mark.skip(reason='Takes too long')
+@pytest.mark.skip(reason='Network call, takes too long')
 def test_get_one_classification():
     """ Get the first classification
     """
@@ -63,7 +63,7 @@ def test_with_train_split():
     c.gold_getter.random(100)
     c.getGoldLabels()
 
-    mock.assert_called_with(100, type_=tuple)
+    mock.assert_called_with(100)
 
     dbcl.getRandomGoldSample = old
 
@@ -76,7 +76,7 @@ def test_without_train_split():
     c = Control(.5, .5, mock)
     c.getGoldLabels()
 
-    mock.assert_called_with(type_=tuple)
+    mock.assert_called_with()
 
     dbcl.getAllGolds = old
 
@@ -103,15 +103,40 @@ class TestGoldGetter:
         gg._golds = {}
         gg.all()
 
-        print(type(gg.getter))
-        assert callable(gg.getter)
+        print(gg.getters)
+        assert callable(gg.getters[0])
 
         dbcl.getAllGolds = old
 
     def test_getter_propagation(self):
         c = Control(0.5, 0.5)
-        c.gold_getter.getter = lambda: [(1, 1), (2, 0)]
+        c.gold_getter.getters = [lambda: {1: 1, 2: 0}]
 
         c.init_swap()
         assert c.swap.subjects.get(1).gold == 1
         assert c.swap.subjects.get(2).gold == 0
+
+    def test_multiple_getters(self):
+        c = Control(0.5, 0.5)
+        c.gold_getter.getters = [
+            lambda: {1: 1, 2: 0},
+            lambda: {3: 0, 4: 0}
+        ]
+
+        c.init_swap()
+        assert c.swap.subjects.get(1).gold == 1
+        assert c.swap.subjects.get(2).gold == 0
+        assert c.swap.subjects.get(3).gold == 0
+        assert c.swap.subjects.get(4).gold == 0
+
+    @pytest.mark.skip(reason='Network call, takes too long')
+    def test_real_multiple_getters(self):
+        c = Control(0.5, 0.5)
+        gg = c.gold_getter
+
+        gg.controversial(10)
+        gg.consensus(10)
+
+        golds = c.getGoldLabels()
+        print(golds)
+        assert len(golds) == 20

@@ -169,9 +169,9 @@ class SWAP:
             gold on initialization
 
             Args:
-                subjects: (list: (subject, gold)) list of subjects
+                subjects: (dict: {subject: gold}) list of subjects
         """
-        for subject, gold in golds:
+        for subject, gold in golds.items():
             # TODO use old swap score or reset with p0 for bootstrap?
             if subject in self.subjects:
                 self.subjects.get(subject).setGoldLabel(gold)
