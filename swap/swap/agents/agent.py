@@ -129,7 +129,8 @@ class Stats:
 
     def __str__(self):
         s = ''
-        for name, stat in self.stats.items():
+        stats = sorted(self.stats.items(), key=lambda item: item[0])
+        for name, stat in stats:
             name = str(name)
             s += '%s\n' % name
             s += ''.join(['-' for c in name])

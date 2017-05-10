@@ -314,7 +314,8 @@ class SWAPInterface(Interface):
             swap = self.run_swap(args)
 
         if args.save:
-            self.save(swap, self.f(args.save[0]))
+            manifest = self.manifest(swap, args)
+            self.save(swap, self.f(args.save[0]), manifest)
 
         if args.subject:
             fname = self.f(args.subject[0])
@@ -348,6 +349,34 @@ class SWAPInterface(Interface):
             self.difference(args)
 
         return swap
+
+    def manifest(self, swap, args):
+        def arg_str(args):
+            s = ''
+            for key, value in args._get_kwargs():
+                if key in ['func']:
+                    continue
+                s += '%13s  %s\n' % (key, value)
+
+            return s
+
+        s = swap.manifest() + '\n'
+        s += 'UI Manifest\n'
+        s += '===========\n'
+        s += 'args:\n%s' % arg_str(args)
+
+        return s
+
+    def save(self, obj, fname, manifest):
+        if manifest != '' and manifest is not None:
+            m_fname = fname.split('.')
+            m_fname = m_fname[:-1]
+            m_fname[-1] += '-manifest'
+            m_fname = '.'.join(m_fname)
+            with open(self.f(m_fname), 'w') as file:
+                file.write(manifest)
+
+        super().save(obj, fname)
 
     def getControl(self):
         """

@@ -240,6 +240,34 @@ class SWAP:
 
         return data
 
+    def manifest(self):
+        """
+        Generates a text manifest. Contains relevant information on the
+        bootstrap run, including whatever parameters were used, and
+        statistical information on each run.
+        """
+
+        def countGolds():
+            golds = [0, 0, 0]
+            for subject in self.subjects:
+                golds[subject.gold] += 1
+
+            return tuple(golds)
+
+        s = ''
+        s += 'SWAP manifest\n'
+        s += '=============\n'
+        s += 'p0:         %f\n' % self.p0
+        s += 'epsilon:    %f\n' % self.epsilon
+        s += '\n'
+        s += 'n golds:    %5d %5d %5d\n' % countGolds()
+        s += '\n'
+        s += 'Statistics\n'
+        s += '==========\n'
+        s += str(self.stats) + '\n'
+
+        return s
+
 
 class Classification:
     """
