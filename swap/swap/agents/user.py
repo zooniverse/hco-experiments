@@ -90,7 +90,7 @@ class User(Agent):
 
     def __str__(self):
         return 'id: %s score 0: %.2f score 1: %.2f' % \
-            (self.getID(), self.getScore(0), self.getScore(1))
+            (self.id, self.getScore(0), self.getScore(1))
 
     @staticmethod
     def stats(bureau):

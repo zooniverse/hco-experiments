@@ -17,15 +17,15 @@ class Agent(metaclass=abc.ABCMeta):
             Initial probability used depending on subclass.
     """
 
-    def __init__(self, id, probability):
-        self.id = id
+    def __init__(self, id_, probability):
+        self._id = id_
         self.probability = probability
 
         self.annotations = Tracker()
 
-    def getID(self):
-        """ Returns Agents ID """
-        return self.id
+    @property
+    def id(self):
+        return self._id
 
     @staticmethod
     def stats(bureau):

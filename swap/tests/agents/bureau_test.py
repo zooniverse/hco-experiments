@@ -99,8 +99,8 @@ class TestAgentIterator(unittest.TestCase):
         b = self.getBureau()
         a = AgentIterator(b, [1, 3])
 
-        assert next(a).getID() == 1
-        assert next(a).getID() == 3
+        assert next(a).id == 1
+        assert next(a).id == 3
         with self.assertRaises(StopIteration):
             a.next()
 

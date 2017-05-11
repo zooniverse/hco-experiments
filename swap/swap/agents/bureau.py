@@ -43,8 +43,8 @@ class Bureau(object):
                 (type(agent), self.agent_type))
 
         # Add agent to collection
-        if not agent.getID() in self._agents:
-            self._agents[agent.getID()] = agent
+        if not agent.id in self._agents:
+            self._agents[agent.id] = agent
         else:
             raise KeyError("Agent-ID already in bureau, remove first")
 
@@ -118,7 +118,7 @@ class Bureau(object):
 
     def __contains__(self, item):
         if isinstance(item, Agent):
-            id_ = item.getID()
+            id_ = item.id
         else:
             id_ = item
 
