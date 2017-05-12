@@ -1,6 +1,9 @@
 
+import swap.plots.distributions as distributions
+from swap import Control
 
-class ExperimentRun:
+
+class Trial:
     def __init__(self, consensus, controversial, golds, roc_export):
         """
             consensus, controversial: settings used to run swap; number of
@@ -27,6 +30,44 @@ class ExperimentRun:
     def plot(self):
         return (self.consensus, self.controversial, self.purity())
 
+    @staticmethod
+    def from_control(consensus, controversial, control):
+        t = Trial(consensus, controversial,
+                  control.gold_getter.golds,
+                  control.getSWAP().roc_export())
+        return t
+
 
 class Experiment:
-    pass
+    def __init__(self):
+        self.trials = []
+        self.control = Control(.12, .5)
+
+    def run(self):
+        control = self.control
+        for cv in range(0, 1000, 50):
+            for cn in range(0, 1000, 50):
+                control.reset()
+                control.gold_getter.controversial(cv)
+                control.gold_getter.consensus(cn)
+
+                self.trials.append(Trial.from_control(cn, cv, control))
+
+    def export(self, trials):
+        data = [trial.plot() for trial in trials]
+        distributions.multivar_scatter(data)
+
+
+if __name__ == "__main__":
+    x_ = range(50)
+    y_ = range(50)
+    z = lambda x, y: x + y
+
+    data = []
+    for x in x_:
+        for y in y_:
+            data.append((x, y, z(x, y)))
+
+    print(data)
+    distributions.multivar_scatter(None, data)
+

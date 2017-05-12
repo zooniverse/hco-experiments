@@ -24,6 +24,15 @@ def test_set_gold():
     assert export[8]['gold_label'] == 1
 
 
+def test_get_gold():
+    swap = SWAP(0.5, 0.5)
+    labels = {0: 1, 1: 1, 2: 0, 3: 0}
+    swap.setGoldLabels(labels)
+
+    golds = swap.getGoldLabels()
+    assert golds == labels
+
+
 def test_export_nonempty():
     swap = SWAP(p0=2e-4, epsilon=1.0)
 

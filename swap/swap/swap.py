@@ -179,6 +179,14 @@ class SWAP:
                 agent = Subject(subject, self.p0, gold)
                 self.subjects.addAgent(agent)
 
+    def getGoldLabels(self):
+        data = {}
+        for subject in self.subjects:
+            if subject.gold != -1:
+                data[subject.id] = subject.gold
+
+        return data
+
     # ----------------------------------------------------------------
 
     @property
