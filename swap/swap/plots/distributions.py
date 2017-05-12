@@ -120,6 +120,13 @@ def plot_class_histogram(swap):
     # plt.title('Multiclass Probability Distribution')
 
 
+@_plot
+def multivar_scatter(data):
+    plt.subplot(111)
+    x, y, z = zip(*data)
+    plt.scatter(x, y, c=z, cmap='hsv')
+
+
 def plot_pdf(data, fname, swap=None, cutoff=1):
     cut_data = np.array([x for x in data if x < cutoff])
 

@@ -7,14 +7,14 @@ from bootstrap import *
 from swap import ui
 import swap.plots as plots
 
-import copy
+# import copy
 
 
 p0 = 0.12
 epsilon = 0.5
 
 
-class Interface(ui.Interface):
+class Interface(ui.SWAPInterface):
 
     def __init__(self):
         super().__init__()
@@ -25,6 +25,10 @@ class Interface(ui.Interface):
 
     def options(self):
         parser = super().options()
+
+        ################################################################
+        # Boot Parser
+        ################################################################
 
         boot_parser = self.subparsers.add_parser('boot')
         boot_parser.set_defaults(func=self.command_boot)
@@ -68,6 +72,10 @@ class Interface(ui.Interface):
         boot_parser.add_argument(
             '--utraces', nargs='*')
 
+        ################################################################
+        # ROC Parser
+        ################################################################
+
         roc_parser = self.the_subparsers['roc']
         roc_parser.add_argument(
             '-b', '--bootstrap', nargs='*', action='append',
@@ -77,6 +85,17 @@ class Interface(ui.Interface):
             '-s', '--silver-only', nargs=2,
             help='Generate roc curves only considering the silver ' +
                  'subjects in this file and round')
+
+        ################################################################
+        # Experiment Parser
+        ################################################################
+
+        exp_parser = self.subparsers.add_parser('experiment')
+        exp_parser.set_defaults(func=self.command_experiment)
+        self.the_subparsers['experiment'] = exp_parser
+
+        # exp_parser.add_argument(
+        #     '--iterate', )
 
         return parser
 
@@ -108,6 +127,9 @@ class Interface(ui.Interface):
             fname = self.f(args.save[0])
             self.save(bootstrap, fname)
 
+    def command_experiment(self, args):
+        pass
+
     def save(self, obj, fname):
         if isinstance(obj, Bootstrap):
             with open(self.f('manifest'), 'w') as file:
@@ -135,6 +157,12 @@ class Interface(ui.Interface):
         f = f[:i] + '-%s' % append + f[i:]
 
         return self.f(f)
+
+    ################################################################
+    #
+    # Bootstrap
+    #
+    ################################################################
 
     def threshold(self, data, threshold):
         min = float(threshold[0])
@@ -255,6 +283,12 @@ class Interface(ui.Interface):
                 it.addBootObject(label, fname, self.load, steps)
 
         return it
+
+    ################################################################
+    #
+    # Experiments
+    #
+    ################################################################
 
 
 class Roc_Iterator(ui.Roc_Iterator):

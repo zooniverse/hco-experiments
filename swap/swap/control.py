@@ -108,6 +108,10 @@ class Control:
         """
         self.swap = swap
 
+    def reset(self):
+        self.swap = None
+        self.gold_getter.reset()
+
 
 class MetaDataControl(Control):
     """ Calls SWAP to process classifications for specific meta data splits
