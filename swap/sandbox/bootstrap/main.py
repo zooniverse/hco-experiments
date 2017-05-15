@@ -3,6 +3,7 @@
 # Recursive swap implementation to bootstrap silver-standard
 # subject labels
 from bootstrap import *
+from experiments import Experiment
 
 from swap import ui
 import swap.plots as plots
@@ -129,8 +130,8 @@ class Interface(ui.SWAPInterface):
             self.save(bootstrap, fname)
 
     def command_experiment(self, args):
-        f_plot = self.f(args.experiment[0])
-        f_pickle = self.f(args.experiment[1])
+        f_plot = self.f(args.run[0])
+        f_pickle = self.f(args.run[1])
 
         e = Experiment()
         e.run()
