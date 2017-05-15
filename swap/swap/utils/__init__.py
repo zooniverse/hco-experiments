@@ -41,7 +41,7 @@ class ScoreExport:
             if score.p >= threshold:
                 n[score.gold] += 1
 
-        total = sum(n)
+        total = sum(n.values())
         for i in n:
             n[i] = n[i] / total
 

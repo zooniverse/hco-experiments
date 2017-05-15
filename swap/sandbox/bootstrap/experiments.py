@@ -46,9 +46,8 @@ class Experiment:
     def run(self):
         control = self.control
         n = 1
-        for cv in range(0, 100, 50):
-            for cn in range(0, 100, 50):
-
+        for cv in range(0, 1001, 50):
+            for cn in range(0, 1001, 50):
                 if cv == 0 and cn == 0:
                     continue
                 control.reset()
@@ -65,9 +64,9 @@ class Experiment:
 
                 n += 1
 
-    def plot(self):
+    def plot(self, fname):
         data = [trial.plot() for trial in self.trials]
-        distributions.multivar_scatter(None, data)
+        distributions.multivar_scatter(fname, data)
 
 
 if __name__ == "__main__":

@@ -94,8 +94,9 @@ class Interface(ui.SWAPInterface):
         exp_parser.set_defaults(func=self.command_experiment)
         self.the_subparsers['experiment'] = exp_parser
 
-        # exp_parser.add_argument(
-        #     '--iterate', )
+        exp_parser.add_argument(
+            '--run', nargs=2,
+            metavar=('Plot destination, experiment pickle destination'))
 
         return parser
 
@@ -128,7 +129,14 @@ class Interface(ui.SWAPInterface):
             self.save(bootstrap, fname)
 
     def command_experiment(self, args):
-        pass
+        f_plot = self.f(args.experiment[0])
+        f_pickle = self.f(args.experiment[1])
+
+        e = Experiment()
+        e.run()
+        e.plot(f_plot)
+
+        self.save(f_pickle)
 
     def save(self, obj, fname):
         if isinstance(obj, Bootstrap):
