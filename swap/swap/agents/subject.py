@@ -4,6 +4,8 @@
 
 from swap.agents.tracker import Tracker
 from swap.agents.agent import Agent
+import swap.agents.ledger as ledger
+from swap.config import Config
 
 
 class Subject(Agent):
@@ -191,3 +193,59 @@ class Subject(Agent):
     def __str__(self):
         return 'id: %s score: %.2f gold label: %d' % \
             (self.id, self.score, self.gold)
+
+
+class Ledger(ledger.Ledger):
+    def recalculate(self):
+        transaction = self.first_change
+
+        score = transaction.get_prior()
+        while transaction is not None:
+            score = transaction.calculate(score)
+            transaction = transaction.right
+
+        self._score = score
+        return score
+
+
+class Transaction(ledger.Transaction):
+    def __init__(self, id_, user, annotation):
+        super().__init__(id_)
+        self.user = user
+        self.annotation = annotation
+        self.score = None
+
+    def get_prior(self):
+        if self.left is None:
+            return Config().p0
+        else:
+            return self.left.score
+
+    def calculate(self, prior):
+        # Calculation when annotation 1
+        #           s*u1
+        # -------------------------
+        #    s*u1 + (1-s)*(1-u0)
+
+        # Calculation when annotation 0
+        #           s*(1-u1)
+        # -------------------------
+        #    s*(1-u1) + (1-s)*u0
+        if self.annotation == 1:
+            a = prior * self.user.getScore(1)
+            b = (1 - prior) * (1 - self.user.getScore(0))
+        elif self.annotation == 0:
+            a = prior * (1 - self.user.getScore(1))
+            b = (1 - prior) * (self.user.getScore(0))
+
+        # Preliminary catch of zero division error
+        # TODO: Figure out how to handle it
+        try:
+            score = a / (a + b)
+        # leave score unchanged
+        except ZeroDivisionError as e:
+            print(e)
+            score = prior
+
+        self.score = score
+        return score

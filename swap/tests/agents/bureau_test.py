@@ -5,9 +5,9 @@ import pytest
 from pprint import pprint
 from swap.agents.bureau import Bureau
 from swap.agents.bureau import AgentIterator
-from swap.agents import Agent
-from swap.agents import User
-from swap.agents import Subject
+from swap.agents.agent import Agent
+from swap.agents.user import User
+from swap.agents.subject import Subject
 
 import unittest
 

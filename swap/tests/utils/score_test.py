@@ -2,7 +2,7 @@
 
 from swap.utils import ScoreExport, Score, ScoreIterator
 import swap.db.classifications as dbcl
-from swap.agents import Subject
+from swap.agents.subject import Subject
 
 from unittest.mock import MagicMock
 

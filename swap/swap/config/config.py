@@ -26,6 +26,9 @@ class _Config:
         'mag_err': float
     }
 
+    p0 = 0.12
+    epsilon = 0.5
+
     database = Object({
         'name': 'swapDB',
         'host': 'localhost',

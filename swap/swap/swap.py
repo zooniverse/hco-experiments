@@ -2,7 +2,7 @@
 # SWAP implementation
 #
 
-from swap.agents import Bureau
+from swap.agents.bureau import Bureau
 from swap.agents.agent import Stats
 from swap.agents.subject import Subject
 from swap.agents.user import User
