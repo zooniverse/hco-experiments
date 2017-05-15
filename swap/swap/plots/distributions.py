@@ -56,7 +56,7 @@ def plot_seaborn_density(data):
 
 
 def plot_seaborn_density_split(swap, cutoff=1):
-    roc = swap.roc_export()
+    roc = swap.score_export().roc()
     roc = [item for item in roc if item[1] < cutoff]
     b0 = [item[1] for item in roc if item[0] == 0]
     b1 = [item[1] for item in roc if item[0] == 1]
@@ -70,7 +70,7 @@ def plot_seaborn_density_split(swap, cutoff=1):
 
 @_plot
 def plot_class_histogram(swap):
-    roc = swap.roc_export()
+    roc = swap.score_export().roc()
     # b0 = [item[1] for item in roc if item[0] == 0]
     # b1 = [item[1] for item in roc if item[0] == 1]
 

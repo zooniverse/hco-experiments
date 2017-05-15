@@ -41,7 +41,11 @@ class ScoreExport:
             if score.p >= threshold:
                 n[score.gold] += 1
 
-        return n
+        total = sum(n)
+        for i in n:
+            n[i] = n[i] / total
+
+        return n[1]
 
     def __len__(self):
         return len(self.scores)
@@ -49,13 +53,21 @@ class ScoreExport:
     def __iter__(self):
         return self.scores.values()
 
-    def roc(self):
-        return ScoreIterator(self.scores.values(),
-                             lambda score: (score.gold, score.p))
+    def roc(self, labels=None):
+        def func(score):
+            return score.gold, score.p
+        scores = self.scores.values()
+
+        if labels is None:
+            return ScoreIterator(scores, func)
+        else:
+            def cond(score):
+                return score.id in labels
+            return ScoreIterator(scores, func, cond)
 
 
 class ScoreIterator:
-    def __init__(self, scores, func):
+    def __init__(self, scores, func, cond=None):
         if type(scores) is dict:
             scores = list(scores.values())
         if type(scores) is not list:
@@ -63,6 +75,8 @@ class ScoreIterator:
 
         self.scores = scores
         self.func = func
+        if cond is None:
+            self.cond = lambda item: True
         self.i = 0
 
     def next(self):
@@ -70,7 +84,11 @@ class ScoreIterator:
             raise StopIteration
         obj = self.func(self.scores[self.i])
         self.i += 1
-        return obj
+
+        if self.cond(obj):
+            return obj
+        else:
+            return self.next()
 
     def __iter__(self):
         return self

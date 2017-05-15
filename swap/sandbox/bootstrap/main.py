@@ -305,7 +305,7 @@ class Roc_Iterator(ui.Roc_Iterator):
         if isinstance(obj, Bootstrap):
             return obj.roc_export(*args, labels=self.silvers, **kwargs)
         else:
-            return obj.roc_export(labels=self.silvers)
+            return obj.score_export().roc(labels=self.silvers)
 
     def next(self):
         self.__bounds()

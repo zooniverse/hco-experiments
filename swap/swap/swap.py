@@ -6,6 +6,7 @@ from swap.agents import Bureau
 from swap.agents.agent import Stats
 from swap.agents.subject import Subject
 from swap.agents.user import User
+from swap.utils import ScoreExport
 from pprint import pprint
 
 from swap.db import classifications as db
@@ -225,6 +226,9 @@ class SWAP:
             'stats': self.stats.export()
         }
 
+    def score_export(self):
+        return ScoreExport(self)
+
     def roc_export(self, labels=None):
         """
             Exports subject classification data in a suitable form
@@ -236,6 +240,7 @@ class SWAP:
                 labels: List of subject ids. Limits roc export to these
                         subjects
         """
+
         db_golds = db.getAllGolds()
 
         data = []

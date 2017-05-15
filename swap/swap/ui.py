@@ -185,8 +185,6 @@ class Interface:
         if args.add:
             for label, fname in args.add:
                 print(fname)
-                # obj = self.load(fname)
-                # data.append((label, obj.roc_export()))
                 it.addObject(label, fname, self.load)
 
         return it
@@ -486,7 +484,7 @@ class Roc_Iterator:
             raise StopIteration()
 
     def _get_export(self, obj):
-        return obj.roc_export()
+        return obj.score_export().roc()
 
     def next(self):
         self.__bounds()
