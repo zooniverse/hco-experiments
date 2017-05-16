@@ -131,7 +131,7 @@ class Interface(ui.SWAPInterface):
 
     def command_experiment(self, args):
         f_plot = self.f(args.run[0])
-        f_pickle = args.run[1]
+        f_pickle = self.f(args.run[1])
 
         def saver(trials, fname):
             fname = self.f(fname)
@@ -141,6 +141,8 @@ class Interface(ui.SWAPInterface):
         e.run()
         e.plot(f_plot)
 
+        del e.save_f
+        del e.control
         self.save(e, f_pickle)
 
     def save(self, obj, fname):
