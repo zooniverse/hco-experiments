@@ -27,6 +27,9 @@ class Trial:
     def purity(self):
         return self.scores.purity(.96)
 
+    def purify(self):
+        pass
+
     def plot(self):
         return (self.consensus, self.controversial, self.purity())
 
@@ -39,9 +42,11 @@ class Trial:
 
 
 class Experiment:
-    def __init__(self):
+    def __init__(self, saver):
         self.trials = []
+        self.plot_points = []
         self.control = Control(.12, .5)
+        self.save_f = saver
 
     def run(self):
         control = self.control
@@ -63,9 +68,29 @@ class Experiment:
                 self.trials.append(Trial.from_control(cn, cv, control))
 
                 n += 1
+            self.clear_mem(cn, cn)
+
+    def clear_mem(self, cv, cn):
+        """
+            Saves trial objects to disk to free up memory
+        """
+        def to_fname(n):
+            if type(n) is int:
+                return str(n)
+            elif type(n) is tuple:
+                return '_'.join(n)
+            else:
+                return ''
+
+        fname = 'trials_cv_%s_cn_%s.pkl' % (cv, cn)
+        self.save_f(self.trials, fname)
+
+        for trial in self.trials:
+            self.plot_points.append(trial.plot())
+        self.trials = []
 
     def plot(self, fname):
-        data = [trial.plot() for trial in self.trials]
+        data = self.plot_points
         distributions.multivar_scatter(fname, data)
 
 

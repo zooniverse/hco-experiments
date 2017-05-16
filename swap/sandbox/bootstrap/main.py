@@ -131,13 +131,17 @@ class Interface(ui.SWAPInterface):
 
     def command_experiment(self, args):
         f_plot = self.f(args.run[0])
-        f_pickle = self.f(args.run[1])
+        f_pickle = args.run[1]
 
-        e = Experiment()
+        def saver(trials, fname):
+            fname = self.f(fname)
+            self.save(trials, fname)
+        e = Experiment(saver)
+
         e.run()
         e.plot(f_plot)
 
-        self.save(f_pickle)
+        self.save(e, f_pickle)
 
     def save(self, obj, fname):
         if isinstance(obj, Bootstrap):

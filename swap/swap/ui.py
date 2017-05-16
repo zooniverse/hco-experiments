@@ -134,7 +134,8 @@ class Interface:
                 object
                 fname
         """
-        save_pickle(object, fname)
+        if fname is not None:
+            save_pickle(object, fname)
 
     def load(self, fname):
         """
@@ -365,7 +366,7 @@ class SWAPInterface(Interface):
 
         return s
 
-    def save(self, obj, fname, manifest):
+    def save(self, obj, fname, manifest=None):
         if manifest != '' and manifest is not None:
             m_fname = fname.split('.')
             m_fname = m_fname[:-1]
