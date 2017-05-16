@@ -196,6 +196,22 @@ class Subject(Agent):
 
 
 class Ledger(ledger.Ledger):
+    def __init__(self):
+        super().__init__()
+        # First change in the change cascade
+        # self.first_change = None
+        # Most recently added transaction
+        self.last = None
+        self._score = None
+        # Note: first_change and last are references to the
+        #       actual transactions, not their id numbers
+
+    @property
+    def score(self):
+        if self.stale or self._score is None:
+            self.recalculate()
+        return self._score
+
     def recalculate(self):
         transaction = self.first_change
 
@@ -204,8 +220,53 @@ class Ledger(ledger.Ledger):
             score = transaction.calculate(score)
             transaction = transaction.right
 
+        super().recalculate()
+
         self._score = score
         return score
+
+    def add(self, transaction):
+        # Link last transaction to this one
+        if self.last is not None:
+            self.last.right = transaction
+            transaction.left = self.last
+
+        # Store this transaction
+        id_ = super().add(transaction)
+
+        # Determine if most first change in cascade
+        # self._change(transaction)
+        # Assign this as last added
+        self.last = transaction
+
+        return id_
+
+    @property
+    def first_change(self):
+        if len(self.changed) == 0:
+            return None
+
+        def order(id_):
+            return self.transactions[id_].order
+        id_ = min(self.changed, key=order)
+
+        return self.transactions[id_]
+
+    # def _change(self, transaction):
+    #     """
+    #         Determine which transaction changed first in the ledger
+    #     """
+    #     # Usefule when recalculating a subject score, for example, as
+    #     # that needs to be calculated in order
+
+    #     if self.first_change is None:
+    #         self.first_change = transaction
+    #     else:
+    #         old = self.first_change.order
+    #         new = transaction.order
+
+    #         if new < old:
+    #             self.first_change = transaction
 
 
 class Transaction(ledger.Transaction):
@@ -214,6 +275,9 @@ class Transaction(ledger.Transaction):
         self.user = user
         self.annotation = annotation
         self.score = None
+
+        self.right = None
+        self.left = None
 
     def get_prior(self):
         if self.left is None:

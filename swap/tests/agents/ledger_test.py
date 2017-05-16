@@ -11,8 +11,8 @@ class TestLedger:
     def test_init(self):
         le = Ledger()
         assert le.transactions == {}
-        assert le.first_change is None
-        assert le.last is None
+        assert le.stale is True
+        assert le.changed == []
 
     def test_add_transaction(self):
         le = Ledger()
@@ -28,7 +28,7 @@ class TestLedger:
         assert t0.order == 0
         assert t1.order == 1
 
-    def test_add_transaction_last(self):
+    def test_add_registers_change(self):
         le = Ledger()
         t0 = Transaction(0)
         t1 = Transaction(1)
@@ -36,12 +36,89 @@ class TestLedger:
         le.add(t0)
         le.add(t1)
 
-        assert le.last == t1
+        assert 0 in le.changed
+        assert 1 in le.changed
+        assert le.stale is True
 
-    def test_add_transaction_links(self):
+    def test_get(self):
+        le = Ledger()
+        t = Transaction(0)
+        le.add(t)
+
+        assert le.get(0) == t
+
+    def test_update(self):
+        le = Ledger()
+        t0 = Transaction(0)
+        t1 = Transaction(0)
+        le.add(t0)
+
+        le.update(t1)
+        assert le.get(0) == t1
+
+    def test_update_registers_change(self):
         le = Ledger()
         t0 = Transaction(0)
         t1 = Transaction(1)
+
+        le.add(t0)
+        le.add(t1)
+
+        le.recalculate()
+        le.update(t0)
+
+        assert le.changed == [0]
+        assert le.stale is True
+
+    def test_recalculate_clears_changes(self):
+        le = Ledger()
+        t0 = Transaction(0)
+        t1 = Transaction(1)
+
+        le.add(t0)
+        le.add(t1)
+
+        le.recalculate()
+
+        assert le.changed == []
+        assert le.stale is False
+
+    def test_change(self):
+        le = Ledger()
+        le.change(1)
+
+        assert 1 in le.changed
+
+
+class TestSubjectLedger:
+    def test_init(self):
+        le = SLedger()
+        assert le.last is None
+        assert le._score is None
+        assert le.first_change is None
+
+    @patch.object(SLedger, 'recalculate', MagicMock())
+    def test_score_stale(self):
+        le = SLedger()
+        le.stale = True
+        le.score
+
+        le.recalculate.asert_called_once()
+
+    def test_add_transaction_last(self):
+        le = SLedger()
+        t0 = STransaction(0, None, 0)
+        t1 = STransaction(1, None, 0)
+
+        le.add(t0)
+        le.add(t1)
+
+        assert le.last == t1
+
+    def test_add_transaction_links(self):
+        le = SLedger()
+        t0 = STransaction(0, None, 0)
+        t1 = STransaction(1, None, 0)
 
         le.add(t0)
         le.add(t1)
@@ -52,64 +129,34 @@ class TestLedger:
         assert t1.right is None
         assert t0.left is None
 
-    def test_change(self):
-        le = Ledger()
-        t0 = Transaction(0)
-        t1 = Transaction(1)
-
-        le.add(t0)
-        le.add(t1)
-        le.first_change = t1
-
-        le._change(t0)
-        assert le.first_change == t0
-
-    def test_update(self):
-        le = Ledger()
-        t0 = Transaction(0)
-        le.add(t0)
-
-        def f(item):
-            item.order = 55
-
-        le.update(0, f)
-        assert t0.order == 55
-
-    def test_update_registers_change(self):
-        le = Ledger()
-        t0 = Transaction(0)
-        t1 = Transaction(1)
-        t2 = Transaction(2)
+    @patch.object(STransaction, 'calculate', MagicMock(return_value=.5))
+    def test_update_first_change(self):
+        le = SLedger()
+        t0 = STransaction(0, None, 0)
+        t1 = STransaction(1, None, 0)
+        t2 = STransaction(2, None, 0)
 
         le.add(t0)
         le.add(t1)
         le.add(t2)
 
-        le.recalculate()
-        le.update(1, lambda item: None)
+        le.clear_changes()
+        le.update(t1)
 
+        print(le.changed)
         assert le.first_change == t1
 
-    def test_recalculate_clears_changes(self):
-        le = Ledger()
-        t0 = Transaction(0)
-        t1 = Transaction(1)
-        t2 = Transaction(2)
+    def test_change(self):
+        le = SLedger()
+        t0 = STransaction(0, None, 0)
+        t1 = STransaction(1, None, 0)
 
         le.add(t0)
         le.add(t1)
-        le.add(t2)
+        le.clear_changes()
 
-        le.recalculate()
-        assert le.first_change is None
-
-
-# def my_patch(func, method, mock):
-#     def wrapper(*args, **kwargs):
-#         method = 
-
-
-class TestSubjectLedger:
+        le.change(0)
+        assert le.first_change == t0
 
     @patch.object(STransaction, 'calculate', new=MagicMock(return_value=.5))
     @patch.object(STransaction, 'get_prior', new=MagicMock(return_value=.5))
@@ -138,7 +185,7 @@ class TestSubjectLedger:
         le.add(t1)
         le.add(t2)
 
-        le.first_change = t1
+        le.changed = [1]
         le.recalculate()
         assert STransaction.calculate.call_count == 2
 
@@ -152,6 +199,9 @@ class TestSubjectTransaction:
         assert t.user == user
         assert t.annotation == 0
         assert t.score is None
+
+        assert t.left is None
+        assert t.right is None
 
     def test_get_prior_first(self):
         user = MagicMock()

@@ -8,67 +8,46 @@ class Ledger:
         # Transactions are linked in order to allow downstream updating,
         # for example to update subject scores
         self.transactions = {}
-        # First change in the change cascade
-        self.first_change = None
-        # Most recently added transaction
-        self.last = None
+        self.stale = True
+        self.changed = []
 
-        # Note: first_change and last are references to the
-        #       actual transactions, not their id numbers
-
-    def recalculate(self):
-        self.first_change = None
+    def change(self, id_):
+        self.changed.append(id_)
 
     @property
     def score(self):
         pass
 
     def add(self, transaction):
-        # Link last transaction to this one
-        if self.last is not None:
-            self.last.right = transaction
-            transaction.left = self.last
-
-        # Store this transaction
         id_ = transaction.id
+        # Record the transactions order
         transaction.order = len(self.transactions)
+        # Store this transaction
         self.transactions[id_] = transaction
+        self.change(id_)
 
-        # Determine if most first change in cascade
-        self._change(transaction)
-        # Assign this as last added
-        self.last = transaction
+        self.stale = True
 
-    def update(self, id_, update_function):
+        return id_
 
-        # Update the transaction
-        transaction = self.transactions[id_]
-        update_function(transaction)
+    def get(self, id_):
+        return self.transactions[id_]
 
-        # Update cascade
+    def recalculate(self):
+        self.clear_changes()
+
+    def clear_changes(self):
+        self.stale = False
+        self.changed = []
+
+    def update(self, transaction):
+        self.stale = True
+        id_ = transaction.id
+        self.change(id_)
         self.transactions[id_] = transaction
-        self._change(transaction)
-
-    def _change(self, transaction):
-        """
-            Determine which transaction changed first in the ledger
-        """
-        # Usefule when recalculating a subject score, for example, as
-        # that needs to be calculated in order
-
-        if self.first_change is None:
-            self.first_change = transaction
-        else:
-            old = self.first_change.order
-            new = transaction.order
-
-            if new < old:
-                self.first_change = transaction
 
 
 class Transaction:
     def __init__(self, id_):
         self.id = id_
         self.order = None
-        self.right = None
-        self.left = None
