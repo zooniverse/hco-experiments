@@ -206,12 +206,6 @@ class Ledger(ledger.Ledger):
         # Note: first_change and last are references to the
         #       actual transactions, not their id numbers
 
-    @property
-    def score(self):
-        if self.stale or self._score is None:
-            self.recalculate()
-        return self._score
-
     def recalculate(self):
         transaction = self.first_change
 

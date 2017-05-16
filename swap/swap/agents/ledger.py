@@ -16,7 +16,9 @@ class Ledger:
 
     @property
     def score(self):
-        pass
+        if self.stale or self._score is None:
+            self.recalculate()
+        return self._score
 
     def add(self, transaction):
         id_ = transaction.id

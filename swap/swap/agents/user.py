@@ -6,6 +6,8 @@
 from swap.agents.agent import Agent, MultiStat
 from swap.agents.tracker import Tracker
 from swap.agents.tracker import Tracker_Collection
+from swap.config import Config
+import swap.agents.ledger as ledger
 
 
 class User(Agent):
@@ -176,3 +178,105 @@ class User_Score_Tracker(Tracker):
 
         score = self.calculateScore()
         super().add(score)
+
+
+class Ledger(ledger.Ledger):
+    def __init__(self):
+        super().__init__()
+        self.no = Counter()
+        self.yes = Counter()
+        self._score = None
+
+    def add(self, transaction):
+        transaction.gold = None
+        id_ = super().add(transaction)
+        return id_
+
+    def recalculate(self):
+        def counter(gold):
+            if gold == 0:
+                return self.no
+            elif gold == 1:
+                return self.yes
+
+        def action(transaction, version):
+            c = counter(t.gold)
+            if version == 'new':
+                if t.matched:
+                    c.match()
+                else:
+                    c.see()
+            elif version == 'old':
+                if t.matched:
+                    c.unmatch()
+                else:
+                    c.unsee()
+
+        for i in self.changed:
+            t = self.transactions[i]
+
+            if t.changed:
+                action(t, 'old')
+                t.gold = t.subject.gold
+                action(t, 'new')
+
+        score = self._calculate()
+
+        super().recalculate()
+
+        self._score = score
+        return score
+
+    def _calculate(self):
+        return (self.no.score, self.yes.score)
+
+
+class Transaction(ledger.Transaction):
+    def __init__(self, id_, subject, annotation):
+        super().__init__(id_)
+        self.subject = subject
+        self.annotation = annotation
+        self.gold = subject.gold
+
+    @property
+    def changed(self):
+        return self.gold != self.subject.gold
+
+    @property
+    def matched(self):
+        return self.annotation == self.gold
+
+
+class Counter:
+    def __init__(self):
+        self.seen = 0
+        self.matched = 0
+
+    def calculate(self):
+        def formula(n, total):
+            alpha = 2
+            beta = 2
+            alpha += n
+            beta += total - n
+            score = (alpha - 1) / (alpha + beta - 2)
+            return score
+
+        return formula(self.matched, self.seen)
+
+    def unmatch(self):
+        self.matched -= 1
+        self.unsee()
+
+    def unsee(self):
+        self.seen -= 1
+
+    def match(self):
+        self.matched += 1
+        self.see()
+
+    def see(self):
+        self.seen += 1
+
+    @property
+    def score(self):
+        return self.calculate()
