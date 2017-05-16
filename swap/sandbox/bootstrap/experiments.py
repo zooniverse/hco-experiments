@@ -68,7 +68,7 @@ class Experiment:
                 self.trials.append(Trial.from_control(cn, cv, control))
 
                 n += 1
-            self.clear_mem(cn, cn)
+            self.clear_mem(cv, cn)
 
     def clear_mem(self, cv, cn):
         """
