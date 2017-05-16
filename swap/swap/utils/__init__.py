@@ -42,8 +42,9 @@ class ScoreExport:
                 n[score.gold] += 1
 
         total = sum(n.values())
-        for i in n:
-            n[i] = n[i] / total
+        if total > 0:
+            for i in n:
+                n[i] = n[i] / total
 
         return n[1]
 
