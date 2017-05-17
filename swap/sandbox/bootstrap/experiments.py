@@ -1,6 +1,7 @@
 
 import swap.plots.distributions as distributions
 from swap import Control
+from swap.agents.agent import Stat
 
 
 class Trial:
@@ -48,6 +49,38 @@ class Experiment:
         self.control = Control(.12, .5)
         self.save_f = saver
 
+    @staticmethod
+    def from_trial_export(directory, saver, loader):
+        import os
+        import re
+
+        pattern = re.compile('trials_cv_[0-9]{1,4}_cn_[0-9]{1,4}.pkl')
+
+        def _path(fname):
+            return os.path.join(directory, fname)
+
+        def istrial(fname):
+            if pattern.match(fname):
+                return True
+            else:
+                return False
+
+        files = []
+        for fname in os.listdir(directory):
+            path = _path(fname)
+            if os.path.isfile(path) and istrial(fname):
+                files.append(path)
+
+        e = Experiment(saver)
+        for fname in files:
+            print(fname)
+            trials = loader(fname)
+            for trial in trials:
+                e.add_trial(trial)
+            e.trials = []
+
+        return e
+
     def run(self):
         control = self.control
         n = 1
@@ -65,7 +98,7 @@ class Experiment:
                     control.gold_getter.consensus(cn)
 
                 control.process()
-                self.trials.append(Trial.from_control(cn, cv, control))
+                self.add_trial(Trial.from_control(cn, cv, control))
 
                 n += 1
             self.clear_mem(cv, cn)
@@ -84,14 +117,23 @@ class Experiment:
 
         fname = 'trials_cv_%s_cn_%s.pkl' % (cv, cn)
         self.save_f(self.trials, fname)
-
-        for trial in self.trials:
-            self.plot_points.append(trial.plot())
         self.trials = []
+
+    def add_trial(self, trial):
+        self.trials.append(trial)
+        self.plot_points.append(trial.plot())
 
     def plot(self, fname):
         data = self.plot_points
         distributions.multivar_scatter(fname, data)
+
+    def __str__(self):
+        s = '%d points\n' % len(self.plot_points)
+        s += str(Stat([i[2] for i in self.plot_points]))
+        return s
+
+    def __repr__(self):
+        return str(self)
 
 
 if __name__ == "__main__":

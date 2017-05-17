@@ -99,6 +99,25 @@ class Interface(ui.SWAPInterface):
             '--run', nargs=2,
             metavar=('Plot destination, experiment pickle destination'))
 
+        exp_parser.add_argument(
+            '--from-trials', nargs=1,
+            metavar='directory with trial files',
+            help='load experiment plot data from trial files')
+
+        exp_parser.add_argument(
+            '--load', nargs=1,
+            metavar='file',
+            help='load pickled experiment data')
+
+        exp_parser.add_argument(
+            '--plot', nargs=1,
+            metavar='file',
+            help='Generate experiment plot')
+
+        exp_parser.add_argument(
+            '--shell', action='store_true',
+            help='Drop to python interpreter after loading experiment')
+
         return parser
 
     def command_boot(self, args):
@@ -130,20 +149,36 @@ class Interface(ui.SWAPInterface):
             self.save(bootstrap, fname)
 
     def command_experiment(self, args):
-        f_plot = self.f(args.run[0])
-        f_pickle = self.f(args.run[1])
+        if args.run:
+            f_plot = self.f(args.run[0])
+            f_pickle = self.f(args.run[1])
 
-        def saver(trials, fname):
-            fname = self.f(fname)
-            self.save(trials, fname)
-        e = Experiment(saver)
+            def saver(trials, fname):
+                fname = self.f(fname)
+                self.save(trials, fname)
+            e = Experiment(saver)
 
-        e.run()
-        e.plot(f_plot)
+            e.run()
+            e.plot(f_plot)
 
-        del e.save_f
-        del e.control
-        self.save(e, f_pickle)
+            del e.save_f
+            del e.control
+            self.save(e, f_pickle)
+
+        elif args.from_trials:
+            e = Experiment.from_trial_export(
+                args.from_trials[0], self.save, self.load)
+
+        elif args.load:
+            e = self.load(args.load[0])
+
+        assert e
+        if args.plot:
+            e.plot(self.f(args.plot[0]))
+
+        if args.shell:
+            import code
+            code.interact(local=locals())
 
     def save(self, obj, fname):
         if isinstance(obj, Bootstrap):
