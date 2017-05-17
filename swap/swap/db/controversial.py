@@ -21,19 +21,21 @@ def _controv_query(size=100):
                 '_id': 1, 'real': 1, 'bogus': 1, 'total': 1, 'controv': {
                     '$cond': [
                         {'$gt': ['$real', '$bogus']},
-                        {'$pow': [{'$add': ['$real', '$bogus']},
-                                  {'$divide': ['$bogus', '$real']}]},
-                        {'$pow': [{'$add': ['$real', '$bogus']},
-                                  {'$divide': ['$real', '$bogus']}]}
+                        {'$pow': [
+                            {'$add': ['$real', '$bogus']},
+                            {'$divide': ['$bogus', '$real']}]},
+                        {'$pow': [
+                            {'$add': ['$real', '$bogus']},
+                            {'$divide': ['$real', '$bogus']}]}
                     ]
                 }
             }
         },
-        {
-            '$match': {
-                'total': {'$lt': 50}
-            }
-        },
+        # {
+        #     '$match': {
+        #         'total': {'$lt': 50}
+        #     }
+        # },
         {
             '$sort': {
                 'controv': -1
@@ -62,21 +64,23 @@ def _consensus_query(size=100):
                 '_id': 1, 'real': 1, 'bogus': 1, 'total': 1, 'controv': {
                     '$cond': [
                         {'$gt': ['$real', '$bogus']},
-                        {'$pow': [{'$abs': {'$subtract': ['$real', '$bogus']}},
-                                  {'$subtract':
-                                      [1, {'$divide': ['$bogus', '$real']}]}]},
-                        {'$pow': [{'$abs': {'$subtract': ['$real', '$bogus']}},
-                                  {'$subtract':
-                                      [1, {'$divide': ['$real', '$bogus']}]}]},
+                        {'$pow': [
+                            {'$abs': {'$subtract': ['$real', '$bogus']}},
+                            {'$subtract':
+                                [1, {'$divide': ['$bogus', '$real']}]}]},
+                        {'$pow': [
+                            {'$abs': {'$subtract': ['$real', '$bogus']}},
+                            {'$subtract':
+                                [1, {'$divide': ['$real', '$bogus']}]}]},
                     ]
                 }
             }
         },
-        {
-            '$match': {
-                'total': {'$lt': 50}
-            }
-        },
+        # {
+        #     '$match': {
+        #         'total': {'$lt': 50}
+        #     }
+        # },
         {
             '$sort': {
                 'controv': -1
