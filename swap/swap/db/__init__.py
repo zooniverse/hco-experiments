@@ -32,6 +32,7 @@ class _DB:
         self.batch_size = int(cdb.max_batch_size)
 
         self.classifications = self._db.classifications
+        self.experiment = self._db.experiment
         self.subjects = self._db.subjects
 
         self.subject_count = None

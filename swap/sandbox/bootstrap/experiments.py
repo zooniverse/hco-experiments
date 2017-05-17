@@ -2,6 +2,7 @@
 import swap.plots.distributions as distributions
 from swap import Control
 from swap.agents.agent import Stat
+import swap.db.experiment as dbe
 
 
 class Trial:
@@ -41,6 +42,20 @@ class Trial:
                   control.getSWAP().score_export())
         return t
 
+    def db_export(self):
+        export = {}
+        export['consensus'] = self.consensus
+        export['controversial'] = self.controversial
+
+        golds = {'0': [], '1': [], '-1': []}
+        for id_, gold in self.golds.items():
+            golds[str(gold)].append(id_)
+        export['golds'] = golds
+
+        export['scores'] = [list(x) for x in self.scores.full()]
+
+        return export
+
 
 class Experiment:
     def __init__(self, saver, cutoff=0.96):
@@ -52,25 +67,7 @@ class Experiment:
 
     @staticmethod
     def from_trial_export(directory, cutoff, saver, loader):
-        import os
-        import re
-
-        pattern = re.compile('trials_cv_[0-9]{1,4}_cn_[0-9]{1,4}.pkl')
-
-        def _path(fname):
-            return os.path.join(directory, fname)
-
-        def istrial(fname):
-            if pattern.match(fname):
-                return True
-            else:
-                return False
-
-        files = []
-        for fname in os.listdir(directory):
-            path = _path(fname)
-            if os.path.isfile(path) and istrial(fname):
-                files.append(path)
+        files = get_trials(directory)
 
         e = Experiment(saver, cutoff)
         for fname in files:
@@ -135,6 +132,40 @@ class Experiment:
 
     def __repr__(self):
         return str(self)
+
+
+def upload_trials(directory, loader):
+    files = get_trials(directory)
+    for fname in files:
+        print(fname)
+        trials = loader(fname)
+        dbe.upload_trials(trials)
+
+        break
+
+
+def get_trials(directory):
+    import os
+    import re
+
+    pattern = re.compile('trials_cv_[0-9]{1,4}_cn_[0-9]{1,4}.pkl')
+
+    def _path(fname):
+        return os.path.join(directory, fname)
+
+    def istrial(fname):
+        if pattern.match(fname):
+            return True
+        else:
+            return False
+
+    files = []
+    for fname in os.listdir(directory):
+        path = _path(fname)
+        if os.path.isfile(path) and istrial(fname):
+            files.append(path)
+
+    return files
 
 
 if __name__ == "__main__":

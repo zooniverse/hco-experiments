@@ -57,14 +57,18 @@ class ScoreExport:
     def roc(self, labels=None):
         def func(score):
             return score.gold, score.p
-        scores = self.scores.values()
 
         if labels is None:
-            return ScoreIterator(scores, func)
+            return ScoreIterator(self.scores, func)
         else:
             def cond(score):
                 return score.id in labels
-            return ScoreIterator(scores, func, cond)
+            return ScoreIterator(self.scores, func, cond)
+
+    def full(self):
+        def func(score):
+            return (score.id, score.gold, score.p)
+        return ScoreIterator(self.scores, func)
 
 
 class ScoreIterator:
@@ -72,7 +76,7 @@ class ScoreIterator:
         if type(scores) is dict:
             scores = list(scores.values())
         if type(scores) is not list:
-            raise TypeError
+            raise TypeError(type(scores))
 
         self.scores = scores
         self.func = func

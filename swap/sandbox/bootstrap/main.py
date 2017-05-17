@@ -4,6 +4,7 @@
 # subject labels
 from bootstrap import *
 from experiments import Experiment
+import experiments as ex
 
 from swap import ui
 import swap.plots as plots
@@ -127,6 +128,11 @@ class Interface(ui.SWAPInterface):
             '--cutoff', nargs=1,
             help='Cutoff swap p scores')
 
+        exp_parser.add_argument(
+            '--upload', nargs=1,
+            metavar='directory containing trial files',
+            help='Upload trials to mongo database')
+
         return parser
 
     def command_boot(self, args):
@@ -184,8 +190,8 @@ class Interface(ui.SWAPInterface):
         elif args.load:
             e = self.load(args.load[0])
 
-        assert e
         if args.plot:
+            assert e
             e.plot(self.f(args.plot[0]))
 
         if args.shell:
@@ -193,9 +199,13 @@ class Interface(ui.SWAPInterface):
             code.interact(local=locals())
 
         if args.save:
+            assert e
             del e.save_f
             del e.control
             self.save(e, self.f(args.save[0]))
+
+        if args.upload:
+            ex.upload_trials(args.upload[0], self.load)
 
     def save(self, obj, fname):
         if isinstance(obj, Bootstrap):
