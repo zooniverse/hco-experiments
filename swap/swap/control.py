@@ -6,8 +6,8 @@ import progressbar
 
 from swap.swap import SWAP, Classification
 import swap.db.classifications as db
+import swap.db.controversial as cv
 from swap.db import Query
-import swap.config.controversial as cv
 
 
 class Control:

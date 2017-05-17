@@ -1,7 +1,7 @@
 ################################################################
 #
 
-from swap.db import DB
+from swap.db import classifications as dbcl
 
 
 def _controv_query(size=100):
@@ -130,7 +130,7 @@ def _consensus_max_query(min_):
 
 def get_controversial(size):
     query = _controv_query(size)
-    cursor = DB().classifications.aggregate(query)
+    cursor = dbcl.aggregate(query)
     subjects = []
     for item in cursor:
         subjects.append(item['_id'])
@@ -140,7 +140,7 @@ def get_controversial(size):
 
 def get_consensus(size):
     query = _consensus_query(size)
-    cursor = DB().classifications.aggregate(query)
+    cursor = dbcl.aggregate(query)
     subjects = []
     for item in cursor:
         subjects.append(item['_id'])
@@ -150,7 +150,7 @@ def get_consensus(size):
 
 def get_max_consensus(min_):
     query = _consensus_query(min_)
-    cursor = DB().classifications.aggregate(query)
+    cursor = dbcl.aggregate(query)
     subjects = []
     for item in cursor:
         subjects.append(item['_id'])
