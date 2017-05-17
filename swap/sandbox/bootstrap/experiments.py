@@ -145,8 +145,6 @@ def upload_trials(directory, loader):
         trials = loader(fname)
         dbe.upload_trials(trials)
 
-        break
-
 
 def get_trials(directory):
     import os
