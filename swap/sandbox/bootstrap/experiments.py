@@ -52,7 +52,11 @@ class Trial:
             golds[str(gold)].append(id_)
         export['golds'] = golds
 
-        export['scores'] = [list(x) for x in self.scores.full()]
+        def score_to_bson(score):
+            subject, gold, p = score
+            return {'subject': subject, 'gold': gold, 'score': p}
+
+        export['scores'] = [score_to_bson(x) for x in self.scores.full()]
 
         return export
 
