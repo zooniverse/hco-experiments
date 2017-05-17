@@ -25,14 +25,14 @@ class Trial:
 
         return n
 
-    def purity(self):
-        return self.scores.purity(.96)
+    def purity(self, cutoff):
+        return self.scores.purity(cutoff)
 
     def purify(self):
         pass
 
-    def plot(self):
-        return (self.consensus, self.controversial, self.purity())
+    def plot(self, cutoff):
+        return (self.consensus, self.controversial, self.purity(cutoff))
 
     @staticmethod
     def from_control(consensus, controversial, control):
@@ -43,14 +43,15 @@ class Trial:
 
 
 class Experiment:
-    def __init__(self, saver):
+    def __init__(self, saver, cutoff=0.96):
         self.trials = []
         self.plot_points = []
         self.control = Control(.12, .5)
         self.save_f = saver
+        self.p_cutoff = cutoff
 
     @staticmethod
-    def from_trial_export(directory, saver, loader):
+    def from_trial_export(directory, cutoff, saver, loader):
         import os
         import re
 
@@ -71,7 +72,7 @@ class Experiment:
             if os.path.isfile(path) and istrial(fname):
                 files.append(path)
 
-        e = Experiment(saver)
+        e = Experiment(saver, cutoff)
         for fname in files:
             print(fname)
             trials = loader(fname)
@@ -121,7 +122,7 @@ class Experiment:
 
     def add_trial(self, trial):
         self.trials.append(trial)
-        self.plot_points.append(trial.plot())
+        self.plot_points.append(trial.plot(self.p_cutoff))
 
     def plot(self, fname):
         data = self.plot_points

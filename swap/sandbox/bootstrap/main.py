@@ -110,6 +110,11 @@ class Interface(ui.SWAPInterface):
             help='load pickled experiment data')
 
         exp_parser.add_argument(
+            '--save', nargs=1,
+            metavar='file',
+            help='pickle and save experiment data')
+
+        exp_parser.add_argument(
             '--plot', nargs=1,
             metavar='file',
             help='Generate experiment plot')
@@ -117,6 +122,10 @@ class Interface(ui.SWAPInterface):
         exp_parser.add_argument(
             '--shell', action='store_true',
             help='Drop to python interpreter after loading experiment')
+
+        exp_parser.add_argument(
+            '--cutoff', nargs=1,
+            help='Cutoff swap p scores')
 
         return parser
 
@@ -149,6 +158,11 @@ class Interface(ui.SWAPInterface):
             self.save(bootstrap, fname)
 
     def command_experiment(self, args):
+        if args.cutoff:
+            cutoff = float(args.cutoff[0])
+        else:
+            cutoff = 0.96
+
         if args.run:
             f_plot = self.f(args.run[0])
             f_pickle = self.f(args.run[1])
@@ -157,9 +171,7 @@ class Interface(ui.SWAPInterface):
                 fname = self.f(fname)
                 self.save(trials, fname)
             e = Experiment(saver)
-
             e.run()
-            e.plot(f_plot)
 
             del e.save_f
             del e.control
@@ -167,7 +179,7 @@ class Interface(ui.SWAPInterface):
 
         elif args.from_trials:
             e = Experiment.from_trial_export(
-                args.from_trials[0], self.save, self.load)
+                args.from_trials[0], cutoff, self.save, self.load)
 
         elif args.load:
             e = self.load(args.load[0])
@@ -179,6 +191,11 @@ class Interface(ui.SWAPInterface):
         if args.shell:
             import code
             code.interact(local=locals())
+
+        if args.save:
+            del e.save_f
+            del e.control
+            self.save(e, self.f(args.save[0]))
 
     def save(self, obj, fname):
         if isinstance(obj, Bootstrap):
