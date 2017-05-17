@@ -273,6 +273,9 @@ class Transaction(ledger.Transaction):
         self.right = None
         self.left = None
 
+    def notify(self):
+        self.user.ledger.update(self.id)
+
     def get_prior(self):
         if self.left is None:
             return Config().p0

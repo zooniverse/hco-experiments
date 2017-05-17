@@ -200,17 +200,19 @@ class Ledger(ledger.Ledger):
                 return self.yes
 
         def action(transaction, version):
+            t = transaction
             c = counter(t.gold)
-            if version == 'new':
-                if t.matched:
-                    c.match()
-                else:
-                    c.see()
-            elif version == 'old':
-                if t.matched:
-                    c.unmatch()
-                else:
-                    c.unsee()
+            if c is not None:
+                if version == 'new':
+                    if t.matched:
+                        c.match()
+                    else:
+                        c.see()
+                elif version == 'old':
+                    if t.matched:
+                        c.unmatch()
+                    else:
+                        c.unsee()
 
         for i in self.changed:
             t = self.transactions[i]
@@ -238,6 +240,9 @@ class Transaction(ledger.Transaction):
         self.annotation = annotation
         self.gold = subject.gold
 
+    def notify(self):
+        self.subject.ledger.update(self.id)
+
     @property
     def changed(self):
         return self.gold != self.subject.gold
@@ -245,6 +250,13 @@ class Transaction(ledger.Transaction):
     @property
     def matched(self):
         return self.annotation == self.gold
+
+    def __str__(self):
+        s = super().__str__()
+        print(self.gold, self.annotation)
+        s += 'gold %d annotation %d' % \
+            (self.gold, self.annotation)
+        return s
 
 
 class Counter:

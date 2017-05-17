@@ -9,6 +9,8 @@ from swap.agents.user import Counter
 
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 
 class TestLedger:
     def test_init(self):
@@ -53,11 +55,12 @@ class TestLedger:
     def test_update(self):
         le = Ledger()
         t0 = Transaction(0)
-        t1 = Transaction(0)
-        le.add(t0)
+        t0.notify = MagicMock()
 
-        le.update(t1)
-        assert le.get(0) == t1
+        le.add(t0)
+        le.update(0)
+
+        t0.notify.assert_called_once_with()
 
     def test_update_registers_change(self):
         le = Ledger()
@@ -68,7 +71,7 @@ class TestLedger:
         le.add(t1)
 
         le.recalculate()
-        le.update(t0)
+        le.update(0)
 
         assert le.changed == [0]
         assert le.stale is True
@@ -139,12 +142,14 @@ class TestSubjectLedger:
         t1 = STransaction(1, None, 0)
         t2 = STransaction(2, None, 0)
 
+        t1.notify = MagicMock()
+
         le.add(t0)
         le.add(t1)
         le.add(t2)
 
         le.clear_changes()
-        le.update(t1)
+        le.update(1)
 
         print(le.changed)
         assert le.first_change == t1
@@ -192,6 +197,29 @@ class TestSubjectLedger:
         le.recalculate()
         assert STransaction.calculate.call_count == 2
 
+    def test_recalculate_propagates(self):
+        def get_score(a, b):
+            def f(n):
+                if n == 0:
+                    return a
+                elif n == 1:
+                    return b
+            return f
+
+        def user(a, b):
+            u = MagicMock()
+            u.getScore = get_score(a, b)
+            return u
+
+        le = SLedger()
+        t0 = STransaction(0, user(3 / 4, 3 / 4), 1)
+        t1 = STransaction(1, user(1 / 4, 1 / 4), 1)
+
+        le.add(t0)
+        le.add(t1)
+
+        assert le.score - .12 < 1e-10
+
 
 class TestSubjectTransaction:
     def test_init(self):
@@ -221,6 +249,12 @@ class TestSubjectTransaction:
         t0.score = 15
 
         assert t1.get_prior() == 15
+
+    def test_notify(self):
+        user = MagicMock()
+        t = STransaction(15, user, 0)
+        t.notify()
+        user.ledger.update.assert_called_once_with(15)
 
     def test_calculate_1(self):
         user = MagicMock()
@@ -256,6 +290,11 @@ class TestSubjectTransaction:
 
 
 class TestUserLedger:
+    def get_subject(self, gold):
+        subject = MagicMock()
+        subject.gold = gold
+        return subject
+
     def test_init(self):
         le = ULedger()
         assert type(le.no) is Counter
@@ -263,16 +302,52 @@ class TestUserLedger:
         assert le._score is None
 
     def test_add(self):
-        subject = MagicMock()
-        subject.gold = 0
+        subject = self.get_subject(0)
 
         le = ULedger()
         t = UTransaction(0, subject, 0)
         le.add(t)
         assert t.gold is None
 
-    def test_recalculate(self):
-        pass
+    def test_recalculate_1(self):
+        le = ULedger()
+        t0 = UTransaction(0, self.get_subject(0), 0)
+        t1 = UTransaction(1, self.get_subject(1), 0)
+        t2 = UTransaction(2, self.get_subject(1), 0)
+
+        le.add(t0)
+        le.add(t1)
+        le.add(t2)
+
+        assert le.recalculate() == (2 / 3, 1 / 4)
+
+    def test_recalculate_2(self):
+        le = ULedger()
+        t0 = UTransaction(0, self.get_subject(1), 0)
+        t1 = UTransaction(1, self.get_subject(1), 0)
+        t2 = UTransaction(2, self.get_subject(1), 0)
+        t3 = UTransaction(2, self.get_subject(1), 1)
+
+        le.add(t0)
+        le.add(t1)
+        le.add(t2)
+        le.add(t3)
+
+        assert le.recalculate() == (1 / 2, 2 / 5)
+
+    def test_score(self):
+        le = ULedger()
+        t0 = UTransaction(0, self.get_subject(1), 0)
+        t1 = UTransaction(1, self.get_subject(1), 0)
+        t2 = UTransaction(2, self.get_subject(1), 0)
+        t3 = UTransaction(2, self.get_subject(1), 1)
+
+        le.add(t0)
+        le.add(t1)
+        le.add(t2)
+        le.add(t3)
+
+        assert le.score == (1 / 2, 2 / 5)
 
     # def test_calculate(self):
     #     le = ULedger()
@@ -298,6 +373,14 @@ class TestUserTransaction:
         assert t.subject == subject
         assert t.annotation == 0
         assert t.gold == 0
+
+    def test_notify(self):
+        subject = MagicMock()
+        subject.gold = 0
+
+        t = UTransaction(22, subject, 0)
+        t.notify()
+        t.subject.ledger.update.assert_called_once_with(22)
 
     def test_changed(self):
         subject = MagicMock()

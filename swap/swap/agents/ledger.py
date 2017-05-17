@@ -42,14 +42,21 @@ class Ledger:
         self.stale = False
         self.changed = []
 
-    def update(self, transaction):
+    def update(self, id_):
         self.stale = True
-        id_ = transaction.id
         self.change(id_)
-        self.transactions[id_] = transaction
+        self.transactions[id_].notify()
 
 
 class Transaction:
     def __init__(self, id_):
         self.id = id_
         self.order = None
+
+    def notify(self):
+        # Notify connected nodes that this transaction changed
+        pass
+
+    def __str__(self):
+        s = 'id %s order %s' % (str(self.id), str(self.order))
+        return s
