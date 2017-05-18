@@ -4,18 +4,22 @@ from swap.utils import ScoreExport, Score, ScoreIterator
 import swap.db.classifications as dbcl
 from swap.agents.subject import Subject
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 
 class TestScoreExport:
-    def test_init(self):
+
+    @patch.object(dbcl, 'getAllGolds')
+    def test_init(self, mock):
         golds = {1: 0, 2: 0, 3: 1, 4: 1}
-        dbcl.getAllGolds = MagicMock(return_value=golds)
+        mock.return_value = golds
+
         swap = MagicMock()
         swap.subjects = []
         for i in range(1, 5):
-            s = Subject(i, .12)
-            s.tracker.add(i / 10)
+            s = Subject(i)
+            s.ledger._score = i / 10
+            s.ledger.stale = False
             swap.subjects.append(s)
 
         se = ScoreExport(swap)
@@ -26,7 +30,7 @@ class TestScoreExport:
             assert score.gold == golds[score.id]
             assert score.p == score.id / 10
 
-    def test_purity(self):
+    def test_counts(self):
         golds = {1: 0, 2: 0, 3: 1, 4: 1, 5: -1, 6: 1}
         scores = dict([(i, Score(i, g, 0)) for i, g in golds.items()])
         ScoreExport._init_scores = MagicMock(return_value=scores)
@@ -34,7 +38,27 @@ class TestScoreExport:
         se = ScoreExport(None)
         print(se.scores)
 
-        assert se.purity(0) == {-1: 1, 0: 2, 1: 3}
+        assert se.counts(0) == {-1: 1, 0: 2, 1: 3}
+
+    def test_composition(self):
+        golds = {1: 0, 2: 0, 3: 1, 4: 1, 5: -1, 6: 1}
+        scores = dict([(i, Score(i, g, 0)) for i, g in golds.items()])
+        ScoreExport._init_scores = MagicMock(return_value=scores)
+
+        se = ScoreExport(None)
+        print(se.scores)
+
+        assert se.composition(0) == {-1: 1 / 6, 0: 1 / 3, 1: 1 / 2}
+
+    def tes_purity(self):
+        golds = {1: 0, 2: 0, 3: 1, 4: 1, 5: -1, 6: 1}
+        scores = dict([(i, Score(i, g, 0)) for i, g in golds.items()])
+        ScoreExport._init_scores = MagicMock(return_value=scores)
+
+        se = ScoreExport(None)
+        print(se.scores)
+
+        assert se.purity(0) == .5
 
 
 class TestScoreIterator:

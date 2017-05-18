@@ -38,17 +38,24 @@ class ScoreExport:
     def get_real_golds(self):
         return db.getAllGolds()
 
-    def purity(self, threshold):
+    def counts(self, threshold):
         n = {-1: 0, 0: 0, 1: 0}
         for score in self.scores.values():
             if score.p >= threshold:
                 n[score.gold] += 1
+        return n
+
+    def composition(self, threshold):
+        n = self.counts(threshold)
 
         total = sum(n.values())
         for i in n:
             n[i] = n[i] / total
 
-        return n[1]
+        return n
+
+    def purity(self, threshold):
+        return self.composition(threshold)[1]
 
     def __len__(self):
         return len(self.scores)

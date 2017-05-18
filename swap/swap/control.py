@@ -15,7 +15,7 @@ class Control:
         Gets classifications from database and feeds them to SWAP
     """
 
-    def __init__(self, p0, epsilon, swap=None):
+    def __init__(self, *args, diagnostics=True, swap=None):
         """
             Initialize control
 
@@ -25,17 +25,17 @@ class Control:
                 train_size: (int) size of gold label sample for
                     test/train split
         """
+        if len(args) > 0:
+            raise DeprecationWarning(
+                'p0 and epsilon now live in config')
 
         # Number of subjects with expert labels for a
         # test/train split
         self.gold_getter = GoldGetter()
-
-        self.p0 = p0
-        self.epsilon = epsilon
-
+        self.diagnostics = diagnostics
         self.swap = swap
 
-    def process(self):
+    def run(self):
         """
         Process all classifications in DB with SWAP
 
@@ -51,25 +51,24 @@ class Control:
         self.init_swap()
 
         # get classifications
-        classifications = self.getClassifications()
-        n_classifications = len(classifications)
+        cursor = self.get_classifications()
         # n_classifications = self._n_classifications()
 
         # loop over classification cursor to process
         # classifications one at a time
-        print("Start: SWAP Processing %d classifications" % n_classifications)
+        print("Start: SWAP Processing %d classifications" % len(cursor))
 
-        n_class = 0
-        with progressbar.ProgressBar(max_value=n_classifications) as bar:
+        count = 0
+        with progressbar.ProgressBar(max_value=len(cursor)) as bar:
             # Loop over all classifications of the query
             # Note that the exact size of the query might be lower than
             # n_classifications if not all classifications are being queried
-            for cl in classifications:
+            for cl in cursor:
                 # process classification in swap
                 cl = Classification.generate(cl)
                 self._delegate(cl)
-                bar.update(n_class)
-                n_class += 1
+                bar.update(count)
+                count += 1
 
     def _delegate(self, cl):
         """
@@ -78,24 +77,24 @@ class Control:
 
         cl: (Classification)
         """
-        self.swap.processOneClassification(cl)
+        self.swap.classify(cl)
 
     def init_swap(self):
         if self.swap is None:
-            swap = SWAP(self.p0, self.epsilon)
+            swap = SWAP()
         else:
             swap = self.swap
 
-        golds = self.getGoldLabels()
+        golds = self.get_gold_labels()
         swap.set_gold_labels(golds)
 
         self.swap = swap
         return swap
 
-    def getGoldLabels(self):
+    def get_gold_labels(self):
         return self.gold_getter.golds
 
-    def getClassifications(self):
+    def get_classifications(self):
         return db.getClassifications()
 
     def getSWAP(self):
@@ -118,6 +117,7 @@ class MetaDataControl(Control):
     """
 
     def __init__(self, p0, epsilon, meta_data, meta_lower, meta_upper):
+        raise DeprecationWarning
         # initialize control
         super().__init__(p0, epsilon)
         # meta data information

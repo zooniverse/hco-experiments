@@ -5,11 +5,31 @@
 import swap.db.classifications as dbcl
 from swap.control import Control
 from swap.control import GoldGetter
-from unittest.mock import MagicMock
+
+from unittest.mock import MagicMock, patch
 import pytest
 
 fields = {'user_id', 'classification_id', 'subject_id',
           'annotation', 'gold_label'}
+
+
+class TestControl:
+
+    @patch.object(dbcl, 'getRandomGoldSample', MagicMock(return_value=[]))
+    def test_with_train_split(self):
+
+        c = Control()
+        c.gold_getter.random(100)
+        c.get_gold_labels()
+
+        dbcl.getRandomGoldSample.assert_called_with(100)
+
+    @patch.object(dbcl, 'getAllGolds', MagicMock(return_value=[]))
+    def test_without_train_split(self):
+        c = Control()
+        c.get_gold_labels()
+
+        dbcl.getAllGolds.assert_called_with()
 
 
 # def test_classifications_projection():
@@ -54,33 +74,6 @@ def test_get_one_classification():
     assert len(cl) > 0
 
 
-def test_with_train_split():
-    old = dbcl.getRandomGoldSample
-    mock = MagicMock(return_value=[])
-    dbcl.getRandomGoldSample = mock
-
-    c = Control(.5, .5, mock)
-    c.gold_getter.random(100)
-    c.getGoldLabels()
-
-    mock.assert_called_with(100)
-
-    dbcl.getRandomGoldSample = old
-
-
-def test_without_train_split():
-    old = dbcl.getAllGolds
-    mock = MagicMock(return_value={})
-    dbcl.getAllGolds = mock
-
-    c = Control(.5, .5, mock)
-    c.getGoldLabels()
-
-    mock.assert_called_with()
-
-    dbcl.getAllGolds = old
-
-
 class TestGoldGetter:
 
     def test_wrapper_golds_to_None(self):
@@ -109,7 +102,7 @@ class TestGoldGetter:
         dbcl.getAllGolds = old
 
     def test_getter_propagation(self):
-        c = Control(0.5, 0.5)
+        c = Control()
         c.gold_getter.getters = [lambda: {1: 1, 2: 0}]
 
         c.init_swap()
@@ -117,7 +110,7 @@ class TestGoldGetter:
         assert c.swap.subjects.get(2).gold == 0
 
     def test_multiple_getters(self):
-        c = Control(0.5, 0.5)
+        c = Control()
         c.gold_getter.getters = [
             lambda: {1: 1, 2: 0},
             lambda: {3: 0, 4: 0}
@@ -131,7 +124,7 @@ class TestGoldGetter:
 
     @pytest.mark.skip(reason='Network call, takes too long')
     def test_real_multiple_getters(self):
-        c = Control(0.5, 0.5)
+        c = Control()
         gg = c.gold_getter
 
         gg.controversial(10)
