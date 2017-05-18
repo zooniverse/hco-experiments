@@ -15,7 +15,7 @@ class User(Agent):
         Agent to manage subject scores
     """
 
-    def __init__(self, user_name, epsilon):
+    def __init__(self, user_name):
         """
             Initialize a User Agent
 
@@ -23,48 +23,23 @@ class User(Agent):
                 user_id: (int) id number
                 epsilon: (float) prior user probability
         """
-        super().__init__(user_name, epsilon)
+        super().__init__(user_name, Ledger)
 
-        self.gold_labels = Tracker()
-
-        self.trackers = Tracker_Collection.Generate(
-            User_Score_Tracker, [0, 1], epsilon)
-
-        self.count = 0
-
-    def addClassification(self, cl, gold):
+    def classify(self, cl, subject):
         """
             adds a classification and calculates the new score
 
             Args:
-                cl (dict) classification data from database
+                cl (Classification) classification data from database
+                subject (Subject)   relevant subject agent
         """
-
-        # Increment basic tracking
-        annotation = int(cl.annotation)
-
-        self.annotations.add(annotation)
-        self.gold_labels.add(gold)
-
-        # Decide which tracker to user
-        tracker = self.trackers.get(gold)
-
-        # Add classification to tracker
-        tracker.add(annotation)
-
-        self.count += 1
-
-    def getScore(self, label):
-        """
-            Gets the current score from the tracker for the annotation
-
-            Args:
-                label (int) label of the tracker, i.e. the annotation
-        """
-        return self.trackers.get(label).current()
-
-    def getCount(self):
-        return self.count
+        if cl.user != self.id:
+            raise ValueError(
+                'Classification user name %s ' % str(cl.user) +
+                'does not match my id %s' % str(self.id))
+        annotation = cl.annotation
+        t = Transaction(subject.id, subject, annotation)
+        self.ledger.add(t)
 
     def export(self):
         """
@@ -77,6 +52,7 @@ class User(Agent):
                 'score_0_history':     history of score_0
                 'score_1_history':     history of score_1
         """
+        raise DeprecationWarning
         data = {
             'gold_labels': self.gold_labels.getHistory()
         }
@@ -92,7 +68,7 @@ class User(Agent):
 
     def __str__(self):
         return 'id: %s score 0: %.2f score 1: %.2f' % \
-            (self.id, self.getScore(0), self.getScore(1))
+            (self.id, *self.score)
 
     @staticmethod
     def stats(bureau):
@@ -188,6 +164,8 @@ class Ledger(ledger.Ledger):
         self._score = None
 
     def add(self, transaction):
+        # Remove gold label from transaction, will be put back in when
+        # recalculating
         transaction.gold = None
         id_ = super().add(transaction)
         return id_

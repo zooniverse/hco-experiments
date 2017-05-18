@@ -197,18 +197,14 @@ class TestSubjectLedger:
         le.recalculate()
         assert STransaction.calculate.call_count == 2
 
-    def test_recalculate_propagates(self):
-        def get_score(a, b):
-            def f(n):
-                if n == 0:
-                    return a
-                elif n == 1:
-                    return b
-            return f
+    def test_recalculate_empty(self):
+        le = SLedger()
+        assert le.recalculate() == 0.12
 
+    def test_recalculate_propagates(self):
         def user(a, b):
             u = MagicMock()
-            u.getScore = get_score(a, b)
+            u.score = (a, b)
             return u
 
         le = SLedger()
@@ -258,13 +254,7 @@ class TestSubjectTransaction:
 
     def test_calculate_1(self):
         user = MagicMock()
-
-        def get_score(n):
-            if n == 0:
-                return .25
-            elif n == 1:
-                return .80
-        user.getScore = get_score
+        user.score = (.25, .8)
 
         print(user.getScore(0))
         print(user.getScore(1))
@@ -274,16 +264,8 @@ class TestSubjectTransaction:
 
     def test_calculate_0(self):
         user = MagicMock()
-
-        def get_score(n):
-            if n == 0:
-                return .25
-            elif n == 1:
-                return .80
-        user.getScore = get_score
-
-        print(user.getScore(0))
-        print(user.getScore(1))
+        user.score = (.25, .8)
+        print(*user.score)
 
         t = STransaction(0, user, 0)
         assert t.calculate(.12) - .024 / .244 < 1e-10

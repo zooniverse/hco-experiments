@@ -17,15 +17,24 @@ class Agent(metaclass=abc.ABCMeta):
             Initial probability used depending on subclass.
     """
 
-    def __init__(self, id_, probability):
+    def __init__(self, id_, ledger_type):
         self._id = id_
-        self.probability = probability
-
-        self.annotations = Tracker()
+        self.ledger = ledger_type()
 
     @property
     def id(self):
         return self._id
+
+    @property
+    def score(self):
+        """
+            Score getter function
+        """
+        return self.ledger.score
+
+    @abc.abstractmethod
+    def classify(self, cl):
+        pass
 
     @staticmethod
     def stats(bureau):
@@ -33,7 +42,7 @@ class Agent(metaclass=abc.ABCMeta):
             Calculate the mean, standard deviation, and median
             of the scores in a bureau containing Agents
         """
-        p = [agent.getScore() for agent in bureau]
+        p = [agent.score for agent in bureau]
         return Stat(p)
 
     @abc.abstractmethod
@@ -41,7 +50,7 @@ class Agent(metaclass=abc.ABCMeta):
         """
             Abstract method to export agent data
         """
-        return
+        pass
 
 
 class BaseStat:

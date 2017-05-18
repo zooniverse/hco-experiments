@@ -97,7 +97,7 @@ class SWAP:
         user = self.getUserAgent(cl.user)
         subject = self.getSubjectAgent(cl.subject)
         if self.gold_updates and subject.hasGold():
-            user.addClassification(cl, subject.gold)
+            user.classify(cl, subject)
 
     def updateSubjectData(self, cl):
         """
@@ -112,9 +112,9 @@ class SWAP:
         user = self.getUserAgent(cl.user)
 
         # process the classification
-        subject.addClassification(cl, user)
+        subject.classify(cl, user)
 
-    def getUserAgent(self, agent_id):
+    def getUserAgent(self, user_id):
         """
             Get a User agent from the Bureau. Creates a new one
             if it doesn't exist
@@ -125,14 +125,14 @@ class SWAP:
 
         # TODO should the bureau generate a new agent, or should
         # that be handled here..?
-        if agent_id in self.users:
-            return self.users.getAgent(agent_id)
+        if user_id in self.users:
+            return self.users.getAgent(user_id)
         else:
-            agent = User(agent_id, self.epsilon)
-            self.users.addAgent(agent)
-            return agent
+            user = User(user_id, self.epsilon)
+            self.users.addAgent(user)
+            return user
 
-    def getSubjectAgent(self, agent_id, cl=None):
+    def getSubjectAgent(self, id_, cl=None):
         """
             Get a Subject agent from the Bureau. Creates a new one
             if it doesn't exist
@@ -141,15 +141,15 @@ class SWAP:
                 agent_id: id for the subject
         """
 
-        if agent_id in self.subjects:
-            return self.subjects.getAgent(agent_id)
+        if id_ in self.subjects:
+            return self.subjects.getAgent(id_)
         else:
-            agent = Subject(agent_id, self.p0)
+            subject = Subject(id_, self.p0)
             if self.gold_from_cl and cl.isGold():
-                agent.setGoldLabel(cl.gold)
+                subject.set_gold_label(cl.gold)
 
-            self.subjects.addAgent(agent)
-            return agent
+            self.subjects.addAgent(subject)
+            return subject
 
     def getUserData(self):
         """ Get User Bureau object """
@@ -172,18 +172,18 @@ class SWAP:
             Args:
                 subjects: (dict: {subject: gold}) list of subjects
         """
-        for subject, gold in golds.items():
+        for id_, gold in golds.items():
             # TODO use old swap score or reset with p0 for bootstrap?
-            if subject in self.subjects:
-                self.subjects.get(subject).setGoldLabel(gold)
+            if id_ in self.subjects:
+                self.subjects.get(id_).set_gold_label(gold)
             else:
-                agent = Subject(subject, self.p0, gold)
-                self.subjects.addAgent(agent)
+                subject = Subject(id_, self.p0, gold)
+                self.subjects.addAgent(subject)
 
     def getGoldLabels(self):
         data = {}
         for subject in self.subjects:
-            if subject.gold != -1:
+            if subject.isgold():
                 data[subject.id] = subject.gold
 
         return data

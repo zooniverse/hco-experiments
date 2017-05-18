@@ -43,7 +43,7 @@ class Bureau(object):
                 (type(agent), self.agent_type))
 
         # Add agent to collection
-        if not agent.id in self._agents:
+        if agent.id not in self._agents:
             self._agents[agent.id] = agent
         else:
             raise KeyError("Agent-ID already in bureau, remove first")
