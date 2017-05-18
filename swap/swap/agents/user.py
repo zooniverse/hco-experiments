@@ -76,6 +76,7 @@ class User(Agent):
             Calculate the mean, standard deviation, and median
             of the scores in a bureau containing Users
         """
+
         p = [agent.score for agent in bureau]
         p = zip(*p)
 

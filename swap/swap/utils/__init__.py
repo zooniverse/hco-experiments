@@ -1,5 +1,8 @@
 
 import swap.db.classifications as db
+from swap.utils.classification import Classification
+
+assert Classification
 
 
 class Score:

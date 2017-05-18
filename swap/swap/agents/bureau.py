@@ -58,7 +58,9 @@ class Bureau(object):
         if agent_id in self._agents:
             return self._agents[agent_id]
         elif make_new:
-            return self.agent_type(agent_id)
+            agent = self.agent_type(agent_id)
+            self.add(agent)
+            return agent
         else:
             return None
 
@@ -115,6 +117,9 @@ class Bureau(object):
             id_ = item
 
         return self.has(id_)
+
+    def __len__(self):
+        return len(self._agents)
 
     def __str__(self):
         return '\n'.join([str(item) for item in self._agents.values()])

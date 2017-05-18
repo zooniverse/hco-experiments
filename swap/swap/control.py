@@ -87,7 +87,7 @@ class Control:
             swap = self.swap
 
         golds = self.getGoldLabels()
-        swap.setGoldLabels(golds)
+        swap.set_gold_labels(golds)
 
         self.swap = swap
         return swap

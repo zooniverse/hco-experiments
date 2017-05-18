@@ -6,8 +6,8 @@ from swap.agents.bureau import Bureau
 from swap.agents.agent import Stats
 from swap.agents.subject import Subject
 from swap.agents.user import User
-from swap.utils import ScoreExport
-from pprint import pprint
+from swap.config import Config
+from swap.utils import ScoreExport, Classification
 
 from swap.db import classifications as db
 
@@ -23,7 +23,7 @@ class SWAP:
         (hereafter Marshall et al. 2016) for algorithm explanation.
     """
 
-    def __init__(self, p0=0.01, epsilon=0.5):
+    def __init__(self):
         """
             Initialize SWAP instance
             Args:
@@ -41,10 +41,6 @@ class SWAP:
                 framework for each volunteer's agent.
         """
 
-        # assign class variables from args
-        self.p0 = p0  # prior probability real
-        self.epsilon = epsilon  # estimated volunteer performance
-
         # initialize bureaus to manage user / subject agents
         self.users = Bureau(User)
         self.subjects = Bureau(Subject)
@@ -53,7 +49,7 @@ class SWAP:
         # probability of containing an interesting object will be updated
         # whenever an expertly classified "gold standard" subject is
         # classified by that volunteer.
-        self.gold_updates = True
+        # self.gold_updates = True
 
         # Directive to use gold labels from classification
         # if true, assigns the gold_label from the classification
@@ -61,10 +57,10 @@ class SWAP:
         #
         # Useful to ignore gold_labels when doing a test/train split
         # without properly sanitizing gold labels from classifications
-        self.gold_from_cl = False
+        # self.gold_from_cl = False
 
     # Process a classification
-    def processOneClassification(self, cl, subject=True, user=True):
+    def classify(self, cl, subject=True, user=True):
         """
             Processes a single classification
 
@@ -82,11 +78,11 @@ class SWAP:
         # User and subject agents weren't being created
         # if the subject's gold label is -1
         if subject:
-            self.updateSubjectData(cl)
+            self.classify_subject(cl)
         if user:
-            self.updateUserData(cl)
+            self.classify_user(cl)
 
-    def updateUserData(self, cl):
+    def classify_user(self, cl):
         """
             Update User Data - Process current classification
 
@@ -94,12 +90,13 @@ class SWAP:
                 cl: (Classification)
         """
 
-        user = self.getUserAgent(cl.user)
-        subject = self.getSubjectAgent(cl.subject)
-        if self.gold_updates and subject.hasGold():
+        user = self.users.get(cl.user)
+        subject = self.subjects.get(cl.subject)
+        # if self.gold_updates and subject.isgold():
+        if subject.isgold():
             user.classify(cl, subject)
 
-    def updateSubjectData(self, cl):
+    def classify_subject(self, cl):
         """
             Pass a classification to the appropriate subject agent
 
@@ -108,58 +105,57 @@ class SWAP:
         """
 
         # Get subject and user agents
-        subject = self.getSubjectAgent(cl.subject, cl=cl)
-        user = self.getUserAgent(cl.user)
-
+        user = self.users.get(cl.user)
+        subject = self.subjects.get(cl.subject)
         # process the classification
         subject.classify(cl, user)
 
-    def getUserAgent(self, user_id):
-        """
-            Get a User agent from the Bureau. Creates a new one
-            if it doesn't exist
+    # def getUserAgent(self, user_id):
+    #     """
+    #         Get a User agent from the Bureau. Creates a new one
+    #         if it doesn't exist
 
-            Args:
-                agent_id: id for the user
-        """
+    #         Args:
+    #             agent_id: id for the user
+    #     """
 
-        # TODO should the bureau generate a new agent, or should
-        # that be handled here..?
-        if user_id in self.users:
-            return self.users.getAgent(user_id)
-        else:
-            user = User(user_id, self.epsilon)
-            self.users.addAgent(user)
-            return user
+    #     # TODO should the bureau generate a new agent, or should
+    #     # that be handled here..?
+    #     if user_id in self.users:
+    #         return self.users.getAgent(user_id)
+    #     else:
+    #         user = User(user_id, self.epsilon)
+    #         self.users.addAgent(user)
+    #         return user
 
-    def getSubjectAgent(self, id_, cl=None):
-        """
-            Get a Subject agent from the Bureau. Creates a new one
-            if it doesn't exist
+    # def getSubjectAgent(self, id_, cl=None):
+    #     """
+    #         Get a Subject agent from the Bureau. Creates a new one
+    #         if it doesn't exist
 
-            Args:
-                agent_id: id for the subject
-        """
+    #         Args:
+    #             agent_id: id for the subject
+    #     """
 
-        if id_ in self.subjects:
-            return self.subjects.getAgent(id_)
-        else:
-            subject = Subject(id_, self.p0)
-            if self.gold_from_cl and cl.isGold():
-                subject.set_gold_label(cl.gold)
+    #     if id_ in self.subjects:
+    #         return self.subjects.getAgent(id_)
+    #     else:
+    #         subject = Subject(id_, self.p0)
+    #         if self.gold_from_cl and cl.isGold():
+    #             subject.set_gold_label(cl.gold)
 
-            self.subjects.addAgent(subject)
-            return subject
+    #         self.subjects.addAgent(subject)
+    #         return subject
 
-    def getUserData(self):
-        """ Get User Bureau object """
-        return self.users
+    # def getUserData(self):
+    #     """ Get User Bureau object """
+    #     return self.users
 
-    def getSubjectData(self):
-        """ Get Subject Bureau object """
-        return self.subjects
+    # def getSubjectData(self):
+    #     """ Get Subject Bureau object """
+    #     return self.subjects
 
-    def setGoldLabels(self, golds):
+    def set_gold_labels(self, golds):
         """
             Defines the subjects explicitly that should be
             treated as gold standards
@@ -174,13 +170,14 @@ class SWAP:
         """
         for id_, gold in golds.items():
             # TODO use old swap score or reset with p0 for bootstrap?
-            if id_ in self.subjects:
-                self.subjects.get(id_).set_gold_label(gold)
-            else:
-                subject = Subject(id_, self.p0, gold)
-                self.subjects.addAgent(subject)
+            # if id_ in self.subjects:
+            self.subjects.get(id_, make_new=True).set_gold_label(gold)
+            # else:
+            #     subject = Subject(id_, self.p0, gold)
+            #     self.subjects.addAgent(subject)
 
-    def getGoldLabels(self):
+    @property
+    def golds(self):
         data = {}
         for subject in self.subjects:
             if subject.isgold():
@@ -196,8 +193,10 @@ class SWAP:
             Consolidate all the statistical data from the bureaus
         """
         stats = Stats()
-        stats.add('user', self.users.stats())
-        stats.add('subject', self.subjects.stats())
+        if len(self.users) > 0:
+            stats.add('user', self.users.stats())
+        if len(self.subjects) > 0:
+            stats.add('subject', self.subjects.stats())
 
         return stats
 
@@ -208,18 +207,19 @@ class SWAP:
         """
         return str(self.stats)
 
-    def exportUserData(self):
-        """ Exports consolidated user information """
-        return self.users.export()
+    # def exportUserData(self):
+    #     """ Exports consolidated user information """
+    #     return self.users.export()
 
-    def exportSubjectData(self):
-        """ Exports consolidated subject information """
-        return self.subjects.export()
+    # def exportSubjectData(self):
+    #     """ Exports consolidated subject information """
+    #     return self.subjects.export()
 
     def export(self):
         """
             Export both user and subject data
         """
+        raise DeprecationWarning
         return {
             'users': self.users.export(),
             'subjects': self.subjects.export(),
@@ -248,7 +248,7 @@ class SWAP:
             if (labels is None or id_ in labels) and \
                     gold in [0, 1] and \
                     id_ in self.subjects:
-                score = self.subjects.get(id_).score
+                score = self.subjects.get(id_, make_new=False).score
                 data.append((gold, score))
 
         return data
@@ -267,152 +267,18 @@ class SWAP:
 
             return tuple(golds)
 
+        config = Config()
+
         s = ''
         s += 'SWAP manifest\n'
         s += '=============\n'
-        s += 'p0:         %f\n' % self.p0
-        s += 'epsilon:    %f\n' % self.epsilon
+        s += 'p0:         %f\n' % config.p0
+        s += 'epsilon:    %f\n' % config.epsilon
         s += '\n'
-        s += 'n golds:    %5d %5d %5d\n' % countGolds()
+        s += 'n golds:    %d %d %d\n' % countGolds()
         s += '\n'
         s += 'Statistics\n'
         s += '==========\n'
         s += str(self.stats) + '\n'
 
         return s
-
-
-class Classification:
-    """
-        Object to represent each individual classification
-    """
-
-    def __init__(self, user, subject, annotation,
-                 gold_label=-1, metadata={}):
-        """
-            Args:
-                user:       user name of the classifying user
-                subject:    id number of the subject being classified
-                annotation: label assigned by the user
-                gold_label: (optional) expert assigned label
-                metadata:   (optional) any additional metadata associated
-        """
-
-        if type(annotation) is not int:
-            raise ClValueError('annotation', int, annotation)
-
-        if type(gold_label) is not int:
-            raise ClValueError('gold_label', int, gold_label)
-
-        if type(metadata) is not dict:
-            raise ClValueError('metadata', dict, metadata)
-
-        self.user = user
-        self.subject = subject
-        self.annotation = annotation
-
-        self.gold_label = None
-        self.gold = gold_label
-
-        self.metadata = metadata
-
-    @property
-    def gold(self):
-        """
-            Get the gold label
-        """
-        if self.gold_label is not None:
-            return self.gold_label
-        else:
-            return False
-
-    @gold.setter
-    def gold(self, gold):
-        if gold in [0, 1]:
-            self.gold_label = gold
-        else:
-            self.gold_label = None
-
-    def isGold(self):
-        if self.gold_label is not None:
-            return True
-        else:
-            return False
-
-    def __str__(self):
-        return 'user %s subject %s annotation %d gold %s' % \
-            (str(self.user), str(self.subject),
-             self.annotation, str(self.gold))
-
-    @staticmethod
-    def generate(cl):
-        """
-            Static generator method. Generates a classification
-            object from a classification in dictionary form
-        """
-        Classification.Validate(cl)
-
-        user = cl['user_name']
-        subject = cl['subject_id']
-        annotation = cl['annotation']
-
-        c = Classification(user, subject, annotation)
-
-        if 'gold_label' in cl:
-            c.gold_label = cl['gold_label']
-
-        if 'metadata' in cl:
-            c.metadata = cl['metadata']
-
-        return c
-
-    def Validate(cl):
-        """
-            Verify classification is compatible with current
-            SWAP version
-
-            Args:
-                cl: (dict) classification
-        """
-        names = [
-            'user_name',
-            'subject_id',
-            'annotation']
-        for key in names:
-            try:
-                cl[key]
-            except KeyError:
-                raise ClKeyError(key, cl)
-
-        if type(cl['annotation']) is not int:
-            raise ClValueError('annotation', int, cl)
-        if 'gold_label' in cl and type(cl['gold_label']) is not int:
-            raise ClValueError('gold_label', int, cl)
-
-
-class ClKeyError(KeyError):
-    """
-        Raise when a classification is missing a key element
-    """
-
-    def __init__(self, key, cl={}, *args, **kwargs):
-        pprint(cl)
-        msg = 'key %s not found in classification %s' % (key, str(cl))
-        KeyError.__init__(self, msg)
-
-
-class ClValueError(ValueError):
-    """
-        Raise when a value in the classification is incorrect,
-        impossible, or is of the wrong type
-    """
-
-    def __init__(self, key, _type, value, *args, **kwargs):
-        if type(value) is dict:
-            kwargs['cl'] = value
-            value = value[key]
-        if 'cl' in kwargs:
-            pprint(kwargs['cl'])
-        bad_type = type(value)
-        msg = 'key %s should be type %s but is %s' % (key, _type, bad_type)
-        ValueError.__init__(self, msg)

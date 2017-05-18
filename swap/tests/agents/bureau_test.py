@@ -61,6 +61,13 @@ class TestBureau:
         assert type(u) is User
         assert u.id == 15
 
+    def test_get_newagent_isadded(self):
+        b = Bureau(User)
+        u = b.get(15)
+
+        assert u in b
+        assert b.get(15) == u
+
     def test_get_agent_none(self):
         b = Bureau(User)
         assert b.get(0, make_new=False) is None
@@ -96,6 +103,14 @@ class TestBureau:
         b = Bureau(User)
         agent = User(15)
         assert agent not in b
+
+    def test_contains_int(self):
+        b = Bureau(User)
+        agent = User(15)
+        b.add(agent)
+
+        assert 15 in b
+        assert 16 not in b
 
     def test_idset(self):
         b = Bureau(User)
