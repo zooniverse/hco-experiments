@@ -61,12 +61,12 @@ class ScoreExport:
         return len(self.scores)
 
     def __iter__(self):
-        return self.scores.values()
+        return iter(self.scores)
 
     def roc(self, labels=None):
         def func(score):
             return score.gold, score.p
-        scores = self.scores.values()
+        scores = self.scores
 
         if labels is None:
             return ScoreIterator(scores, func)
@@ -81,21 +81,25 @@ class ScoreIterator:
         if type(scores) is dict:
             scores = list(scores.values())
         if type(scores) is not list:
-            raise TypeError
+            raise TypeError('scores type %s not valid!' % str(type(scores)))
 
         self.scores = scores
         self.func = func
         if cond is None:
             self.cond = lambda item: True
+        else:
+            self.cond = cond
         self.i = 0
 
     def next(self):
         if self.i >= len(self):
             raise StopIteration
-        obj = self.func(self.scores[self.i])
+
+        score = self.scores[self.i]
         self.i += 1
 
-        if self.cond(obj):
+        if self.cond(score):
+            obj = self.func(score)
             return obj
         else:
             return self.next()
