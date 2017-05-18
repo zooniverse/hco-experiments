@@ -134,6 +134,14 @@ class Interface(ui.SWAPInterface):
             metavar='directory containing trial files',
             help='Upload trials to mongo database')
 
+        exp_parser.add_argument(
+            '--pow', action='store_true',
+            help='controversial and consensus aggregation method')
+
+        exp_parser.add_argument(
+            '--multiply', action='store_true',
+            help='controversial and consensus aggregation method')
+
         return parser
 
     def command_boot(self, args):
@@ -170,6 +178,13 @@ class Interface(ui.SWAPInterface):
         else:
             cutoff = 0.96
 
+        if args.pow:
+            version = 'pow'
+        elif args.multiply:
+            version = 'multiply'
+        else:
+            version = 'pow'
+
         if args.run:
             d_trials = self.f(args.run[0])
             f_pickle = self.f(args.run[1])
@@ -177,7 +192,7 @@ class Interface(ui.SWAPInterface):
             def saver(trials, fname):
                 fname = os.path.join(d_trials, fname)
                 self.save(trials, fname)
-            e = Experiment(saver)
+            e = Experiment(version, saver)
             e.run()
 
             del e.save_f
@@ -186,7 +201,8 @@ class Interface(ui.SWAPInterface):
 
         elif args.from_trials:
             e = Experiment.from_trial_export(
-                args.from_trials[0], cutoff, self.save, self.load)
+                version, args.from_trials[0],
+                cutoff, self.save, self.load)
 
         elif args.load:
             e = self.load(args.load[0])

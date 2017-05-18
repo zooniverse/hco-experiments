@@ -215,16 +215,16 @@ class GoldGetter:
         return lambda: db.getExpertGold(subject_ids)
 
     @_getter
-    def controversial(self, size):
+    def controversial(self, size, version):
         def f():
-            subjects = cv.get_controversial(size)
+            subjects = cv.get_controversial(size, version)
             return db.getExpertGold(subjects)
         return f
 
     @_getter
-    def consensus(self, size):
+    def consensus(self, size, version):
         def f():
-            consensus = cv.get_consensus(size)
+            consensus = cv.get_consensus(size, version)
             return db.getExpertGold(consensus)
         return f
 
