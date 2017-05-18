@@ -17,53 +17,67 @@ class TestBureau:
     def test_init(self):
         b = Bureau(Agent)
         assert b.agent_type is Agent
-        assert b.agents == {}
+        assert b._agents == {}
 
     def test_add_agent_typecheck(self):
         b = Bureau(User)
-        agent = Subject(0, 0)
+        agent = Subject(0)
         with pytest.raises(TypeError):
-            b.addAgent(agent)
+            b.add(agent)
 
-    def test_add_agent_twice(self):
+    def test_add_agent_twice_nonew(self):
         b = Bureau(User)
-        agent = User(0, 0)
-        b.addAgent(agent)
+        agent = User(0)
+        b.add(agent)
         with pytest.raises(KeyError):
-            b.addAgent(agent)
+            b.add(agent, override=False)
+
+    def test_add_agent_twice_new(self):
+        b = Bureau(User)
+        agent = User(0)
+        b.add(agent)
+        b.add(agent, override=True)
 
     def test_add_agent(self):
         b = Bureau(User)
-        agent = User(0, 0)
-        b.addAgent(agent)
+        agent = User(0)
+        b.add(agent)
 
-        assert 0 in b.agents
-        assert b.agents[0] == agent
+        assert agent in b
+        assert 0 in b._agents
+        assert b.get(0) == agent
 
     def test_get_agent(self):
         b = Bureau(User)
-        agent = User(0, 0)
-        b.addAgent(agent)
+        agent = User(0)
+        b.add(agent)
 
-        assert b.getAgent(0) == agent
+        assert b.get(0) == agent
 
-    def test_get_agent_keyerror(self):
+    def test_get_agent_new(self):
         b = Bureau(User)
-        with pytest.raises(KeyError):
-            b.getAgent(0)
+        u = b.get(15)
+
+        assert type(u) is User
+        assert u.id == 15
+
+    def test_get_agent_none(self):
+        b = Bureau(User)
+        assert b.get(0, make_new=False) is None
 
     def test_del_agent(self):
         b = Bureau(User)
-        agent = User(0, 0)
-        b.addAgent(agent)
-        b.removeAgent(0)
+        agent = User(0)
+        b.add(agent)
+        b.remove(0)
 
-        assert 0 not in b.agents
+        assert agent not in b
+        assert 0 not in b._agents
 
     def test_has_true(self):
         b = Bureau(User)
-        agent = User(0, 0)
-        b.addAgent(agent)
+        agent = User(0)
+        b.add(agent)
 
         assert agent in b
 
@@ -72,31 +86,57 @@ class TestBureau:
 
         assert 0 not in b
 
-    # ---------EXPORT TEST------------------------------
+    def test_contains_true(self):
+        b = Bureau(User)
+        agent = User(15)
+        b.add(agent)
+        assert agent in b
 
+    def test_contains_false(self):
+        b = Bureau(User)
+        agent = User(15)
+        assert agent not in b
+
+    def test_idset(self):
+        b = Bureau(User)
+        [b.add(User(i)) for i in range(5)]
+        assert b.idset() == set(range(5))
+
+    def test_stats_subject(self):
+        b = Bureau(Subject)
+        [b.add(Subject(i)) for i in range(5)]
+        b.stats()
+
+    def test_stats_users(self):
+        b = Bureau(User)
+        [b.add(User(i)) for i in range(5)]
+        b.stats()
+
+    # ---------EXPORT TEST------------------------------
+    @pytest.mark.skip()
     def test_export_contents(self):
         b = Bureau(User)
         for i in range(10):
-            b.addAgent(User(i, .5))
+            b.add(User(i))
 
         export = b.export()
         pprint(export)
 
-        assert b.export()[0] == User(0, .5).export()
-        assert b.export()[5] == User(5, .5).export()
+        assert b.export()[0] == User(0).export()
+        assert b.export()[5] == User(5).export()
 
 
 class TestAgentIterator(unittest.TestCase):
 
-    def getBureau(self):
+    def get_bureau(self):
         b = Bureau(Subject)
         for i in range(5):
-            b.add(Subject(i, .12))
+            b.add(Subject(i))
 
         return b
 
     def test_next(self):
-        b = self.getBureau()
+        b = self.get_bureau()
         a = AgentIterator(b, [1, 3])
 
         assert next(a).id == 1
@@ -105,13 +145,13 @@ class TestAgentIterator(unittest.TestCase):
             a.next()
 
     def test_length(self):
-        b = self.getBureau()
+        b = self.get_bureau()
         a = AgentIterator(b, [1, 2])
 
         assert len(a) == 2
 
     def test_iter(self):
-        b = self.getBureau()
+        b = self.get_bureau()
         a = AgentIterator(b, [1, 2])
 
         assert iter(a) == a

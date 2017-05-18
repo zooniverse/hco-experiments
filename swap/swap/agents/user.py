@@ -76,10 +76,11 @@ class User(Agent):
             Calculate the mean, standard deviation, and median
             of the scores in a bureau containing Users
         """
-        data = []
-        for i in [0, 1]:
-            p = [agent.getScore(i) for agent in bureau]
-            data.append((i, p))
+        p = [agent.score for agent in bureau]
+        p = zip(*p)
+
+        p0, p1 = p
+        data = [(0, p0), (1, p1)]
 
         return MultiStat(*data)
 

@@ -213,7 +213,6 @@ class TestUser:
     #     pprint(export)
     #     assert export['score_1_history'] == [.5, 1 / 3, 1 / 4, 2 / 5, 3 / 6]
 
-    @pytest.mark.skip()
     def test_bureau_stats(self):
         b = Bureau(User)
         b.add(User(0))

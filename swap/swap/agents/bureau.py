@@ -24,11 +24,7 @@ class Bureau(object):
         # dictionary to store all agents, key is agent-ID
         self._agents = dict()
 
-    @property
-    def agents(self):
-        return self._agents.copy()
-
-    def addAgent(self, agent):
+    def add(self, agent, override=True):
         """
             Add agent to bureau
 
@@ -43,15 +39,12 @@ class Bureau(object):
                 (type(agent), self.agent_type))
 
         # Add agent to collection
-        if agent.id not in self._agents:
-            self._agents[agent.id] = agent
-        else:
+        if agent.id in self._agents and not override:
             raise KeyError("Agent-ID already in bureau, remove first")
+        else:
+            self._agents[agent.id] = agent
 
-    def add(self, agent):
-        self.addAgent(agent)
-
-    def getAgent(self, agent_id):
+    def get(self, agent_id, make_new=True):
         """ Get agent from bureau
 
         Parameter:
@@ -64,13 +57,12 @@ class Bureau(object):
         """
         if agent_id in self._agents:
             return self._agents[agent_id]
+        elif make_new:
+            return self.agent_type(agent_id)
         else:
-            raise KeyError("Error: Agent_id not in Bureau")
+            return None
 
-    def get(self, agent_id):
-        return self.getAgent(agent_id)
-
-    def removeAgent(self, agent_id):
+    def remove(self, agent_id):
         """ Remove agent from bureau
 
         Parameter:
@@ -94,8 +86,8 @@ class Bureau(object):
 
     # ----------------------------------------------------------------
 
-    def getAgentIds(self):
-        return set(self.agents.keys())
+    def idset(self):
+        return set(self._agents.keys())
 
     def stats(self):
         """
@@ -106,7 +98,7 @@ class Bureau(object):
 
     def export(self):
         data = dict()
-        for name, agent in self.agents.items():
+        for name, agent in self._agents.items():
             data[name] = agent.export()
         return data
 
@@ -114,7 +106,7 @@ class Bureau(object):
         return AgentIterator(self, ids)
 
     def __iter__(self):
-        return iter(self.agents.values())
+        return iter(self._agents.values())
 
     def __contains__(self, item):
         if isinstance(item, Agent):
