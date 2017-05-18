@@ -9,6 +9,7 @@ import experiments as ex
 from swap import ui
 import swap.plots as plots
 
+import os
 # import copy
 
 
@@ -170,11 +171,11 @@ class Interface(ui.SWAPInterface):
             cutoff = 0.96
 
         if args.run:
-            f_plot = self.f(args.run[0])
+            d_trials = self.f(args.run[0])
             f_pickle = self.f(args.run[1])
 
             def saver(trials, fname):
-                fname = self.f(fname)
+                fname = os.path.join(d_trials, fname)
                 self.save(trials, fname)
             e = Experiment(saver)
             e.run()
