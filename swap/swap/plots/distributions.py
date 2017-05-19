@@ -2,6 +2,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import statistics as st
 
 from sklearn.neighbors.kde import KernelDensity
@@ -124,7 +125,13 @@ def plot_class_histogram(swap):
 def multivar_scatter(data):
     plt.subplot(111)
     x, y, z = zip(*data)
-    plt.scatter(x, y, c=z, cmap='hsv')
+    norm = mpl.colors.Normalize(vmin=0., vmax=1.0)
+    plt.scatter(x, y, c=z, norm=norm, cmap='hsv')
+
+    plt.colorbar()
+    plt.title('Purity in subjects with p>0.96')
+    plt.xlabel('Consensus')
+    plt.ylabel('Controversial')
 
 
 def plot_pdf(data, fname, swap=None, cutoff=1):

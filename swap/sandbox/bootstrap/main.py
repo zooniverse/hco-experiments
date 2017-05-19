@@ -226,14 +226,56 @@ class ExperimentInterface(swap.ui.Interface):
             metavar=('Plot destination, experiment pickle destination'))
 
     def call(self, args):
-        f_plot = self.f(args.run[0])
-        f_pickle = self.f(args.run[1])
+        if args.cutoff:
+            cutoff = float(args.cutoff[0])
+        else:
+            cutoff = 0.96
 
-        e = Experiment()
-        e.run()
-        e.plot(f_plot)
+        if args.pow:
+            version = 'pow'
+        elif args.multiply:
+            version = 'multiply'
+        else:
+            version = 'pow'
 
-        self.save(f_pickle)
+        if args.run:
+            d_trials = self.f(args.run[0])
+            f_pickle = self.f(args.run[1])
+
+            def saver(trials, fname):
+                fname = os.path.join(d_trials, fname)
+                self.save(trials, fname)
+            e = Experiment(version, saver)
+            e.run()
+
+            del e.save_f
+            del e.control
+            self.save(e, f_pickle)
+
+        elif args.from_trials:
+            e = Experiment.from_trial_export(
+                version, args.from_trials[0],
+                cutoff, self.save, self.load)
+
+        elif args.load:
+            e = self.load(args.load[0])
+
+        if args.plot:
+            assert e
+            e.plot(self.f(args.plot[0]))
+
+        if args.shell:
+            import code
+            code.interact(local=locals())
+
+        if args.save:
+            assert e
+            del e.save_f
+            del e.control
+            self.save(e, self.f(args.save[0]))
+
+        if args.upload:
+            ex.upload_trials(args.upload[0], self.load)
 
 
 ################################################################

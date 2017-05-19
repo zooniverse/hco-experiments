@@ -75,6 +75,11 @@ class ScoreExport:
                 return score.id in labels
             return ScoreIterator(scores, func, cond)
 
+    def full(self):
+        def func(score):
+            return (score.id, score.gold, score.p)
+        return ScoreIterator(self.scores, func)
+
 
 class ScoreIterator:
     def __init__(self, scores, func, cond=None):

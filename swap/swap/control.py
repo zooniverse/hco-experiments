@@ -6,8 +6,8 @@ import progressbar
 
 from swap.swap import SWAP, Classification
 import swap.db.classifications as db
+import swap.db.controversial as cv
 from swap.db import Query
-import swap.config.controversial as cv
 
 
 class Control:
@@ -217,16 +217,16 @@ class GoldGetter:
         return lambda: db.getExpertGold(subject_ids)
 
     @_getter
-    def controversial(self, size):
+    def controversial(self, size, version):
         def f():
-            subjects = cv.get_controversial(size)
+            subjects = cv.get_controversial(size, version)
             return db.getExpertGold(subjects)
         return f
 
     @_getter
-    def consensus(self, size):
+    def consensus(self, size, version):
         def f():
-            consensus = cv.get_consensus(size)
+            consensus = cv.get_consensus(size, version)
             return db.getExpertGold(consensus)
         return f
 
