@@ -5,96 +5,60 @@
 from bootstrap import *
 from experiments import Experiment
 
-from swap import ui
+import swap.ui
 import swap.plots as plots
 
 
-class Interface(ui.SWAPInterface):
+class BootInterface(swap.ui.Interface):
 
-    def __init__(self):
-        super().__init__()
+    def init(self):
 
         self.last_load = None
 
-    def options(self):
-        parser = super().options()
+    @property
+    def command(self):
+        return 'boot'
 
-        ################################################################
-        # Boot Parser
-        ################################################################
-
-        boot_parser = self.subparsers.add_parser('boot')
-        boot_parser.set_defaults(func=self.command_boot)
-        self.the_subparsers['boot'] = boot_parser
-
-        # boot_parser.add_argument(
+    def options(self, parser):
+        # parser.add_argument(
         #     '--threshold', nargs=2,
         #     help='Print the number of subjects above or below the threshold')
 
-        boot_parser.add_argument(
+        parser.add_argument(
             '--iterate', nargs=3,
             help='Iterate SWAP N times with the ' +
                  'specified (low, high) thresholds')
 
-        boot_parser.add_argument(
+        parser.add_argument(
             '--thresholds', '-t', nargs=3)
 
-        boot_parser.add_argument(
+        parser.add_argument(
             '--traces', nargs=1,
             metavar='file',
             help='Generate trace plot of bootstrap iterations')
 
-        boot_parser.add_argument(
+        parser.add_argument(
             '--load', nargs=1,
             metavar='file',
             help='load a pickled bootstrap from file')
 
-        boot_parser.add_argument(
+        parser.add_argument(
             '--save', nargs=1,
             metavar='file',
             help='load a pickled bootstrap from file')
 
-        boot_parser.add_argument(
+        parser.add_argument(
             '--histogram', nargs=1,
             metavar='file',
             help='Draw a histogram of bootstrap data')
 
-        boot_parser.add_argument(
+        parser.add_argument(
             '--cm', nargs=3)
 
-        boot_parser.add_argument(
+        parser.add_argument(
             '--utraces', nargs='*')
 
-        ################################################################
-        # ROC Parser
-        ################################################################
-
-        roc_parser = self.the_subparsers['roc']
-        roc_parser.add_argument(
-            '-b', '--bootstrap', nargs='*', action='append',
-            help='Generate ROC curve from this file, bootstrap specific')
-
-        roc_parser.add_argument(
-            '-s', '--silver-only', nargs=2,
-            help='Generate roc curves only considering the silver ' +
-                 'subjects in this file and round')
-
-        ################################################################
-        # Experiment Parser
-        ################################################################
-
-        exp_parser = self.subparsers.add_parser('experiment')
-        exp_parser.set_defaults(func=self.command_experiment)
-        self.the_subparsers['experiment'] = exp_parser
-
-        exp_parser.add_argument(
-            '--run', nargs=2,
-            metavar=('Plot destination, experiment pickle destination'))
-
-        return parser
-
-    def command_boot(self, args):
-
+    def call(self, args):
         if args.load:
             bootstrap = self.load(args.load[0])
         else:
@@ -121,16 +85,6 @@ class Interface(ui.SWAPInterface):
             fname = self.f(args.save[0])
             self.save(bootstrap, fname)
 
-    def command_experiment(self, args):
-        f_plot = self.f(args.run[0])
-        f_pickle = self.f(args.run[1])
-
-        e = Experiment()
-        e.run()
-        e.plot(f_plot)
-
-        self.save(f_pickle)
-
     def save(self, obj, fname):
         if isinstance(obj, Bootstrap):
             with open(self.f('manifest'), 'w') as file:
@@ -139,16 +93,7 @@ class Interface(ui.SWAPInterface):
         super().save(obj, fname)
 
     def load(self, fname):
-        if self.last_load is not None and \
-                self.last_load[0] == fname:
-            return self.last_load[1]
-        else:
-            self.last_load = None
-
-            obj = super().load(fname)
-            self.last_load = (fname, obj)
-
-            return obj
+        return load(fname)
 
     def mod_f(self, fname, append):
         append = str(append)
@@ -260,10 +205,60 @@ class Interface(ui.SWAPInterface):
         plots.traces.plot_tracks(plot_data, "Bootstrap Traces",
                                  fname, scale='linear')
 
-    def get_silvers(self, fname, round_):
-        boot = self.load(fname)
-        silvers = boot.metrics.get(round_).getSilverNames()
-        return silvers
+
+################################################################
+#
+# Experiment
+#
+################################################################
+
+
+class ExperimentInterface(swap.ui.Interface):
+
+    @property
+    def command(self):
+        return 'experiment'
+
+    def options(self, parser):
+
+        parser.add_argument(
+            '--run', nargs=2,
+            metavar=('Plot destination, experiment pickle destination'))
+
+    def call(self, args):
+        f_plot = self.f(args.run[0])
+        f_pickle = self.f(args.run[1])
+
+        e = Experiment()
+        e.run()
+        e.plot(f_plot)
+
+        self.save(f_pickle)
+
+
+################################################################
+#
+# ROC
+#
+################################################################
+
+
+class RocInterface(swap.ui.RocInterface):
+
+    def call(self, args):
+        pass
+
+    def options(self, parser):
+        super().options(parser)
+
+        parser.add_argument(
+            '-b', '--bootstrap', nargs='*', action='append',
+            help='Generate ROC curve from this file, bootstrap specific')
+
+        parser.add_argument(
+            '-s', '--silver-only', nargs=2,
+            help='Generate roc curves only considering the silver ' +
+                 'subjects in this file and round')
 
     def collect_roc(self, args):
         it = super().collect_roc(args)
@@ -285,14 +280,16 @@ class Interface(ui.SWAPInterface):
 
         return it
 
-    ################################################################
-    #
-    # Experiments
-    #
-    ################################################################
+    def get_silvers(self, fname, round_):
+        boot = self.load(fname)
+        silvers = boot.metrics.get(round_).getSilverNames()
+        return silvers
+
+    def load(self, fname):
+        return load(fname)
 
 
-class Roc_Iterator(ui.Roc_Iterator):
+class Roc_Iterator(swap.ui.Roc_Iterator):
 
     def addBootObject(self, label, fname, load,
                       iterations=None, silver_only=False):
@@ -328,9 +325,26 @@ class Roc_Iterator(ui.Roc_Iterator):
             return (label, self._get_export(obj, i))
 
 
+def load(self, fname):
+    if self.last_load is not None and \
+            self.last_load[0] == fname:
+        return self.last_load[1]
+    else:
+        self.last_load = None
+
+        obj = super().load(fname)
+        self.last_load = (fname, obj)
+
+        return obj
+
+
 def main():
-    interface = Interface()
-    ui.run(interface)
+    ui = swap.ui.UI()
+    RocInterface(ui)
+    BootInterface(ui)
+    ExperimentInterface(ui)
+
+    ui.run()
 
 
 if __name__ == "__main__":

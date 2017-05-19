@@ -10,52 +10,20 @@ import argparse
 import os
 
 
-class Interface:
-    """
-        Common CLI interface for repetitive operations
-    """
-
+class UI:
     def __init__(self):
-        """
-            Initialize variables
-        """
-        self.args = None
-        self.dir = None
-
+        self.interfaces = {}
         self.parser = argparse.ArgumentParser()
-        self.subparsers = self.parser.add_subparsers()
-        self.the_subparsers = {}
+        self.sparsers = self.parser.add_subparsers()
 
-    def options(self):
-        """
-            Add command line options
+        self.options(self.parser)
 
-            dir: Save all output to a separate subdirectory
-            -a|--add: Add an object to roc curve generation queue
-            --output: Save roc curve to file
-            --p0: Use custom value for p0
-            --epsilon: Use custom value for epsilon
-        """
-        parser = self.parser
+    def run(self):
+        args = self.parser.parse_args()
+        print(args)
+        self.call(args)
 
-        roc_parser = self.subparsers.add_parser('roc')
-        roc_parser.set_defaults(func=self.command_roc)
-        self.the_subparsers['roc'] = roc_parser
-
-        # roc_parser.add_argument(
-        #     'files', nargs='*',
-        #     help='Pickle files used to generate roc curves')
-
-        roc_parser.add_argument(
-            '-a', '--add', nargs=2, action='append',
-            metavar=('label', 'file'),
-            help='Add pickled SWAP object to roc curve')
-
-        roc_parser.add_argument(
-            '--output', '-o', nargs=1,
-            metavar='file',
-            help='Save plot to file')
-
+    def options(self, parser):
         parser.add_argument(
             '--dir', nargs=1,
             help='Direct all output to a different directory')
@@ -68,17 +36,14 @@ class Interface:
             '--epsilon', nargs=1,
             help='Define epsilon')
 
-        return parser
-
-    def call(self):
+    def call(self, args):
         """
             Execute arguments
         """
-        args = self.getArgs()
-        print(args)
         config = Config()
 
-        self.option_dir(args)
+        if args.dir:
+            self.set_dir(args.dir[0])
 
         if args.p0:
             config.p0 = float(args.p0[0])
@@ -89,41 +54,72 @@ class Interface:
         if 'func' in args:
             args.func(args)
 
-    def option_dir(self, args):
+    def add(self, interface):
+        command = interface.command
+
+        sparser = self.sparsers.add_parser(command)
+        sparser.set_defaults(func=interface.call)
+
+        interface.options(sparser)
+        self.interfaces[command] = interface
+
+    @property
+    def args(self):
+        pass
+
+    def f(self, fname):
+        """
+            Ensure directory specified with --dir is in
+            a filename
+
+            Args:
+                fname: filename to modify
+        """
+        if fname == '-':
+            return None
+        if self.dir:
+            return os.path.join(self.dir, fname)
+        else:
+            return fname
+
+    def set_dir(self, dir_):
         """
             Output all plots and pickle files ot a sub directory
 
             Args:
                 args: command line arguments
         """
-        if args.dir:
-            _dir = args.dir[0]
-            if not os.path.isdir(_dir):
-                raise ValueError(
-                    '%s Does not point to a valid directory' % _dir)
+        if not os.path.isdir(dir_):
+            raise ValueError(
+                '%s Does not point to a valid directory' % dir_)
 
-            if _dir[-1] == '/':
-                _dir = _dir[:-1]
+        if dir_[-1] == '/':
+            dir_ = dir_[:-1]
 
-            self.dir = _dir
+        self.dir = dir_
 
-    def command_roc(self, args):
-        """
-            Generate a roc curve
 
-            Args:
-                args: command line arguments
-        """
-        if args.output:
-            output = self.f(args.output[0])
-        else:
-            output = None
+class Interface:
 
-        data = self.collect_roc(args)
+    def __init__(self, ui):
+        self.ui = ui
+        ui.add(self)
+        self.init()
 
-        title = 'Receiver Operater Characteristic'
-        plots.plot_roc(title, *data, fname=output)
-        print(args)
+    def init(self):
+        pass
+
+    @property
+    def command(self):
+        pass
+
+    def options(self, parser):
+        pass
+
+    def call(self, args):
+        pass
+
+    ###############################################################
 
     def save(self, object, fname):
         """
@@ -144,33 +140,51 @@ class Interface:
         """
         return load_pickle(fname)
 
-    def getArgs(self):
-        """
-            Commmon method to get arguments and store them in
-            instance variable
-        """
-        if self.args is None:
-            parser = self.options()
-            args = parser.parse_args()
-            self.args = args
-            return args
-        else:
-            return self.args
-
     def f(self, fname):
+        self.ui.f(fname)
+
+
+class RocInterface(Interface):
+
+    @property
+    def command(self):
+        return 'roc'
+
+    def options(self, parser):
+
+        # roc_parser.add_argument(
+        #     'files', nargs='*',
+        #     help='Pickle files used to generate roc curves')
+
+        parser.add_argument(
+            '-a', '--add', nargs=2, action='append',
+            metavar=('label', 'file'),
+            help='Add pickled SWAP object to roc curve')
+
+        parser.add_argument(
+            '--output', '-o', nargs=1,
+            metavar='file',
+            help='Save plot to file')
+
+    def call(self, args):
         """
-            Ensure directory specified with --dir is in
-            a filename
+            Generate a roc curve
 
             Args:
-                fname: filename to modify
+                args: command line arguments
         """
-        if fname == '-':
-            return None
-        if self.dir:
-            return os.path.join(self.dir, fname)
+        super().call()
+
+        if args.output:
+            output = self.f(args.output[0])
         else:
-            return fname
+            output = None
+
+        data = self.collect_roc(args)
+
+        title = 'Receiver Operater Characteristic'
+        plots.plot_roc(title, *data, fname=output)
+        print(args)
 
     def collect_roc(self, args):
         """
@@ -189,119 +203,291 @@ class Interface:
         return it
 
 
+# class Interface:
+#     """
+#         Common CLI interface for repetitive operations
+#     """
+
+#     def __init__(self):
+#         """
+#             Initialize variables
+#         """
+#         self.args = None
+#         self.dir = None
+
+#         self.parser = argparse.ArgumentParser()
+#         self.subparsers = self.parser.add_subparsers()
+#         self.the_subparsers = {}
+
+#     def options(self):
+#         """
+#             Add command line options
+
+#             dir: Save all output to a separate subdirectory
+#             -a|--add: Add an object to roc curve generation queue
+#             --output: Save roc curve to file
+#             --p0: Use custom value for p0
+#             --epsilon: Use custom value for epsilon
+#         """
+#         parser = self.parser
+
+#         roc_parser = self.subparsers.add_parser('roc')
+#         roc_parser.set_defaults(func=self.command_roc)
+#         self.the_subparsers['roc'] = roc_parser
+
+#         # roc_parser.add_argument(
+#         #     'files', nargs='*',
+#         #     help='Pickle files used to generate roc curves')
+
+#         roc_parser.add_argument(
+#             '-a', '--add', nargs=2, action='append',
+#             metavar=('label', 'file'),
+#             help='Add pickled SWAP object to roc curve')
+
+#         roc_parser.add_argument(
+#             '--output', '-o', nargs=1,
+#             metavar='file',
+#             help='Save plot to file')
+
+#         parser.add_argument(
+#             '--dir', nargs=1,
+#             help='Direct all output to a different directory')
+
+#         parser.add_argument(
+#             '--p0', nargs=1,
+#             help='Define p0')
+
+#         parser.add_argument(
+#             '--epsilon', nargs=1,
+#             help='Define epsilon')
+
+#         return parser
+
+#     def call(self):
+#         """
+#             Execute arguments
+#         """
+#         args = self.getArgs()
+#         print(args)
+#         config = Config()
+
+#         self.option_dir(args)
+
+#         if args.p0:
+#             config.p0 = float(args.p0[0])
+
+#         if args.epsilon:
+#             config.epsilon = float(args.epsilon[0])
+
+#         if 'func' in args:
+#             args.func(args)
+
+#     def option_dir(self, args):
+#         """
+#             Output all plots and pickle files ot a sub directory
+
+#             Args:
+#                 args: command line arguments
+#         """
+#         if args.dir:
+#             _dir = args.dir[0]
+#             if not os.path.isdir(_dir):
+#                 raise ValueError(
+#                     '%s Does not point to a valid directory' % _dir)
+
+#             if _dir[-1] == '/':
+#                 _dir = _dir[:-1]
+
+#             self.dir = _dir
+
+#     def command_roc(self, args):
+#         """
+#             Generate a roc curve
+
+#             Args:
+#                 args: command line arguments
+#         """
+#         if args.output:
+#             output = self.f(args.output[0])
+#         else:
+#             output = None
+
+#         data = self.collect_roc(args)
+
+#         title = 'Receiver Operater Characteristic'
+#         plots.plot_roc(title, *data, fname=output)
+#         print(args)
+
+#     def save(self, object, fname):
+#         """
+#             Pickle and save an object
+
+#             Args:
+#                 object
+#                 fname
+#         """
+#         save_pickle(object, fname)
+
+#     def load(self, fname):
+#         """
+#             Load pickled object from file
+
+#             Args:
+#                 fname
+#         """
+#         return load_pickle(fname)
+
+#     def getArgs(self):
+#         """
+#             Commmon method to get arguments and store them in
+#             instance variable
+#         """
+#         if self.args is None:
+#             parser = self.options()
+#             args = parser.parse_args()
+#             self.args = args
+#             return args
+#         else:
+#             return self.args
+
+#     def f(self, fname):
+#         """
+#             Ensure directory specified with --dir is in
+#             a filename
+
+#             Args:
+#                 fname: filename to modify
+#         """
+#         if fname == '-':
+#             return None
+#         if self.dir:
+#             return os.path.join(self.dir, fname)
+#         else:
+#             return fname
+
+#     def collect_roc(self, args):
+#         """
+#             Load objects for roc curve from file
+#             and prepare data for roc curve generation
+
+#             Args:
+#                 args: command line arguments
+#         """
+#         it = Roc_Iterator()
+#         if args.add:
+#             for label, fname in args.add:
+#                 print(fname)
+#                 it.addObject(label, fname, self.load)
+
+#         return it
+
+
+################################################################
+#
+# SWAP
+#
+################################################################
+
+
 class SWAPInterface(Interface):
     """
         Customized interface to add SWAP operations
     """
 
-    def __init__(self):
+    def init(self):
         """
             Initialize variables
         """
-        super().__init__()
-
         self.control = None
 
-    def options(self):
-        """
-            Add command line options
-        """
-        parser = super().options()
+    @property
+    def command(self):
+        return 'swap'
 
-        swap_parser = self.subparsers.add_parser('swap')
-        swap_parser.set_defaults(func=self.command_swap)
-        self.the_subparsers['swap'] = swap_parser
+    def options(self, parser):
 
-        swap_parser.add_argument(
+        parser.add_argument(
             '--save', nargs=1,
             metavar='file',
             help='The filename where the SWAP object should be stored')
 
-        swap_parser.add_argument(
+        parser.add_argument(
             '--load', nargs=1,
             metavar='file',
             help='Load a pickled SWAP object')
 
-        swap_parser.add_argument(
+        parser.add_argument(
             '--run', action='store_true',
             help='Run the SWAP algorithm')
 
-        swap_parser.add_argument(
+        parser.add_argument(
             '--subject', nargs=1,
             metavar='file',
             help='Generate subject track plot and output to file')
 
-        swap_parser.add_argument(
+        parser.add_argument(
             '--utraces', nargs=1,
             metavar='file',
             help='Generate user track plots and output to file')
 
-        swap_parser.add_argument(
+        parser.add_argument(
             '--user', nargs=1,
             metavar='file',
             help='Generate user confusion matrices and outname to file')
 
-        swap_parser.add_argument(
+        parser.add_argument(
             '--hist', nargs=1,
             metavar='file',
             help='Generate multiclass histogram plot')
 
-        swap_parser.add_argument(
+        parser.add_argument(
             '--log', nargs=1,
             metavar='file',
             help='Write the entire SWAP export to file')
 
-        swap_parser.add_argument(
+        parser.add_argument(
             '--train', nargs=1,
             metavar='n',
             help='Run swap with a test/train split. Restricts sample size' +
                  ' of gold labels to \'n\'')
 
-        swap_parser.add_argument(
+        parser.add_argument(
             '--controversial', nargs=1,
             metavar='n',
             help='Run swap with a test/train split, using the most/least' +
                  'controversial subjects')
 
-        swap_parser.add_argument(
+        parser.add_argument(
             '--consensus', nargs=1,
             metavar='n',
             help='Run swap with a test/train split, using the most/least' +
                  'consensus subjects')
 
-        # swap_parser.add_argument(
+        # parser.add_argument(
         #     '--extremes', nargs=2,
         #     metavar='controversial consensus',
         #     help='Run swap with a test/train split, using the most' +
         #          'controversial subjects and subjects with most consensus')
 
-        # swap_parser.add_argument(
+        # parser.add_argument(
         #     '--extreme-min', nargs=2,
         #     metavar='controversial consensus',
         #     help='Run swap with a test/train split, using the most' +
         #          'controversial subjects and subjects with most consensus')
 
-        swap_parser.add_argument(
+        parser.add_argument(
             '--stats', action='store_true',
             help='Display run statistics')
 
-        swap_parser.add_argument(
+        parser.add_argument(
             '--dist', nargs=2,
             help='Show distribution plot')
 
-        swap_parser.add_argument(
+        parser.add_argument(
             '--diff', nargs='*',
             help='Visualize performance difference between swap outputs')
 
-        return parser
-
-    def command_swap(self, args):
-        """
-            Execute SWAP operations
-
-            Args:
-                args: command line arguments
-        """
+    def call(self, args):
         swap = None
 
         if args.load:
@@ -347,6 +533,40 @@ class SWAPInterface(Interface):
 
         return swap
 
+    def run_swap(self, args):
+        """
+            Have the Control process all classifications
+        """
+        control = self.getControl()
+
+        # Random test/train split
+        if args.train:
+            train = int(args.train[0])
+            control.gold_getter.random(train)
+
+        if args.controversial:
+            size = int(args.controversial[0])
+            control.gold_getter.controversial(size)
+
+        if args.consensus:
+            size = int(args.consensus[0])
+            control.gold_getter.consensus(size)
+
+        # if args.extremes:
+        #     controversial = int(args.extremes[0])
+        #     consensus = int(args.extremes[1])
+        #     control.gold_getter.extremes(controversial, consensus)
+
+        # if args.extreme_min:
+        #     controversial = int(args.extreme_min[0])
+        #     consensus = int(args.extreme_min[1])
+        #     control.gold_getter.extreme_min(controversial, consensus)
+
+        control.run()
+        swap = control.getSWAP()
+
+        return swap
+
     def manifest(self, swap, args):
         def arg_str(args):
             s = ''
@@ -384,40 +604,6 @@ class SWAPInterface(Interface):
 
         return control
 
-    def run_swap(self, args):
-        """
-            Have the Control process all classifications
-        """
-        control = self.getControl()
-
-        # Random test/train split
-        if args.train:
-            train = int(args.train[0])
-            control.gold_getter.random(train)
-
-        if args.controversial:
-            size = int(args.controversial[0])
-            control.gold_getter.controversial(size)
-
-        if args.consensus:
-            size = int(args.consensus[0])
-            control.gold_getter.consensus(size)
-
-        # if args.extremes:
-        #     controversial = int(args.extremes[0])
-        #     consensus = int(args.extremes[1])
-        #     control.gold_getter.extremes(controversial, consensus)
-
-        # if args.extreme_min:
-        #     controversial = int(args.extreme_min[0])
-        #     consensus = int(args.extreme_min[1])
-        #     control.gold_getter.extreme_min(controversial, consensus)
-
-        control.run()
-        swap = control.getSWAP()
-
-        return swap
-
     def difference(self, args):
         base = load_pickle(args.diff[0])
         fname = self.f(args.diff[-1])
@@ -428,19 +614,6 @@ class SWAPInterface(Interface):
 
         # other = [load_pickle(x) for x in args.diff[1:]]
         plots.performance.p_diff(base, items, fname, self.load)
-
-
-def run(interface=None):
-    """
-        Run the interface
-
-        Args:
-            interface: Custom interface subclass to use
-    """
-    if interface:
-        interface.call()
-    else:
-        Interface().call()
 
 
 def load_pickle(fname):
@@ -462,6 +635,22 @@ def save_pickle(object, fname):
     """
     with open(fname, 'wb') as file:
         pickle.dump(object, file)
+
+
+def run(*interfaces):
+    """
+        Run the interface
+
+        Args:
+            interface: Custom interface subclass to use
+    """
+    ui = UI()
+    RocInterface(ui)
+    SWAPInterface(ui)
+    for interface in interfaces:
+        interface()
+
+    ui.run()
 
 
 class Roc_Iterator:

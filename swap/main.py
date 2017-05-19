@@ -7,8 +7,7 @@ from swap import ui
 
 
 def main():
-    interface = ui.SWAPInterface()
-    ui.run(interface)
+    ui.run()
 
 
 if __name__ == "__main__":

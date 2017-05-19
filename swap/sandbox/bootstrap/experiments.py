@@ -41,7 +41,7 @@ class Trial:
 class Experiment:
     def __init__(self):
         self.trials = []
-        self.control = Control(.12, .5)
+        self.control = Control()
 
     def run(self):
         control = self.control
