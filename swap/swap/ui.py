@@ -331,7 +331,7 @@ class SWAPInterface(Interface):
             plots.traces.plot_user(swap, fname)
 
         if args.log:
-            fname = self.f(args.output[0])
+            fname = self.f(args.log[0])
             write_log(swap, fname)
 
         if args.stats:
@@ -498,9 +498,9 @@ class Roc_Iterator:
         return (label, self._get_export(obj))
 
 
-def write_log(data, fname):
+def write_log(swap, fname):
     with open(fname, 'w') as file:
-        pprint(data, file)
+        file.writelines(swap.debug_str())
 
 
 if __name__ == "__main__":

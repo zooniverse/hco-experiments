@@ -3,10 +3,11 @@
 
 
 class Ledger:
-    def __init__(self):
+    def __init__(self, id_):
         # unordered dictionary of all transactions in this ledger
         # Transactions are linked in order to allow downstream updating,
         # for example to update subject scores
+        self.id = id_
         self.transactions = {}
         self.stale = True
         self.changed = []
@@ -45,7 +46,15 @@ class Ledger:
     def update(self, id_):
         self.stale = True
         self.change(id_)
-        self.transactions[id_].notify()
+        # self.transactions[id_].notify()
+
+    def __str__(self):
+        s = 'transactions %d stale %s score %s\n' % \
+            (len(self.transactions), str(self.stale), str(self._score))
+        for t in sorted(self.transactions.values(), key=lambda t: t.order):
+            s += '%s\n' % str(t)
+
+        return s
 
 
 class Transaction:
@@ -58,5 +67,8 @@ class Transaction:
         pass
 
     def __str__(self):
-        s = 'id %s order %s' % (str(self.id), str(self.order))
+        id_ = self.id
+        if type(id_) is str and 'not-logged-in' in id_:
+            id_ = id_.split('-')[-1]
+        s = 'id %20s order %2d' % (str(id_), self.order)
         return s

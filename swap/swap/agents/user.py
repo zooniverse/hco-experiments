@@ -159,8 +159,8 @@ class User_Score_Tracker(Tracker):
 
 
 class Ledger(ledger.Ledger):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, id_):
+        super().__init__(id_)
         self.no = Counter()
         self.yes = Counter()
         self._score = None
@@ -207,7 +207,13 @@ class Ledger(ledger.Ledger):
         super().recalculate()
 
         self._score = score
+        self.notify_subjects()
+
         return score
+
+    def notify_subjects(self):
+        for t in self.transactions.values():
+            t.notify(self.id)
 
     def _calculate(self):
         return (self.no.score, self.yes.score)
@@ -220,8 +226,8 @@ class Transaction(ledger.Transaction):
         self.annotation = annotation
         self.gold = subject.gold
 
-    def notify(self):
-        self.subject.ledger.update(self.id)
+    def notify(self, id_):
+        self.subject.ledger.update(id_)
 
     @property
     def changed(self):
@@ -233,8 +239,7 @@ class Transaction(ledger.Transaction):
 
     def __str__(self):
         s = super().__str__()
-        print(self.gold, self.annotation)
-        s += 'gold %d annotation %d' % \
+        s += ' gold %d annotation %d' % \
             (self.gold, self.annotation)
         return s
 

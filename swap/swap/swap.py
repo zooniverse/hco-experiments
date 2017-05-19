@@ -110,6 +110,10 @@ class SWAP:
         # process the classification
         subject.classify(cl, user)
 
+    def process_changes(self):
+        self.users.process_changes()
+        self.subjects.process_changes()
+
     # def getUserAgent(self, user_id):
     #     """
     #         Get a User agent from the Bureau. Creates a new one
@@ -252,6 +256,16 @@ class SWAP:
                 data.append((gold, score))
 
         return data
+
+    def debug_str(self):
+        s = ''
+        for u in self.users:
+            s += 'user %s\n' % str(u.id)
+            s += '%s\n' % str(u.ledger)
+        for a in self.subjects:
+            s += 'subject %s gold %d\n' % (str(a.id), a.gold)
+            s += '%s\n' % str(a.ledger)
+        return s
 
     def manifest(self):
         """

@@ -86,6 +86,10 @@ class Bureau(object):
         """
         return agent_id in self._agents
 
+    def process_changes(self):
+        for agent in self:
+            agent.ledger.recalculate()
+
     # ----------------------------------------------------------------
 
     def idset(self):

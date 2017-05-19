@@ -19,7 +19,7 @@ class Agent(metaclass=abc.ABCMeta):
 
     def __init__(self, id_, ledger_type):
         self._id = id_
-        self.ledger = ledger_type()
+        self.ledger = ledger_type(id_)
 
     @property
     def id(self):

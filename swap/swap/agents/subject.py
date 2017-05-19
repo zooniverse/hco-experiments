@@ -108,8 +108,8 @@ class Subject(Agent):
 
 
 class Ledger(ledger.Ledger):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, id_):
+        super().__init__(id_)
         # First change in the change cascade
         # self.first_change = None
         # Most recently added transaction
@@ -135,6 +135,8 @@ class Ledger(ledger.Ledger):
         return score
 
     def add(self, transaction):
+        if transaction.id in self.transactions:
+            return None
         # Link last transaction to this one
         if self.last is not None:
             self.last.right = transaction
@@ -188,8 +190,8 @@ class Transaction(ledger.Transaction):
         self.right = None
         self.left = None
 
-    def notify(self):
-        self.user.ledger.update(self.id)
+    def notify(self, id_):
+        self.user.ledger.update(id_)
 
     def get_prior(self):
         if self.left is None:
@@ -229,7 +231,11 @@ class Transaction(ledger.Transaction):
         return score
 
     def __str__(self):
+        score = self.score
+        if score is None:
+            score = -1
+
         s = super().__str__()
-        s += ' user %d annotation %d score %s' % \
-            (self.id, self.annotation, self.score)
+        s += ' annotation %d score %.5f' % \
+            (self.annotation, score)
         return s

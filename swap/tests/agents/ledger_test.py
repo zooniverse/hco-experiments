@@ -3,6 +3,7 @@
 from swap.agents.ledger import Ledger, Transaction
 from swap.agents.subject import Ledger as SLedger
 from swap.agents.subject import Transaction as STransaction
+from swap.agents.user import User
 from swap.agents.user import Ledger as ULedger
 from swap.agents.user import Transaction as UTransaction
 from swap.agents.user import Counter
@@ -14,13 +15,14 @@ import pytest
 
 class TestLedger:
     def test_init(self):
-        le = Ledger()
+        le = Ledger(15)
+        assert le.id == 15
         assert le.transactions == {}
         assert le.stale is True
         assert le.changed == []
 
     def test_add_transaction(self):
-        le = Ledger()
+        le = Ledger(0)
         t0 = Transaction(0)
         t1 = Transaction(1)
 
@@ -34,7 +36,7 @@ class TestLedger:
         assert t1.order == 1
 
     def test_add_registers_change(self):
-        le = Ledger()
+        le = Ledger(0)
         t0 = Transaction(0)
         t1 = Transaction(1)
 
@@ -46,24 +48,24 @@ class TestLedger:
         assert le.stale is True
 
     def test_get(self):
-        le = Ledger()
+        le = Ledger(0)
         t = Transaction(0)
         le.add(t)
 
         assert le.get(0) == t
 
     def test_update(self):
-        le = Ledger()
+        le = Ledger(0)
         t0 = Transaction(0)
         t0.notify = MagicMock()
 
         le.add(t0)
         le.update(0)
 
-        t0.notify.assert_called_once_with()
+        t0.notify.assert_not_called
 
     def test_update_registers_change(self):
-        le = Ledger()
+        le = Ledger(0)
         t0 = Transaction(0)
         t1 = Transaction(1)
 
@@ -77,7 +79,7 @@ class TestLedger:
         assert le.stale is True
 
     def test_recalculate_clears_changes(self):
-        le = Ledger()
+        le = Ledger(0)
         t0 = Transaction(0)
         t1 = Transaction(1)
 
@@ -90,7 +92,7 @@ class TestLedger:
         assert le.stale is False
 
     def test_change(self):
-        le = Ledger()
+        le = Ledger(0)
         le.change(1)
 
         assert 1 in le.changed
@@ -98,21 +100,22 @@ class TestLedger:
 
 class TestSubjectLedger:
     def test_init(self):
-        le = SLedger()
+        le = SLedger(16)
+        assert le.id == 16
         assert le.last is None
         assert le._score is None
         assert le.first_change is None
 
     @patch.object(SLedger, 'recalculate', MagicMock())
     def test_score_stale(self):
-        le = SLedger()
+        le = SLedger(0)
         le.stale = True
         le.score
 
         le.recalculate.asert_called_once()
 
     def test_add_transaction_last(self):
-        le = SLedger()
+        le = SLedger(0)
         t0 = STransaction(0, None, 0)
         t1 = STransaction(1, None, 0)
 
@@ -122,7 +125,7 @@ class TestSubjectLedger:
         assert le.last == t1
 
     def test_add_transaction_links(self):
-        le = SLedger()
+        le = SLedger(0)
         t0 = STransaction(0, None, 0)
         t1 = STransaction(1, None, 0)
 
@@ -137,7 +140,7 @@ class TestSubjectLedger:
 
     @patch.object(STransaction, 'calculate', MagicMock(return_value=.5))
     def test_update_first_change(self):
-        le = SLedger()
+        le = SLedger(0)
         t0 = STransaction(0, None, 0)
         t1 = STransaction(1, None, 0)
         t2 = STransaction(2, None, 0)
@@ -155,7 +158,7 @@ class TestSubjectLedger:
         assert le.first_change == t1
 
     def test_change(self):
-        le = SLedger()
+        le = SLedger(0)
         t0 = STransaction(0, None, 0)
         t1 = STransaction(1, None, 0)
 
@@ -169,7 +172,7 @@ class TestSubjectLedger:
     @patch.object(STransaction, 'calculate', new=MagicMock(return_value=.5))
     @patch.object(STransaction, 'get_prior', new=MagicMock(return_value=.5))
     def test_recalculate_beginning(self):
-        le = SLedger()
+        le = SLedger(0)
         t0 = STransaction(0, None, 0)
         t1 = STransaction(1, None, 0)
         t2 = STransaction(2, None, 0)
@@ -184,7 +187,7 @@ class TestSubjectLedger:
     @patch.object(STransaction, 'calculate', new=MagicMock(return_value=.5))
     @patch.object(STransaction, 'get_prior', new=MagicMock(return_value=.5))
     def test_recalculate_middle(self):
-        le = SLedger()
+        le = SLedger(0)
         t0 = STransaction(0, None, 0)
         t1 = STransaction(1, None, 0)
         t2 = STransaction(2, None, 0)
@@ -197,8 +200,21 @@ class TestSubjectLedger:
         le.recalculate()
         assert STransaction.calculate.call_count == 2
 
+    def test_recalculate_real(self):
+        def u(i):
+            user = MagicMock()
+            user.score = (.25, .25)
+            return user
+        le = SLedger(0)
+        for x in range(10):
+            le.add(STransaction(x, u(x), 0))
+
+        score = le.recalculate()
+        print(score)
+        assert False
+
     def test_recalculate_empty(self):
-        le = SLedger()
+        le = SLedger(0)
         assert le.recalculate() == 0.12
 
     def test_recalculate_propagates(self):
@@ -207,7 +223,7 @@ class TestSubjectLedger:
             u.score = (a, b)
             return u
 
-        le = SLedger()
+        le = SLedger(0)
         t0 = STransaction(0, user(3 / 4, 3 / 4), 1)
         t1 = STransaction(1, user(1 / 4, 1 / 4), 1)
 
@@ -249,8 +265,8 @@ class TestSubjectTransaction:
     def test_notify(self):
         user = MagicMock()
         t = STransaction(15, user, 0)
-        t.notify()
-        user.ledger.update.assert_called_once_with(15)
+        t.notify(25)
+        user.ledger.update.assert_called_once_with(25)
 
     def test_calculate_1(self):
         user = MagicMock()
@@ -278,7 +294,8 @@ class TestUserLedger:
         return subject
 
     def test_init(self):
-        le = ULedger()
+        le = ULedger(17)
+        assert le.id == 17
         assert type(le.no) is Counter
         assert type(le.yes) is Counter
         assert le._score is None
@@ -286,13 +303,13 @@ class TestUserLedger:
     def test_add(self):
         subject = self.get_subject(0)
 
-        le = ULedger()
+        le = ULedger(0)
         t = UTransaction(0, subject, 0)
         le.add(t)
         assert t.gold is None
 
     def test_recalculate_1(self):
-        le = ULedger()
+        le = ULedger(0)
         t0 = UTransaction(0, self.get_subject(0), 0)
         t1 = UTransaction(1, self.get_subject(1), 0)
         t2 = UTransaction(2, self.get_subject(1), 0)
@@ -304,7 +321,7 @@ class TestUserLedger:
         assert le.recalculate() == (2 / 3, 1 / 4)
 
     def test_recalculate_2(self):
-        le = ULedger()
+        le = ULedger(0)
         t0 = UTransaction(0, self.get_subject(1), 0)
         t1 = UTransaction(1, self.get_subject(1), 0)
         t2 = UTransaction(2, self.get_subject(1), 0)
@@ -318,7 +335,7 @@ class TestUserLedger:
         assert le.recalculate() == (1 / 2, 2 / 5)
 
     def test_score(self):
-        le = ULedger()
+        le = ULedger(0)
         t0 = UTransaction(0, self.get_subject(1), 0)
         t1 = UTransaction(1, self.get_subject(1), 0)
         t2 = UTransaction(2, self.get_subject(1), 0)
@@ -332,7 +349,7 @@ class TestUserLedger:
         assert le.score == (1 / 2, 2 / 5)
 
     # def test_calculate(self):
-    #     le = ULedger()
+    #     le = ULedger(0)
     #     le.no = 5
     #     le.yes = 6
     #     le.transactions = [0 for i in range(10)]
@@ -341,7 +358,7 @@ class TestUserLedger:
     #     assert le._calculate()[1] == 7 / 12
 
     # def test_recalculate(self):
-    #     le = ULedger()
+    #     le = ULedger(0)
     #     t0 = UTransaction(0, )
 
 
@@ -361,8 +378,8 @@ class TestUserTransaction:
         subject.gold = 0
 
         t = UTransaction(22, subject, 0)
-        t.notify()
-        t.subject.ledger.update.assert_called_once_with(22)
+        t.notify(23)
+        t.subject.ledger.update.assert_called_once_with(23)
 
     def test_changed(self):
         subject = MagicMock()

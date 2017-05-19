@@ -70,6 +70,8 @@ class Control:
                 bar.update(count)
                 count += 1
 
+        self.swap.process_changes()
+
     def _delegate(self, cl):
         """
         Method to allow subclasses to override how classifications
