@@ -182,16 +182,12 @@ class Ledger(ledger.Ledger):
 
 class Transaction(ledger.Transaction):
     def __init__(self, id_, user, annotation):
-        super().__init__(id_)
-        self.user = user
+        super().__init__(id_, user)
         self.annotation = annotation
         self.score = None
 
         self.right = None
         self.left = None
-
-    def notify(self, id_):
-        self.user.ledger.update(id_)
 
     def get_prior(self):
         if self.left is None:
@@ -210,7 +206,7 @@ class Transaction(ledger.Transaction):
         # -------------------------
         #    s*(1-u1) + (1-s)*u0
 
-        u0, u1 = self.user.score
+        u0, u1 = self.agent.score
         if self.annotation == 1:
             a = prior * u1
             b = (1 - prior) * (1 - u0)
@@ -239,3 +235,7 @@ class Transaction(ledger.Transaction):
         s += ' annotation %d score %.5f' % \
             (self.annotation, score)
         return s
+
+    def __setstate__(self):
+        self.agent = None
+        return super().__setstate__()

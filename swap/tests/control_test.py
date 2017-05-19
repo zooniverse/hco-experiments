@@ -135,9 +135,9 @@ class TestGoldGetter:
         assert len(golds) == 20
 
     def test_reset(self):
-        c = Control(0.5, 0.5)
+        c = Control()
         gg = c.gold_getter
-        gg.getter = [lambda: {1: 1, 2: 0}]
+        gg.getters = [lambda: {1: 1, 2: 0}]
         gg.golds
         assert gg._golds is not None
 

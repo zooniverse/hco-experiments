@@ -296,3 +296,15 @@ class SWAP:
         s += str(self.stats) + '\n'
 
         return s
+
+    def __setstate__(self, state):
+        # Restore cyclic references to transactions
+        self.__dict__.update(state)
+
+        for u in self.users:
+            for t in u.ledger:
+                t.subject = self.subjects.get(t.id)
+
+        for s in self.subjects:
+            for t in s.ledger:
+                t.user = self.users.get(t.id)

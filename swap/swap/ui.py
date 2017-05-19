@@ -16,6 +16,8 @@ class UI:
         self.parser = argparse.ArgumentParser()
         self.sparsers = self.parser.add_subparsers()
 
+        self.dir = None
+
         self.options(self.parser)
 
     def run(self):
@@ -142,7 +144,7 @@ class Interface:
         return load_pickle(fname)
 
     def f(self, fname):
-        self.ui.f(fname)
+        return self.ui.f(fname)
 
 
 class RocInterface(Interface):

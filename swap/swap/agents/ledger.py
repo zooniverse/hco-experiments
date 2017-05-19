@@ -10,7 +10,11 @@ class Ledger:
         self.id = id_
         self.transactions = {}
         self.stale = True
+        self.bureau = None
         self.changed = []
+
+    def set_bureau(self, bureau):
+        self.bureau = bureau
 
     def change(self, id_):
         self.changed.append(id_)
@@ -48,6 +52,22 @@ class Ledger:
         self.change(id_)
         # self.transactions[id_].notify()
 
+    def nuke(self):
+        """
+        Delete all references to the parent agent
+        """
+        for t in self:
+            t.agent.ledger.delrefs(self.id)
+
+    def delrefs(self, id_):
+        """
+        Delete references to agent with id_ in this ledger
+        """
+        self.get(id_).delref()
+
+    def restore_agent(self, id_):
+        self.transactions[id_].restore(self.bureau.get(id_))
+
     def __str__(self):
         s = 'transactions %d stale %s score %s\n' % \
             (len(self.transactions), str(self.stale), str(self._score))
@@ -56,15 +76,34 @@ class Ledger:
 
         return s
 
+    def __iter__(self):
+        return iter(self.transactions.values())
+
+    def __len__(self):
+        return len(self.transactions)
+
 
 class Transaction:
-    def __init__(self, id_):
+    def __init__(self, id_, agent):
         self.id = id_
+        self.agent = agent
         self.order = None
 
-    def notify(self):
+    def notify(self, id_):
         # Notify connected nodes that this transaction changed
-        pass
+        self.agent.ledger.update(id_)
+
+    def delref(self):
+        """
+        Remove references to relevant agent
+        """
+        self.agent = None
+
+    def restore(self, agent):
+        """
+        Restore a reference to an agent
+        """
+        self.agent = agent
 
     def __str__(self):
         id_ = self.id
@@ -72,3 +111,6 @@ class Transaction:
             id_ = id_.split('-')[-1]
         s = 'id %20s order %2d' % (str(id_), self.order)
         return s
+
+    def __getstate__(self):
+        return self.__dict__.copy()

@@ -3,9 +3,10 @@
 # - Initial class to test SWAP
 
 from swap.agents.agent import Agent
+from swap.config.helpers import Singleton
 
 
-class Bureau(object):
+class Bureau:
     """ Bureau to keep track of agents
 
     Parameter:
@@ -157,3 +158,17 @@ class AgentIterator:
 
     def __next__(self):
         return self.next()
+
+
+class _Bureaus:
+    """
+    Central container with references to the subject and
+    user bureaus
+    """
+
+    def add(self, name, bureau):
+        self.setattr(name, bureau)
+
+
+class Bureaus(_Bureaus, metaclass=Singleton):
+    pass

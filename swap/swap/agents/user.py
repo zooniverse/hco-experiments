@@ -199,7 +199,7 @@ class Ledger(ledger.Ledger):
 
             if t.changed:
                 action(t, 'old')
-                t.gold = t.subject.gold
+                t.gold = t.agent.gold
                 action(t, 'new')
 
         score = self._calculate()
@@ -221,17 +221,13 @@ class Ledger(ledger.Ledger):
 
 class Transaction(ledger.Transaction):
     def __init__(self, id_, subject, annotation):
-        super().__init__(id_)
-        self.subject = subject
+        super().__init__(id_, subject)
         self.annotation = annotation
         self.gold = subject.gold
 
-    def notify(self, id_):
-        self.subject.ledger.update(id_)
-
     @property
     def changed(self):
-        return self.gold != self.subject.gold
+        return self.gold != self.agent.gold
 
     @property
     def matched(self):
@@ -242,6 +238,10 @@ class Transaction(ledger.Transaction):
         s += ' gold %d annotation %d' % \
             (self.gold, self.annotation)
         return s
+
+    def __setstate__(self):
+        self.agent = None
+        return super().__setstate__()
 
 
 class Counter:

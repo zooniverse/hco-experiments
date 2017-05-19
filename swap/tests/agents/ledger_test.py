@@ -23,8 +23,8 @@ class TestLedger:
 
     def test_add_transaction(self):
         le = Ledger(0)
-        t0 = Transaction(0)
-        t1 = Transaction(1)
+        t0 = Transaction(0, None)
+        t1 = Transaction(1, None)
 
         le.add(t0)
         le.add(t1)
@@ -37,8 +37,8 @@ class TestLedger:
 
     def test_add_registers_change(self):
         le = Ledger(0)
-        t0 = Transaction(0)
-        t1 = Transaction(1)
+        t0 = Transaction(0, None)
+        t1 = Transaction(1, None)
 
         le.add(t0)
         le.add(t1)
@@ -49,14 +49,14 @@ class TestLedger:
 
     def test_get(self):
         le = Ledger(0)
-        t = Transaction(0)
+        t = Transaction(0, None)
         le.add(t)
 
         assert le.get(0) == t
 
     def test_update(self):
         le = Ledger(0)
-        t0 = Transaction(0)
+        t0 = Transaction(0, None)
         t0.notify = MagicMock()
 
         le.add(t0)
@@ -66,8 +66,8 @@ class TestLedger:
 
     def test_update_registers_change(self):
         le = Ledger(0)
-        t0 = Transaction(0)
-        t1 = Transaction(1)
+        t0 = Transaction(0, None)
+        t1 = Transaction(1, None)
 
         le.add(t0)
         le.add(t1)
@@ -80,8 +80,8 @@ class TestLedger:
 
     def test_recalculate_clears_changes(self):
         le = Ledger(0)
-        t0 = Transaction(0)
-        t1 = Transaction(1)
+        t0 = Transaction(0, None)
+        t1 = Transaction(1, None)
 
         le.add(t0)
         le.add(t1)
@@ -239,7 +239,7 @@ class TestSubjectTransaction:
         t = STransaction(0, user, 0)
 
         assert t.id == 0
-        assert t.user == user
+        assert t.agent == user
         assert t.annotation == 0
         assert t.score is None
 
@@ -369,7 +369,7 @@ class TestUserTransaction:
 
         t = UTransaction(0, subject, 0)
 
-        assert t.subject == subject
+        assert t.agent == subject
         assert t.annotation == 0
         assert t.gold == 0
 
@@ -379,7 +379,7 @@ class TestUserTransaction:
 
         t = UTransaction(22, subject, 0)
         t.notify(23)
-        t.subject.ledger.update.assert_called_once_with(23)
+        t.agent.ledger.update.assert_called_once_with(23)
 
     def test_changed(self):
         subject = MagicMock()
