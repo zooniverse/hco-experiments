@@ -8,19 +8,11 @@ from experiments import Experiment
 from swap import ui
 import swap.plots as plots
 
-# import copy
-
-
-p0 = 0.12
-epsilon = 0.5
-
 
 class Interface(ui.SWAPInterface):
 
     def __init__(self):
         super().__init__()
-        self.p0 = p0
-        self.epsilon = epsilon
 
         self.last_load = None
 
@@ -208,7 +200,7 @@ class Interface(ui.SWAPInterface):
             high = float(args.thresholds[2])
             thresholds[i] = (low, high)
 
-        bootstrap = Bootstrap(low, high, self.p0, self.epsilon)
+        bootstrap = Bootstrap(low, high)
 
         for i in range(n):
             if i in thresholds:
@@ -236,10 +228,10 @@ class Interface(ui.SWAPInterface):
         bswap = bootstrap.getMetric(level).getSWAP()
 
         data = []
-        for id_ in swap.users.getAgentIds():
+        for id_ in swap.users.idset():
 
-            a_user = swap.users.getAgent(id_)
-            b_user = bswap.users.getAgent(id_)
+            a_user = swap.users.get(id_)
+            b_user = bswap.users.get(id_)
 
             error = [0, 0]
             for i in [0, 1]:

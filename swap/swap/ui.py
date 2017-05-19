@@ -1,12 +1,13 @@
 ################################################################
 
 from swap.control import Control
+from swap.config import Config
+import swap.plots as plots
+
 import pickle
 from pprint import pprint
 import argparse
 import os
-
-import swap.plots as plots
 
 
 class Interface:
@@ -20,9 +21,6 @@ class Interface:
         """
         self.args = None
         self.dir = None
-
-        self.p0 = 0.12
-        self.epsilon = 0.5
 
         self.parser = argparse.ArgumentParser()
         self.subparsers = self.parser.add_subparsers()
@@ -78,14 +76,15 @@ class Interface:
         """
         args = self.getArgs()
         print(args)
+        config = Config()
 
         self.option_dir(args)
 
         if args.p0:
-            self.p0 = float(args.p0[0])
+            config.p0 = float(args.p0[0])
 
         if args.epsilon:
-            self.epsilon = float(args.epsilon[0])
+            config.epsilon = float(args.epsilon[0])
 
         if 'func' in args:
             args.func(args)
@@ -169,7 +168,7 @@ class Interface:
         if fname == '-':
             return None
         if self.dir:
-            return '%s/%s' % (self.dir, fname)
+            return os.path.join(self.dir, fname)
         else:
             return fname
 
@@ -381,7 +380,7 @@ class SWAPInterface(Interface):
             Returns the Control instance
             Defines a Control instance if it doesn't exist yet
         """
-        control = Control(self.p0, self.epsilon)
+        control = Control()
 
         return control
 
@@ -414,7 +413,7 @@ class SWAPInterface(Interface):
         #     consensus = int(args.extreme_min[1])
         #     control.gold_getter.extreme_min(controversial, consensus)
 
-        control.process()
+        control.run()
         swap = control.getSWAP()
 
         return swap

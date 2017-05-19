@@ -59,7 +59,7 @@ class Experiment:
                 if cn > 0:
                     control.gold_getter.consensus(cn)
 
-                control.process()
+                control.run()
                 self.trials.append(Trial.from_control(cn, cv, control))
 
                 n += 1

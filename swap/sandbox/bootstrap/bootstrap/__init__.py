@@ -8,6 +8,7 @@ import swap.db.classifications as db
 from swap.agents.agent import Agent
 from swap.agents.tracker import Tracker
 from swap.agents.bureau import Bureau
+from swap.config import Config
 
 from bootstrap.analysis import Metric, Metrics
 
@@ -18,7 +19,7 @@ gold_0 = [3624432, 3469678, 3287492, 3627326, 3724438]
 
 class Bootstrap:
 
-    def __init__(self, t_low, t_high, p0, epsilon, export=None):
+    def __init__(self, t_low, t_high, export=None):
         golds = gold_0 + gold_1
         self.golds = db.getExpertGold(golds)
         self.silver = self.golds.copy()
@@ -28,9 +29,6 @@ class Bootstrap:
         self.bureau = Bureau(Bootstrap_Subject)
 
         self.metrics = Metrics()
-
-        self.p0 = p0
-        self.epsilon = epsilon
 
         self.n = 0
 
@@ -42,7 +40,7 @@ class Bootstrap:
         self.n += 1
 
         control = self.gen_control()
-        control.process()
+        control.run()
 
         swap = control.getSWAP()
         export = swap.export()
@@ -84,7 +82,7 @@ class Bootstrap:
         return silver
 
     def gen_control(self):
-        return BootstrapControl(self.p0, self.epsilon, self.silver.items())
+        return BootstrapControl(self.silver.items())
 
     def export(self):
         return self.bureau.export()
@@ -148,9 +146,10 @@ class Bootstrap:
         bootstrap run, including whatever parameters were used, and
         statistical information on each run.
         """
+        config = Config()
         s = ''
-        s += 'p0:         %f\n' % self.p0
-        s += 'epsilon     %f\n' % self.epsilon
+        s += 'p0:         %f\n' % config.p0
+        s += 'epsilon     %f\n' % config.epsilon
         s += 'iterations: %d\n' % self.n
         s += 'thresholds: %f < p < %f\n' % (self.t_low, self.t_high)
         s += '\n'
@@ -189,12 +188,12 @@ class BootstrapControl(Control):
     Feeds classifications to swap, Bootstrap specific method
     """
 
-    def __init__(self, p0, epsilon, golds):
+    def __init__(self, golds):
         """
             golds: (dict) dictionary of gold labels
         """
         self.golds = golds
-        super().__init__(p0, epsilon)
+        super().__init__()
 
     def getClassifications(self):
         golds = [item[0] for item in self.golds]
@@ -206,9 +205,9 @@ class BootstrapControl(Control):
         user score updates or subject score updates.
         """
         if cl.isGold():
-            self.swap.processOneClassification(cl, user=True, subject=False)
+            self.swap.classify(cl, user=True, subject=False)
         else:
-            self.swap.processOneClassification(cl, user=False, subject=True)
+            self.swap.classify(cl, user=False, subject=True)
 
     def getGoldLabels(self):
         return self.golds
