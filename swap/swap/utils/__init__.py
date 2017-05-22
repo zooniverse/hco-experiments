@@ -66,13 +66,16 @@ class ScoreExport:
     def roc(self, labels=None):
         def func(score):
             return score.gold, score.p
+
+        def isgold(score):
+            return score.gold in [0, 1]
         scores = self.scores
 
         if labels is None:
-            return ScoreIterator(scores, func)
+            return ScoreIterator(scores, func, isgold)
         else:
             def cond(score):
-                return score.id in labels
+                return isgold(score) and score.id in labels
             return ScoreIterator(scores, func, cond)
 
     def full(self):

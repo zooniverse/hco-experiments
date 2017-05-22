@@ -4,6 +4,9 @@ from swap.control import Control
 from swap.config import Config
 import swap.plots as plots
 
+from swap.utils import ScoreExport
+from swap.swap import SWAP
+
 import pickle
 from pprint import pprint
 import argparse
@@ -176,17 +179,17 @@ class RocInterface(Interface):
             Args:
                 args: command line arguments
         """
-        super().call()
+        super().call(args)
 
         if args.output:
             output = self.f(args.output[0])
         else:
             output = None
 
-        data = self.collect_roc(args)
+        iterator = self.collect_roc(args)
 
         title = 'Receiver Operater Characteristic'
-        plots.plot_roc(title, *data, fname=output)
+        plots.plot_roc(title, iterator, fname=output)
         print(args)
 
     def collect_roc(self, args):
@@ -263,6 +266,11 @@ class SWAPInterface(Interface):
             '--hist', nargs=1,
             metavar='file',
             help='Generate multiclass histogram plot')
+
+        parser.add_argument(
+            '--scores', nargs=1,
+            metavar='file',
+            help='Save swap scores to file')
 
         parser.add_argument(
             '--log', nargs=1,
@@ -346,6 +354,10 @@ class SWAPInterface(Interface):
         if args.log:
             fname = self.f(args.log[0])
             write_log(swap, fname)
+
+        if args.scores:
+            fname = self.f(args.scores[0])
+            self.save(swap.score_export(), fname)
 
         if args.stats:
             print(swap.stats_str())
@@ -503,7 +515,13 @@ class Roc_Iterator:
             raise StopIteration()
 
     def _get_export(self, obj):
-        return obj.score_export().roc()
+        if isinstance(obj, ScoreExport):
+            return obj.roc()
+        elif isinstance(obj, SWAP):
+            return obj.score_export().roc()
+        else:
+            raise TypeError(
+                'Did not recognize valid type for roc iterator %s' % type(obj))
 
     def next(self):
         self.__bounds()
