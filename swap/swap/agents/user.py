@@ -239,10 +239,6 @@ class Transaction(ledger.Transaction):
             (self.gold, self.annotation)
         return s
 
-    def __setstate__(self):
-        self.agent = None
-        return super().__setstate__()
-
 
 class Counter:
     def __init__(self):

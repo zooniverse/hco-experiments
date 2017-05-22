@@ -311,6 +311,9 @@ class SWAPInterface(Interface):
             '--diff', nargs='*',
             help='Visualize performance difference between swap outputs')
 
+        parser.add_argument(
+            '--shell', action='store_true')
+
     def call(self, args):
         swap = None
 
@@ -354,6 +357,10 @@ class SWAPInterface(Interface):
 
         if args.diff:
             self.difference(args)
+
+        if args.shell:
+            import code
+            code.interact(local=locals())
 
         return swap
 

@@ -235,7 +235,3 @@ class Transaction(ledger.Transaction):
         s += ' annotation %d score %.5f' % \
             (self.annotation, score)
         return s
-
-    def __setstate__(self):
-        self.agent = None
-        return super().__setstate__()

@@ -45,6 +45,9 @@ class SWAP:
         self.users = Bureau(User)
         self.subjects = Bureau(Subject)
 
+        self.users.reference_bureau(self.subjects)
+        self.subjects.reference_bureau(self.users)
+
         # Directive to update - if True, then a volunteer agent's posterior
         # probability of containing an interesting object will be updated
         # whenever an expertly classified "gold standard" subject is
@@ -301,10 +304,5 @@ class SWAP:
         # Restore cyclic references to transactions
         self.__dict__.update(state)
 
-        for u in self.users:
-            for t in u.ledger:
-                t.subject = self.subjects.get(t.id)
-
-        for s in self.subjects:
-            for t in s.ledger:
-                t.user = self.users.get(t.id)
+        self.subjects.reference_bureau(self.users)
+        self.users.reference_bureau(self.subjects)

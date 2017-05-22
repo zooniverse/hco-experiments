@@ -29,6 +29,8 @@ class Ledger:
         id_ = transaction.id
         # Record the transactions order
         transaction.order = len(self.transactions)
+        transaction.set_restore_callback(
+            lambda: self.restore_agent(transaction.id))
         # Store this transaction
         self.transactions[id_] = transaction
         self.change(id_)
@@ -54,7 +56,7 @@ class Ledger:
 
     def nuke(self):
         """
-        Delete all references to the parent agent
+        Delete all references to this agent in each referenced agent
         """
         for t in self:
             t.agent.ledger.delrefs(self.id)
@@ -65,14 +67,33 @@ class Ledger:
         """
         self.get(id_).delref()
 
+    def delete_all_agents(self):
+        """
+        Delete all agent references in the transactions
+        """
+
+        for t in self:
+            t.agent = None
+
     def restore_agent(self, id_):
+        if self.bureau is None:
+            raise MissingReference('Missing reference to bureau!')
+
         self.transactions[id_].restore(self.bureau.get(id_))
 
     def __str__(self):
-        s = 'transactions %d stale %s score %s\n' % \
-            (len(self.transactions), str(self.stale), str(self._score))
+        s = 'id %s transactions %d stale %s score %s\n' % \
+            (str(self.id), len(self.transactions),
+             str(self.stale), str(self._score))
         for t in sorted(self.transactions.values(), key=lambda t: t.order):
             s += '%s\n' % str(t)
+
+        return s
+
+    def __repr__(self):
+        s = 'id %s transactions %d stale %s score %s\n' % \
+            (str(self.id), len(self.transactions),
+             str(self.stale), str(self._score))
 
         return s
 
@@ -82,12 +103,48 @@ class Ledger:
     def __len__(self):
         return len(self.transactions)
 
+    def __getstate__(self):
+        self.bureau = None
+        return self.__dict__
+
+    def __setstate__(self, d):
+        self.__dict__ = d
+
+        def restore(transaction):
+            def f():
+                self.restore_agent(transaction.id)
+            return f
+
+        for t in self:
+            t.set_restore_callback(restore(t))
+
+
+class MissingReference(AttributeError):
+    """
+    Missing a reference to an object that should be there.
+    """
+    pass
+
 
 class Transaction:
     def __init__(self, id_, agent):
         self.id = id_
-        self.agent = agent
+        self._agent = agent
         self.order = None
+        self.restore_callback = None
+
+    @property
+    def agent(self):
+        if self._agent is None:
+            if self.restore_callback is None:
+                raise MissingReference()
+            else:
+                self.restore_callback()
+        return self._agent
+
+    @agent.setter
+    def agent(self, agent):
+        self._agent = agent
 
     def notify(self, id_):
         # Notify connected nodes that this transaction changed
@@ -105,12 +162,19 @@ class Transaction:
         """
         self.agent = agent
 
+    def set_restore_callback(self, callback):
+        self.restore_callback = callback
+
     def __str__(self):
         id_ = self.id
         if type(id_) is str and 'not-logged-in' in id_:
             id_ = id_.split('-')[-1]
+        if self.order is None:
+            self.order = -1
         s = 'id %20s order %2d' % (str(id_), self.order)
         return s
 
     def __getstate__(self):
-        return self.__dict__.copy()
+        self.agent = None
+        self.restore_callback = None
+        return self.__dict__

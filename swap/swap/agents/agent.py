@@ -52,6 +52,14 @@ class Agent(metaclass=abc.ABCMeta):
         """
         pass
 
+    def __str__(self):
+        return 'id %s transactions %d' % \
+            (str(self.id), len(self.ledger.transactions))
+
+    def __repr__(self):
+        return '%s agent id %s transactions %d' % \
+            (type(self), str(self.id), len(self.ledger.transactions))
+
 
 class BaseStat:
     pass

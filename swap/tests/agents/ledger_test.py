@@ -1,12 +1,13 @@
 ################################################################
 
-from swap.agents.ledger import Ledger, Transaction
+from swap.agents.ledger import Ledger, Transaction, MissingReference
 from swap.agents.subject import Ledger as SLedger
 from swap.agents.subject import Transaction as STransaction
 from swap.agents.user import User
 from swap.agents.user import Ledger as ULedger
 from swap.agents.user import Transaction as UTransaction
 from swap.agents.user import Counter
+from swap.agents.bureau import Bureau
 
 from unittest.mock import MagicMock, patch
 
@@ -96,6 +97,68 @@ class TestLedger:
         le.change(1)
 
         assert 1 in le.changed
+
+    def test_missing_bureau(self):
+        le = Ledger(0)
+
+        with pytest.raises(MissingReference):
+            le.restore_agent(15)
+
+
+class TestTransaction:
+
+    def test_init(self):
+        t = Transaction(1, 2)
+        assert t.id == 1
+        assert t._agent == 2
+        assert t.order is None
+        assert t.restore_callback is None
+
+    def test_delref(self):
+        t = Transaction(0, User(0))
+        t.delref()
+
+        assert t._agent is None
+
+    def test_restore(self):
+        t = Transaction(0, None)
+        u = User(0)
+        t.restore(u)
+
+        assert t._agent == u
+
+    def test_notify(self):
+        mock = MagicMock()
+        t = Transaction(0, mock)
+        t.notify(100)
+
+        mock.ledger.update.assert_called_once_with(100)
+
+    def test_set_restore_callback(self):
+        t = Transaction(0, None)
+        mock = MagicMock()
+        t.set_restore_callback(mock)
+        t.restore_callback()
+
+        mock.assert_called_once_with()
+
+    def test_builtins(self):
+        t = Transaction(1, None)
+        print(t)
+
+    def test_agent_missing(self):
+        t = Transaction(1, None)
+
+        with pytest.raises(MissingReference):
+            t.agent
+
+    def test_agent_missing_callback(self):
+        t = Transaction(1, None)
+        mock = MagicMock()
+        t.set_restore_callback(mock)
+
+        t.agent
+        mock.assert_called_once_with()
 
 
 class TestSubjectLedger:
@@ -448,3 +511,61 @@ class TestUserCounter:
         c.unmatch()
         assert c.seen == 4
         assert c.matched == 4
+
+
+class TestDynamicReferencing:
+
+    def test_nuke(self):
+        le = Ledger(15)
+        mock = MagicMock()
+        t = Transaction(1, mock)
+
+        le.add(t)
+        le.nuke()
+
+        mock.ledger.delrefs.assert_called_once_with(15)
+
+    def test_delrefs(self):
+        le = Ledger(15)
+        t = Transaction(16, None)
+        t.delref = MagicMock()
+        le.add(t)
+
+        le.delrefs(16)
+        t.delref.assert_called_once_with()
+
+    def test_delete_all_agents(self):
+
+        le = Ledger(0)
+        u = User(0)
+        for i in range(5):
+            le.add(Transaction(i, u))
+
+        le.delete_all_agents()
+
+        for t in le:
+            assert t._agent is None
+
+    def test_transaction_restore(self):
+        le = Ledger(0)
+        bureau = Bureau(User)
+        le.set_bureau(bureau)
+        user = bureau.get(15)
+
+        t = Transaction(15, None)
+        le.add(t)
+
+        assert t.agent == user
+
+    def test_transaction_restore2(self):
+        le = Ledger(0)
+        bureau = Bureau(User)
+        le.set_bureau(bureau)
+        user = bureau.get(15)
+
+        t = Transaction(15, None)
+        le.add(t)
+        t.restore_callback = None
+        t.set_restore_callback(lambda: le.restore_agent(t.id))
+
+        assert t.agent == user
