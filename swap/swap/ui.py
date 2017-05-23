@@ -250,7 +250,12 @@ class SWAPInterface(Interface):
         parser.add_argument(
             '--save', nargs=1,
             metavar='file',
-            help='The filename where the SWAP object should be stored')
+            help='save swap to file')
+
+        parser.add_argument(
+            '--save-scores', nargs=1,
+            metavar='file',
+            help='save swap scores to file')
 
         parser.add_argument(
             '--load', nargs=1,
@@ -352,6 +357,10 @@ class SWAPInterface(Interface):
             manifest = self.manifest(swap, args)
             self.save(swap, self.f(args.save[0]), manifest)
 
+        if args.save_scores:
+            fname = self.f(args.save_scores[0])
+            self.save_scores(swap, fname)
+
         if args.subject:
             fname = self.f(args.subject[0])
             plots.traces.plot_subjects(swap, fname)
@@ -362,7 +371,7 @@ class SWAPInterface(Interface):
 
         if args.hist:
             fname = self.f(args.hist[0])
-            plots.plot_class_histogram(fname, swap)
+            plots.plot_class_histogram(fname, swap.score_export())
 
         if args.utraces:
             fname = self.f(args.user[0])
@@ -397,6 +406,11 @@ class SWAPInterface(Interface):
         if args.shell:
             import code
             from swap import ui
+            assert ui
+
+            def save_scores(fname):
+                self.save(swap.score_export(), self.f(fname))
+
             code.interact(local=locals())
 
         return swap
@@ -434,6 +448,9 @@ class SWAPInterface(Interface):
         swap = control.getSWAP()
 
         return swap
+
+    def save_scores(self, swap, fname):
+        self.save(swap.score_export(), fname)
 
     def manifest(self, swap, args):
         def arg_str(args):

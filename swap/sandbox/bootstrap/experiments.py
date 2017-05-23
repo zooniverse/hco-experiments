@@ -1,6 +1,7 @@
 
 import swap.plots.distributions as distributions
 from swap import Control
+from swap.control import GoldGetter
 from swap.agents.agent import Stat
 import swap.db.experiment as dbe
 
@@ -65,7 +66,6 @@ class Experiment:
     def __init__(self, version, saver, cutoff=0.96):
         self.trials = []
         self.plot_points = []
-        self.control = Control()
         self.save_f = saver
         self.p_cutoff = cutoff
         self.version = version
@@ -84,24 +84,32 @@ class Experiment:
 
         return e
 
+    def init_swap(self):
+        control = Control()
+        control.run()
+
+        return control.getSWAP()
+
     def run(self):
-        control = self.control
+        gg = GoldGetter()
+        swap = self.init_swap()
         n = 1
         for cv in range(0, 1001, 50):
             for cn in range(0, 1001, 50):
                 if cv == 0 and cn == 0:
                     continue
-                control.reset()
+                gg.reset()
 
                 print('Running trial %d with cv=%d cn=%d' %
                       (n, cv, cn))
                 if cv > 0:
-                    control.gold_getter.controversial(cv, self.version)
+                    gg.controversial(cv, self.version)
                 if cn > 0:
-                    control.gold_getter.consensus(cn, self.version)
+                    gg.consensus(cn, self.version)
 
-                control.run()
-                self.add_trial(Trial.from_control(cn, cv, control))
+                swap.set_gold_labels(gg.golds)
+                swap.process_changes()
+                self.add_trial(Trial(cn, cv, gg.golds, swap.score_export()))
 
                 n += 1
             self.clear_mem(cv, cn)
