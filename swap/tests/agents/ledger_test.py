@@ -94,7 +94,7 @@ class TestLedger:
 
     def test_change(self):
         le = Ledger(0)
-        le.change(1)
+        le._change(1)
 
         assert 1 in le.changed
 
@@ -229,7 +229,7 @@ class TestSubjectLedger:
         le.add(t1)
         le.clear_changes()
 
-        le.change(0)
+        le._change(0)
         assert le.first_change == t0
 
     @patch.object(STransaction, 'calculate', new=MagicMock(return_value=.5))
