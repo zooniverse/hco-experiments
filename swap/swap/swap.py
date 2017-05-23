@@ -115,16 +115,16 @@ class SWAP:
         subject.classify(cl, user)
 
     def process_changes(self):
+        print('processing user score changes')
         with progressbar.ProgressBar(
                 max_value=self.users.calculate_changes()) as bar:
             bar.update(0)
-            print('processing user score changes')
             self.users.process_changes(bar)
 
+        print('processing subject score changes')
         with progressbar.ProgressBar(
                 max_value=self.subjects.calculate_changes()) as bar:
             bar.update(0)
-            print('processing subject score changes')
             self.subjects.process_changes(bar)
 
     def calculate_changes(self):

@@ -8,6 +8,8 @@ from experiments import Experiment
 import swap.ui
 import swap.plots as plots
 
+import os
+
 
 class BootInterface(swap.ui.Interface):
 
@@ -259,7 +261,6 @@ class ExperimentInterface(swap.ui.Interface):
             e.run()
 
             del e.save_f
-            del e.control
             self.save(e, f_pickle)
 
         elif args.from_trials:
@@ -281,7 +282,6 @@ class ExperimentInterface(swap.ui.Interface):
         if args.save:
             assert e
             del e.save_f
-            del e.control
             self.save(e, self.f(args.save[0]))
 
         if args.upload:

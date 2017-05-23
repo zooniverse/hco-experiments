@@ -99,7 +99,7 @@ class Experiment:
                     continue
                 gg.reset()
 
-                print('Running trial %d with cv=%d cn=%d' %
+                print('\nRunning trial %d with cv=%d cn=%d' %
                       (n, cv, cn))
                 if cv > 0:
                     gg.controversial(cv)
