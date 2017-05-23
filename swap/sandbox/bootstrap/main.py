@@ -223,7 +223,7 @@ class ExperimentInterface(swap.ui.Interface):
 
         parser.add_argument(
             '--run', nargs=2,
-            metavar=('Plot destination, experiment pickle destination'))
+            metavar=('trials directory, experiment file'))
 
         parser.add_argument(
             '--pow', action='store_true',
@@ -232,6 +232,10 @@ class ExperimentInterface(swap.ui.Interface):
         parser.add_argument(
             '--multiply', action='store_true',
             help='controversial and consensus aggregation method')
+
+        parser.add_argument(
+            '--cutoff', nargs=1,
+            help='p cutoff')
 
     def call(self, args):
         if args.cutoff:
