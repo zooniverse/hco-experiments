@@ -134,8 +134,8 @@ def multivar_scatter(data):
     plt.ylabel('Controversial')
 
 
-def plot_pdf(data, fname, swap=None, cutoff=1):
-    cut_data = np.array([x for x in data if x < cutoff])
+def plot_pdf(score_export, fname, swap=None, cutoff=1):
+    cut_data = np.array([p for g, p in score_export.roc() if p < cutoff])
 
     plots = ['density', 'kde']
     n = len(plots)
@@ -147,7 +147,7 @@ def plot_pdf(data, fname, swap=None, cutoff=1):
         elif f == 'split':
             plot_seaborn_density_split(swap, cutoff)
         elif f == 'kde':
-            plot_kde(data)
+            plot_kde(cut_data)
 
     plt.suptitle('Probability Density Function')
     plt.tight_layout()

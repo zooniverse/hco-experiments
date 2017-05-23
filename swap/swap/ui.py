@@ -287,11 +287,6 @@ class SWAPInterface(Interface):
             help='Generate multiclass histogram plot')
 
         parser.add_argument(
-            '--scores', nargs=1,
-            metavar='file',
-            help='Save swap scores to file')
-
-        parser.add_argument(
             '--log', nargs=1,
             metavar='file',
             help='Write the entire SWAP export to file')
@@ -348,68 +343,71 @@ class SWAPInterface(Interface):
         swap = None
 
         if args.load:
-            swap = self.load(args.load[0])
+            obj = self.load(args.load[0])
+
+            if isinstance(obj, SWAP):
+                swap = obj
+                score_export = swap.score_export()
+            elif isinstance(obj, ScoreExport):
+                score_export = obj
 
         if args.run:
             swap = self.run_swap(args)
+            score_export = swap.score_export()
 
-        if args.save:
-            manifest = self.manifest(swap, args)
-            self.save(swap, self.f(args.save[0]), manifest)
+        if swap is not None:
 
-        if args.save_scores:
-            fname = self.f(args.save_scores[0])
-            self.save_scores(swap, fname)
+            if args.save:
+                manifest = self.manifest(swap, args)
+                self.save(swap, self.f(args.save[0]), manifest)
 
-        if args.subject:
-            fname = self.f(args.subject[0])
-            plots.traces.plot_subjects(swap, fname)
+            if args.subject:
+                fname = self.f(args.subject[0])
+                plots.traces.plot_subjects(swap, fname)
 
-        if args.user:
-            fname = self.f(args.user[0])
-            plots.plot_user_cm(swap, fname)
+            if args.user:
+                fname = self.f(args.user[0])
+                plots.plot_user_cm(swap, fname)
 
-        if args.hist:
-            fname = self.f(args.hist[0])
-            plots.plot_class_histogram(fname, swap.score_export())
+            if args.utraces:
+                fname = self.f(args.user[0])
+                plots.traces.plot_user(swap, fname)
 
-        if args.utraces:
-            fname = self.f(args.user[0])
-            plots.traces.plot_user(swap, fname)
+            if args.log:
+                fname = self.f(args.log[0])
+                write_log(swap, fname)
 
-        if args.log:
-            fname = self.f(args.log[0])
-            write_log(swap, fname)
+            if args.stats:
+                print(swap.stats_str())
 
-        if args.scores:
-            fname = self.f(args.scores[0])
-            self.save(swap.score_export(), fname)
+            if args.test:
+                from swap.control import GoldGetter
+                gg = GoldGetter()
+                print('applying new gold labels')
+                swap.set_gold_labels(gg.golds)
+                swap.process_changes()
 
-        if args.stats:
-            print(swap.stats_str())
+        if score_export is not None:
+            if args.save_scores:
+                fname = self.f(args.save_scores[0])
+                self.save(score_export, fname)
 
-        if args.dist:
-            data = [s.getScore() for s in swap.subjects]
-            plots.plot_pdf(data, self.f(args.dist[0]), swap,
-                           cutoff=float(args.dist[1]))
+            if args.hist:
+                fname = self.f(args.hist[0])
+                plots.plot_class_histogram(fname, score_export)
+
+            if args.dist:
+                data = [s.getScore() for s in swap.subjects]
+                plots.plot_pdf(data, self.f(args.dist[0]), swap,
+                               cutoff=float(args.dist[1]))
 
         if args.diff:
             self.difference(args)
-
-        if args.test:
-            from swap.control import GoldGetter
-            gg = GoldGetter()
-            print('applying new gold labels')
-            swap.set_gold_labels(gg.golds)
-            swap.process_changes()
 
         if args.shell:
             import code
             from swap import ui
             assert ui
-
-            def save_scores(fname):
-                self.save(swap.score_export(), self.f(fname))
 
             code.interact(local=locals())
 
@@ -448,9 +446,6 @@ class SWAPInterface(Interface):
         swap = control.getSWAP()
 
         return swap
-
-    def save_scores(self, swap, fname):
-        self.save(swap.score_export(), fname)
 
     def manifest(self, swap, args):
         def arg_str(args):
