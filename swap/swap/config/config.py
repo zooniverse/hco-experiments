@@ -29,6 +29,8 @@ class _Config:
     p0 = 0.12
     epsilon = 0.5
 
+    controversial_version = 'pow'
+
     database = Object({
         'name': 'swapDB',
         'host': 'localhost',

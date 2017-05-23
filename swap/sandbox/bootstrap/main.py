@@ -225,6 +225,14 @@ class ExperimentInterface(swap.ui.Interface):
             '--run', nargs=2,
             metavar=('Plot destination, experiment pickle destination'))
 
+        parser.add_argument(
+            '--pow', action='store_true',
+            help='controversial and consensus aggregation method')
+
+        parser.add_argument(
+            '--multiply', action='store_true',
+            help='controversial and consensus aggregation method')
+
     def call(self, args):
         if args.cutoff:
             cutoff = float(args.cutoff[0])

@@ -11,6 +11,7 @@ import pickle
 from pprint import pprint
 import argparse
 import os
+import sys
 
 
 class UI:
@@ -41,6 +42,14 @@ class UI:
             '--epsilon', nargs=1,
             help='Define epsilon')
 
+        parser.add_argument(
+            '--pow', action='store_true',
+            help='controversial and consensus aggregation method')
+
+        parser.add_argument(
+            '--multiply', action='store_true',
+            help='controversial and consensus aggregation method')
+
     def call(self, args):
         """
             Execute arguments
@@ -55,6 +64,11 @@ class UI:
 
         if args.epsilon:
             config.epsilon = float(args.epsilon[0])
+
+        if args.pow:
+            config.controversial_version = 'pow'
+        elif args.multiply:
+            config.controversial_version = 'multiply'
 
         if 'func' in args:
             args.func(args)
@@ -322,6 +336,9 @@ class SWAPInterface(Interface):
         parser.add_argument(
             '--shell', action='store_true')
 
+        parser.add_argument(
+            '--test', action='store_true')
+
     def call(self, args):
         swap = None
 
@@ -369,6 +386,13 @@ class SWAPInterface(Interface):
 
         if args.diff:
             self.difference(args)
+
+        if args.test:
+            from swap.control import GoldGetter
+            gg = GoldGetter()
+            print('applying new gold labels')
+            swap.set_gold_labels(gg.golds)
+            swap.process_changes()
 
         if args.shell:
             import code
@@ -476,6 +500,7 @@ def save_pickle(object, fname):
     """
         Pickles and saves an object to file
     """
+    sys.setrecursionlimit(10000)
     with open(fname, 'wb') as file:
         pickle.dump(object, file)
 

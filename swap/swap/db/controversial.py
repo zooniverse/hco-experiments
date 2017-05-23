@@ -2,6 +2,7 @@
 #
 
 from swap.db import classifications as dbcl
+from swap.config import Config
 
 
 def _controv_query(size=100, version='pow'):
@@ -134,7 +135,8 @@ def _consensus_query(size=100, version='pow'):
 #     ]
 
 
-def get_controversial(size, version):
+def get_controversial(size):
+    version = Config().controversial_version
     query = _controv_query(size, version)
     cursor = dbcl.aggregate(query)
     subjects = []
@@ -144,7 +146,8 @@ def get_controversial(size, version):
     return subjects
 
 
-def get_consensus(size, version):
+def get_consensus(size):
+    version = Config().controversial_version
     query = _consensus_query(size, version)
     cursor = dbcl.aggregate(query)
     subjects = []
