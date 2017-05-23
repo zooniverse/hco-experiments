@@ -11,6 +11,8 @@ from swap.utils import ScoreExport, Classification
 
 from swap.db import classifications as db
 
+import progressbar
+
 
 class SWAP:
     """
@@ -113,8 +115,21 @@ class SWAP:
         subject.classify(cl, user)
 
     def process_changes(self):
-        self.users.process_changes()
-        self.subjects.process_changes()
+        with progressbar.ProgressBar(
+                max_value=self.users.calculate_changes()) as bar:
+            bar.update(0)
+            print('processing user score changes')
+            self.users.process_changes(bar)
+
+        with progressbar.ProgressBar(
+                max_value=self.subjects.calculate_changes()) as bar:
+            bar.update(0)
+            print('processing subject score changes')
+            self.subjects.process_changes(bar)
+
+    def calculate_changes(self):
+        return self.users.calculate_changes() + \
+            self.subjects.calculate_changes() + 1
 
     # def getUserAgent(self, user_id):
     #     """

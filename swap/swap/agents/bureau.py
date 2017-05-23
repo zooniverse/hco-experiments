@@ -91,9 +91,15 @@ class Bureau:
         """
         return agent_id in self._agents
 
-    def process_changes(self):
+    def process_changes(self, bar=None):
         for agent in self:
+            if bar is not None and agent.ledger.stale:
+                bar.update(bar.value + 1)
+
             agent.ledger.recalculate()
+
+    def calculate_changes(self):
+        return len([1 for i in self if i.ledger.stale])
 
     # ----------------------------------------------------------------
 

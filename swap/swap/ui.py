@@ -396,6 +396,7 @@ class SWAPInterface(Interface):
 
         if args.shell:
             import code
+            from swap import ui
             code.interact(local=locals())
 
         return swap
