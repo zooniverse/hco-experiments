@@ -239,6 +239,35 @@ class ExperimentInterface(swap.ui.Interface):
             '--cutoff', nargs=1,
             help='p cutoff')
 
+        parser.add_argument(
+            '--from-trials', nargs=1,
+            metavar='directory with trial files',
+            help='load experiment plot data from trial files')
+
+        parser.add_argument(
+            '--load', nargs=1,
+            metavar='file',
+            help='load pickled experiment data')
+
+        parser.add_argument(
+            '--save', nargs=1,
+            metavar='file',
+            help='pickle and save experiment data')
+
+        parser.add_argument(
+            '--plot', nargs=1,
+            metavar='file',
+            help='Generate experiment plot')
+
+        parser.add_argument(
+            '--shell', action='store_true',
+            help='Drop to python interpreter after loading experiment')
+
+        parser.add_argument(
+            '--upload', nargs=1,
+            metavar='directory containing trial files',
+            help='Upload trials to mongo database')
+
     def call(self, args):
         if args.cutoff:
             cutoff = float(args.cutoff[0])
