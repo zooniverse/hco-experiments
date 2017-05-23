@@ -244,11 +244,9 @@ class ExperimentInterface(swap.ui.Interface):
             cutoff = 0.96
 
         if args.pow:
-            version = 'pow'
+            Config().controversial_version = 'pow'
         elif args.multiply:
-            version = 'multiply'
-        else:
-            version = 'pow'
+            Config().controversial_version = 'multiply'
 
         if args.run:
             d_trials = self.f(args.run[0])
@@ -257,7 +255,7 @@ class ExperimentInterface(swap.ui.Interface):
             def saver(trials, fname):
                 fname = os.path.join(d_trials, fname)
                 self.save(trials, fname)
-            e = Experiment(version, saver)
+            e = Experiment(saver)
             e.run()
 
             del e.save_f
@@ -266,7 +264,7 @@ class ExperimentInterface(swap.ui.Interface):
 
         elif args.from_trials:
             e = Experiment.from_trial_export(
-                version, args.from_trials[0],
+                args.from_trials[0],
                 cutoff, self.save, self.load)
 
         elif args.load:

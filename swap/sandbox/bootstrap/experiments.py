@@ -63,18 +63,17 @@ class Trial:
 
 
 class Experiment:
-    def __init__(self, version, saver, cutoff=0.96):
+    def __init__(self, saver, cutoff=0.96):
         self.trials = []
         self.plot_points = []
         self.save_f = saver
         self.p_cutoff = cutoff
-        self.version = version
 
     @staticmethod
-    def from_trial_export(version, directory, cutoff, saver, loader):
+    def from_trial_export(directory, cutoff, saver, loader):
         files = get_trials(directory)
 
-        e = Experiment(version, saver, cutoff)
+        e = Experiment(saver, cutoff)
         for fname in files:
             print(fname)
             trials = loader(fname)
@@ -103,9 +102,9 @@ class Experiment:
                 print('Running trial %d with cv=%d cn=%d' %
                       (n, cv, cn))
                 if cv > 0:
-                    gg.controversial(cv, self.version)
+                    gg.controversial(cv)
                 if cn > 0:
-                    gg.consensus(cn, self.version)
+                    gg.consensus(cn,)
 
                 swap.set_gold_labels(gg.golds)
                 swap.process_changes()
