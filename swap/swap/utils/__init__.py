@@ -29,6 +29,8 @@ class ScoreExport:
         scores = {}
         golds = self.get_real_golds()
         for subject in swap.subjects:
+            if len(subject.ledger) == 0:
+                continue
             id_ = subject.id
             gold = golds[id_]
             score = subject.score
@@ -69,6 +71,7 @@ class ScoreExport:
 
         def isgold(score):
             return score.gold in [0, 1]
+
         scores = self.scores
 
         if labels is None:

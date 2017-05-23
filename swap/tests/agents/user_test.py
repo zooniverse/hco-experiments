@@ -50,8 +50,8 @@ class TestUser:
         print(u.ledger.transactions)
         t = u.ledger.get(12)
         assert t.annotation == 1
-        assert t.subject.gold == 0
-        assert t.subject.id == 12
+        assert t.agent.gold == 0
+        assert t.agent.id == 12
 
     def test_classify_rejects_wrong_classification(self):
         u = User(1)

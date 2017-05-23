@@ -74,7 +74,12 @@ class Subject(Agent):
                      0 bogus object
                      1 real supernova
         """
-        self._gold = gold_label
+        old = self._gold
+        new = gold_label
+
+        if old != new:
+            self._gold = gold_label
+            self.ledger.notify_agents()
 
     def isgold(self):
         return self.gold in [0, 1]

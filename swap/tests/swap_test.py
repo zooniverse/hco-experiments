@@ -64,6 +64,18 @@ class TestSwap:
             assert i in b
             assert b.get(i).gold == g
 
+    def test_set_gold_negates(self):
+        swap = SWAP()
+        subject = Subject(0)
+        subject._gold = 1
+        swap.subjects.add(subject)
+
+        swap.set_gold_labels({})
+
+        print(type(subject.gold))
+        print(subject.gold)
+        assert subject.gold == -1
+
     def test_get_gold(self):
         swap = SWAP()
         labels = {0: 1, 1: 1, 2: 0, 3: 0}

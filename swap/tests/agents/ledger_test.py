@@ -411,6 +411,24 @@ class TestUserLedger:
 
         assert le.score == (1 / 2, 2 / 5)
 
+    def test_notify(self):
+        le = ULedger(0)
+        t = UTransaction(0, self.get_subject(1), 0)
+
+        le.notify_agents = MagicMock()
+        le.score = 0.5
+        le.notify_agents.assert_called_once_with()
+
+    def test_no_gold(self):
+        le = ULedger(0)
+        s = MagicMock()
+        s.gold = -1
+        for i in range(0):
+            t = UTransaction(i, s, 0)
+            le.add(t)
+
+        assert le.recalculate() == (0.5, 0.5)
+
     # def test_calculate(self):
     #     le = ULedger(0)
     #     le.no = 5

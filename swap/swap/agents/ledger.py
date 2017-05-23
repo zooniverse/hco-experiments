@@ -45,6 +45,10 @@ class Ledger:
     def recalculate(self):
         self.clear_changes()
 
+    def notify_agents(self):
+        for t in self:
+            t.notify(self.id)
+
     def clear_changes(self):
         self.stale = False
         self.changed = []
@@ -79,7 +83,7 @@ class Ledger:
         if self.bureau is None:
             raise MissingReference('Missing reference to bureau!')
 
-        self.transactions[id_].restore(self.bureau.get(id_))
+        self.transactions[id_].restore(self.bureau.get(id_, make_new=False))
 
     def __str__(self):
         s = 'id %s transactions %d stale %s score %s\n' % \
@@ -105,7 +109,7 @@ class Ledger:
 
     def __getstate__(self):
         self.bureau = None
-        return self.__dict__
+        return self.__dict__.copy()
 
     def __setstate__(self, d):
         self.__dict__ = d
@@ -177,4 +181,4 @@ class Transaction:
     def __getstate__(self):
         self.agent = None
         self.restore_callback = None
-        return self.__dict__
+        return self.__dict__.copy()

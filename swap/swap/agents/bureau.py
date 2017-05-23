@@ -144,7 +144,7 @@ class Bureau:
 
     def __getstate__(self):
         self.other_bureau = None
-        return self.__dict__
+        return self.__dict__.copy()
 
 
 class AgentIterator:

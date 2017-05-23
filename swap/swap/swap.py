@@ -95,9 +95,8 @@ class SWAP:
 
         user = self.users.get(cl.user)
         subject = self.subjects.get(cl.subject)
-        # if self.gold_updates and subject.isgold():
-        if subject.isgold():
-            user.classify(cl, subject)
+
+        user.classify(cl, subject)
 
     def classify_subject(self, cl):
         """
@@ -182,6 +181,12 @@ class SWAP:
             # else:
             #     subject = Subject(id_, self.p0, gold)
             #     self.subjects.addAgent(subject)
+
+        for subject in self.subjects:
+            if subject.id not in golds:
+                subject.set_gold_label(-1)
+
+        # self.process_changes()
 
     @property
     def golds(self):

@@ -165,6 +165,12 @@ class Ledger(ledger.Ledger):
         self.yes = Counter()
         self._score = None
 
+    @ledger.Ledger.score.setter
+    def score(self, new):
+        if self._score != new:
+            self._score = new
+            self.notify_agents()
+
     def add(self, transaction):
         # Remove gold label from transaction, will be put back in when
         # recalculating
@@ -194,7 +200,9 @@ class Ledger(ledger.Ledger):
                     else:
                         c.unsee()
 
+        # print(self.changed)
         for i in self.changed:
+            # print(i, self.id)
             t = self.transactions[i]
 
             if t.changed:
@@ -206,14 +214,8 @@ class Ledger(ledger.Ledger):
 
         super().recalculate()
 
-        self._score = score
-        self.notify_subjects()
-
+        self.score = score
         return score
-
-    def notify_subjects(self):
-        for t in self.transactions.values():
-            t.notify(self.id)
 
     def _calculate(self):
         return (self.no.score, self.yes.score)

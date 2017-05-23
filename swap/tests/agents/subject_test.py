@@ -6,6 +6,7 @@ import swap.agents.user as _user
 from swap.utils import Classification
 
 import pytest
+from unittest.mock import MagicMock
 
 Subject = _subject.Subject
 User = _user.User
@@ -47,7 +48,7 @@ class TestSubject:
 
         t = s.ledger.get(11)
         assert t.annotation == 1
-        assert t.user.id == 11
+        assert t.agent.id == 11
         assert t.id == 11
         print(t)
         s.score
@@ -114,6 +115,21 @@ class TestSubject:
 
         s.set_gold_label(1)
         assert s.gold == 1
+
+    def test_set_gold_label_notify_ledger(self):
+        s = Subject(1)
+        s.ledger = MagicMock()
+
+        s.set_gold_label(1)
+        s.ledger.notify_agents.assert_called_once_with()
+
+    def test_set_gold_label_no_notify_ledger(self):
+        s = Subject(1)
+        s.ledger = MagicMock()
+
+        s._gold = 1
+        s.set_gold_label(1)
+        s.ledger.notify_agents.assert_not_called()
 
     # ---------EXPORT TEST------------------------------
 
