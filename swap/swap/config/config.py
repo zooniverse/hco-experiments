@@ -1,7 +1,7 @@
 ################################################################
 # Configuration module to handle local config setup
 
-from swap.config.helpers import Singleton
+from swap.utils import Singleton
 
 
 class Object:

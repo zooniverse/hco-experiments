@@ -7,7 +7,8 @@ from swap.agents.agent import Stats
 from swap.agents.subject import Subject
 from swap.agents.user import User
 from swap.config import Config
-from swap.utils import ScoreExport, Classification
+from swap.utils.scores import ScoreExport
+from swap.utils import Classification
 
 from swap.db import classifications as db
 

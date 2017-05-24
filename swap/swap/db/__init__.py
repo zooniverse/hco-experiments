@@ -3,7 +3,7 @@
 
 from swap.db.query import Query
 from swap.config import Config
-from swap.config.helpers import Singleton
+from swap.utils import Singleton
 from pymongo import MongoClient
 
 assert Query

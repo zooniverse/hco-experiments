@@ -1,6 +1,6 @@
 ################################################################
 
-from swap.utils import ScoreExport, Score, ScoreIterator
+from swap.utils.scores import ScoreExport, Score, ScoreIterator
 import swap.db.classifications as dbcl
 from swap.agents.subject import Subject
 

@@ -4,7 +4,7 @@ from swap.control import Control
 from swap.config import Config
 import swap.plots as plots
 
-from swap.utils import ScoreExport
+from swap.utils.scores import ScoreExport
 from swap.swap import SWAP
 
 import pickle

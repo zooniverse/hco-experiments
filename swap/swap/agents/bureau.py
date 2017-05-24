@@ -3,7 +3,7 @@
 # - Initial class to test SWAP
 
 from swap.agents.agent import Agent
-from swap.config.helpers import Singleton
+from swap.utils import Singleton
 
 
 class Bureau:
