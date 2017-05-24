@@ -19,19 +19,15 @@ class Score:
 
 
 class ScoreExport:
-    def __init__(self, swap):
-        self.scores = self._init_scores(swap)
+    def __init__(self, scores, new_golds=True):
+        if new_golds:
+            scores = self._init_golds(scores)
+        self.scores = scores
 
-    def _init_scores(self, swap):
-        scores = {}
+    def _init_golds(self, scores):
         golds = self.get_real_golds()
-        for subject in swap.subjects:
-            if len(subject.ledger) == 0:
-                continue
-            id_ = subject.id
-            gold = golds[id_]
-            score = subject.score
-            scores[id_] = Score(id_, gold, score)
+        for score in scores:
+            score.gold = golds[score.id]
         return scores
 
     def get_real_golds(self):

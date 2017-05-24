@@ -381,7 +381,7 @@ class SWAPInterface(Interface):
                 print(swap.stats_str())
 
             if args.test:
-                from swap.control import GoldGetter
+                from swap.utils.golds import GoldGetter
                 gg = GoldGetter()
                 print('applying new gold labels')
                 swap.set_gold_labels(gg.golds)

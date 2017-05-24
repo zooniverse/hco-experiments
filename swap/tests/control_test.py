@@ -4,7 +4,7 @@
 
 import swap.db.classifications as dbcl
 from swap.control import Control
-from swap.control import GoldGetter
+from swap.utils.golds import GoldGetter
 
 from unittest.mock import MagicMock, patch
 import pytest

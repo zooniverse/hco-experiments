@@ -12,17 +12,11 @@ class TestScoreExport:
     @patch.object(dbcl, 'getAllGolds')
     def test_init(self, mock):
         golds = {1: 0, 2: 0, 3: 1, 4: 1}
-        mock.return_value = golds
+        scores = {}
+        for i, g in golds.items():
+            scores[i] = Score(i, g, i / 10)
 
-        swap = MagicMock()
-        swap.subjects = []
-        for i in range(1, 5):
-            s = Subject(i)
-            s.ledger._score = i / 10
-            s.ledger.stale = False
-            swap.subjects.append(s)
-
-        se = ScoreExport(swap)
+        se = ScoreExport(scores, False)
         print(se.scores)
 
         assert len(se.scores) == 4
@@ -33,9 +27,8 @@ class TestScoreExport:
     def test_counts(self):
         golds = {1: 0, 2: 0, 3: 1, 4: 1, 5: -1, 6: 1}
         scores = dict([(i, Score(i, g, 0)) for i, g in golds.items()])
-        ScoreExport._init_scores = MagicMock(return_value=scores)
 
-        se = ScoreExport(None)
+        se = ScoreExport(scores, False)
         print(se.scores)
 
         assert se.counts(0) == {-1: 1, 0: 2, 1: 3}
@@ -43,9 +36,8 @@ class TestScoreExport:
     def test_composition(self):
         golds = {1: 0, 2: 0, 3: 1, 4: 1, 5: -1, 6: 1}
         scores = dict([(i, Score(i, g, 0)) for i, g in golds.items()])
-        ScoreExport._init_scores = MagicMock(return_value=scores)
 
-        se = ScoreExport(None)
+        se = ScoreExport(scores, False)
         print(se.scores)
 
         assert se.composition(0) == {-1: 1 / 6, 0: 1 / 3, 1: 1 / 2}
@@ -53,9 +45,8 @@ class TestScoreExport:
     def test_purity(self):
         golds = {1: 0, 2: 0, 3: 1, 4: 1, 5: -1, 6: 1}
         scores = dict([(i, Score(i, g, 0)) for i, g in golds.items()])
-        ScoreExport._init_scores = MagicMock(return_value=scores)
 
-        se = ScoreExport(None)
+        se = ScoreExport(scores, False)
         print(se.scores)
 
         assert se.purity(0) == .5
@@ -63,20 +54,18 @@ class TestScoreExport:
     def test_builtins(self):
         golds = {1: 0, 2: 0, 3: 1, 4: 1, 5: -1, 6: 1}
         scores = dict([(i, Score(i, g, 0)) for i, g in golds.items()])
-        ScoreExport._init_scores = MagicMock(return_value=scores)
 
-        se = ScoreExport(None)
+        se = ScoreExport(scores, False)
         print(se.scores)
 
         assert len(se) == 6
         iter(se)
 
     def test_roc(self):
-        golds = {1: 0, 2: 0, 3: 1, 4: 1, 5: -1, 6: 1}
+        golds = {1: 0, 2: 0, 3: 1, 4: 1, 5: 0, 6: 1}
         scores = dict([(i, Score(i, g, 0)) for i, g in golds.items()])
-        ScoreExport._init_scores = MagicMock(return_value=scores)
 
-        se = ScoreExport(None)
+        se = ScoreExport(scores, False)
         print(list(se.roc()))
 
         for i, item in enumerate(se.roc()):
@@ -84,12 +73,20 @@ class TestScoreExport:
             assert g == golds[i + 1]
             assert p == 0
 
+    def test_roc_notgold(self):
+        golds = {0: -1, 1: 0, 2: 1}
+        scores = dict([(i, Score(i, g, 0)) for i, g in golds.items()])
+
+        se = ScoreExport(scores, False)
+        print(list(se.roc()))
+
+        assert len(list(se.roc())) == 2
+
     def test_roc_labels(self):
         golds = {1: 0, 2: 0, 3: 1, 4: 1, 5: -1, 6: 1}
         scores = dict([(i, Score(i, g, 0)) for i, g in golds.items()])
-        ScoreExport._init_scores = MagicMock(return_value=scores)
 
-        se = ScoreExport(None)
+        se = ScoreExport(scores, False)
 
         roc = list(se.roc(labels=(2, 3, 4)))
         print(roc)
