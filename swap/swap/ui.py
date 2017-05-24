@@ -8,13 +8,35 @@ from swap.utils.scores import ScoreExport
 from swap.swap import SWAP
 
 import pickle
-from pprint import pprint
 import argparse
 import os
 import sys
 
+__doc__ = """
+    An interface to interact with our utilities from the command line.
+    Makes it easier to repeated run SWAP under different conditions.
+
+    UI:
+        Container for all the different interfaces
+
+    Interface:
+        A construct that manages options and determines the right action
+
+    SWAPInterface:
+        An interface for interacting with SWAP
+
+    RocInterface:
+        An interface to generate roc curves from multiple SWAP exports
+"""
+__author__ = "Michael Laraia"
+
 
 class UI:
+    """
+    Main interface endpoint, manages interaction with argparse. Interfaces
+    register with a UI instance, and the UI instance chooses the right
+    Interface to pass args to.
+    """
     def __init__(self):
         self.interfaces = {}
         self.parser = argparse.ArgumentParser()
@@ -25,11 +47,23 @@ class UI:
         self.options(self.parser)
 
     def run(self):
+        """
+        Called after interfaces have registered to parse arguments and
+        execute operations
+        """
         args = self.parser.parse_args()
         print(args)
         self.call(args)
 
     def options(self, parser):
+        """
+        Adds arguments to the parser
+
+        Parameters
+        ----------
+        parser : argparse.ArgumentParser
+            parser to add args to
+        """
         parser.add_argument(
             '--dir', nargs=1,
             help='Direct all output to a different directory')
@@ -52,7 +86,11 @@ class UI:
 
     def call(self, args):
         """
-            Execute arguments
+            Called when executing args
+
+            Parameters
+            ----------
+            args : argparse.Namespace
         """
         config = Config()
 
@@ -74,6 +112,14 @@ class UI:
             args.func(args)
 
     def add(self, interface):
+        """
+        Register an interface with the UI
+
+        Parameters
+        ----------
+        interface : ui.Interface
+            Interface to be added
+        """
         command = interface.command
 
         sparser = self.sparsers.add_parser(command)
@@ -82,17 +128,14 @@ class UI:
         interface.options(sparser)
         self.interfaces[command] = interface
 
-    @property
-    def args(self):
-        pass
-
     def f(self, fname):
         """
-            Ensure directory specified with --dir is in
-            a filename
+            Prepend directory to the file path if it was specified
 
-            Args:
-                fname: filename to modify
+            Parameters
+            ----------
+                fname : str
+                    filename to modify
         """
         if fname == '-':
             return None
@@ -102,12 +145,6 @@ class UI:
             return fname
 
     def set_dir(self, dir_):
-        """
-            Output all plots and pickle files ot a sub directory
-
-            Args:
-                args: command line arguments
-        """
         if not os.path.isdir(dir_):
             raise ValueError(
                 '%s Does not point to a valid directory' % dir_)
@@ -119,44 +156,76 @@ class UI:
 
 
 class Interface:
+    """
+    Interface that defines a set of options and operations.
+    Designed to be subclassed and overriden
+    """
 
     def __init__(self, ui):
+        """
+        Initialize this interface and register it with the UI.
+
+        Parameters
+        ----------
+        ui : ui.UI
+            UI to register with
+        """
         self.ui = ui
         ui.add(self)
         self.init()
 
     def init(self):
+        """
+        Method called on init, after having registered with ui
+        """
         pass
 
     @property
     def command(self):
+        """
+        Command used to select parser.
+
+        For example, this would return 'swap' for SWAPInterface
+        and 'roc' for RocInterface
+        """
         pass
 
     def options(self, parser):
+        """
+        Add options to the parser
+        """
         pass
 
     def call(self, args):
+        """
+        Define what to do if this interface's command was passed
+        """
         pass
 
     ###############################################################
 
     def save(self, object, fname):
         """
-            Pickle and save an object
+        Pickle and save an object
 
-            Args:
-                object
-                fname
+        Parameters
+        ----------
+        object : object
+            Object to be saved
+        fname : str
+            Filepath to save object to
         """
         if fname is not None:
             save_pickle(object, fname)
 
     def load(self, fname):
         """
-            Load pickled object from file
+        Load pickled object from file
 
-            Args:
-                fname
+        Parameters
+        ----------
+        fname : str
+            Location of file
         """
         return load_pickle(fname)
 

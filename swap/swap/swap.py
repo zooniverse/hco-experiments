@@ -77,12 +77,20 @@ class SWAP:
         # self.gold_from_cl = False
 
     # Process a classification
-    def classify(self, cl, subject=True, user=True):
+    def classify(self, cl, subject=None, user=None):
         """
-            Processes a single classification
+            Process a classification
 
-            Args:
-                cl: (dict,Classification) classification
+            Parameters
+            ----------
+            cl : swap.utils.classification.Classification, dict
+                Classification to be processed. Should be a Classification
+                object, but will also accept a dict object to generate a
+                new Classification object
+            subject : boolean
+                Deprecated
+            user : boolean
+                Deprecated
         """
         # if subject is gold standard and gold_updates are specified,
         # update user success probability
@@ -90,43 +98,65 @@ class SWAP:
         if not isinstance(cl, Classification):
             cl = Classification.generate(cl)
 
-        # if self.gold_updates and cl.gold() in [0, 1]:
-        # ^ moved gold check downstream to update methods
-        # User and subject agents weren't being created
-        # if the subject's gold label is -1
-        if subject:
-            self.classify_subject(cl)
-        if user:
-            self.classify_user(cl)
+        if subject is not None or user is not None:
+            raise DeprecationWarning(
+                'controlling subject and user are ' +
+                'no longer supported')
 
-    def classify_user(self, cl):
-        """
-            Update User Data - Process current classification
-
-            Args:
-                cl: (Classification)
-        """
-
-        user = self.users.get(cl.user)
         subject = self.subjects.get(cl.subject)
+        user = self.users.get(cl.user)
 
+        subject.classify(cl, user)
         user.classify(cl, subject)
 
-    def classify_subject(self, cl):
-        """
-            Pass a classification to the appropriate subject agent
+    # def _classify_user(self, cl):
+    #     """
+    #         Gets the appropriate user and
 
-            Args:
-                cl: (dict) classification
-        """
+    #         Parameters
+    #         ----------
+    #         cl: Classification
+    #     """
 
-        # Get subject and user agents
-        user = self.users.get(cl.user)
-        subject = self.subjects.get(cl.subject)
-        # process the classification
-        subject.classify(cl, user)
+    #     user = self.users.get(cl.user)
+    #     subject = self.subjects.get(cl.subject)
+
+    #     user.classify(cl, subject)
+
+    # def _classify_subject(self, cl):
+    #     """
+    #         Pass a classification to the appropriate subject agent
+
+    #         Parameters
+    #         ----------
+    #         cl : (dict) classification
+    #     """
+
+    #     # Get subject and user agents
+    #     user = self.users.get(cl.user)
+    #     subject = self.subjects.get(cl.subject)
+    #     # process the classification
+    #     subject.classify(cl, user)
 
     def process_changes(self):
+        """
+        Process changes to agent ledgers
+
+        While classifying, scores are calculated, they are merely added to
+        the ledger structures. Here the changes are committed and the new
+        scores are calculated. This reduces processing time as the subject
+        score calculation is dependent on the user confusion matrix. The
+        user's confusion matrix is subject to change depending on the
+        user's performance on gold standard subjects.
+
+        First the user's confusion matrices are calculated based on their
+        performance classifying gold standard subjects. If a user's scores
+        have changed, then it notifies every subject agent it classified on
+        of this change.
+
+        Then any subject agent which is connected to a user whose score has
+        changed recalculates its score.
+        """
         print('processing user score changes')
         with progressbar.ProgressBar(
                 max_value=self.users.calculate_changes()) as bar:
@@ -138,10 +168,6 @@ class SWAP:
                 max_value=self.subjects.calculate_changes()) as bar:
             bar.update(0)
             self.subjects.process_changes(bar)
-
-    def calculate_changes(self):
-        return self.users.calculate_changes() + \
-            self.subjects.calculate_changes() + 1
 
     # def getUserAgent(self, user_id):
     #     """
@@ -198,25 +224,33 @@ class SWAP:
             This function is for defining all subjects that are
             gold on initialization
 
-            Args:
-                subjects: (dict: {subject: gold}) list of subjects
+            Parameters
+            ----------
+            golds : dict
+                (subject id : gold label) Mapping of subject to its gold label
         """
-        for id_, gold in golds.items():
-            # TODO use old swap score or reset with p0 for bootstrap?
-            # if id_ in self.subjects:
-            self.subjects.get(id_, make_new=True).set_gold_label(gold)
-            # else:
-            #     subject = Subject(id_, self.p0, gold)
-            #     self.subjects.addAgent(subject)
-
+        # Removes gold label from all subjects not in the golds list
         for subject in self.subjects:
             if subject.id not in golds:
                 subject.set_gold_label(-1)
+        # Assigns the new gold label to subjects in the list
+        # Also tells the Bureau to make a new subject agent if it
+        # doesn't exist yet
+        for id_, gold in golds.items():
+            self.subjects.get(id_, make_new=True).set_gold_label(gold)
 
         # self.process_changes()
 
     @property
     def golds(self):
+        """
+        Compile a list of all the subject -> gold mappings being used
+
+        Returns
+        -------
+        dict
+            {subject id: gold label}
+        """
         data = {}
         for subject in self.subjects:
             if subject.isgold():
@@ -230,6 +264,12 @@ class SWAP:
     def stats(self):
         """
             Consolidate all the statistical data from the bureaus
+
+            Returns
+            -------
+            swap.agents.agent.Stats
+                Stats object containing statistical data on the
+                confusion matrices and subject scores
         """
         stats = Stats()
         if len(self.users) > 0:
@@ -243,6 +283,11 @@ class SWAP:
         """
             Consolidate all the statistical data from the bureaus
             into a string
+
+            Returns
+            -------
+            str
+                Stats to string
         """
         return str(self.stats)
 
@@ -257,6 +302,8 @@ class SWAP:
     def export(self):
         """
             Export both user and subject data
+
+            Deprecated
         """
         raise DeprecationWarning
         return {
@@ -266,6 +313,16 @@ class SWAP:
         }
 
     def score_export(self):
+        """
+        Generate object containing subject score data
+
+        Used in most of our plotting functions and other analysis tools
+
+        Returns
+        -------
+        swap.utils.scores.ScoreExport
+            ScoreExport
+        """
         scores = {}
         for subject in self.subjects:
             if len(subject.ledger) == 0:
@@ -377,6 +434,7 @@ class DummySWAP:
         Returns
         -------
         swap.db.Cursor
+            Classifications
         """
         cursor = db.aggregate([
             {'$match': {'gold_label': {'$ne': -1}}},
@@ -408,5 +466,6 @@ class DummySWAP:
         Returns
         -------
         swap.utils.scores.ScoreExport
+            ScoreExport
         """
         return ScoreExport(self.data)

@@ -204,6 +204,7 @@ class BootstrapControl(Control):
         Determines if swap should only consider each classification for
         user score updates or subject score updates.
         """
+        raise DeprecationWarning('Classify params changed')
         if cl.isGold():
             self.swap.classify(cl, user=True, subject=False)
         else:

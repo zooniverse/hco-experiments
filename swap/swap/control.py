@@ -99,6 +99,7 @@ class Control:
         Returns
         -------
         SWAP
+            SWAP
         """
         if self.swap is None:
             swap = SWAP()
@@ -124,6 +125,7 @@ class Control:
         Returns
         -------
         swap.db.Cursor
+            Cursor with classifications
         """
         return db.getClassifications()
 
@@ -134,6 +136,7 @@ class Control:
         Returns
         -------
         SWAP
+            SWAP
         """
         return self.swap
 
