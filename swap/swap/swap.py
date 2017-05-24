@@ -7,12 +7,23 @@ from swap.agents.agent import Stats
 from swap.agents.subject import Subject
 from swap.agents.user import User
 from swap.config import Config
-from swap.utils.scores import ScoreExport
+from swap.utils.scores import ScoreExport, Score
 from swap.utils import Classification
 
 from swap.db import classifications as db
 
 import progressbar
+
+
+__doc__ = """
+    SWAP:
+        Calculates and updates a confusion matrix for each user, and the
+        probability that a subject is an object of interest
+
+    DummySWAP:
+        Calculates the probability that a subject is an object of interest
+        using only simple vote fractions
+"""
 
 
 class SWAP:
@@ -255,7 +266,14 @@ class SWAP:
         }
 
     def score_export(self):
-        return ScoreExport(self)
+        scores = {}
+        for subject in self.subjects:
+            if len(subject.ledger) == 0:
+                continue
+            id_ = subject.id
+            score = subject.score
+            scores[id_] = Score(id_, None, score)
+        return ScoreExport(scores, new_golds=False)
 
     def roc_export(self, labels=None):
         """
@@ -327,3 +345,68 @@ class SWAP:
 
         self.subjects.reference_bureau(self.users)
         self.users.reference_bureau(self.subjects)
+
+
+class DummySWAP:
+    """
+    For each subject, calculates the probability that it is of
+    interest using simple vote fractions.
+
+    Purpose is to provide a baseline when making performance
+    comparisons
+    """
+
+    def __init__(self):
+        self.data = {}
+
+    def process(self):
+        """
+        Process all subjects
+        """
+        cursor = self.get_cursor()
+        for item in cursor:
+            score = item['votes'] / item['total']
+            gold = item['gold']
+            id_ = item['_id']
+            self.data[id_] = Score(id_, gold, score)
+
+    def get_cursor(self):
+        """
+        Generate a cursor with classifications
+
+        Returns
+        -------
+        swap.db.Cursor
+        """
+        cursor = db.aggregate([
+            {'$match': {'gold_label': {'$ne': -1}}},
+            {'$group': {
+                '_id': '$subject_id',
+                'gold': {'$first': "$gold_label"},
+                'total': {'$sum': 1},
+                'votes': {'$sum': "$annotation"}}}])
+
+        return cursor
+
+    def export(self):
+        """
+        Deprecated
+        """
+        raise DeprecationWarning
+        data = {}
+        for subject, item in self.data.items():
+            data[subject] = {'gold': item[0], 'score': item[1]}
+
+        return data
+
+    def score_export(self):
+        """
+        Generate object containing subject score data
+
+        Used in most of our plotting functions and other analysis tools
+
+        Returns
+        -------
+        swap.utils.scores.ScoreExport
+        """
+        return ScoreExport(self.data)

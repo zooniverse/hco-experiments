@@ -2,11 +2,19 @@
 # Interface between the data structure and SWAP
 # Serves data to SWAP
 
+__doc__ = """
+    Contains classes to control a SWAP instance
+
+        Control: Regular SWAP instance in simulation mode
+
+        MetaDataControl: SWAP instance that splits data by metadata
+        """
+
 import progressbar
 
 from swap.swap import SWAP, Classification
 import swap.db.classifications as db
-import swap.db.controversial as cv
+from swap.utils.golds import GoldGetter
 from swap.db import Query
 
 
@@ -15,15 +23,13 @@ class Control:
         Gets classifications from database and feeds them to SWAP
     """
 
-    def __init__(self, *args, diagnostics=True, swap=None):
+    def __init__(self, *args):
         """
             Initialize control
 
             Args:
-                p0:              prior subject probability
-                epsilon: (float) initial user score
-                train_size: (int) size of gold label sample for
-                    test/train split
+                p0:              (Deprecated) prior subject probability
+                epsilon:         (Deprecated) initial user score
         """
         if len(args) > 0:
             raise DeprecationWarning(
@@ -32,8 +38,7 @@ class Control:
         # Number of subjects with expert labels for a
         # test/train split
         self.gold_getter = GoldGetter()
-        self.diagnostics = diagnostics
-        self.swap = swap
+        self.swap = None
 
     def run(self):
         """
@@ -74,14 +79,27 @@ class Control:
 
     def _delegate(self, cl):
         """
-        Method to allow subclasses to override how classifications
-        are handed to swap
+        Passes classification to SWAP
 
-        cl: (Classification)
+        Purpose is to allow subclasses to override how SWAP receives
+        classifications
+
+        Parameters
+        ----------
+        cl : Classification
+            Classification being delegated
         """
         self.swap.classify(cl)
 
     def init_swap(self):
+        """
+        Create a new SWAP instance, also passes SWAP the appropriate
+        gold labels.
+
+        Returns
+        -------
+        SWAP
+        """
         if self.swap is None:
             swap = SWAP()
         else:
@@ -94,13 +112,29 @@ class Control:
         return swap
 
     def get_gold_labels(self):
+        """
+        Get the set of gold labels being used for this run
+        """
         return self.gold_getter.golds
 
     def get_classifications(self):
+        """
+        Get the cursor containing classifications from db
+
+        Returns
+        -------
+        swap.db.Cursor
+        """
         return db.getClassifications()
 
     def getSWAP(self):
-        """ Returns SWAP object """
+        """
+        Get the SWAP instance being used
+
+        Returns
+        -------
+        SWAP
+        """
         return self.swap
 
     def setSWAP(self, swap):
@@ -110,6 +144,11 @@ class Control:
         self.swap = swap
 
     def reset(self):
+        """
+        Reset the gold getter and SWAP instances.
+
+        Useful when running multiple subsequent instances of SWAP
+        """
         self.swap = None
         self.gold_getter.reset()
 
@@ -151,119 +190,3 @@ class MetaDataControl(Control):
         classifications = db.aggregate(q.build())
 
         return classifications
-
-
-class DummySWAP:
-    def __init__(self):
-        self.data = {}
-
-    def process(self):
-        cursor = self.get_cursor()
-        for item in cursor:
-            score = item['votes'] / item['total']
-            gold = item['gold']
-            subject = item['_id']
-            self.data[subject] = (gold, score)
-
-    def get_cursor(self):
-        cursor = db.aggregate([
-            {'$match': {'gold_label': {'$ne': -1}}},
-            {'$group': {
-                '_id': '$subject_id',
-                'gold': {'$first': "$gold_label"},
-                'total': {'$sum': 1},
-                'votes': {'$sum': "$annotation"}}}])
-
-        return cursor
-
-    def export(self):
-        data = {}
-        for subject, item in self.data.items():
-            data[subject] = {'gold': item[0], 'score': item[1]}
-
-        return data
-
-    def roc_export(self):
-        data = []
-        for item in self.data.values():
-            data.append(item)
-
-        return data
-
-
-class GoldGetter:
-
-    def __init__(self):
-        self.reset()
-
-    def _getter(func):
-        def wrapper(self, *args, **kwargs):
-            getter = func(self, *args, **kwargs)
-            self.getters.append(getter)
-            self._golds = None
-            return getter
-        return wrapper
-
-    @_getter
-    def all(self):
-        return lambda: db.getAllGolds()
-
-    @_getter
-    def random(self, size):
-        return lambda: db.getRandomGoldSample(size)
-
-    @_getter
-    def subjects(self, subject_ids):
-        return lambda: db.getExpertGold(subject_ids)
-
-    @_getter
-    def controversial(self, size):
-        def f():
-            subjects = cv.get_controversial(size)
-            return db.getExpertGold(subjects)
-        return f
-
-    @_getter
-    def consensus(self, size):
-        def f():
-            consensus = cv.get_consensus(size)
-            return db.getExpertGold(consensus)
-        return f
-
-    # @_getter
-    # def extreme_min(self, n_controv, max_consensus):
-    #     def f():
-    #         controv = cv.get_controversial(n_controv)
-    #         consensus = cv.get_max_consensus(max_consensus)
-
-    #         return db.getExpertGold(controv + consensus)
-    #     return f
-
-    # @_getter
-    # def extremes(self, n_controv, n_consensus):
-    #     def f():
-    #         controv = cv.get_controversial(n_controv)
-    #         consensus = cv.get_consensus(n_consensus)
-
-    #         return db.getExpertGold(controv + consensus)
-    #     return f
-
-    def reset(self):
-        self.getters = []
-        self._golds = None
-
-    @property
-    def golds(self):
-        if self._golds is None:
-            if len(self.getters) == 0:
-                self.all()
-
-            golds = {}
-            for getter in self.getters:
-                golds.update(getter())
-
-            self._golds = golds
-        return self._golds
-
-    def __iter__(self):
-        return self.golds
