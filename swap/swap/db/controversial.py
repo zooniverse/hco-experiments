@@ -5,6 +5,11 @@ from swap.db import classifications as dbcl
 from swap.config import Config
 
 
+__doc__ = """
+    Ranks subjects by how controversial or agreeable they are
+"""
+
+
 def _controv_query(size=100, version='pow'):
     return [
         {
@@ -136,6 +141,16 @@ def _consensus_query(size=100, version='pow'):
 
 
 def get_controversial(size):
+    """
+    Get the most controversial subjects
+
+    Formula: :math:`(x + y) ^ {x \over y}` where :math:`x<y`
+
+    Parameters
+    ----------
+    size : int
+        Number of subjects in the set
+    """
     version = Config().controversial_version
     query = _controv_query(size, version)
     cursor = dbcl.aggregate(query)
@@ -147,6 +162,16 @@ def get_controversial(size):
 
 
 def get_consensus(size):
+    """
+    Get the most agreeable subjects, i.e. subjects with highest consensus
+
+    Formula: :math:`(y-x) ^ {1 - {x \over y}}` where :math:`x<y`
+
+    Parameters
+    ----------
+    size : int
+        Number of subjects in the set
+    """
     version = Config().controversial_version
     query = _consensus_query(size, version)
     cursor = dbcl.aggregate(query)

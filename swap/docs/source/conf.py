@@ -35,7 +35,8 @@ extensions = ['sphinx.ext.autodoc',
     'sphinx.ext.doctest',
     'sphinx.ext.coverage',
     'sphinx.ext.viewcode',
-    'sphinxcontrib.napoleon']
+    'sphinxcontrib.napoleon',
+    'sphinx.ext.mathjax']
 
 # Napoleon settings
 napoleon_google_docstring = True
@@ -111,15 +112,15 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+html_theme_options = {'navigation_depth': 4}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
-html_sidebars = { '**': ['globaltoc.html', 'relations.html',
-                         'sourcelink.html', 'searchbox.html'], }
+# html_sidebars = { '**': ['globaltoc.html', 'relations.html',
+#                          'sourcelink.html', 'searchbox.html'], }
 
 
 # -- Options for HTMLHelp output ------------------------------------------
@@ -179,4 +180,12 @@ texinfo_documents = [
 ]
 
 
+# Always document class init methods
+def skip(app, what, name, obj, skip, options):
+    if name == "__init__":
+        return False
+    return skip
 
+
+def setup(app):
+    app.connect("autodoc-skip-member", skip)

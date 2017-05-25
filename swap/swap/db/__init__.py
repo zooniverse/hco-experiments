@@ -46,8 +46,27 @@ class DB(_DB, metaclass=Singleton):
 
 
 class Cursor:
+    """
+    Custom wrapper around mongo's aggregation cursor.
+
+    Has additional functionality to get the number of documents
+    in a query, which is not otherwise available from the regular cursor.
+    However, this functionality performs an additional query to mongo,
+    so it comes with a slight penalty due to additional network access.
+    """
 
     def __init__(self, query, collection, **kwargs):
+        """
+        Parameters
+        ----------
+        query : list
+            Aggregation query for mongo
+        collection : swap.db.[collection]
+            Collection the query thould be performed on
+        **kargs
+            Additional parameters that are passed to the pymongo aggregation
+            command
+        """
         self.query = query
         self.collection = collection
         self.cursor = None

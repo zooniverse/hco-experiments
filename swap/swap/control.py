@@ -44,8 +44,7 @@ class Control:
         """
         Process all classifications in DB with SWAP
 
-        Notes:
-        ------
+        .. note::
             Iterates through the classification collection of the
             database and proccesss each classification one at a time
             in the order returned by the db.

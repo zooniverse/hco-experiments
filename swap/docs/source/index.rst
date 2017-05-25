@@ -9,20 +9,10 @@ Welcome to SWAP's documentation!
 Contents
 --------
 .. toctree::
-   :maxdepth: 3
-   :caption: Contents:
+    :maxdepth: 4
 
-   intro
-   package
-   ui
-   control
-   swap
-   ledger
-   bureau
-   agents
-   db
-   utils
-   plots
+    usage
+    api/index
 
 
 
