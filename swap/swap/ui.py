@@ -444,7 +444,7 @@ class SWAPInterface(Interface):
         #     consensus = int(args.extreme_min[1])
         #     control.gold_getter.extreme_min(controversial, consensus)
 
-        control.run()
+        control.process()
         swap = control.getSWAP()
 
         return swap
@@ -485,7 +485,7 @@ class SWAPInterface(Interface):
             Returns the Control instance
             Defines a Control instance if it doesn't exist yet
         """
-        control = Control()
+        control = Control(Config().p0, Config().epsilon)
 
         return control
 
@@ -580,8 +580,9 @@ class Roc_Iterator:
 
 
 def write_log(swap, fname):
-    with open(fname, 'w') as file:
-        file.writelines(swap.debug_str())
+    pass
+    # with open(fname, 'w') as file:
+    #     file.writelines(swap.debug_str())
 
 
 if __name__ == "__main__":
