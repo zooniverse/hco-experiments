@@ -51,6 +51,8 @@ class ScoreExport:
         if new_golds:
             scores = self._init_golds(scores)
         self.scores = scores
+        self.sorted_scores = sorted(scores, key=lambda id_: scores[id_].p)
+        self.class_counts = self.counts(0)
 
     def _init_golds(self, scores):
         """
@@ -114,6 +116,49 @@ class ScoreExport:
             Threshold for p values of Scores to consider
         """
         return self.composition(threshold)[1]
+
+    def find_purity(self, desired_purity):
+        """
+        Determine the threshold for p needed to arrive at the
+        desired purity.
+
+        Parameters
+        ----------
+        desired_purity : float
+        """
+        def purity(counts):
+            total = sum(counts.values())
+            if total > 0:
+                return counts[1] / sum(counts.values())
+
+        counts = self.class_counts.copy()
+        for id_ in self.sorted_scores:
+
+            score = self.scores[id_]
+            counts[score.gold] -= 1
+
+            _purity = purity(counts)
+            print(score, _purity, counts)
+
+            if _purity is not None and _purity > desired_purity:
+                return score.p
+
+    def completeness(self, threshold):
+        """
+        Find the completeness at a desired purity
+
+        Parameters
+        ----------
+        threshold : float
+            Threshold for the desired purity
+        """
+        p = self.find_purity(threshold)
+        if p is None:
+            raise Exception(
+                'Can\'t find purity > %d in score set!' % threshold)
+
+        print(p, threshold)
+        return self.counts(p)[1] / self.class_counts[1]
 
     def __len__(self):
         return len(self.scores)

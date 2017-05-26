@@ -91,6 +91,36 @@ class TestScoreExport:
         roc = list(se.roc(labels=(2, 3, 4)))
         print(roc)
 
+    def test_find_purity(self):
+        golds = [0, 0, 0, 0, 1, 1, 1, 1]
+        scores = dict([(i, Score(i, g, i / 10))
+                       for i, g in enumerate(golds)])
+        se = ScoreExport(scores, False)
+
+        p = se.find_purity(0.99)
+        print(p)
+        assert p == 0.3
+
+    def test_find_purity_2(self):
+        golds = [0, 1, 0, 1, 0, 1, 0, 1, 1]
+        scores = dict([(i, Score(i, g, i / 10))
+                       for i, g in enumerate(golds)])
+        se = ScoreExport(scores, False)
+
+        p = se.find_purity(0.99)
+        print(p)
+        assert p == 0.6
+
+    def test_completeness(self):
+        golds = [1, 1, 0, 0, 1, 1]
+        scores = dict([(i, Score(i, g, i / 10))
+                       for i, g in enumerate(golds)])
+        se = ScoreExport(scores, False)
+        print(se.find_purity(0.8))
+        c = se.completeness(0.8)
+
+        assert c == 0.5
+
 
 class TestScoreIterator:
     def test_(self):
