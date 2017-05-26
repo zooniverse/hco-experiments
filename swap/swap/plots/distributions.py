@@ -70,8 +70,8 @@ def plot_seaborn_density_split(swap, cutoff=1):
 
 
 @_plot
-def plot_class_histogram(swap):
-    roc = swap.score_export().roc()
+def plot_class_histogram(score_export):
+    data = score_export.roc()
     # b0 = [item[1] for item in roc if item[0] == 0]
     # b1 = [item[1] for item in roc if item[0] == 1]
 
@@ -79,7 +79,7 @@ def plot_class_histogram(swap):
     b1 = []
     bins = [[0, 0, 0] for i in range(25)]
 
-    for gold, p in roc:
+    for gold, p in data:
         bin_ = int(p * 100 / 4)
         if bin_ == 25:
             bin_ -= 1
