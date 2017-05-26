@@ -5,6 +5,6 @@
 -------------------------
 
 .. automodule:: swap.config.config
-    :members:
+    :members: _Config, Object
     :undoc-members:
     :show-inheritance:

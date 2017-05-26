@@ -10,12 +10,18 @@ class Classification:
     def __init__(self, user, subject, annotation,
                  gold_label=-1, metadata={}):
         """
-            Args:
-                user:       user name of the classifying user
-                subject:    id number of the subject being classified
-                annotation: label assigned by the user
-                gold_label: (optional) expert assigned label
-                metadata:   (optional) any additional metadata associated
+            Parameters
+            ----------
+            user : str
+                user name of the classifying user
+            subject : int
+                id number of the subject being classified
+            annotation : int
+                label assigned by the user
+            gold_label : int
+                (optional) expert assigned label
+            metadata : dict
+                (optional) any additional metadata associated
         """
 
         if type(annotation) is not int:
@@ -54,6 +60,9 @@ class Classification:
             self.gold_label = None
 
     def isgold(self):
+        """
+        If the classification has a gold label associated with it
+        """
         if self.gold_label is not None:
             return True
         else:
@@ -91,8 +100,10 @@ class Classification:
             Verify classification is compatible with current
             SWAP version
 
-            Args:
-                cl: (dict) classification
+            Parameters
+            ----------
+            cl : dict
+                classification
         """
         names = [
             'user_name',
@@ -112,7 +123,7 @@ class Classification:
 
 class ClKeyError(KeyError):
     """
-        Raise when a classification is missing a key element
+    Raise when a classification is missing a key element
     """
 
     def __init__(self, key, cl={}, *args, **kwargs):
@@ -123,8 +134,8 @@ class ClKeyError(KeyError):
 
 class ClValueError(ValueError):
     """
-        Raise when a value in the classification is incorrect,
-        impossible, or is of the wrong type
+    Raise when a value in the classification is incorrect,
+    impossible, or is of the wrong type
     """
 
     def __init__(self, key, _type, value, *args, **kwargs):

@@ -5,6 +5,10 @@ from swap.utils import Singleton
 
 
 class Object:
+    """
+    Accepts a dict as an argument. Sets an instance variable
+    for each key value mapping in the dict
+    """
     def __init__(self, obj):
         if type(obj) is dict:
             for key, value in obj.items():
@@ -14,6 +18,15 @@ class Object:
 
 
 class _Config:
+    """
+    Globally accessible config object. All variables that are specific
+    to a project should be in here.
+
+    Config is a singleton class. To access its variables, for example
+    to access p0, do::
+        from swap.config import Config
+        Config().p0
+    """
     csv_types = {
         'classification_id': int,
         'user_id': int,
@@ -26,11 +39,14 @@ class _Config:
         'mag_err': float
     }
 
+    # Prior probabilities
     p0 = 0.12
     epsilon = 0.5
 
+    # Operator used in controversial and consensus score calculation
     controversial_version = 'pow'
 
+    # Database config options
     database = Object({
         'name': 'swapDB',
         'host': 'localhost',

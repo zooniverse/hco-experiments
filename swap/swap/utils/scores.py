@@ -3,7 +3,20 @@ import swap.db.classifications as db
 
 
 class Score:
+    """
+    Stores information on each subject for export
+    """
     def __init__(self, id_, gold, p):
+        """
+        Parameters
+        ----------
+        id_ : int
+            Subject id
+        gold : gold
+            Gold label of subject
+        p : float
+            SWAP probability that the subject is real
+        """
         self.id = id_
         self.gold = gold
         self.p = p
@@ -19,21 +32,55 @@ class Score:
 
 
 class ScoreExport:
+    """
+    Export SWAP scores
+
+    Uses less space than pickling and saving the entire SWAP object.
+    Used to generate plots like ROC curves.
+    """
     def __init__(self, scores, new_golds=True):
+        """
+        Pararmeters
+        -----------
+        scores : [Score]
+            List of scores in export
+        new_golds : bool
+            Flag to indicate whether to fetch gold labels from database
+            or to use the gold labels already in score objects
+        """
         if new_golds:
             scores = self._init_golds(scores)
         self.scores = scores
 
     def _init_golds(self, scores):
+        """
+        Assign new gold labels to score objects
+
+        Parameters
+        ----------
+        score : [Score]
+            List of scores in export
+        """
         golds = self.get_real_golds()
         for score in scores:
             score.gold = golds[score.id]
         return scores
 
     def get_real_golds(self):
+        """
+        Fetch gold labels from database
+        """
         return db.getAllGolds()
 
     def counts(self, threshold):
+        """
+        Count how many subjects of each class are in the export
+
+        Parameters
+        ----------
+        threshold : float
+            Threshold for p values of Scores to consider
+        """
         n = {-1: 0, 0: 0, 1: 0}
         for score in self.scores.values():
             if score.p >= threshold:
@@ -41,6 +88,14 @@ class ScoreExport:
         return n
 
     def composition(self, threshold):
+        """
+        Measure percentage of each class in the export
+
+        Parameters
+        ----------
+        threshold : float
+            Threshold for p values of Scores to consider
+        """
         n = self.counts(threshold)
 
         total = sum(n.values())
@@ -50,6 +105,14 @@ class ScoreExport:
         return n
 
     def purity(self, threshold):
+        """
+        Measure the purity of real objects in score export
+
+        Parameters
+        ----------
+        threshold : float
+            Threshold for p values of Scores to consider
+        """
         return self.composition(threshold)[1]
 
     def __len__(self):
@@ -59,6 +122,9 @@ class ScoreExport:
         return iter(self.scores)
 
     def roc(self, labels=None):
+        """
+        Generate iterator of information for a ROC curve
+        """
         def func(score):
             return score.gold, score.p
 
@@ -75,12 +141,18 @@ class ScoreExport:
             return ScoreIterator(scores, func, cond)
 
     def full(self):
+        """
+        Generate iterator of all information
+        """
         def func(score):
             return (score.id, score.gold, score.p)
         return ScoreIterator(self.scores, func)
 
 
 class ScoreIterator:
+    """
+    Custom iterator to process exported score data
+    """
     def __init__(self, scores, func, cond=None):
         if type(scores) is dict:
             scores = list(scores.values())

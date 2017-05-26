@@ -5,6 +5,12 @@ assert Classification
 
 
 class Singleton(type):
+    """
+    Singleton construct. Add as metaclass inheritance to only
+    allow one instance of a class to exist. Currently used for
+    DB and Config so that there is a single config instance,
+    and a single connection to the database.
+    """
     _instances = {}
 
     def __call__(cls, *args, **kwargs):
