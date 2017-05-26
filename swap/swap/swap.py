@@ -330,7 +330,7 @@ class SWAP:
             id_ = subject.id
             score = subject.score
             scores[id_] = Score(id_, None, score)
-        return ScoreExport(scores, new_golds=False)
+        return ScoreExport(scores)
 
     def roc_export(self, labels=None):
         """
@@ -468,4 +468,4 @@ class DummySWAP:
         swap.utils.scores.ScoreExport
             ScoreExport
         """
-        return ScoreExport(self.data)
+        return ScoreExport(self.data, new_golds=False)
