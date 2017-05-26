@@ -93,7 +93,8 @@ setup(
     # for example:
     # $ pip install -e .[dev,test]
     extras_require={
-        'dev': ['check-manifest', 'setuptools', 'wheel'],
+        'dev': ['check-manifest', 'setuptools', 'wheel', 'sphinx',
+                'sphinxcontrib-napoleon', 'sphinx-rtd-theme'],
         'test': ['coverage', 'pytest'],
     },
 
