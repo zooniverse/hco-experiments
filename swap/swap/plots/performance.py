@@ -42,10 +42,10 @@ def plot_histogram(data, title, fname, dpi=300):
     plt.show()
 
 
-def plot_roc(title, *datasets, fname=None, dpi=300):
+def plot_roc(title, iterator, fname=None, dpi=300):
     plt.figure(1)
 
-    for label, data in datasets:
+    for label, data in iterator:
         y_true = []
         y_score = []
 

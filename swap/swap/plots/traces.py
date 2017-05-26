@@ -35,11 +35,20 @@ def plot_subjects(swap, fname):
         Generate a trace plot of how each subject's score changes
         with each classification
     """
-    export = swap.export()
-    print(fname)
-    data = [(d['gold_label'], d['history'])
-            for d in export['subjects'].values()]
+    data = []
+    for subject in swap.subjects:
+        scores = []
+        for t in sorted(subject.ledger, key=lambda t: t.order):
+            scores.append(t.score)
+        data.append((subject.gold, scores))
+
     plot_tracks(data, 'Subject Tracks', fname)
+
+    # export = swap.export()
+    # print(fname)
+    # data = [(d['gold_label'], d['history'])
+    #         for d in export['subjects'].values()]
+    # plot_tracks(data, 'Subject Tracks', fname)
 
 
 def plot_tracks(data, title, fname, dpi=300, scale='log'):

@@ -1,5 +1,8 @@
 
 import swap.db.classifications as db
+from swap.utils.classification import Classification
+
+assert Classification
 
 
 class Score:
@@ -35,35 +38,45 @@ class ScoreExport:
     def get_real_golds(self):
         return db.getAllGolds()
 
-    def purity(self, threshold):
+    def counts(self, threshold):
         n = {-1: 0, 0: 0, 1: 0}
         for score in self.scores.values():
             if score.p >= threshold:
                 n[score.gold] += 1
+        return n
+
+    def composition(self, threshold):
+        n = self.counts(threshold)
 
         total = sum(n.values())
-        if total > 0:
-            for i in n:
-                n[i] = n[i] / total
+        for i in n:
+            n[i] = n[i] / total
 
-        return n[1]
+        return n
+
+    def purity(self, threshold):
+        return self.composition(threshold)[1]
 
     def __len__(self):
         return len(self.scores)
 
     def __iter__(self):
-        return self.scores.values()
+        return iter(self.scores)
 
     def roc(self, labels=None):
         def func(score):
             return score.gold, score.p
 
+        def isgold(score):
+            return score.gold in [0, 1]
+        scores = self.scores
+
         if labels is None:
-            return ScoreIterator(self.scores, func)
+            return ScoreIterator(scores, func, isgold)
         else:
             def cond(score):
-                return score.id in labels
-            return ScoreIterator(self.scores, func, cond)
+                return isgold(score) and score.id in labels
+            return ScoreIterator(scores, func, cond)
 
     def full(self):
         def func(score):
@@ -76,21 +89,25 @@ class ScoreIterator:
         if type(scores) is dict:
             scores = list(scores.values())
         if type(scores) is not list:
-            raise TypeError(type(scores))
+            raise TypeError('scores type %s not valid!' % str(type(scores)))
 
         self.scores = scores
         self.func = func
         if cond is None:
             self.cond = lambda item: True
+        else:
+            self.cond = cond
         self.i = 0
 
     def next(self):
         if self.i >= len(self):
             raise StopIteration
-        obj = self.func(self.scores[self.i])
+
+        score = self.scores[self.i]
         self.i += 1
 
-        if self.cond(obj):
+        if self.cond(score):
+            obj = self.func(score)
             return obj
         else:
             return self.next()
