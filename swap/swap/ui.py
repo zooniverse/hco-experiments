@@ -408,8 +408,15 @@ class SWAPInterface(Interface):
         parser.add_argument(
             '--test', action='store_true')
 
+        parser.add_argument(
+            '--scores-from-csv', nargs=1)
+
+        parser.add_argument(
+            '--scores-to-csv', nargs=1)
+
     def call(self, args):
         swap = None
+        score_export = None
 
         if args.load:
             obj = self.load(args.load[0])
@@ -419,6 +426,9 @@ class SWAPInterface(Interface):
                 score_export = swap.score_export()
             elif isinstance(obj, ScoreExport):
                 score_export = obj
+
+        if args.scores_from_csv:
+            score_export = self.scores_from_csv(args.scores_from_csv[0])
 
         if args.run:
             swap = self.run_swap(args)
@@ -470,6 +480,9 @@ class SWAPInterface(Interface):
                 plots.plot_pdf(data, self.f(args.dist[0]), swap,
                                cutoff=float(args.dist[1]))
 
+            if args.scores_to_csv:
+                self.scores_to_csv(score_export, args.scores_to_csv[0])
+
         if args.diff:
             self.difference(args)
 
@@ -515,6 +528,27 @@ class SWAPInterface(Interface):
         swap = control.getSWAP()
 
         return swap
+
+    def scores_to_csv(self, score_export, fname):
+        import csv
+        with open(fname, 'w') as csvfile:
+            writer = csv.writer(csvfile)
+            for score in score_export.scores.values():
+                writer.writerow((score.id, score.gold, score.p))
+
+    def scores_from_csv(self, fname):
+        import csv
+        from swap.utils.scores import Score, ScoreExport
+        data = {}
+        with open(fname) as csvfile:
+            reader = csv.reader(csvfile)
+            for i, g, p in reader:
+                i = int(i)
+                g = int(g)
+                p = float(p)
+                data[i] = Score(i, g, p)
+
+        return ScoreExport(data, new_golds=False)
 
     def manifest(self, swap, args):
         def arg_str(args):
