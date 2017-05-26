@@ -26,10 +26,13 @@ Generate a ROC curve from pickled score exports
     ``run_swap roc -a label1 score_export1.pkl -a label2 score_export2.pkl --output roc.png``
 
 .. note::
-    Most of these examples assume you've added the main.py file in the
-    project root to your path. This can be done on linux with::
-        ln -s {SWAP root folder}/main.py {home directory}/.local/bin/run_swap
-    and ensuring that `$HOME/.local/bin` is in your PATH variable
+    Most of these examples assume you've added properly installed the SWAP
+    package using distutils, such that run_swap exists in your PATH variable
+    and points to the __main__.py script.
+    You can install the SWAP package by running::
+        python setup.py install
+    from the project root. Make sure you have a virtual environment setup which
+    points to a python version >=3.4
 
 Detailed Usage
 --------------
