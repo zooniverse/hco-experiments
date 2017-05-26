@@ -64,7 +64,7 @@ class ScoreExport:
             List of scores in export
         """
         golds = self.get_real_golds()
-        for score in scores:
+        for score in scores.values():
             score.gold = golds[score.id]
         return scores
 

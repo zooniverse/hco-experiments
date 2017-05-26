@@ -24,6 +24,20 @@ class TestScoreExport:
             assert score.gold == golds[score.id]
             assert score.p == score.id / 10
 
+    @patch.object(
+        ScoreExport, 'get_real_golds')
+    def test_assign_golds(self, mock):
+        golds = [1, 1, 0, 0, 1, 1]
+
+        rg = dict([(i, g) for i, g in enumerate(golds)])
+        mock.return_value = rg
+
+        scores = dict([(i, Score(i, None, i / 10))
+                       for i in range(len(golds))])
+        se = ScoreExport(scores, True)
+        for score in se.scores.values():
+            assert golds[score.id] == score.gold
+
     def test_counts(self):
         golds = {1: 0, 2: 0, 3: 1, 4: 1, 5: -1, 6: 1}
         scores = dict([(i, Score(i, g, 0)) for i, g in golds.items()])
