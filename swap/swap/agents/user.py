@@ -38,8 +38,10 @@ class User(Agent):
                 'Classification user name %s ' % str(cl.user) +
                 'does not match my id %s' % str(self.id))
         annotation = cl.annotation
-        t = Transaction(subject.id, subject, annotation)
-        self.ledger.add(t)
+
+        if subject.id not in self.ledger.transactions:
+            t = Transaction(subject.id, subject, annotation)
+            self.ledger.add(t)
 
     def export(self):
         """

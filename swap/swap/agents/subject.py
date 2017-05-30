@@ -61,8 +61,9 @@ class Subject(Agent):
         annotation = int(cl.annotation)
         id_ = user.id
 
-        t = Transaction(id_, user, annotation)
-        self.ledger.add(t)
+        if id_ not in self.ledger.transactions:
+            t = Transaction(id_, user, annotation)
+            self.ledger.add(t)
 
     def set_gold_label(self, gold_label):
         """
