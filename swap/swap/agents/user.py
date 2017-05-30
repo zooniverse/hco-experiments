@@ -30,6 +30,9 @@ class User(Agent):
 
         self.count = 0
 
+        self.subjects = []
+        self.duplicate_count = 0
+
     def addClassification(self, cl, gold):
         """
             adds a classification and calculates the new score
@@ -37,6 +40,13 @@ class User(Agent):
             Args:
                 cl (dict) classification data from database
         """
+
+        subject_id = cl.subject
+        if subject_id in self.subjects:
+            self.duplicate_count += 1
+            return
+
+        self.subjects.append(subject_id)
 
         # Increment basic tracking
         annotation = int(cl.annotation)
