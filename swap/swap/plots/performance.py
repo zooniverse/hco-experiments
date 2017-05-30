@@ -130,8 +130,10 @@ def plot_matrix_difference(data, title, fname):
         if n < 0:
             color = '#C10505'
             n = -n
-        else:
+        elif n == 0:
             color = '#3F88C5'
+        else:
+            color = '#000000'
 
         plt.plot(x, y, 'o', ms=5, color=color, alpha=.5)
 
@@ -144,7 +146,7 @@ def plot_matrix_difference(data, title, fname):
     plt.title(title)
 
     if fname:
-        plt.savefig(fname, dpi=dpi)
+        plt.savefig(fname, dpi=300)
     else:
         plt.show()
 

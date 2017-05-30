@@ -36,7 +36,7 @@ def getClassifications(query=None, **kwargs):
     """
     # Generate a default query if not specified
     query = [
-        {'$match': {'classification_id': {'$lt': 25000000}}},
+        # {'$match': {'classification_id': {'$lt': 25000000}}},
         {'$project': {'user_name': 1, 'subject_id': 1, 'annotation': 1}}
     ]
 

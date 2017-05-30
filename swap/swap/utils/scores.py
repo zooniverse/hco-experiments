@@ -158,7 +158,6 @@ class ScoreExport:
             counts[score.gold] -= 1
 
             _purity = purity(counts)
-            print(score, _purity, counts)
 
             if _purity is not None and _purity > desired_purity:
                 return score.p
@@ -174,10 +173,9 @@ class ScoreExport:
         """
         p = self.find_purity(threshold)
         if p is None:
-            raise Exception(
-                'Can\'t find purity > %d in score set!' % threshold)
+            print('Can\'t find purity > %f in score set!' % threshold)
+            return 0
 
-        print(p, threshold)
         return self.counts(p)[1] / self.class_counts[1]
 
     def __len__(self):
