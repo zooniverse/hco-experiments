@@ -67,6 +67,7 @@ class Control:
             for cl in classifications:
                 # process classification in swap
                 cl = Classification.generate(cl)
+
                 self._delegate(cl)
                 bar.update(n_class)
                 n_class += 1

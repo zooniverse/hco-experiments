@@ -33,9 +33,6 @@ class Subject(Agent):
         # store gold label
         self.gold_label = gold_label
 
-        self.users = []
-        self.duplicate_count = 0
-
     @property
     def score(self):
         """
@@ -69,12 +66,6 @@ class Subject(Agent):
                 cl (dict) classification data from database
                 user_agent (Agent->User)  Agent for the classifying user
         """
-
-        if user_agent.id in self.users:
-            self.duplicate_count += 1
-            return
-
-        self.users.append(user_agent.id)
 
         annotation = int(cl.annotation)
         s_score = self.score

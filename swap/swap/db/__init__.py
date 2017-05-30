@@ -72,7 +72,8 @@ class Cursor:
         query = self.query
         query += [{'$group': {'_id': 1, 'sum': {'$sum': 1}}}]
 
-        count = self.collection.aggregate(query).next()['sum']
+        count = self.collection.aggregate(
+            query, allowDiskUse=True).next()['sum']
         return count
 
     def next(self):

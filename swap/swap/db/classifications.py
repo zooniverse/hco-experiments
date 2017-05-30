@@ -12,11 +12,21 @@ aggregate = collection.aggregate
 def getClassifications(query=None, **kwargs):
     """ Returns Iterator over all Classifications """
     # Generate a default query if not specified
-    if query is None:
-        query = Query()
+    # if query is None:
+    #     query = Query()
 
-        fields = ['user_name', 'subject_id', 'annotation']
-        query.project(fields)
+    #     fields = ['user_name', 'subject_id', 'annotation']
+    #     query.project(fields)
+
+    query = [
+        {'$group': {'_id': {'subject': '$subject_id', 'user': '$user_name'},
+                    'annotation': {'$first': '$annotation'},
+                    'classification': {'$first': '$classification_id'}}},
+        {'$project': {'_id': '$classification',
+                      'user_name': '$_id.user',
+                      'subject_id': '$_id.subject',
+                      'annotation': 1}}
+    ]
 
     # set batch size as specified in kwargs,
     # or default to the config default
@@ -26,8 +36,9 @@ def getClassifications(query=None, **kwargs):
         batch_size = DB().batch_size
 
     # perform query on classification data
-    classifications = Cursor(query.build(), collection,
-                             batchSize=batch_size)
+    classifications = Cursor(query, collection,
+                             batchSize=batch_size,
+                             allowDiskUse=True)
     # classifications = self.classifications.aggregate(
     #     query.build(), batchSize=batch_size)
 
