@@ -30,11 +30,15 @@ class Trial:
     def purity(self, cutoff):
         return self.scores.purity(cutoff)
 
+    def completeness(self):
+        return self.scores.completeness(0.99)
+
     def purify(self):
         pass
 
     def plot(self, cutoff):
-        return (self.consensus, self.controversial, self.purity(cutoff))
+        return (self.consensus, self.controversial,
+                self.purity(cutoff), self.completeness())
 
     @staticmethod
     def from_control(consensus, controversial, control):
@@ -66,6 +70,7 @@ class Experiment:
     def __init__(self, saver, cutoff=0.96):
         self.trials = []
         self.plot_points = []
+
         self.save_f = saver
         self.p_cutoff = cutoff
 
@@ -133,8 +138,20 @@ class Experiment:
         self.trials.append(trial)
         self.plot_points.append(trial.plot(self.p_cutoff))
 
-    def plot(self, fname):
-        data = self.plot_points
+    def plot_purity(self, fname):
+        data = []
+        for point in self.plot_points:
+            x, y, purity, completeness = point
+            data.append((x, y, purity))
+
+        distributions.multivar_scatter(fname, data)
+
+    def plot_completeness(self, fname):
+        data = []
+        for point in self.plot_points:
+            x, y, purity, completeness = point
+            data.append((x, y, completeness))
+
         distributions.multivar_scatter(fname, data)
 
     def __str__(self):

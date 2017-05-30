@@ -255,8 +255,8 @@ class ExperimentInterface(swap.ui.Interface):
             help='pickle and save experiment data')
 
         parser.add_argument(
-            '--plot', nargs=1,
-            metavar='file',
+            '--plot', nargs=2,
+            metavar=('type', 'file'),
             help='Generate experiment plot')
 
         parser.add_argument(
@@ -302,7 +302,13 @@ class ExperimentInterface(swap.ui.Interface):
 
         if args.plot:
             assert e
-            e.plot(self.f(args.plot[0]))
+            fname = self.f(args.plot[1])
+            type_ = args.plot[0]
+
+            if type_ == 'purity':
+                e.plot_purity(fname)
+            elif type_ == 'completeness':
+                e.plot_completeness(fname)
 
         if args.shell:
             import code

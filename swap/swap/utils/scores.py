@@ -8,6 +8,7 @@ class Score:
     """
     Stores information on each subject for export
     """
+
     def __init__(self, id_, gold, p):
         """
         Parameters
@@ -40,6 +41,7 @@ class ScoreExport:
     Uses less space than pickling and saving the entire SWAP object.
     Used to generate plots like ROC curves.
     """
+
     def __init__(self, scores, new_golds=True):
         """
         Pararmeters
@@ -219,6 +221,7 @@ class ScoreIterator:
     """
     Custom iterator to process exported score data
     """
+
     def __init__(self, scores, func, cond=None):
         if type(scores) is dict:
             scores = list(scores.values())
