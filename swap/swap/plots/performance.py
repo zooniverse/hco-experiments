@@ -11,11 +11,10 @@ from sklearn.metrics import auc
 def plot_user_cm(swap, fname):
     data = []
     for user in swap.users:
-        score0 = user.getScore(0)
-        score1 = user.getScore(1)
-        n = user.getCount()
+        score = user.score
+        n = len(user.ledger)
 
-        data.append((score0, score1, n))
+        data.append((*score, n))
 
     plot_confusion_matrix(data, "User Confusion Matrices", fname)
 
@@ -126,28 +125,49 @@ def plot_confusion_matrix(data, title, fname, dpi=300):
         plt.show()
 
 
-def p_diff(base, other, fname, load):
-    def score(swap, id_):
-        return swap.subjects.get(id_).getScore()
+def p_diff(base_score, other, fname, y_axis=None,
+           aspect=None, x_axis=None):
 
     # Configure subplots in 'n x n' square grid
-    n = math.ceil(math.sqrt(len(other)))
+    count = len(other)
+    w = math.ceil(math.sqrt(count))
+    h = math.ceil(count / w)
+
+    # fig = plt.figure()
 
     for i, item in enumerate(other):
-        label = item[1]
-        o_swap = load(item[0])
+        label, other_score = item
 
         # Select the right subplot position
-        plt.subplot(n, n, i + 1)
+        # if aspect is not None:
+        #     ax = fig.add_subplot(
+        #         w, h, i + 1, adjustable='box',
+        #         aspect=9 / 16)
+        # else:
+        #     ax = plt
+        plt.subplot(w, h, i + 1)
 
         data = []
-        for id_ in base.subjects.getAgentIds():
-            if o_swap.subjects.has(id_):
-                a = score(base, id_)
-                b = score(o_swap, id_)
+        a_dict = base_score.dict()
+        b_dict = other_score.dict()
+
+        for id_ in a_dict:
+            if id_ in b_dict:
+                a = a_dict[id_].p
+                b = b_dict[id_].p
                 data.append((a, b))
 
-        scatter_plot(data, label)
+        scatter_plot(data)
+
+        # Plot Title
+        plt.title(label)
+
+        if y_axis is not None:
+            plt.ylabel(y_axis)
+
+        if x_axis is not None:
+            plt.xlabel(x_axis)
+
         print(label)
 
     plt.tight_layout()
@@ -159,10 +179,7 @@ def p_diff(base, other, fname, load):
         plt.show()
 
 
-def scatter_plot(data, title):
+def scatter_plot(data):
     x = [i[0] for i in data]
     y = [i[1] for i in data]
     plt.plot(x, y, 'o', alpha=.5, ms=1)
-
-    # Plot Title
-    plt.title(title)
