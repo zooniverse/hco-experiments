@@ -56,11 +56,11 @@ def plot_seaborn_density(data):
     plt.xlabel('Probability')
 
 
-def plot_seaborn_density_split(swap, cutoff=1):
-    roc = swap.score_export().roc()
-    roc = [item for item in roc if item[1] < cutoff]
-    b0 = [item[1] for item in roc if item[0] == 0]
-    b1 = [item[1] for item in roc if item[0] == 1]
+@_plot
+def plot_seaborn_density_split(scores, cutoff=1):
+    scores = [item for item in scores if item[1] < cutoff]
+    b0 = [item[1] for item in scores if item[0] == 0]
+    b1 = [item[1] for item in scores if item[0] == 1]
 
     sns.distplot(np.array(b0), kde_kws={'label': 'Real 0'})
     sns.distplot(np.array(b1), kde_kws={'label': 'Real 1'})

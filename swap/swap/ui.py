@@ -686,7 +686,7 @@ class ScoresInterface(Interface):
             '--aspect-ratio', nargs=1)
 
         parser.add_argument(
-            '--user-diff', nargs=1)
+            '--user-diff', nargs=2)
 
     def call(self, args):
         """
@@ -703,6 +703,9 @@ class ScoresInterface(Interface):
 
         elif args.user:
             self.user(args.user[0], output, args)
+
+        elif args.user_diff:
+            self.user_diff(args.user_diff, output, args)
 
     def difference(self, base, output, args):
         base = self.load(base)
@@ -759,6 +762,7 @@ class ScoresInterface(Interface):
             return ScoreExport.from_csv(fname)
 
     def load_user(self, fname, type_=list):
+        print('loading csv')
         if type_ is list:
             data = []
             with open(fname) as csvfile:
@@ -777,6 +781,7 @@ class ScoresInterface(Interface):
         else:
             data = None
 
+        print('done')
         return data
 
 

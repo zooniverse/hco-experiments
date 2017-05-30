@@ -128,11 +128,17 @@ def plot_confusion_matrix(data, title, fname, dpi=300):
 def plot_matrix_difference(data, title, fname):
     for x, y, n in data:
         if n < 0:
-            color = '#3F88C5'
+            color = '#C10505'
             n = -n
         else:
-            color = '#C10505'
-        plt.plot(x, y, 'o', ms=n / 100, color=color, alpha=.5)
+            color = '#3F88C5'
+
+        plt.plot(x, y, 'o', ms=5, color=color, alpha=.5)
+
+    # Quadrant divider lines
+    plt.plot([0, 0], [-1, 1], "k--", lw=1)
+    plt.plot([-1, 1], [0, 0], "k--", lw=1)
+    # plt.plot([0, 1], [1, 0], "k-", lw=1)
 
     # Plot Title
     plt.title(title)
