@@ -11,6 +11,7 @@ import pickle
 import argparse
 import os
 import sys
+import csv
 
 __doc__ = """
     An interface to interact with our utilities from the command line.
@@ -414,6 +415,10 @@ class SWAPInterface(Interface):
         parser.add_argument(
             '--scores-to-csv', nargs=1)
 
+        parser.add_argument(
+            '--export-user-scores', nargs=1,
+            help='Export user scores to csv')
+
     def call(self, args):
         swap = None
         score_export = None
@@ -465,6 +470,10 @@ class SWAPInterface(Interface):
                 print('applying new gold labels')
                 swap.set_gold_labels(gg.golds)
                 swap.process_changes()
+
+            if args.export_user_scores:
+                fname = self.f(args.export_user_scores[0])
+                self.export_user_scores(swap, fname)
 
         if score_export is not None:
             if args.save_scores:
@@ -530,11 +539,18 @@ class SWAPInterface(Interface):
         return swap
 
     def scores_to_csv(self, score_export, fname):
-        import csv
         with open(fname, 'w') as csvfile:
             writer = csv.writer(csvfile)
             for score in score_export.scores.values():
                 writer.writerow((score.id, score.gold, score.p))
+
+    def export_user_scores(self, swap, fname):
+        print('Exporting user scores to %s' % fname)
+        with open(fname, 'w') as csvfile:
+            writer = csv.writer(csvfile)
+            for user in swap.users:
+                writer.writerow((user.id, *user.score, len(user.ledger)))
+        print('done')
 
     # def scores_from_csv(self, fname):
     #     import csv
@@ -655,6 +671,9 @@ class ScoresInterface(Interface):
             '--diff', nargs=1)
 
         parser.add_argument(
+            '--user', nargs=1)
+
+        parser.add_argument(
             '--output', nargs=1)
 
         parser.add_argument(
@@ -679,6 +698,9 @@ class ScoresInterface(Interface):
             base = args.diff[0]
             self.difference(base, output, args)
 
+        elif args.user:
+            self.user(args.user[0], output, args)
+
     def difference(self, base, output, args):
         base = self.load(base)
         print(11, base, output, args)
@@ -700,6 +722,17 @@ class ScoresInterface(Interface):
 
         # other = [load_pickle(x) for x in args.diff[1:]]
         plots.performance.p_diff(base, p_args, output, **kwargs)
+
+    def user(self, fname, output, args):
+        data = []
+        with open(fname) as csvfile:
+            reader = csv.reader(csvfile)
+            for line in reader:
+                id_, s0, s1, n = line
+                data.append((float(s0), float(s1), int(n)))
+
+        plots.performance.plot_confusion_matrix(
+            data, "User Confusion Matrices", output)
 
     def load(self, fname):
         _, extension = os.path.splitext(fname)
