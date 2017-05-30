@@ -125,6 +125,24 @@ def plot_confusion_matrix(data, title, fname, dpi=300):
         plt.show()
 
 
+def plot_matrix_difference(data, title, fname):
+    for x, y, n in data:
+        if n < 0:
+            color = '#3F88C5'
+            n = -n
+        else:
+            color = '#C10505'
+        plt.plot(x, y, 'o', ms=n / 100, color=color, alpha=.5)
+
+    # Plot Title
+    plt.title(title)
+
+    if fname:
+        plt.savefig(fname, dpi=dpi)
+    else:
+        plt.show()
+
+
 def p_diff(base_score, other, fname, y_axis=None,
            aspect=None, x_axis=None):
 

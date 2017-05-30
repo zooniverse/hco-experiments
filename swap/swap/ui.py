@@ -685,6 +685,9 @@ class ScoresInterface(Interface):
         parser.add_argument(
             '--aspect-ratio', nargs=1)
 
+        parser.add_argument(
+            '--user-diff', nargs=1)
+
     def call(self, args):
         """
         Define what to do if this interface's command was passed
@@ -724,15 +727,28 @@ class ScoresInterface(Interface):
         plots.performance.p_diff(base, p_args, output, **kwargs)
 
     def user(self, fname, output, args):
-        data = []
-        with open(fname) as csvfile:
-            reader = csv.reader(csvfile)
-            for line in reader:
-                id_, s0, s1, n = line
-                data.append((float(s0), float(s1), int(n)))
+        data = self.load_user(fname)
 
         plots.performance.plot_confusion_matrix(
             data, "User Confusion Matrices", output)
+
+    def user_diff(self, users, output, args):
+        a = self.load_user(users[0], type_=dict)
+        b = self.load_user(users[1], type_=dict)
+
+        data = []
+        for id_ in a:
+            if id_ in b:
+                x, y, n = zip(a[id_], b[id_])
+
+                x = x[1] - x[0]
+                y = y[1] - y[0]
+                n = n[1] - n[0]
+
+                data.append((x, y, n))
+
+        plots.performance.plot_matrix_difference(
+            data, "Confusion Matrix Difference", output)
 
     def load(self, fname):
         _, extension = os.path.splitext(fname)
@@ -741,6 +757,27 @@ class ScoresInterface(Interface):
             return super().load(fname)
         elif extension == '.csv':
             return ScoreExport.from_csv(fname)
+
+    def load_user(self, fname, type_=list):
+        if type_ is list:
+            data = []
+            with open(fname) as csvfile:
+                reader = csv.reader(csvfile)
+                for line in reader:
+                    id_, s0, s1, n = line
+                    data.append((float(s0), float(s1), int(n)))
+        elif type_ is dict:
+            data = {}
+            with open(fname) as csvfile:
+                reader = csv.reader(csvfile)
+                for line in reader:
+                    id_, s0, s1, n = line
+                    data[id_] = (float(s0), float(s1), int(n))
+
+        else:
+            data = None
+
+        return data
 
 
 def load_pickle(fname):
