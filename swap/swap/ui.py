@@ -350,6 +350,9 @@ class SWAPInterface(Interface):
         parser.add_argument(
             '--scores-to-csv', nargs=1)
 
+        parser.add_argument(
+            '--export-user-scores', nargs=1)
+
     def call(self, args):
         swap = None
         score_export = None
@@ -396,6 +399,10 @@ class SWAPInterface(Interface):
         if args.log:
             fname = self.f(args.log[0])
             write_log(swap, fname)
+
+        if args.export_user_scores:
+                fname = self.f(args.export_user_scores[0])
+                self.export_user_scores(swap, fname)
 
         if score_export is not None:
             if args.scores:
@@ -468,6 +475,17 @@ class SWAPInterface(Interface):
         swap = control.getSWAP()
 
         return swap
+
+    def export_user_scores(self, swap, fname):
+        import csv
+        print('Exporting user scores to %s' % fname)
+        with open(fname, 'w') as csvfile:
+            writer = csv.writer(csvfile)
+            for user in swap.users:
+                writer.writerow(
+                    (user.id, user.getScore(0),
+                     user.getScore(1), user.getCount()))
+        print('done')
 
     def scores_to_csv(self, score_export, fname):
         import csv
