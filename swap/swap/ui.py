@@ -410,6 +410,9 @@ class SWAPInterface(Interface):
             '--test', action='store_true')
 
         parser.add_argument(
+            '--test-reorder', action='store_true')
+
+        parser.add_argument(
             '--scores-from-csv', nargs=1)
 
         parser.add_argument(
@@ -470,6 +473,9 @@ class SWAPInterface(Interface):
                 print('applying new gold labels')
                 swap.set_gold_labels(gg.golds)
                 swap.process_changes()
+
+            if args.test_reorder:
+                self.reorder_classifications(swap)
 
             if args.export_user_scores:
                 fname = self.f(args.export_user_scores[0])
@@ -536,6 +542,39 @@ class SWAPInterface(Interface):
         control.run()
         swap = control.getSWAP()
 
+        return swap
+
+    def reorder_classifications(self, swap):
+        import random
+        import progressbar
+        with progressbar.ProgressBar(
+                max_value=len(swap.subjects)) as bar:
+            n = 0
+            for subject in swap.subjects:
+                bar.update(n)
+
+                ids = [t.id for t in subject.ledger]
+                ids = list(sorted(ids, key=lambda item: random.random()))
+
+                previous = None
+                for i, id_ in enumerate(ids):
+                    t = subject.ledger.get(id_)
+                    t.order = i
+                    t.right = None
+
+                    if previous is None:
+                        t.left = None
+                    else:
+                        previous.right = t
+                        t.left = previous
+
+                    subject.ledger.update(id_)
+                    previous = t
+
+                n += 1
+        print(n)
+
+        swap.process_changes()
         return swap
 
     def scores_to_csv(self, score_export, fname):
