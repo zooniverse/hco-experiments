@@ -1,6 +1,8 @@
 
 import swap.db.classifications as db
 
+import csv
+
 
 class Score:
     """
@@ -42,8 +44,8 @@ class ScoreExport:
         """
         Pararmeters
         -----------
-        scores : [Score]
-            List of scores in export
+        scores : {Score}
+            Mapping of scores in export
         new_golds : bool
             Flag to indicate whether to fetch gold labels from database
             or to use the gold labels already in score objects
@@ -53,6 +55,22 @@ class ScoreExport:
         self.scores = scores
         self.sorted_scores = sorted(scores, key=lambda id_: scores[id_].p)
         self.class_counts = self.counts(0)
+
+    @staticmethod
+    def from_csv(fname):
+        data = {}
+        with open(fname) as csvfile:
+            reader = csv.reader(csvfile)
+            print('loading csv')
+            for i, g, p in reader:
+                i = int(i)
+                g = int(g)
+                p = float(p)
+                data[i] = Score(i, g, p)
+                # print(i, g, p)
+            print('done')
+
+        return ScoreExport(data, new_golds=False)
 
     def _init_golds(self, scores):
         """
@@ -192,6 +210,9 @@ class ScoreExport:
         def func(score):
             return (score.id, score.gold, score.p)
         return ScoreIterator(self.scores, func)
+
+    def dict(self):
+        return self.scores.copy()
 
 
 class ScoreIterator:

@@ -428,7 +428,7 @@ class SWAPInterface(Interface):
                 score_export = obj
 
         if args.scores_from_csv:
-            score_export = self.scores_from_csv(args.scores_from_csv[0])
+            score_export = ScoreExport.from_csv(args.scores_from_csv[0])
 
         if args.run:
             swap = self.run_swap(args)
@@ -536,19 +536,19 @@ class SWAPInterface(Interface):
             for score in score_export.scores.values():
                 writer.writerow((score.id, score.gold, score.p))
 
-    def scores_from_csv(self, fname):
-        import csv
-        from swap.utils.scores import Score, ScoreExport
-        data = {}
-        with open(fname) as csvfile:
-            reader = csv.reader(csvfile)
-            for i, g, p in reader:
-                i = int(i)
-                g = int(g)
-                p = float(p)
-                data[i] = Score(i, g, p)
+    # def scores_from_csv(self, fname):
+    #     import csv
+    #     from swap.utils.scores import Score, ScoreExport
+    #     data = {}
+    #     with open(fname) as csvfile:
+    #         reader = csv.reader(csvfile)
+    #         for i, g, p in reader:
+    #             i = int(i)
+    #             g = int(g)
+    #             p = float(p)
+    #             data[i] = Score(i, g, p)
 
-        return ScoreExport(data, new_golds=False)
+    #     return ScoreExport(data, new_golds=False)
 
     def manifest(self, swap, args):
         def arg_str(args):
@@ -589,14 +589,125 @@ class SWAPInterface(Interface):
 
     def difference(self, args):
         base = load_pickle(args.diff[0])
+
+        p_args = []
+        args_ = args.diff[1: -1]
+        args_ = [tuple(args_[i: i + 2]) for i in range(0, len(args_), 2)]
+        for label, fname in args_:
+            _, extension = os.path.splitext(fname)
+            if extension == '.csv':
+                scores = ScoreExport.from_csv(fname)
+            elif extension == '.pkl':
+                scores = load_pickle(fname)
+
+            p_args.append((label, scores))
+
         fname = self.f(args.diff[-1])
 
-        items = args.diff[1:-1]
-        items = [tuple(items[i: i + 2]) for i in range(0, len(items), 2)]
-        print(items)
+        print(p_args)
 
         # other = [load_pickle(x) for x in args.diff[1:]]
-        plots.performance.p_diff(base, items, fname, self.load)
+        plots.performance.p_diff(base, p_args, fname)
+
+
+class ScoresInterface(Interface):
+    """
+        Customized interface for swap scores analysis
+    """
+
+    def __init__(self, ui):
+        """
+        Initialize this interface and register it with the UI.
+
+        Parameters
+        ----------
+        ui : ui.UI
+            UI to register with
+        """
+        self.ui = ui
+        ui.add(self)
+        self.init()
+
+    # def init(self):
+    #     """
+    #     Method called on init, after having registered with ui
+    #     """
+    #     pass
+
+    @property
+    def command(self):
+        """
+        Command used to select parser.
+
+        For example, this would return 'swap' for SWAPInterface
+        and 'roc' for RocInterface
+        """
+        return 'scores'
+
+    def options(self, parser):
+        """
+        Add options to the parser
+        """
+        parser.add_argument(
+            '-a', '--add', nargs=2, action='append')
+
+        parser.add_argument(
+            '--diff', nargs=1)
+
+        parser.add_argument(
+            '--output', nargs=1)
+
+        parser.add_argument(
+            '--xaxis', nargs=1)
+
+        parser.add_argument(
+            '--yaxis', nargs=1)
+
+        parser.add_argument(
+            '--aspect-ratio', nargs=1)
+
+    def call(self, args):
+        """
+        Define what to do if this interface's command was passed
+        """
+        if args.output:
+            output = self.f(args.output[0])
+        else:
+            output = None
+
+        if args.diff:
+            base = args.diff[0]
+            self.difference(base, output, args)
+
+    def difference(self, base, output, args):
+        base = self.load(base)
+        print(11, base, output, args)
+
+        p_args = []
+
+        for label, fname in args.add:
+            p_args.append((label, self.load(fname)))
+
+        kwargs = {}
+        if args.yaxis:
+            kwargs['y_axis'] = args.yaxis[0]
+        if args.xaxis:
+            kwargs['x_axis'] = args.xaxis[0]
+        if args.aspect_ratio:
+            kwargs['aspect'] = eval(args.aspect_ratio[0])
+
+        print(p_args)
+
+        # other = [load_pickle(x) for x in args.diff[1:]]
+        plots.performance.p_diff(base, p_args, output, **kwargs)
+
+    def load(self, fname):
+        _, extension = os.path.splitext(fname)
+
+        if extension == '.pkl':
+            return super().load(fname)
+        elif extension == '.csv':
+            return ScoreExport.from_csv(fname)
 
 
 def load_pickle(fname):
@@ -631,6 +742,7 @@ def run(*interfaces):
     ui = UI()
     RocInterface(ui)
     SWAPInterface(ui)
+    ScoresInterface(ui)
     for interface in interfaces:
         interface()
 
@@ -670,11 +782,17 @@ class Roc_Iterator:
             raise StopIteration()
 
         label, fname, load = self.items[self.i]
+        _, extension = os.path.splitext(fname)
+        print(label, fname, load)
 
-        obj = load(fname)
         self.i += 1
 
-        return (label, self._get_export(obj))
+        if extension == '.csv':
+            return (label, ScoreExport.from_csv(fname).roc())
+        else:
+            obj = load(fname)
+
+            return (label, self._get_export(obj))
 
 
 def write_log(swap, fname):
