@@ -367,6 +367,7 @@ class SWAPInterface(Interface):
 
         if args.run:
             swap = self.run_swap(args)
+            score_export = swap.score_export()
 
         if args.save:
             manifest = self.manifest(swap, args)
