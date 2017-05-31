@@ -122,14 +122,14 @@ def plot_class_histogram(score_export):
 
 
 @_plot
-def multivar_scatter(data):
+def multivar_scatter(data, title):
     plt.subplot(111)
     x, y, z = zip(*data)
-    norm = mpl.colors.Normalize(vmin=0., vmax=1.0)
-    plt.scatter(x, y, c=z, norm=norm, cmap='hsv')
+    norm = mpl.colors.Normalize(vmin=min(z), vmax=max(z))
+    plt.scatter(x, y, c=z, norm=norm, cmap='viridis')
 
     plt.colorbar()
-    plt.title('Purity in subjects with p>0.96')
+    plt.title(title)
     plt.xlabel('Consensus')
     plt.ylabel('Controversial')
 

@@ -144,7 +144,8 @@ class Experiment:
             x, y, purity, completeness = point
             data.append((x, y, purity))
 
-        distributions.multivar_scatter(fname, data)
+        distributions.multivar_scatter(
+            fname, data, 'Purity in subjects with p>0.96')
 
     def plot_completeness(self, fname):
         data = []
@@ -152,7 +153,21 @@ class Experiment:
             x, y, purity, completeness = point
             data.append((x, y, completeness))
 
-        distributions.multivar_scatter(fname, data)
+        import pprint
+        pprint.pprint(data)
+        distributions.multivar_scatter(
+            fname, data, 'Completeness in swap scores when purity > .99')
+
+    def plot_both(self, fname):
+        data = []
+        for point in self.plot_points:
+            x, y, purity, completeness = point
+            data.append((x, y, purity * completeness))
+
+        import pprint
+        pprint.pprint(data)
+        distributions.multivar_scatter(
+            fname, data, '')
 
     def __str__(self):
         s = '%d points\n' % len(self.plot_points)

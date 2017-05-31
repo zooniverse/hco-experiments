@@ -309,6 +309,8 @@ class ExperimentInterface(swap.ui.Interface):
                 e.plot_purity(fname)
             elif type_ == 'completeness':
                 e.plot_completeness(fname)
+            elif type_ == 'both':
+                e.plot_both(fname)
 
         if args.shell:
             import code
