@@ -72,51 +72,99 @@ def plot_seaborn_density_split(scores, cutoff=1):
 @_plot
 def plot_class_histogram(score_export):
     data = score_export.roc()
+    sorted_data = score_export.sorted_scores
+    scores = score_export.scores
     # b0 = [item[1] for item in roc if item[0] == 0]
     # b1 = [item[1] for item in roc if item[0] == 1]
 
+    # class bins for drawing the histogram
     b0 = []
     b1 = []
-    bins = [[0, 0, 0] for i in range(25)]
+    # bins for drawing the purity and completeness lines
+    # bins = [[0, 0, 0] for i in range(25)]
 
     for gold, p in data:
-        bin_ = int(p * 100 / 4)
-        if bin_ == 25:
-            bin_ -= 1
+        # bin_ = int(p * 100 / 4)
+        # if bin_ == 25:
+        #     bin_ -= 1
 
         # print(bin_, gold, p)
 
         if gold == 0:
             b0.append(p)
-            bins[bin_][1] += 1
-            bins[bin_][2] += 1
+            # bins[bin_][1] += 1
+            # bins[bin_][2] += 1
         elif gold == 1:
             b1.append(p)
 
-            bins[bin_][0] += 1
-            bins[bin_][1] += 1
+            # bins[bin_][0] += 1
+            # bins[bin_][1] += 1
 
     ax = plt.subplot(111)
+
+    # Draw the histogram
     ax.hist([b0, b1], 25, histtype='bar',
             label=['bogus', 'real'], stacked=True)
     ax.legend()
 
-    ax.set_yscale('log')
-    bins = np.array(bins)
-    print(bins)
+    ax.set_yscale('linear')
+    ax.set_ylim(top=5000)
+    # bins = np.array(bins)
+    # print(bins)
+
+    # Draw the purity curve
+    line_ax = ax.twinx()
+    line_ax.set_ylabel('% purity/completeness')
+    line_ax.axis([0, 1, 0, 1])
 
     line_x = []
     line_y = []
-    for i, bin_ in enumerate(bins):
-        line_x.append(i * .04 + .02)
-        line_y.append(bin_[0] / bin_[1])
+    count = 0
+    golds = 0
+    for i in reversed(sorted_data):
+        score = scores[i]
+        count += 1
+        if score.gold == 1:
+            golds += 1
 
-    ax2 = ax.twinx()
-    ax2.plot(line_x, line_y, color='red')
-    ax2.axis([0, 1, 0, 1])
+        line_x.append(score.p)
+        line_y.append(golds / count)
+
+    line_ax.plot(line_x, line_y, color='red')
+
+    # Draw the completeness curve
+    line_x = []
+    line_y = []
+    count = 0
+    golds = 0
+    for i in sorted_data:
+        score = scores[i]
+        count += 1
+        if score.gold == 1:
+            golds += 1
+
+        line_x.append(score.p)
+        line_y.append(golds)
+
+    line_y = [y / count for y in line_y]
+
+    line_ax.plot(line_x, line_y, color='orange')
+
+    line_ax.legend(['Purity', 'Completeness'], loc=2)
+    # line_ax.axis([0, 1, 0, 1])
+
+    # Draw the purity/completeness curve
+    # line_x = []
+    # line_y = []
+    # for i, bin_ in enumerate(bins):
+    #     line_x.append(i * .04 + .02)
+    #     line_y.append(bin_[0] / bin_[1])
+
+    # ax2 = ax.twinx()
+    # ax2.plot(line_x, line_y, color='red')
+    # ax2.axis([0, 1, 0, 1])
 
     ax.set_ylabel('frequency')
-    ax2.set_ylabel('% real in bin')
     plt.xlabel('probability')
     # plt.title('Multiclass Probability Distribution')
 
