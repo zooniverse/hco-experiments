@@ -1,26 +1,55 @@
-# hco-experiments
+README
+======
 
-## swap
-### Get the data
-[SNHunters_classification_dump_20170109.mat](https://www.dropbox.com/s/0sjkfhbxocnkbbb/SNHunters_classification_dump_20170109.mat?dl=0)
+Documentation
+-------------
 
-Same as above but with magnitude metadata.
+Find full documentation and more at [ReadTheDocs](http://hco-experiments.readthedocs.io/en/latest/)
 
-[SNHunters_classification_dump_20170109_metadata.mat](https://www.dropbox.com/s/4i2ilou79tixc61/SNHunters_classification_dump_20170109_metadata.mat?dl=0)
+Getting Started
+---------------
 
-### Usage Example
+Recommended to set up a virtual environment and install SWAP
+and its dependencies inside. You can find more information about virtual environments
+[here](http://python-guide-pt-br.readthedocs.io/en/latest/dev/virtualenvs/).
 
-Process the .mat file:
+### Installing SWAP
 
-```python
-from swap import MATSWAP
-swap = MATSWAP("SNHunters_classification_dump_20170109.mat")
-swap.process()
-swap.save("swap_SNHunters_classification_dump_20170109.mat")
+To install SWAP regularly, run
 
-```
+    pip install {PATH_TO_SWAP}
 
-## machine-learning
+To install SWAP in development mode, run::
+
+    pip install -e {PATH_TO_SWAP}[dev,test]
+
+Using SWAP
+----------
+
+After installing, there are a number of commands available for running SWAP.
+These include tools to create plots and export SWAP scores to file.
+
+Basic syntax is
+
+    run_swap [options] COMMAND [options]
+
+Command can be one of `{roc, swap}`
+
+To run swap and pickle and save, run
+
+    run_swap swap --run 
+
+Find more details by running
+
+    run_swap -h
+
+or, for more details about SWAP specific commands, run
+
+    run_swap swap -h
+
+Machine Learning
+----------------
+
 ### Get the data
 [Pan-STARRS1 Medium Deep training set](https://www.dropbox.com/s/dft3qpnfn3clv9y/md_20x20_skew4_SignPreserveNorm_with_confirmed1.mat?dl=0) - [Wright et al. 2015](https://arxiv.org/abs/1501.05470)
 

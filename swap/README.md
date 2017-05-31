@@ -1,6 +1,10 @@
 README
 ======
 
+Documentation
+-------------
+
+Find full documentation and more at [ReadTheDocs](http://hco-experiments.readthedocs.io/en/latest/)
 
 Getting Started
 ---------------
