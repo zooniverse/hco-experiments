@@ -30,15 +30,15 @@ class Trial:
     def purity(self, cutoff):
         return self.scores.purity(cutoff)
 
-    def completeness(self):
-        return self.scores.completeness(0.99)
+    def completeness(self, purity):
+        return self.scores.completeness(purity)
 
     def purify(self):
         pass
 
     def plot(self, cutoff):
         return (self.consensus, self.controversial,
-                self.purity(cutoff), self.completeness())
+                self.purity(cutoff), self.completeness(cutoff))
 
     @staticmethod
     def from_control(consensus, controversial, control):
@@ -156,7 +156,7 @@ class Experiment:
         import pprint
         pprint.pprint(data)
         distributions.multivar_scatter(
-            fname, data, 'Completeness in swap scores when purity > .99')
+            fname, data, 'Completeness in swap scores when purity >0.96')
 
     def plot_both(self, fname):
         data = []
