@@ -106,7 +106,7 @@ data/
 *.csv
 *.txt
 *.pkl
-!requirements.txt
+!*requirements.txt
 
 *dump
 manifest
