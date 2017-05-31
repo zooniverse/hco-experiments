@@ -118,7 +118,8 @@ def plot_class_histogram(score_export):
     line_ax.axis([0, 1, 0, 1])
 
     line_x = []
-    line_y = []
+    purity = []
+    completeness = []
     count = 0
     golds = 0
     for i in reversed(sorted_data):
@@ -128,27 +129,29 @@ def plot_class_histogram(score_export):
             golds += 1
 
         line_x.append(score.p)
-        line_y.append(golds / count)
+        purity.append(golds / count)
+        completeness.append(golds)
 
-    line_ax.plot(line_x, line_y, color='red')
+    completeness = [y / golds for y in completeness]
+
+    line_ax.plot(line_x, purity, color='red')
+    line_ax.plot(line_x, completeness, color='orange')
 
     # Draw the completeness curve
-    line_x = []
-    line_y = []
-    count = 0
-    golds = 0
-    for i in sorted_data:
-        score = scores[i]
-        count += 1
-        if score.gold == 1:
-            golds += 1
+    # line_x = []
+    # line_y = []
+    # count = 0
+    # golds = 0
+    # for i in reversed(sorted_data):
+    #     score = scores[i]
+    #     count += 1
+    #     if score.gold == 1:
+    #         golds += 1
 
-        line_x.append(score.p)
-        line_y.append(golds)
+    #     line_x.append(score.p)
+    #     line_y.append(golds)
 
-    line_y = [y / count for y in line_y]
-
-    line_ax.plot(line_x, line_y, color='orange')
+    # line_y = [y / count for y in line_y]
 
     line_ax.legend(['Purity', 'Completeness'], loc=2)
     # line_ax.axis([0, 1, 0, 1])

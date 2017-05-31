@@ -171,12 +171,31 @@ class ScoreExport:
         threshold : float
             Threshold for the desired purity
         """
-        p = self.find_purity(threshold)
-        if p is None:
-            print('Can\'t find purity > %f in score set!' % threshold)
-            return 0
+        inside = 0
+        total = 0
 
-        return self.counts(p)[1] / self.class_counts[1]
+        for i in self.sorted_scores:
+            score = self.scores[i]
+            if score.gold == 1:
+                if score.p > threshold:
+                    inside += 1
+                total += 1
+
+        return inside / total
+
+    def completeness_at_purity(self, purity):
+        """
+        Find the completeness at a desired purity
+
+        Parameters
+        ----------
+        threshold : float
+            Threshold for the desired purity
+        """
+        p = self.find_purity(purity)
+        if p is None:
+            print('Can\'t find purity > %f in score set!' % purity)
+            return 0
 
     def __len__(self):
         return len(self.scores)
