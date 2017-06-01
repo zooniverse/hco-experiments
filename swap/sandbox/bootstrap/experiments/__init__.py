@@ -38,13 +38,6 @@ class Trial:
     def completeness(self, cutoff):
         return self.scores.completeness(cutoff)
 
-    @staticmethod
-    def from_control(consensus, controversial, control):
-        t = Trial(consensus, controversial,
-                  control.gold_getter.golds,
-                  control.getSWAP().score_export())
-        return t
-
     def db_export(self):
         export = {}
         export['consensus'] = self.consensus
