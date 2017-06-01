@@ -3,12 +3,13 @@
 # Recursive swap implementation to bootstrap silver-standard
 # subject labels
 from bootstrap import *
-from experiments import Experiment
+from experiments.cv_grid_experiment import Experiment
 
 import swap.ui
 import swap.plots as plots
 
 import os
+import sys
 
 
 class BootInterface(swap.ui.Interface):
@@ -437,4 +438,7 @@ def main():
 
 
 if __name__ == "__main__":
+    path = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, path)
+
     main()

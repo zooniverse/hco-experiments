@@ -16,6 +16,7 @@ class Ledger:
     for use with online bureaus to reduce memory load, and can dereference
     agents and rebuild reference trees arbitrarily from a bureau
     """
+
     def __init__(self, id_):
         """
         Args:

@@ -1,24 +1,29 @@
 
-import swap.plots.distributions as distributions
 from swap import Control
-from swap.utils.golds import GoldGetter
 from swap.agents.agent import Stat
+from swap.config import Config
+import swap.ui
 import swap.db.experiment as dbe
 
 
 class Trial:
-    def __init__(self, consensus, controversial, golds, swap_export):
+    def __init__(self, golds, score_export):
         """
             consensus, controversial: settings used to run swap; number of
                 consensus  controversial subjects used to make gold set
             golds: Gold standard set used during run
             roc_export: ScoreExport of swap scores
         """
-        self.consensus = consensus
-        self.controversial = controversial
 
         self.golds = golds
-        self.scores = swap_export
+        self.scores = score_export
+
+    def plot(self, cutoff):
+        # return (self.consensus, self.controversial,
+        #         self.purity(cutoff), self.completeness(cutoff))
+        pass
+
+    ###############################################################
 
     def n_golds(self):
         n = {-1: 0, 0: 0, 1: 0}
@@ -30,15 +35,8 @@ class Trial:
     def purity(self, cutoff):
         return self.scores.purity(cutoff)
 
-    def completeness(self, purity):
-        return self.scores.completeness(purity)
-
-    def purify(self):
-        pass
-
-    def plot(self, cutoff):
-        return (self.consensus, self.controversial,
-                self.purity(cutoff), self.completeness(cutoff))
+    def completeness(self, cutoff):
+        return self.scores.completeness(cutoff)
 
     @staticmethod
     def from_control(consensus, controversial, control):
@@ -74,6 +72,14 @@ class Experiment:
         self.save_f = saver
         self.p_cutoff = cutoff
 
+    def run(self):
+        pass
+
+    def plot(self, fname):
+        pass
+
+    ###############################################################
+
     @staticmethod
     def from_trial_export(directory, cutoff, saver, loader):
         files = get_trials(directory)
@@ -93,30 +99,6 @@ class Experiment:
         control.run()
 
         return control.getSWAP()
-
-    def run(self):
-        gg = GoldGetter()
-        swap = self.init_swap()
-        n = 1
-        for cv in range(0, 1001, 50):
-            for cn in range(0, 1001, 50):
-                if cv == 0 and cn == 0:
-                    continue
-                gg.reset()
-
-                print('\nRunning trial %d with cv=%d cn=%d' %
-                      (n, cv, cn))
-                if cv > 0:
-                    gg.controversial(cv)
-                if cn > 0:
-                    gg.consensus(cn,)
-
-                swap.set_gold_labels(gg.golds)
-                swap.process_changes()
-                self.add_trial(Trial(cn, cv, gg.golds, swap.score_export()))
-
-                n += 1
-            self.clear_mem(cv, cn)
 
     def clear_mem(self, cv, cn):
         """
@@ -138,44 +120,10 @@ class Experiment:
         self.trials.append(trial)
         self.plot_points.append(trial.plot(self.p_cutoff))
 
-    def plot_purity(self, fname):
-        data = []
-        for point in self.plot_points:
-            x, y, purity, completeness = point
-            data.append((x, y, purity))
-
-        distributions.multivar_scatter(
-            fname, data, 'Purity in subjects with p>0.96')
-
-    def plot_completeness(self, fname):
-        data = []
-        for point in self.plot_points:
-            x, y, purity, completeness = point
-            data.append((x, y, completeness))
-
-        import pprint
-        pprint.pprint(data)
-        distributions.multivar_scatter(
-            fname, data, 'Completeness in swap scores when purity >0.96')
-
-    def plot_both(self, fname):
-        data = []
-        for point in self.plot_points:
-            x, y, purity, completeness = point
-            data.append((x, y, purity * completeness))
-
-        import pprint
-        pprint.pprint(data)
-        distributions.multivar_scatter(
-            fname, data, '')
-
     def __str__(self):
         s = '%d points\n' % len(self.plot_points)
         s += str(Stat([i[2] for i in self.plot_points]))
         return s
-
-    def __repr__(self):
-        return str(self)
 
 
 def upload_trials(directory, loader):
@@ -210,21 +158,86 @@ def get_trials(directory):
     return files
 
 
-if __name__ == "__main__":
-    e = Experiment()
-    e.run()
+class ExperimentInterface(swap.ui.Interface):
 
-    import code
-    code.interact(local=locals())
+    def options(self, parser):
 
-    # x_ = range(50)
-    # y_ = range(50)
-    # z = lambda x, y: x + y
+        parser.add_argument(
+            '--run', nargs=2,
+            metavar=('trials directory, experiment file'))
 
-    # data = []
-    # for x in x_:
-    #     for y in y_:
-    #         data.append((x, y, z(x, y)))
+        parser.add_argument(
+            '--cutoff', nargs=1,
+            help='p cutoff')
 
-    # print(data)
-    # distributions.multivar_scatter(None, data)
+        parser.add_argument(
+            '--from-trials', nargs=1,
+            metavar='directory with trial files',
+            help='load experiment plot data from trial files')
+
+        parser.add_argument(
+            '--load', nargs=1,
+            metavar='file',
+            help='load pickled experiment data')
+
+        parser.add_argument(
+            '--save', nargs=1,
+            metavar='file',
+            help='pickle and save experiment data')
+
+        parser.add_argument(
+            '--shell', action='store_true',
+            help='Drop to python interpreter after loading experiment')
+
+        parser.add_argument(
+            '--plot', nargs=2,
+            metavar=('type', 'file'),
+            help='Generate experiment plot')
+
+        parser.add_argument(
+            '--pow', action='store_true',
+            help='controversial and consensus aggregation method')
+
+        parser.add_argument(
+            '--multiply', action='store_true',
+            help='controversial and consensus aggregation method')
+
+        # parser.add_argument(
+        #     '--upload', nargs=1,
+        #     metavar='directory containing trial files',
+        #     help='Upload trials to mongo database')
+
+    def call(self, args):
+        if args.cutoff:
+            cutoff = float(args.cutoff[0])
+        else:
+            cutoff = 0.96
+
+        config = Config()
+        if args.pow:
+            config.controversial_version = 'pow'
+        elif args.multiply:
+            config.controversial_version = 'multiply'
+
+        if args.run:
+            e = self._run(args)
+
+        elif args.from_trials:
+            e = Experiment.from_trial_export(
+                args.from_trials[0],
+                cutoff, self.save, self.load)
+
+        elif args.load:
+            e = self.load(args.load[0])
+
+        if args.plot:
+            self._plot(e, args)
+
+        if args.shell:
+            import code
+            code.interact(local=locals())
+
+        if args.save:
+            assert e
+            del e.save_f
+            self.save(e, self.f(args.save[0]))
