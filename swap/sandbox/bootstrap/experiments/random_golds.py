@@ -33,10 +33,11 @@ class Trial(experiments.Trial):
 
 class Experiment(experiments.Experiment):
 
-    def __init__(self, saver, cutoff=0.96, num_golds=1000):
-        super().__init__(saver, cutoff)
+    def __init__(self, cutoff=0.96, num_golds=1000, num_trials=10):
+        super().__init__(cutoff)
 
         self.num_golds = num_golds
+        self.num_trials = num_trials
 
     def run(self):
         gg = GoldGetter()
@@ -61,6 +62,12 @@ class Experiment(experiments.Experiment):
 
                 n += 1
             self.clear_mem(cv, cn)
+    def clear_mem(self, n):
+        """
+            Saves trial objects to disk to free up memory
+        """
+        fname = 'trials_%d.pkl' % n
+        super().clear_mem(fname)
 
     def plot(self, type_, fname):
         if type_ == 'purity':
@@ -150,8 +157,8 @@ class Interface(experiments.ExperimentInterface):
     #         fname = os.path.join(d_trials, fname)
     #         self.save(trials, fname)
 
-    #     e = Experiment(saver, controversial=cv, consensus=cn)
-    #     e.run(saver)
+        e = Experiment(**kwargs)
+        e.run(saver)
 
     #     del e.save_f
     #     self.save(e, f_pickle)

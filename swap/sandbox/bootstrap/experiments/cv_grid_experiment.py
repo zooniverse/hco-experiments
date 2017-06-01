@@ -39,7 +39,7 @@ class Experiment(experiments.Experiment):
         self.consensus = consensus
         self.controversial = controversial
 
-    def run(self):
+    def run(self, saver):
         gg = GoldGetter()
         swap = self.init_swap()
         n = 1
@@ -61,7 +61,14 @@ class Experiment(experiments.Experiment):
                 self.add_trial(Trial(cn, cv, gg.golds, swap.score_export()))
 
                 n += 1
-            self.clear_mem(cv, cn)
+            self.clear_mem(saver, cv, cn)
+
+    def clear_mem(self, cv, cn):
+        """
+            Saves trial objects to disk to free up memory
+        """
+        fname = 'trials_cv_%s_cn_%s.pkl' % (cv, cn)
+        super().clear_mem(fname)
 
     def plot(self, type_, fname):
         if type_ == 'purity':
@@ -159,10 +166,9 @@ class Interface(experiments.ExperimentInterface):
             fname = os.path.join(d_trials, fname)
             self.save(trials, fname)
 
-        e = Experiment(saver, controversial=cv, consensus=cn)
+        e = Experiment(controversial=cv, consensus=cn)
         e.run(saver)
 
-        del e.save_f
         self.save(e, f_pickle)
 
         return e

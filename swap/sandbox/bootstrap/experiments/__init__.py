@@ -58,14 +58,13 @@ class Trial:
 
 
 class Experiment:
-    def __init__(self, saver, cutoff=0.96):
+    def __init__(self, cutoff=0.96):
         self.trials = []
         self.plot_points = []
 
-        self.save_f = saver
         self.p_cutoff = cutoff
 
-    def run(self):
+    def run(self, saver):
         pass
 
     def plot(self, fname):
@@ -74,10 +73,10 @@ class Experiment:
     ###############################################################
 
     @staticmethod
-    def from_trial_export(directory, cutoff, saver, loader):
+    def from_trial_export(directory, cutoff, loader):
         files = get_trials(directory)
 
-        e = Experiment(saver, cutoff)
+        e = Experiment(cutoff)
         for fname in files:
             print(fname)
             trials = loader(fname)
@@ -93,20 +92,11 @@ class Experiment:
 
         return control.getSWAP()
 
-    def clear_mem(self, cv, cn):
+    def clear_mem(self, saver, fname):
         """
             Saves trial objects to disk to free up memory
         """
-        def to_fname(n):
-            if type(n) is int:
-                return str(n)
-            elif type(n) is tuple:
-                return '_'.join(n)
-            else:
-                return ''
-
-        fname = 'trials_cv_%s_cn_%s.pkl' % (cv, cn)
-        self.save_f(self.trials, fname)
+        saver(self.trials, fname)
         self.trials = []
 
     def add_trial(self, trial):
@@ -232,5 +222,4 @@ class ExperimentInterface(swap.ui.Interface):
 
         if args.save:
             assert e
-            del e.save_f
             self.save(e, self.f(args.save[0]))
