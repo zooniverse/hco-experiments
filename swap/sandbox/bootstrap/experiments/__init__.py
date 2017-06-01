@@ -1,9 +1,12 @@
 
 from swap import Control
 from swap.agents.agent import Stat
+from swap.utils.scores import ScoreExport
 from swap.config import Config
 import swap.ui
 import swap.db.experiment as dbe
+
+import json
 
 
 class Trial:
@@ -56,6 +59,26 @@ class Trial:
 
         return export
 
+    def to_json(self, fname, data={}):
+        data['golds'] = self.golds
+        data['scores'] = self.score_export.scores
+        with open(fname, 'w') as file:
+            json.dump(data, file)
+
+    @classmethod
+    def from_json(cls, fname):
+        with open(fname) as file:
+            data = json.load(file)
+
+        return cls.parse_json(data)
+
+    @classmethod
+    def parse_json(cls, data):
+        golds = data['golds']
+        scores = ScoreExport(data['scores'])
+
+        return Trial(golds, scores)
+
 
 class Experiment:
     def __init__(self, cutoff=0.96):
@@ -81,7 +104,7 @@ class Experiment:
             print(fname)
             trials = loader(fname)
             for trial in trials:
-                e.add_trial(trial)
+                e.add_trial(trial, keep=False)
             e.trials = []
 
         return e
@@ -99,8 +122,9 @@ class Experiment:
         saver(self.trials, fname)
         self.trials = []
 
-    def add_trial(self, trial):
-        self.trials.append(trial)
+    def add_trial(self, trial, keep=True):
+        if keep:
+            self.trials.append(trial)
         self.plot_points.append(trial.plot(self.p_cutoff))
 
     def __str__(self):

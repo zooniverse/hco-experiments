@@ -25,6 +25,19 @@ class Trial(experiments.Trial):
         return (self.consensus, self.controversial,
                 self.purity(cutoff), self.completeness(cutoff))
 
+    @classmethod
+    def parse_json(cls, data):
+        t = super().parse_json(data)
+        cn = data['consensus']
+        cv = data['controversial']
+
+        return Trial(cn, cv, t.golds, t.score_export)
+
+    def to_json(self, fname, data={}):
+        data['consensus'] = self.consensus
+        data['controversial'] = self.controversial
+        super().to_json(fname, data)
+
 
 class Experiment(experiments.Experiment):
 
