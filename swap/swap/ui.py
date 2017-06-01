@@ -436,7 +436,8 @@ class SWAPInterface(Interface):
                 score_export = obj
 
         if args.scores_from_csv:
-            score_export = ScoreExport.from_csv(args.scores_from_csv[0])
+            fname = args.scores_from_csv[0]
+            score_export = ScoreExport.from_csv(fname)
 
         if args.run:
             swap = self.run_swap(args)

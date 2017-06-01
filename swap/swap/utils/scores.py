@@ -61,17 +61,18 @@ class ScoreExport:
     @staticmethod
     def from_csv(fname):
         data = {}
+
         with open(fname) as csvfile:
             reader = csv.reader(csvfile)
             print('loading csv')
+
             for i, g, p in reader:
                 i = int(i)
                 g = int(g)
                 p = float(p)
                 data[i] = Score(i, g, p)
-                # print(i, g, p)
-            print('done')
 
+            print('done')
         return ScoreExport(data, new_golds=False)
 
     def _init_golds(self, scores):
