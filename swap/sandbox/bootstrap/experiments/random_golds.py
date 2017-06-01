@@ -42,26 +42,20 @@ class Experiment(experiments.Experiment):
     def run(self):
         gg = GoldGetter()
         swap = self.init_swap()
-        n = 1
-        for cv in range(*self.controversial):
-            for cn in range(*self.consensus):
-                if cv == 0 and cn == 0:
-                    continue
-                gg.reset()
+        for n in range(self.num_trials):
 
-                print('\nRunning trial %d with cv=%d cn=%d' %
-                      (n, cv, cn))
-                if cv > 0:
-                    gg.controversial(cv)
-                if cn > 0:
-                    gg.consensus(cn,)
+            gg.reset()
+            gg.random(self.num_golds)
 
-                swap.set_gold_labels(gg.golds)
-                swap.process_changes()
-                self.add_trial(Trial(cn, cv, gg.golds, swap.score_export()))
+            print('\nRunning trial %d' % n)
 
-                n += 1
-            self.clear_mem(cv, cn)
+            swap.set_gold_labels(gg.golds)
+            swap.process_changes()
+            self.add_trial(Trial(n, gg.golds, swap.score_export()))
+
+            if n > 10:
+                self.clear_mem(n)
+
     def clear_mem(self, n):
         """
             Saves trial objects to disk to free up memory
@@ -138,32 +132,30 @@ class Interface(experiments.ExperimentInterface):
         """
         super().options(parser)
 
-    # def _run(self, args):
-    #     d_trials = self.f(args.run[0])
-    #     f_pickle = self.f(args.run[1])
+        parser.add_argument(
+            '-n', nargs=1)
 
-    #     cn = None
-    #     cv = None
+    def _run(self, args):
+        d_trials = self.f(args.run[0])
+        f_pickle = self.f(args.run[1])
 
-    #     if args.consensus:
-    #         a, b, c = args.consensus
-    #         cn = (1, b + 1, c)
+        kwargs = {}
+        if args.n:
+            kwargs['num_trials'] = int(args.n[0])
 
-    #     if args.controversial:
-    #         a, b, c = args.controversial
-    #         cv = (1, b + 1, c)
+        if args.num_golds:
+            kwargs['num_golds'] = int(args.num_golds[0])
 
-    #     def saver(trials, fname):
-    #         fname = os.path.join(d_trials, fname)
-    #         self.save(trials, fname)
+        def saver(trials, fname):
+            fname = os.path.join(d_trials, fname)
+            self.save(trials, fname)
 
         e = Experiment(**kwargs)
         e.run(saver)
 
-    #     del e.save_f
-    #     self.save(e, f_pickle)
+        self.save(e, f_pickle)
 
-    #     return e
+        return e
 
     # def _plot(self, e, args):
     #     assert e
