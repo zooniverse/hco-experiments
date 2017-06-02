@@ -3,15 +3,9 @@ from swap.utils.golds import GoldGetter
 from swap.agents.agent import Stat
 from swap.config import Config
 
+import swaptools.experiments as experiments
+
 import os
-
-if __name__ == "__main__":
-    import sys
-    path = os.path.dirname(os.path.realpath(__file__))
-    path = os.path.join(path, '..')
-    sys.path.insert(0, path)
-
-import experiments
 
 
 class Trial(experiments.Trial):
