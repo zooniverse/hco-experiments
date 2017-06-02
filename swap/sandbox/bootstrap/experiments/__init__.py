@@ -109,7 +109,8 @@ class Experiment:
 
         return e
 
-    def init_swap(self):
+    @classmethod
+    def init_swap(cls):
         control = Control()
         control.run()
 

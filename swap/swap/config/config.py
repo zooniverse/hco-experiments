@@ -9,6 +9,7 @@ class Object:
     Accepts a dict as an argument. Sets an instance variable
     for each key value mapping in the dict
     """
+
     def __init__(self, obj):
         if type(obj) is dict:
             for key, value in obj.items():
