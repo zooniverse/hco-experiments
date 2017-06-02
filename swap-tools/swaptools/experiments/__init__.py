@@ -11,7 +11,7 @@ class Trial:
         """
             consensus, controversial: settings used to run swap; number of
                 consensus  controversial subjects used to make gold set
-            golds: Gold standard set used during run
+            golds: (dict) Gold standard set used during run
             roc_export: ScoreExport of swap scores
         """
 
