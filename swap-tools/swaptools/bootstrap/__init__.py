@@ -10,7 +10,7 @@ from swap.agents.tracker import Tracker
 from swap.agents.bureau import Bureau
 from swap.config import Config
 
-from bootstrap.analysis import Metric, Metrics
+from swaptools.bootstrap.analysis import Metric, Metrics
 
 
 gold_1 = [3328040, 3313220, 2977121, 2943566, 3317607]

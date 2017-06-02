@@ -2,8 +2,8 @@
 ################################################################
 # Recursive swap implementation to bootstrap silver-standard
 # subject labels
-from bootstrap import *
-from experiments.cv_grid_experiment import Experiment
+from swaptools.bootstrap import *
+from swaptools.experiments.cv_grid_experiment import Experiment
 
 import swap.ui
 import swap.plots as plots

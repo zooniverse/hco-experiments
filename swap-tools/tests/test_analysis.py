@@ -2,8 +2,8 @@
 # Test functions for bootstrap metrics
 
 from unittest.mock import MagicMock
-from bootstrap import Bootstrap
-from bootstrap.analysis import Metric
+from swaptools.bootstrap import Bootstrap
+from swaptools.bootstrap.analysis import Metric
 from swap.swap import SWAP
 from swap.db import classifications as dbcl
 

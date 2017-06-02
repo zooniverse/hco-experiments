@@ -1,7 +1,7 @@
 ################################################################
 # Methods for experiment collection
 
-from swap.db import DB
+from swaptools.experiments.db import DB
 
 collection = DB().experiment
 aggregate = collection.aggregate

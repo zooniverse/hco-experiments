@@ -4,7 +4,7 @@ from swap.utils.golds import GoldGetter
 from swap.agents.agent import Stat
 from swap.config import Config
 
-import experiments
+import swaptools.experiments as experiments
 
 import os
 
