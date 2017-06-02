@@ -56,46 +56,11 @@ class Trial:
 
         return data
 
-        # export = {}
-        # export['consensus'] = self.consensus
-        # export['controversial'] = self.controversial
-
-        # golds = {'0': [], '1': [], '-1': []}
-        # for id_, gold in self.golds.items():
-        #     golds[str(gold)].append(id_)
-        # export['golds'] = golds
-
-        # def score_to_bson(score):
-        #     subject, gold, p = score
-        #     return {'subject': subject, 'gold': gold, 'score': p}
-
-        # export['scores'] = [score_to_bson(x) for x in self.scores.full()]
-
-        # return export
-
     @classmethod
     def _db_export_id(cls, name):
         return {'experiment': name}
 
-    # def to_json(self, fname, data={}):
-    #     data['golds'] = self.golds
-    #     data['scores'] = self.score_export.scores
-    #     with open(fname, 'w') as file:
-    #         json.dump(data, file)
 
-    # @classmethod
-    # def from_json(cls, fname):
-    #     with open(fname) as file:
-    #         data = json.load(file)
-
-    #     return cls.parse_json(data)
-
-    # @classmethod
-    # def parse_json(cls, data):
-    #     golds = data['golds']
-    #     scores = ScoreExport(data['scores'])
-
-    #     return Trial(golds, scores)
 
 
 class Experiment:
