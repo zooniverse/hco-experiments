@@ -41,28 +41,45 @@ class Trial:
     def completeness(self, cutoff):
         return self.scores.completeness(cutoff)
 
-    def db_export(self):
-        export = {}
-        export['consensus'] = self.consensus
-        export['controversial'] = self.controversial
+    def db_export(self, name):
+        data = []
+        for i in self.scores.sorted_scores:
+            score = self.scores.scores[i]
+            item = self._db_export_id(name).update({
+                'subject': score.id,
+                'gold': score.gold,
+                'p': score.p,
+                'used_gold': -1
+            })
 
-        golds = {'0': [], '1': [], '-1': []}
-        for id_, gold in self.golds.items():
-            golds[str(gold)].append(id_)
-        export['golds'] = golds
+            if score.id in self.golds:
+                item['used_gold'] = self.golds[score.id]
 
-        def score_to_bson(score):
-            subject, gold, p = score
-            return {'subject': subject, 'gold': gold, 'score': p}
+            data.append(item)
 
-        export['scores'] = [score_to_bson(x) for x in self.scores.full()]
+        return data
 
-        return export
+        # export = {}
+        # export['consensus'] = self.consensus
+        # export['controversial'] = self.controversial
 
+        # golds = {'0': [], '1': [], '-1': []}
+        # for id_, gold in self.golds.items():
+        #     golds[str(gold)].append(id_)
+        # export['golds'] = golds
 
+        # def score_to_bson(score):
+        #     subject, gold, p = score
+        #     return {'subject': subject, 'gold': gold, 'score': p}
 
+        # export['scores'] = [score_to_bson(x) for x in self.scores.full()]
+
+        # return export
 
     @classmethod
+    def _db_export_id(cls, name):
+        return {'experiment': name}
+
     # def to_json(self, fname, data={}):
     #     data['golds'] = self.golds
     #     data['scores'] = self.score_export.scores
