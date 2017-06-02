@@ -59,25 +59,29 @@ class Trial:
 
         return export
 
-    def to_json(self, fname, data={}):
-        data['golds'] = self.golds
-        data['scores'] = self.score_export.scores
-        with open(fname, 'w') as file:
-            json.dump(data, file)
+
+
 
     @classmethod
-    def from_json(cls, fname):
-        with open(fname) as file:
-            data = json.load(file)
+    # def to_json(self, fname, data={}):
+    #     data['golds'] = self.golds
+    #     data['scores'] = self.score_export.scores
+    #     with open(fname, 'w') as file:
+    #         json.dump(data, file)
 
-        return cls.parse_json(data)
+    # @classmethod
+    # def from_json(cls, fname):
+    #     with open(fname) as file:
+    #         data = json.load(file)
 
-    @classmethod
-    def parse_json(cls, data):
-        golds = data['golds']
-        scores = ScoreExport(data['scores'])
+    #     return cls.parse_json(data)
 
-        return Trial(golds, scores)
+    # @classmethod
+    # def parse_json(cls, data):
+    #     golds = data['golds']
+    #     scores = ScoreExport(data['scores'])
+
+    #     return Trial(golds, scores)
 
 
 class Experiment:
