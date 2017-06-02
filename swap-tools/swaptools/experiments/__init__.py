@@ -1,12 +1,9 @@
 
 from swap import Control
 from swap.agents.agent import Stat
-from swap.utils.scores import ScoreExport
 from swap.config import Config
 import swap.ui
 import swap.db.experiment as dbe
-
-import json
 
 
 class Trial:
