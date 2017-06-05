@@ -147,14 +147,6 @@ class Experiment:
         return s
 
 
-def upload_trials(directory, loader):
-    files = get_trials(directory)
-    for fname in files:
-        print(fname)
-        trials = loader(fname)
-        dbe.upload_trials(trials)
-
-
 def get_trials(directory):
     import os
     import re
