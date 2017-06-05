@@ -95,7 +95,7 @@ class Experiment(experiments.Experiment):
     def plot_purity(self, fname):
         data = []
         for point in self.plot_points:
-            x, y, purity, completeness = point
+            x, y, purity, _ = point
             data.append((x, y, purity))
 
         distributions.multivar_scatter(
@@ -104,7 +104,7 @@ class Experiment(experiments.Experiment):
     def plot_completeness(self, fname):
         data = []
         for point in self.plot_points:
-            x, y, purity, completeness = point
+            x, y, _, completeness = point
             data.append((x, y, completeness))
 
         import pprint
@@ -169,11 +169,11 @@ class Interface(experiments.ExperimentInterface):
         cv = None
 
         if args.consensus:
-            a, b, c = args.consensus
+            _, b, c = args.consensus
             cn = (1, b + 1, c)
 
         if args.controversial:
-            a, b, c = args.controversial
+            _, b, c = args.controversial
             cv = (1, b + 1, c)
 
         def saver(trials, fname):
