@@ -2,9 +2,9 @@
 from swap import Control
 from swap.agents.agent import Stat
 from swap.utils.scores import Score, ScoreExport
-from swap.config import Config
+from swaptools.experiments.db import Config
 import swap.ui
-import swap.db.experiment as dbe
+import swaptools.experiments.db.experiment_data as dbe
 
 
 class Trial:
@@ -43,7 +43,9 @@ class Trial:
         data = []
         for i in self.scores.sorted_scores:
             score = self.scores.scores[i]
-            item = self._db_export_id(name).update({
+            item = {'experiment': name}
+            item.update({'trial': self._db_export_id()})
+            item.update({
                 'subject': score.id,
                 'gold': score.gold,
                 'p': score.p,
