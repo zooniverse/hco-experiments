@@ -218,26 +218,6 @@ class Interface(experiments.ExperimentInterface):
         e.plot(type_, fname)
 
 
+
 if __name__ == "__main__":
-    # e = Experiment()
-    # e.run()
-
-    # import code
-    # code.interact(local=locals())
-
-    import sys
-    path = os.path.dirname(os.path.realpath(__file__))
-    path = os.path.join(path, '..')
-    sys.path.insert(path)
-
-    # x_ = range(50)
-    # y_ = range(50)
-    # z = lambda x, y: x + y
-
-    # data = []
-    # for x in x_:
-    #     for y in y_:
-    #         data.append((x, y, z(x, y)))
-
-    # print(data)
-    # distributions.multivar_scatter(None, data)
+    pass
