@@ -3,7 +3,7 @@
 
 from swaptools.experiments.db import DB
 
-collection = DB().experiment
+collection = DB().data
 aggregate = collection.aggregate
 
 
