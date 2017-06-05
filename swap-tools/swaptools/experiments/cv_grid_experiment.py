@@ -87,28 +87,15 @@ class Experiment(experiments.Experiment):
             self.plot_both(fname)
 
     @classmethod
-    def build_from_db(cls, name, cutoff):
-        cursor = dbe.get_trials(name)
-        e = cls(name, None, cutoff=cutoff)
-        for item in cursor:
-            cv = item['_id']['controversial']
-            cn = item['_id']['consensus']
+    def build_from_db(cls, experiment_name, cutoff):
+        e = cls(experiment_name, cutoff=cutoff)
+        for trial_info, golds, scores in dbe.get_trials(experiment_name):
+            scores = ScoreExport(scores)
 
-            scores = item['_id']['points']
-            data = {}
-            golds = {}
-            for score in scores:
-                p = score['p']
-                gold = score['gold']
-                _id = score['subject']
+            cv = trial_info['controversial']
+            cn = trial_info['consensus']
 
-                if score['used_gold'] in [0, 1]:
-                    golds[_id] = score['used_gold']
-
-                score = Score(_id, gold, p)
-                data[_id] = score
-
-            trial = Trial(cn, cv, golds, data)
+            trial = Trial(cn, cv, golds, scores)
             e.add_trial(trial, keep=False)
 
         return e
@@ -217,6 +204,9 @@ class Interface(experiments.ExperimentInterface):
 
         e.plot(type_, fname)
 
+    @staticmethod
+    def _from_db(name, cutoff):
+        return Experiment.build_from_db(name, cutoff)
 
 
 if __name__ == "__main__":
