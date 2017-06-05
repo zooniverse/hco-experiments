@@ -2,15 +2,15 @@
 import swap.plots.distributions as distributions
 from swap.utils.golds import GoldGetter
 from swap.agents.agent import Stat
-from swap.utils.scores import Score, ScoreExport
+from swap.utils.scores import ScoreExport
 
-import swaptools.experiments as experiments
+import swaptools.experiments.experiment as experiment
 import swaptools.experiments.db.experiment_data as dbe
 
 import os
 
 
-class Trial(experiments.Trial):
+class Trial(experiment.Trial):
     def __init__(self, consensus, controversial, golds, swap_export):
         """
             consensus, controversial: settings used to run swap; number of
@@ -41,7 +41,7 @@ class Trial(experiments.Trial):
         return kwargs
 
 
-class Experiment(experiments.Experiment):
+class Experiment(experiment.Experiment):
 
     def __init__(self, name, cutoff=0.96,
                  consensus=None, controversial=None):
@@ -145,7 +145,7 @@ class Experiment(experiments.Experiment):
         return s
 
 
-class Interface(experiments.ExperimentInterface):
+class Interface(experiment.ExperimentInterface):
 
     @property
     def command(self):
