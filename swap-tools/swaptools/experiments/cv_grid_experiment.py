@@ -2,9 +2,10 @@
 import swap.plots.distributions as distributions
 from swap.utils.golds import GoldGetter
 from swap.agents.agent import Stat
-from swap.config import Config
+from swap.utils.scores import Score, ScoreExport
 
 import swaptools.experiments as experiments
+import swaptools.experiments.db.experiment_data as dbe
 
 import os
 
@@ -83,6 +84,35 @@ class Experiment(experiments.Experiment):
             self.plot_completeness(fname)
         elif type_ == 'both':
             self.plot_both(fname)
+
+    @classmethod
+    def build_from_db(cls, name, cutoff):
+        cursor = dbe.get_trials(name)
+        e = cls(name, None, cutoff=cutoff)
+        for item in cursor:
+            cv = item['_id']['controversial']
+            cn = item['_id']['consensus']
+
+            scores = item['_id']['points']
+            data = {}
+            golds = {}
+            for score in scores:
+                p = score['p']
+                gold = score['gold']
+                _id = score['subject']
+
+                if score['used_gold'] in [0, 1]:
+                    golds[_id] = score['used_gold']
+
+                score = Score(_id, gold, p)
+                data[_id] = score
+
+            trial = Trial(cn, cv, golds, data)
+            e.add_trial(trial, keep=False)
+
+        return e
+
+    ###############################################################
 
     def plot_purity(self, fname):
         data = []
