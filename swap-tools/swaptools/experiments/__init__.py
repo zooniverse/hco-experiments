@@ -129,16 +129,19 @@ class Experiment:
 
         return control.getSWAP()
 
-    def clear_mem(self, saver, fname):
+    def clear_mem(self):
         """
             Saves trial objects to disk to free up memory
         """
-        saver(self.trials, fname)
+        dbe.upload_trials(self.trials, self.name)
         self.trials = []
 
     def add_trial(self, trial, keep=True):
         if keep:
             self.trials.append(trial)
+            if len(self.trials) >= Config().trials.keep_amount:
+                self.clear_mem()
+
         self.plot_points.append(trial.plot(self.p_cutoff))
 
     def __str__(self):
