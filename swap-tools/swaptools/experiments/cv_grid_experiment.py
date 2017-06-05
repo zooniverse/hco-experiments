@@ -75,14 +75,6 @@ class Experiment(experiments.Experiment):
                 self.add_trial(Trial(cn, cv, gg.golds, swap.score_export()))
 
                 n += 1
-            self.clear_mem(saver, cv, cn)
-
-    def clear_mem(self, cv, cn):
-        """
-            Saves trial objects to disk to free up memory
-        """
-        fname = 'trials_cv_%s_cn_%s.pkl' % (cv, cn)
-        super().clear_mem(fname)
 
     def plot(self, type_, fname):
         if type_ == 'purity':
