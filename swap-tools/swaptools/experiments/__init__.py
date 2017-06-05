@@ -225,6 +225,14 @@ class ExperimentInterface(swap.ui.Interface):
             '--multiply', action='store_true',
             help='controversial and consensus aggregation method')
 
+        parser.add_argument(
+            '--from-db',
+            metavar='experiment name')
+
+        parser.add_argument(
+            '--name', nargs=1, required=True,
+            help='Name of experiment')
+
         # parser.add_argument(
         #     '--upload', nargs=1,
         #     metavar='directory containing trial files',
@@ -235,6 +243,8 @@ class ExperimentInterface(swap.ui.Interface):
             cutoff = float(args.cutoff[0])
         else:
             cutoff = 0.96
+
+        name = args.name[0]
 
         config = Config()
         if args.pow:
@@ -250,6 +260,9 @@ class ExperimentInterface(swap.ui.Interface):
                 args.from_trials[0],
                 cutoff, self.save, self.load)
 
+        elif args.from_db:
+            e = self._from_db(name, cutoff)
+
         elif args.load:
             e = self.load(args.load[0])
 
@@ -263,3 +276,12 @@ class ExperimentInterface(swap.ui.Interface):
         if args.save:
             assert e
             self.save(e, self.f(args.save[0]))
+
+    def _run(self, args):
+        pass
+
+    def _plot(self, e, args):
+        pass
+
+    def _from_db(self, name, cutoff):
+        pass
