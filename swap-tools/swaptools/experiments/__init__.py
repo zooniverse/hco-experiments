@@ -96,13 +96,14 @@ class Trial:
 
 
 class Experiment:
-    def __init__(self, cutoff=0.96):
+    def __init__(self, name, cutoff=0.96):
+        self.name = name
         self.trials = []
         self.plot_points = []
 
         self.p_cutoff = cutoff
 
-    def run(self, saver):
+    def run(self):
         pass
 
     def plot(self, fname):
@@ -123,6 +124,10 @@ class Experiment:
             e.trials = []
 
         return e
+
+    @classmethod
+    def build_from_db(cls):
+        pass
 
     @classmethod
     def init_swap(cls):

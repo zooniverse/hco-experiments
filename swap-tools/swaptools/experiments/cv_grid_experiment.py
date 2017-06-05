@@ -43,8 +43,9 @@ class Trial(experiments.Trial):
 
 class Experiment(experiments.Experiment):
 
-    def __init__(self, saver, cutoff=0.96, consensus=None, controversial=None):
-        super().__init__(saver, cutoff)
+    def __init__(self, name, cutoff=0.96,
+                 consensus=None, controversial=None):
+        super().__init__(name, cutoff)
 
         if consensus is None:
             consensus = (0, 2001, 50)
@@ -54,7 +55,7 @@ class Experiment(experiments.Experiment):
         self.consensus = consensus
         self.controversial = controversial
 
-    def run(self, saver):
+    def run(self):
         gg = GoldGetter()
         swap = self.init_swap()
         n = 1
@@ -203,7 +204,7 @@ class Interface(experiments.ExperimentInterface):
             self.save(trials, fname)
 
         e = Experiment(controversial=cv, consensus=cn)
-        e.run(saver)
+        e.run()
 
         self.save(e, f_pickle)
 
