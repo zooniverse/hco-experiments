@@ -40,6 +40,10 @@ class _Config(_config.Config):
         'max_batch_size': 1e5,
     })
 
+    trials = _config.Object({
+        'keep_amount': 10
+    })
+
 
 class DB(_DB, metaclass=Singleton):
     pass
