@@ -24,11 +24,8 @@ class Trial(experiments.Trial):
         return (self.consensus, self.controversial,
                 self.purity(cutoff), self.completeness(cutoff))
 
-    def db_export_id(self, name):
-        export = super().db_export_id(name)
-        export.update({'n': self.n})
-
-        return export
+    def _db_export_id(self):
+        return {'n': self.n}
 
     @classmethod
     def _parse_db_data(cls, db_data, kwargs=None):

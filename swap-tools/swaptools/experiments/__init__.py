@@ -57,9 +57,8 @@ class Trial:
 
         return data
 
-    @classmethod
-    def _db_export_id(cls, name):
-        return {'experiment': name}
+    def _db_export_id(self):
+        pass
 
     @classmethod
     def db_import(cls, db_data):
