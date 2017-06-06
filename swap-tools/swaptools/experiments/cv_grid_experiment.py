@@ -87,19 +87,10 @@ class Experiment(experiment.Experiment):
             self.plot_both(fname)
 
     @classmethod
-    def build_from_db(cls, experiment_name, cutoff):
-        e = cls(experiment_name, cutoff=cutoff)
-        for trial_info, golds, scores in dbe.get_trials(experiment_name):
-            scores = [(id_, Score(id_, gold, p)) for id_, gold, p in scores]
-            scores = ScoreExport(dict(scores), new_golds=False)
-
-            cv = trial_info['controversial']
-            cn = trial_info['consensus']
-
-            trial = Trial(cn, cv, golds, scores)
-            e.add_trial(trial, keep=False)
-
-        return e
+    def trial_from_db(cls, trial_info, golds, scores):
+        cv = trial_info['controversial']
+        cn = trial_info['consensus']
+        return Trial(cn, cv, golds, scores)
 
     ###############################################################
 

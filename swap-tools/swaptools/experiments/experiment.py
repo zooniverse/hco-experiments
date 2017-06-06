@@ -126,8 +126,17 @@ class Experiment:
         return e
 
     @classmethod
-    def build_from_db(cls):
-        pass
+    def build_from_db(cls, experiment_name, cutoff):
+        e = cls(experiment_name, cutoff=cutoff)
+        for trial_info, golds, scores in dbe.get_trials(experiment_name):
+            scores = [(id_, Score(id_, gold, p)) for id_, gold, p in scores]
+            scores = ScoreExport(dict(scores), new_golds=False)
+
+            # trial = Trial(cn, cv, golds, scores)
+            trial = cls.trial_from_db(trial_info, golds, scores)
+            e.add_trial(trial, keep=False)
+
+        return e
 
     @classmethod
     def init_swap(cls):
