@@ -47,7 +47,7 @@ class Experiment(experiment.Experiment):
         self.consensus = consensus
         self.controversial = controversial
 
-    def run(self):
+    def _run(self):
         gg = GoldGetter()
         swap = self.init_swap()
         n = 1

@@ -75,7 +75,7 @@ class Experiment:
 
         self.p_cutoff = cutoff
 
-    def run(self):
+    def _run(self):
         pass
 
     def plot(self, type_, fname):
@@ -86,6 +86,10 @@ class Experiment:
         pass
 
     ###############################################################
+
+    def run(self):
+        self._run()
+        self.clear_mem()
 
     @staticmethod
     def from_trial_export(directory, cutoff, loader):
@@ -238,7 +242,7 @@ class ExperimentInterface(swap.ui.Interface):
             config.controversial_version = 'multiply'
 
         if args.run:
-            e = self._run(args)
+            e = self._run(name, cutoff, args)
 
         elif args.from_trials:
             e = Experiment.from_trial_export(

@@ -40,7 +40,7 @@ class Experiment(experiment.Experiment):
         self.num_golds = num_golds
         self.num_trials = num_trials
 
-    def run(self):
+    def _run(self):
         gg = GoldGetter()
         swap = self.init_swap()
         for n_golds in range(*self.num_golds):
