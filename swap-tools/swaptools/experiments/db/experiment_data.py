@@ -4,6 +4,8 @@
 from swaptools.experiments.db import DB
 from swap.db import Cursor
 
+import sys
+
 collection = DB().data
 aggregate = collection.aggregate
 
@@ -37,23 +39,33 @@ class TrialsCursor:
     def __init__(self, name):
         self.name = name
         self._trials = None
+        self.current_trial = None
 
     @property
     def trials(self):
         if self._trials is None:
+            print('generating list of trials')
             query = [
                 {'$match': {'experiment': self.name}},
-                {'$group': {'_id': '$trial'}}
+                {'$sort': {'trial': 1}}
             ]
 
             self._trials = Cursor(query, collection, allowDiskUse=True)
+            self.current_trial = self._trials.next()
+            print('done')
         return self._trials
 
-    @staticmethod
-    def parse_trial(cursor):
-        scores = {}
+    def parse_trial(self):
+        cursor = self.trials
+        item = self.current_trial
+
+        scores = []
         golds = {}
-        for item in cursor:
+        trial_info = item['trial']
+        print('parsing trial %s' % trial_info)
+
+        n = 0
+        while item['trial'] == trial_info:
             p = item['p']
             gold = item['gold']
             _id = item['subject']
@@ -62,24 +74,32 @@ class TrialsCursor:
                 golds[_id] = item['used_gold']
 
             # score = Score(_id, gold, p)
-            score = (_id, gold, p)
-            scores[_id] = score
+            scores.append((_id, gold, p))
 
-        return golds, scores
+            item = cursor.next()
+            n += 1
 
-    def get_trial(self, trial_info):
-        query = [
-            {'$match': {'experiment': self.name, 'trial': trial_info}}
-        ]
+            if n % 100 == 0:
+                sys.stdout.write('\r%d' % n)
+                sys.stdout.flush()
 
-        cursor = Cursor(query, collection, allowDiskUse=True)
-        return self.parse_trial(cursor)
+        print('\ndone')
+
+        self.current_trial = item
+        return trial_info, golds, scores
+
+    # def get_trial(self, trial_info):
+    #     print('getting trial %s' % trial_info)
+    #     query = [
+    #         {'$match': {'experiment': self.name, 'trial': trial_info}}
+    #     ]
+
+    #     cursor = Cursor(query, collection, allowDiskUse=True)
+    #     print('done')
+    #     return self.parse_trial(cursor)
 
     def next(self):
-        trial_info = self.trials.next()
-        golds, scores = self.get_trial(trial_info)
-
-        return trial_info, golds, scores
+        return self.parse_trial()
 
     def __iter__(self):
         return self
