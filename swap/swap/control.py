@@ -11,11 +11,14 @@ __doc__ = """
         """
 
 import progressbar
+import logging
 
 from swap.swap import SWAP, Classification
 import swap.db.classifications as db
 from swap.utils.golds import GoldGetter
 from swap.db import Query
+
+logger = logging.getLogger(__name__)
 
 
 class Control:
@@ -60,7 +63,7 @@ class Control:
 
         # loop over classification cursor to process
         # classifications one at a time
-        print("Start: SWAP Processing %d classifications" % len(cursor))
+        logger.info("Start: SWAP Processing %d classifications", len(cursor))
 
         count = 0
         with progressbar.ProgressBar(max_value=len(cursor)) as bar:
@@ -75,6 +78,7 @@ class Control:
                 count += 1
 
         self.swap.process_changes()
+        logger.info('done')
 
     def _delegate(self, cl):
         """
