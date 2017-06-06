@@ -6,6 +6,8 @@ from swap.config import Config
 from swap.utils import Singleton
 from pymongo import MongoClient
 
+import atexit
+
 assert Query
 
 
@@ -39,6 +41,9 @@ class _DB:
 
     def setBatchSize(self, size):
         self.batch_size = size
+
+    def close(self):
+        self._client.close()
 
 
 class DB(_DB, metaclass=Singleton):
@@ -96,3 +101,8 @@ class Cursor:
 
     def next(self):
         return self.cursor.next()
+
+
+@atexit.register
+def goodbye():
+    DB().close()
