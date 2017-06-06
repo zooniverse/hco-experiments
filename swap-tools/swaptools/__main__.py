@@ -216,114 +216,114 @@ class BootInterface(swap.ui.Interface):
 ################################################################
 
 
-class ExperimentInterface(swap.ui.Interface):
+# class ExperimentInterface(swap.ui.Interface):
 
-    @property
-    def command(self):
-        return 'experiment'
+#     @property
+#     def command(self):
+#         return 'experiment'
 
-    def options(self, parser):
+#     def options(self, parser):
 
-        parser.add_argument(
-            '--run', nargs=2,
-            metavar=('trials directory, experiment file'))
+#         parser.add_argument(
+#             '--run', nargs=2,
+#             metavar=('trials directory, experiment file'))
 
-        parser.add_argument(
-            '--pow', action='store_true',
-            help='controversial and consensus aggregation method')
+#         parser.add_argument(
+#             '--pow', action='store_true',
+#             help='controversial and consensus aggregation method')
 
-        parser.add_argument(
-            '--multiply', action='store_true',
-            help='controversial and consensus aggregation method')
+#         parser.add_argument(
+#             '--multiply', action='store_true',
+#             help='controversial and consensus aggregation method')
 
-        parser.add_argument(
-            '--cutoff', nargs=1,
-            help='p cutoff')
+#         parser.add_argument(
+#             '--cutoff', nargs=1,
+#             help='p cutoff')
 
-        parser.add_argument(
-            '--from-trials', nargs=1,
-            metavar='directory with trial files',
-            help='load experiment plot data from trial files')
+#         parser.add_argument(
+#             '--from-trials', nargs=1,
+#             metavar='directory with trial files',
+#             help='load experiment plot data from trial files')
 
-        parser.add_argument(
-            '--load', nargs=1,
-            metavar='file',
-            help='load pickled experiment data')
+#         parser.add_argument(
+#             '--load', nargs=1,
+#             metavar='file',
+#             help='load pickled experiment data')
 
-        parser.add_argument(
-            '--save', nargs=1,
-            metavar='file',
-            help='pickle and save experiment data')
+#         parser.add_argument(
+#             '--save', nargs=1,
+#             metavar='file',
+#             help='pickle and save experiment data')
 
-        parser.add_argument(
-            '--plot', nargs=2,
-            metavar=('type', 'file'),
-            help='Generate experiment plot')
+#         parser.add_argument(
+#             '--plot', nargs=2,
+#             metavar=('type', 'file'),
+#             help='Generate experiment plot')
 
-        parser.add_argument(
-            '--shell', action='store_true',
-            help='Drop to python interpreter after loading experiment')
+#         parser.add_argument(
+#             '--shell', action='store_true',
+#             help='Drop to python interpreter after loading experiment')
 
-        parser.add_argument(
-            '--upload', nargs=1,
-            metavar='directory containing trial files',
-            help='Upload trials to mongo database')
+#         parser.add_argument(
+#             '--upload', nargs=1,
+#             metavar='directory containing trial files',
+#             help='Upload trials to mongo database')
 
-    def call(self, args):
-        if args.cutoff:
-            cutoff = float(args.cutoff[0])
-        else:
-            cutoff = 0.96
+#     def call(self, args):
+#         if args.cutoff:
+#             cutoff = float(args.cutoff[0])
+#         else:
+#             cutoff = 0.96
 
-        if args.pow:
-            Config().controversial_version = 'pow'
-        elif args.multiply:
-            Config().controversial_version = 'multiply'
+#         if args.pow:
+#             Config().controversial_version = 'pow'
+#         elif args.multiply:
+#             Config().controversial_version = 'multiply'
 
-        if args.run:
-            d_trials = self.f(args.run[0])
-            f_pickle = self.f(args.run[1])
+#         if args.run:
+#             d_trials = self.f(args.run[0])
+#             f_pickle = self.f(args.run[1])
 
-            def saver(trials, fname):
-                fname = os.path.join(d_trials, fname)
-                self.save(trials, fname)
-            e = Experiment(saver)
-            e.run()
+#             def saver(trials, fname):
+#                 fname = os.path.join(d_trials, fname)
+#                 self.save(trials, fname)
+#             e = Experiment(saver)
+#             e.run()
 
-            del e.save_f
-            self.save(e, f_pickle)
+#             del e.save_f
+#             self.save(e, f_pickle)
 
-        elif args.from_trials:
-            e = Experiment.from_trial_export(
-                args.from_trials[0],
-                cutoff, self.save, self.load)
+#         elif args.from_trials:
+#             e = Experiment.from_trial_export(
+#                 args.from_trials[0],
+#                 cutoff, self.save, self.load)
 
-        elif args.load:
-            e = self.load(args.load[0])
+#         elif args.load:
+#             e = self.load(args.load[0])
 
-        if args.plot:
-            assert e
-            fname = self.f(args.plot[1])
-            type_ = args.plot[0]
+#         if args.plot:
+#             assert e
+#             fname = self.f(args.plot[1])
+#             type_ = args.plot[0]
 
-            if type_ == 'purity':
-                e.plot_purity(fname)
-            elif type_ == 'completeness':
-                e.plot_completeness(fname)
-            elif type_ == 'both':
-                e.plot_both(fname)
+#             if type_ == 'purity':
+#                 e.plot_purity(fname)
+#             elif type_ == 'completeness':
+#                 e.plot_completeness(fname)
+#             elif type_ == 'both':
+#                 e.plot_both(fname)
 
-        if args.shell:
-            import code
-            code.interact(local=locals())
+#         if args.shell:
+#             import code
+#             code.interact(local=locals())
 
-        if args.save:
-            assert e
-            del e.save_f
-            self.save(e, self.f(args.save[0]))
+#         if args.save:
+#             assert e
+#             del e.save_f
+#             self.save(e, self.f(args.save[0]))
 
-        if args.upload:
-            ex.upload_trials(args.upload[0], self.load)
+#         if args.upload:
+#             ex.upload_trials(args.upload[0], self.load)
 
 
 ################################################################
