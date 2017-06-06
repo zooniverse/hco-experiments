@@ -62,6 +62,7 @@ class _Config:
         'console_format': '%(asctime)s %(levelname)s %(message)s',
         'date_format': '%Y%m%d_%H:%M:%S',
         'level': 'DEBUG',
+        'console_level': 'INFO',
         'keep_logs': 5,
         'filename': 'swap.log'
     })
