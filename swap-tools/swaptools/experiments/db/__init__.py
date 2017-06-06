@@ -4,6 +4,9 @@ from swap.utils import Singleton
 from pymongo import MongoClient
 
 import atexit
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class _DB:
@@ -16,6 +19,7 @@ class _DB:
     """
 
     def __init__(self):
+        logger.info('opening mongo connection')
         config = Config()
 
         # Get database configuration from config file
@@ -33,6 +37,7 @@ class _DB:
         self.batch_size = size
 
     def close(self):
+        logger.info('closing mongo connection')
         self._client.close()
 
 
