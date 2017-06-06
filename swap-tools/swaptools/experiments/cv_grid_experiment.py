@@ -2,7 +2,7 @@
 import swap.plots.distributions as distributions
 from swap.utils.golds import GoldGetter
 from swap.agents.agent import Stat
-from swap.utils.scores import ScoreExport
+from swap.utils.scores import Score, ScoreExport
 
 import swaptools.experiments.experiment as experiment
 import swaptools.experiments.db.experiment_data as dbe
@@ -90,7 +90,8 @@ class Experiment(experiment.Experiment):
     def build_from_db(cls, experiment_name, cutoff):
         e = cls(experiment_name, cutoff=cutoff)
         for trial_info, golds, scores in dbe.get_trials(experiment_name):
-            scores = ScoreExport(scores)
+            scores = [(id_, Score(id_, gold, p)) for id_, gold, p in scores]
+            scores = ScoreExport(dict(scores), new_golds=False)
 
             cv = trial_info['controversial']
             cn = trial_info['consensus']
