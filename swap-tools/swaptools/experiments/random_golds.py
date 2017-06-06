@@ -26,13 +26,16 @@ class Trial(experiment.Trial):
     #             self.purity(cutoff), self.completeness(cutoff))
 
     def _db_export_id(self):
-        return {'n': self.n}
+        return {'n': self.n, 'golds': len(self.golds)}
 
 
 class Experiment(experiment.Experiment):
 
-    def __init__(self, name, cutoff, num_golds=1000, num_trials=10):
+    def __init__(self, name, cutoff, num_golds=None, num_trials=10):
         super().__init__(name, cutoff)
+
+        if num_golds is None:
+            num_golds = (1000, 2001, 1000)
 
         self.num_golds = num_golds
         self.num_trials = num_trials
@@ -40,16 +43,17 @@ class Experiment(experiment.Experiment):
     def run(self):
         gg = GoldGetter()
         swap = self.init_swap()
-        for n in range(self.num_trials):
+        for n_golds in range(*self.num_golds):
+            for n in range(self.num_trials):
 
-            gg.reset()
-            gg.random(self.num_golds)
+                gg.reset()
+                gg.random(n_golds)
 
-            logger.debug('\nRunning trial %d' % n)
+                logger.debug('\nRunning trial %d with %d golds', n, n_golds)
 
-            swap.set_gold_labels(gg.golds)
-            swap.process_changes()
-            self.add_trial(Trial(n, gg.golds, swap.score_export()))
+                swap.set_gold_labels(gg.golds)
+                swap.process_changes()
+                self.add_trial(Trial(n, gg.golds, swap.score_export()))
 
     @classmethod
     def trial_from_db(cls, trial_info, golds, scores):
@@ -127,6 +131,9 @@ class Interface(experiment.ExperimentInterface):
 
         parser.add_argument(
             '-n', nargs=1)
+
+        parser.add_argument(
+            '--num-golds', nargs=1)
 
     def _run(self, name, cutoff, args):
         kwargs = {}
