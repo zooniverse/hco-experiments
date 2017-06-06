@@ -24,6 +24,9 @@ class Trial:
         #         self.purity(cutoff), self.completeness(cutoff))
         pass
 
+    def _db_export_id(self):
+        pass
+
     ###############################################################
 
     def n_golds(self):
@@ -59,44 +62,9 @@ class Trial:
 
         return data
 
-    def _db_export_id(self):
-        pass
-
-    @classmethod
-    def db_import(cls, db_data):
-        kwargs = cls._parse_db_data(db_data)
-        return cls(**kwargs)
-
-    @classmethod
-    def _parse_db_data(cls, db_data, kwargs=None):
-        if kwargs is None:
-            kwargs = {}
-
-        # parse scores
-        rows = db_data['data']
-        golds = {}
-        scores = {}
-        for item in rows:
-            id_ = item['subject']
-            gold = item['gold']
-            p = item['p']
-
-            score = Score(id_, gold, p)
-            scores[id_] = score
-
-            used_gold = item['used_gold']
-            if used_gold in [0, 1]:
-                golds[id_] = used_gold
-
-        scores = ScoreExport(scores, new_golds=False)
-        kwargs['scores'] = scores
-        kwargs['golds'] = golds
-
-        return kwargs
-
 
 class Experiment:
-    def __init__(self, name, cutoff=0.96):
+    def __init__(self, name, cutoff):
         self.name = name
         self.trials = []
         self.plot_points = []
@@ -106,7 +74,11 @@ class Experiment:
     def run(self):
         pass
 
-    def plot(self, fname):
+    def plot(self, type_, fname):
+        pass
+
+    @classmethod
+    def trial_from_db(cls, trial_info, golds, scores):
         pass
 
     ###############################################################
@@ -195,8 +167,8 @@ class ExperimentInterface(swap.ui.Interface):
     def options(self, parser):
 
         parser.add_argument(
-            '--run', nargs=2,
-            metavar=('trials directory, experiment file'))
+            '--run', action='store_true',
+            help=('trials directory, experiment file'))
 
         parser.add_argument(
             '--cutoff', nargs=1,
@@ -286,7 +258,7 @@ class ExperimentInterface(swap.ui.Interface):
             assert e
             self.save(e, self.f(args.save[0]))
 
-    def _run(self, args):
+    def _run(self, name, cutoff, args):
         pass
 
     def _plot(self, e, args):

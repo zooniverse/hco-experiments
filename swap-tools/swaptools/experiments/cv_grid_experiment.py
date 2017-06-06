@@ -2,12 +2,8 @@
 import swap.plots.distributions as distributions
 from swap.utils.golds import GoldGetter
 from swap.agents.agent import Stat
-from swap.utils.scores import Score, ScoreExport
 
 import swaptools.experiments.experiment as experiment
-import swaptools.experiments.db.experiment_data as dbe
-
-import os
 
 
 class Trial(experiment.Trial):
@@ -32,18 +28,10 @@ class Trial(experiment.Trial):
             'consensus': self.consensus
         }
 
-    @classmethod
-    def _parse_db_data(cls, db_data, kwargs=None):
-        kwargs = super()._parse_db_data(db_data, kwargs)
-        kwargs['consensus'] = db_data['id']['consensus']
-        kwargs['controversial'] = db_data['id']['consensus']
-
-        return kwargs
-
 
 class Experiment(experiment.Experiment):
 
-    def __init__(self, name, cutoff=0.96,
+    def __init__(self, name, cutoff,
                  consensus=None, controversial=None):
         super().__init__(name, cutoff)
 
@@ -163,10 +151,7 @@ class Interface(experiment.ExperimentInterface):
             '--controversial', nargs=3,
             metavar=('min', 'max', 'step'))
 
-    def _run(self, args):
-        d_trials = self.f(args.run[0])
-        f_pickle = self.f(args.run[1])
-
+    def _run(self, name, cutoff, args):
         cn = None
         cv = None
 
@@ -178,14 +163,8 @@ class Interface(experiment.ExperimentInterface):
             _, b, c = args.controversial
             cv = (1, b + 1, c)
 
-        def saver(trials, fname):
-            fname = os.path.join(d_trials, fname)
-            self.save(trials, fname)
-
-        e = Experiment(controversial=cv, consensus=cn)
+        e = Experiment(name, cutoff, controversial=cv, consensus=cn)
         e.run()
-
-        self.save(e, f_pickle)
 
         return e
 
