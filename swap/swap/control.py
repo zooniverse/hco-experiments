@@ -104,6 +104,7 @@ class Control:
         SWAP
             SWAP
         """
+        logger.debug('Initializing SWAP')
         if self.swap is None:
             swap = SWAP()
         else:

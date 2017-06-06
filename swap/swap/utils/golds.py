@@ -3,6 +3,11 @@ import swap.db.classifications as db
 import swap.db.controversial as cv
 
 from functools import wraps
+import logging
+
+logger = logging.getLogger(__name__)
+
+# pylint: disable=R0201
 
 
 class GoldGetter:
@@ -11,14 +16,19 @@ class GoldGetter:
     """
 
     def __init__(self):
-        self.reset()
+        self.getters = []
+        self._golds = None
 
     def _getter(func):
         @wraps(func)
         def wrapper(self, *args, **kwargs):
-            getter = func(self, *args, **kwargs)
+            getter = lambda: func(self, *args, **kwargs)
+            logger.debug('Using getter %s with args %s %s',
+                         func, args, kwargs)
+
             self.getters.append(getter)
             self._golds = None
+
             return getter
         return wrapper
 
@@ -27,7 +37,7 @@ class GoldGetter:
         """
         Get all gold labels
         """
-        return lambda: db.getAllGolds()
+        return db.getAllGolds()
 
     @_getter
     def random(self, size):
@@ -39,7 +49,7 @@ class GoldGetter:
         size : int
             Sample size
         """
-        return lambda: db.getRandomGoldSample(size)
+        return db.getRandomGoldSample(size)
 
     @_getter
     def subjects(self, subject_ids):
@@ -51,7 +61,7 @@ class GoldGetter:
         subject_ids : list
             List of subject ids (int)
         """
-        return lambda: db.getExpertGold(subject_ids)
+        return db.getExpertGold(subject_ids)
 
     @_getter
     def controversial(self, size):
@@ -63,10 +73,8 @@ class GoldGetter:
         size : int
             Number of subjects
         """
-        def f():
-            subjects = cv.get_controversial(size)
-            return db.getExpertGold(subjects)
-        return f
+        subjects = cv.get_controversial(size)
+        return db.getExpertGold(subjects)
 
     @_getter
     def consensus(self, size):
@@ -78,10 +86,8 @@ class GoldGetter:
         size : int
             Number of subjects
         """
-        def f():
-            consensus = cv.get_consensus(size)
-            return db.getExpertGold(consensus)
-        return f
+        consensus = cv.get_consensus(size)
+        return db.getExpertGold(consensus)
 
     # @_getter
     # def extreme_min(self, n_controv, max_consensus):

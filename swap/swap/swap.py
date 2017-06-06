@@ -328,6 +328,7 @@ class SWAP:
         swap.utils.scores.ScoreExport
             ScoreExport
         """
+        logger.info('Generating score export')
         scores = {}
         for subject in self.subjects:
             if len(subject.ledger) == 0:
@@ -349,6 +350,7 @@ class SWAP:
                         subjects
         """
 
+        logger.info('Generating roc export')
         db_golds = db.getAllGolds()
 
         data = []
