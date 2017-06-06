@@ -41,7 +41,8 @@ class _Config(_config.Config):
     })
 
     trials = _config.Object({
-        'keep_amount': 10
+        'keep_amount': 10,
+        'cutoff': 0.96
     })
 
 

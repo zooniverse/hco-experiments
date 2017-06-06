@@ -223,7 +223,7 @@ class ExperimentInterface(swap.ui.Interface):
         if args.cutoff:
             cutoff = float(args.cutoff[0])
         else:
-            cutoff = 0.96
+            cutoff = Config().trials.cutoff
 
         name = args.name[0]
 
