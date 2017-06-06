@@ -133,7 +133,7 @@ class Interface(experiment.ExperimentInterface):
             '-n', nargs=1)
 
         parser.add_argument(
-            '--num-golds', nargs=1)
+            '--num-golds', nargs=3)
 
     def _run(self, name, cutoff, args):
         kwargs = {}
@@ -141,7 +141,9 @@ class Interface(experiment.ExperimentInterface):
             kwargs['num_trials'] = int(args.n[0])
 
         if args.num_golds:
-            kwargs['num_golds'] = int(args.num_golds[0])
+            golds = [int(i) for i in args.num_golds]
+            golds[1] += 1    # To ensure range() includes upper limit
+            kwargs['num_golds'] = tuple(golds)
 
         e = Experiment(name, cutoff, **kwargs)
         e.run()
