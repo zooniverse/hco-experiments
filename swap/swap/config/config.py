@@ -56,6 +56,16 @@ class _Config:
         'metadata': ['mag', 'mag_err'],
     })
 
+    logging = Object({
+        'file_format': '%(asctime)s::%(name)s:%(funcName)s ' +
+                       '%(levelname)s %(message)s',
+        'console_format': '%(asctime)s %(levelname)s %(message)s',
+        'date_format': '%Y%m%d_%H:%M:%S',
+        'level': 'DEBUG',
+        'keep_logs': 5,
+        'filename': 'swap.log'
+    })
+
 
 class Config(_Config, metaclass=Singleton):
     pass

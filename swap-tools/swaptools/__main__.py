@@ -7,6 +7,7 @@ import swaptools.experiments.cv_grid_experiment as experiment
 
 import swap.ui
 import swap.plots as plots
+import swap.config.logger as logging
 
 import os
 import sys
@@ -429,6 +430,8 @@ def load(self, fname):
 
 
 def main():
+    logging.init(__name__, __file__)
+
     ui = swap.ui.UI()
     RocInterface(ui)
     BootInterface(ui)
