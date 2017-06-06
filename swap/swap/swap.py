@@ -13,6 +13,9 @@ from swap.utils import Classification
 from swap.db import classifications as db
 
 import progressbar
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 __doc__ = """
@@ -157,17 +160,19 @@ class SWAP:
         Then any subject agent which is connected to a user whose score has
         changed recalculates its score.
         """
-        print('processing user score changes')
+        logger.info('processing user score changes')
         with progressbar.ProgressBar(
                 max_value=self.users.calculate_changes()) as bar:
             bar.update(0)
             self.users.process_changes(bar)
+        logger.info('done')
 
-        print('processing subject score changes')
+        logger.info('processing subject score changes')
         with progressbar.ProgressBar(
                 max_value=self.subjects.calculate_changes()) as bar:
             bar.update(0)
             self.subjects.process_changes(bar)
+        logger.info('done')
 
     # def getUserAgent(self, user_id):
     #     """

@@ -6,6 +6,10 @@ from swaptools.experiments.db import Config
 import swap.ui
 import swaptools.experiments.db.experiment_data as dbe
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class Trial:
     def __init__(self, golds, score_export):
@@ -89,7 +93,7 @@ class Experiment:
 
         e = Experiment(cutoff)
         for fname in files:
-            print(fname)
+            logger.debug(fname)
             trials = loader(fname)
             for trial in trials:
                 e.add_trial(trial, keep=False)

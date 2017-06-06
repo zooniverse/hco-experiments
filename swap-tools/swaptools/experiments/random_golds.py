@@ -4,6 +4,10 @@ from swap.agents.agent import Stat
 
 import swaptools.experiments.experiment as experiment
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class Trial(experiment.Trial):
     def __init__(self, n, golds, swap_export):
@@ -41,7 +45,7 @@ class Experiment(experiment.Experiment):
             gg.reset()
             gg.random(self.num_golds)
 
-            print('\nRunning trial %d' % n)
+            logger.debug('\nRunning trial %d' % n)
 
             swap.set_gold_labels(gg.golds)
             swap.process_changes()

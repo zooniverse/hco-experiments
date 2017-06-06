@@ -7,6 +7,10 @@ import math
 from sklearn.metrics import roc_curve
 from sklearn.metrics import auc
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 def plot_user_cm(swap, fname):
     data = []

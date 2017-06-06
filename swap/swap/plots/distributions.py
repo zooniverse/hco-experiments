@@ -9,6 +9,9 @@ from sklearn.neighbors.kde import KernelDensity
 from scipy.signal import argrelextrema
 
 import seaborn as sns
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def _plot(func):
@@ -30,8 +33,8 @@ def plot_kde(data):
     plt.plot(s, e)
 
     mi, ma = argrelextrema(e, np.less)[0], argrelextrema(e, np.greater)[0]
-    print("Minima: %s" % s[mi])
-    print("Maxima: %s" % s[ma])
+    logger.info("Minima: %s" % s[mi])
+    logger.info("Maxima: %s" % s[ma])
 
     plt.plot(s[:mi[0] + 1], e[:mi[0] + 1], 'r',
              s[mi[0]:mi[1] + 1], e[mi[0]:mi[1] + 1], 'g',
@@ -45,7 +48,7 @@ def plot_kde(data):
 def plot_jenks_breaks(data):
     import jenkspy
     breaks = jenkspy.jenks_breaks(np.array(data).reshape(-1, 1), nb_class=3)
-    print(breaks)
+    logger.debug(breaks)
     for x in breaks:
         plt.plot([x], [5], 'o')
 

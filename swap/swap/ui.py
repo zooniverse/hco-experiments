@@ -12,6 +12,9 @@ import argparse
 import os
 import sys
 import csv
+import logging
+
+logger = logging.getLogger(__name__)
 
 __doc__ = """
     An interface to interact with our utilities from the command line.
@@ -38,6 +41,7 @@ class UI:
     register with a UI instance, and the UI instance chooses the right
     Interface to pass args to.
     """
+
     def __init__(self):
         self.interfaces = {}
         self.parser = argparse.ArgumentParser()
@@ -53,7 +57,7 @@ class UI:
         execute operations
         """
         args = self.parser.parse_args()
-        print(args)
+        logger.debug(args)
         self.call(args)
 
     def options(self, parser):
@@ -274,7 +278,7 @@ class RocInterface(Interface):
 
         title = 'Receiver Operater Characteristic'
         plots.plot_roc(title, iterator, fname=output)
-        print(args)
+        logger.info(args)
 
     def collect_roc(self, args):
         """
@@ -287,7 +291,7 @@ class RocInterface(Interface):
         it = Roc_Iterator()
         if args.add:
             for label, fname in args.add:
-                print(fname)
+                logger.info(fname)
                 it.addObject(label, fname, self.load)
 
         return it
@@ -466,14 +470,17 @@ class SWAPInterface(Interface):
                 write_log(swap, fname)
 
             if args.stats:
-                print(swap.stats_str())
+                s = swap.stats_str()
+                print(s)
+                logger.debug(s)
 
             if args.test:
                 from swap.utils.golds import GoldGetter
                 gg = GoldGetter()
-                print('applying new gold labels')
+                logger.debug('applying new gold labels')
                 swap.set_gold_labels(gg.golds)
                 swap.process_changes()
+                logger.debug('done')
 
             if args.test_reorder:
                 self.reorder_classifications(swap)
@@ -585,12 +592,12 @@ class SWAPInterface(Interface):
                 writer.writerow((score.id, score.gold, score.p))
 
     def export_user_scores(self, swap, fname):
-        print('Exporting user scores to %s' % fname)
+        logger.debug('Exporting user scores to %s' % fname)
         with open(fname, 'w') as csvfile:
             writer = csv.writer(csvfile)
             for user in swap.users:
                 writer.writerow((user.id, *user.score, len(user.ledger)))
-        print('done')
+        logger.debug('done')
 
     # def scores_from_csv(self, fname):
     #     import csv
@@ -802,7 +809,7 @@ class ScoresInterface(Interface):
             return ScoreExport.from_csv(fname)
 
     def load_user(self, fname, type_=list):
-        print('loading csv')
+        logger.info('loading csv')
         if type_ is list:
             data = []
             with open(fname) as csvfile:
@@ -821,7 +828,7 @@ class ScoresInterface(Interface):
         else:
             data = None
 
-        print('done')
+        logger.info('done')
         return data
 
 
@@ -834,7 +841,7 @@ def load_pickle(fname):
             data = pickle.load(file)
         return data
     except Exception as e:
-        print('Error load file %s' % fname)
+        logger.error('Error load file %s' % fname)
         raise e
 
 
@@ -898,7 +905,7 @@ class Roc_Iterator:
 
         label, fname, load = self.items[self.i]
         _, extension = os.path.splitext(fname)
-        print(label, fname, load)
+        logger.info(label, fname, load)
 
         self.i += 1
 

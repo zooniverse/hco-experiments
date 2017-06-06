@@ -155,7 +155,6 @@ def getRandomGoldSample(size, *args, type_=dict):
         tuple
             (_id, gold)
     """
-    print(1)
     query = [
         {'$group': {'_id': '$subject_id',
                     'gold': {'$first': '$gold_label'}}},

@@ -5,6 +5,10 @@ from swap.agents.agent import Stat
 
 import swaptools.experiments.experiment as experiment
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class Trial(experiment.Trial):
     def __init__(self, consensus, controversial, golds, swap_export):
@@ -53,8 +57,8 @@ class Experiment(experiment.Experiment):
                     continue
                 gg.reset()
 
-                print('\nRunning trial %d with cv=%d cn=%d' %
-                      (n, cv, cn))
+                logger.info('\nRunning trial %d with cv=%d cn=%d',
+                            (n, cv, cn))
                 if cv > 0:
                     gg.controversial(cv)
                 if cn > 0:

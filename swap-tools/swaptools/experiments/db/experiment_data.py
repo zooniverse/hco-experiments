@@ -5,6 +5,9 @@ from swaptools.experiments.db import DB
 from swap.db import Cursor
 
 import sys
+import logging
+
+logger = logging.getLogger(__name__)
 
 collection = DB().data
 aggregate = collection.aggregate
@@ -44,7 +47,7 @@ class TrialsCursor:
     @property
     def trials(self):
         if self._trials is None:
-            print('generating list of trials')
+            logger.debug('generating list of trials')
             query = [
                 {'$match': {'experiment': self.name}},
                 {'$sort': {'trial': 1}}
@@ -52,7 +55,7 @@ class TrialsCursor:
 
             self._trials = Cursor(query, collection, allowDiskUse=True)
             self.current_trial = self._trials.next()
-            print('done')
+            logger.debug('done')
         return self._trials
 
     def parse_trial(self):
@@ -62,7 +65,7 @@ class TrialsCursor:
         scores = []
         golds = {}
         trial_info = item['trial']
-        print('parsing trial %s' % trial_info)
+        logger.debug('parsing trial %s' % trial_info)
 
         n = 0
         while item['trial'] == trial_info:
@@ -83,7 +86,7 @@ class TrialsCursor:
                 sys.stdout.write('\r%d' % n)
                 sys.stdout.flush()
 
-        print('\ndone')
+        logger.debug('\ndone')
 
         self.current_trial = item
         return trial_info, golds, scores

@@ -1,5 +1,8 @@
 
 from pprint import pprint
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Classification:
@@ -127,7 +130,7 @@ class ClKeyError(KeyError):
     """
 
     def __init__(self, key, cl={}, *args, **kwargs):
-        pprint(cl)
+        logger.error(cl)
         msg = 'key %s not found in classification %s' % (key, str(cl))
         KeyError.__init__(self, msg)
 
@@ -143,7 +146,7 @@ class ClValueError(ValueError):
             kwargs['cl'] = value
             value = value[key]
         if 'cl' in kwargs:
-            pprint(kwargs['cl'])
+            logger.error(kwargs['cl'])
         bad_type = type(value)
         msg = 'key %s should be type %s but is %s' % (key, _type, bad_type)
         ValueError.__init__(self, msg)

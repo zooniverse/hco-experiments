@@ -7,6 +7,10 @@ from swap.agents.agent import Agent
 import swap.agents.ledger as ledger
 from swap.config import Config
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class Subject(Agent):
     """
@@ -226,7 +230,7 @@ class Transaction(ledger.Transaction):
             score = a / (a + b)
         # leave score unchanged
         except ZeroDivisionError as e:
-            print(e)
+            logger.error(e)
             score = prior
 
         self.score = score

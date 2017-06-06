@@ -2,6 +2,9 @@
 import swap.db.classifications as db
 
 import csv
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Score:
@@ -64,7 +67,7 @@ class ScoreExport:
 
         with open(fname) as csvfile:
             reader = csv.reader(csvfile)
-            print('loading csv')
+            logger.info('loading csv')
 
             for i, g, p in reader:
                 i = int(i)
@@ -72,7 +75,7 @@ class ScoreExport:
                 p = float(p)
                 data[i] = Score(i, g, p)
 
-            print('done')
+            logger.info('done')
         return ScoreExport(data, new_golds=False)
 
     def _init_golds(self, scores):
@@ -195,7 +198,7 @@ class ScoreExport:
         """
         p = self.find_purity(purity)
         if p is None:
-            print('Can\'t find purity > %f in score set!' % purity)
+            logger.error('Can\'t find purity > %f in score set!' % purity)
             return 0
 
     def __len__(self):

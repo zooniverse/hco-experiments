@@ -3,6 +3,10 @@
 
 from collections import OrderedDict
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class Query:
 
@@ -183,7 +187,7 @@ class Group:
             output['_id'] = self._id
             output.update(self._extra)
 
-            print(output)
+            logger.debug(output)
 
             return {'$group': output}
         else:
