@@ -26,7 +26,9 @@ def upload_trials(trials, experiment_name):
     for trial in trials:
         data += trial.db_export(experiment_name)
 
+    logger.debug('uploading %d trials', len(data))
     collection.insert_many(data)
+    logger.debug('done')
 
 
 def get_trials(experiment_name):

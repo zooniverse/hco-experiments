@@ -49,7 +49,7 @@ class Experiment(experiment.Experiment):
                 gg.reset()
                 gg.random(n_golds)
 
-                logger.debug('\nRunning trial %d with %d golds', n, n_golds)
+                logger.debug('Running trial %d with %d golds', n, n_golds)
 
                 swap.set_gold_labels(gg.golds)
                 swap.process_changes()
