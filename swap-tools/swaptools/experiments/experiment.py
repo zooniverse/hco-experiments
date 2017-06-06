@@ -226,8 +226,8 @@ class ExperimentInterface(swap.ui.Interface):
             help='controversial and consensus aggregation method')
 
         parser.add_argument(
-            '--from-db',
-            metavar='experiment name')
+            '--from-db', action='store_true',
+            help='experiment name')
 
         parser.add_argument(
             '--name', nargs=1, required=True,

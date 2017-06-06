@@ -3,7 +3,7 @@
 # Recursive swap implementation to bootstrap silver-standard
 # subject labels
 from swaptools.bootstrap import *
-from swaptools.experiments.cv_grid_experiment import Experiment
+import swaptools.experiments.cv_grid_experiment as experiment
 
 import swap.ui
 import swap.plots as plots
@@ -432,7 +432,7 @@ def main():
     ui = swap.ui.UI()
     RocInterface(ui)
     BootInterface(ui)
-    ExperimentInterface(ui)
+    experiment.Interface(ui)
 
     ui.run()
 
