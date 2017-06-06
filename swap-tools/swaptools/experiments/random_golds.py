@@ -1,14 +1,11 @@
 import swap.plots.distributions as distributions
 from swap.utils.golds import GoldGetter
 from swap.agents.agent import Stat
-from swap.config import Config
 
-import swaptools.experiments as experiments
-
-import os
+import swaptools.experiments.experiment as experiment
 
 
-class Trial(experiments.Trial):
+class Trial(experiment.Trial):
     def __init__(self, n, golds, swap_export):
         """
             consensus, controversial: settings used to run swap; number of
@@ -20,25 +17,18 @@ class Trial(experiments.Trial):
 
         self.n = n
 
-    def plot(self, cutoff):
-        return (self.consensus, self.controversial,
-                self.purity(cutoff), self.completeness(cutoff))
+    # def plot(self, cutoff):
+    #     return (self.consensus, self.controversial,
+    #             self.purity(cutoff), self.completeness(cutoff))
 
     def _db_export_id(self):
         return {'n': self.n}
 
-    @classmethod
-    def _parse_db_data(cls, db_data, kwargs=None):
-        kwargs = super()._parse_db_data(db_data, kwargs)
-        kwargs['n'] = db_data['id']['n']
 
-        return kwargs
+class Experiment(experiment.Experiment):
 
-
-class Experiment(experiments.Experiment):
-
-    def __init__(self, cutoff=0.96, num_golds=1000, num_trials=10):
-        super().__init__(cutoff)
+    def __init__(self, name, cutoff, num_golds=1000, num_trials=10):
+        super().__init__(name, cutoff)
 
         self.num_golds = num_golds
         self.num_trials = num_trials
@@ -57,55 +47,50 @@ class Experiment(experiments.Experiment):
             swap.process_changes()
             self.add_trial(Trial(n, gg.golds, swap.score_export()))
 
-            if n > 10:
-                self.clear_mem(n)
+    @classmethod
+    def trial_from_db(cls, trial_info, golds, scores):
+        n = trial_info['n']
+        return Trial(n, golds, scores)
 
-    def clear_mem(self, n):
-        """
-            Saves trial objects to disk to free up memory
-        """
-        fname = 'trials_%d.pkl' % n
-        super().clear_mem(fname)
+    # def plot(self, type_, fname):
+    #     if type_ == 'purity':
+    #         self.plot_purity(fname)
+    #     elif type_ == 'completeness':
+    #         self.plot_completeness(fname)
+    #     elif type_ == 'both':
+    #         self.plot_both(fname)
 
-    def plot(self, type_, fname):
-        if type_ == 'purity':
-            self.plot_purity(fname)
-        elif type_ == 'completeness':
-            self.plot_completeness(fname)
-        elif type_ == 'both':
-            self.plot_both(fname)
+    # def plot_purity(self, fname):
+    #     data = []
+    #     for point in self.plot_points:
+    #         x, y, purity, completeness = point
+    #         data.append((x, y, purity))
 
-    def plot_purity(self, fname):
-        data = []
-        for point in self.plot_points:
-            x, y, purity, completeness = point
-            data.append((x, y, purity))
+    #     distributions.multivar_scatter(
+    #         fname, data, 'Purity in subjects with p>%.2f' % self.p_cutoff)
 
-        distributions.multivar_scatter(
-            fname, data, 'Purity in subjects with p>%.2f' % self.p_cutoff)
+    # def plot_completeness(self, fname):
+    #     data = []
+    #     for point in self.plot_points:
+    #         x, y, purity, completeness = point
+    #         data.append((x, y, completeness))
 
-    def plot_completeness(self, fname):
-        data = []
-        for point in self.plot_points:
-            x, y, purity, completeness = point
-            data.append((x, y, completeness))
+    #     import pprint
+    #     pprint.pprint(data)
+    #     distributions.multivar_scatter(
+    #         fname, data,
+    #         'Completeness in swap scores when purity >%.2f' % self.p_cutoff)
 
-        import pprint
-        pprint.pprint(data)
-        distributions.multivar_scatter(
-            fname, data,
-            'Completeness in swap scores when purity >%.2f' % self.p_cutoff)
+    # def plot_both(self, fname):
+    #     data = []
+    #     for point in self.plot_points:
+    #         x, y, purity, completeness = point
+    #         data.append((x, y, purity * completeness))
 
-    def plot_both(self, fname):
-        data = []
-        for point in self.plot_points:
-            x, y, purity, completeness = point
-            data.append((x, y, purity * completeness))
-
-        import pprint
-        pprint.pprint(data)
-        distributions.multivar_scatter(
-            fname, data, '')
+    #     import pprint
+    #     pprint.pprint(data)
+    #     distributions.multivar_scatter(
+    #         fname, data, '')
 
     def __str__(self):
         s = '%d points\n' % len(self.plot_points)
@@ -113,12 +98,12 @@ class Experiment(experiments.Experiment):
         return s
 
     def __repr__(self):
-        s = 'Controversial/Consensus grid experiment cv %s cn %s' % \
-            (str(self.controversial), str(self.consensus))
+        s = 'Random grid experiment %d golds %d trials' % \
+            (self.num_golds, self.num_trials)
         return s
 
 
-class Interface(experiments.ExperimentInterface):
+class Interface(experiment.ExperimentInterface):
 
     @property
     def command(self):
@@ -139,10 +124,7 @@ class Interface(experiments.ExperimentInterface):
         parser.add_argument(
             '-n', nargs=1)
 
-    def _run(self, args):
-        d_trials = self.f(args.run[0])
-        f_pickle = self.f(args.run[1])
-
+    def _run(self, name, cutoff, args):
         kwargs = {}
         if args.n:
             kwargs['num_trials'] = int(args.n[0])
@@ -150,14 +132,8 @@ class Interface(experiments.ExperimentInterface):
         if args.num_golds:
             kwargs['num_golds'] = int(args.num_golds[0])
 
-        def saver(trials, fname):
-            fname = os.path.join(d_trials, fname)
-            self.save(trials, fname)
-
-        e = Experiment(**kwargs)
-        e.run(saver)
-
-        self.save(e, f_pickle)
+        e = Experiment(name, cutoff, **kwargs)
+        e.run()
 
         return e
 
