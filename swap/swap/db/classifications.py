@@ -4,6 +4,10 @@
 from swap.db import DB, Cursor
 from swap.db.query import Query
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 __doc__ = """
     Manages interactions with the classification collection in the database.
 
@@ -16,7 +20,15 @@ __doc__ = """
 
 subject_count = None
 collection = DB().classifications
-aggregate = collection.aggregate
+
+
+def aggregate(*args, **kwargs):
+    try:
+        logger.debug(*args, **kwargs)
+        return collection.aggregate(*args, **kwargs)
+    except Exception as e:
+        logger.error(e)
+        raise e
 
 
 def getClassifications(query=None, **kwargs):

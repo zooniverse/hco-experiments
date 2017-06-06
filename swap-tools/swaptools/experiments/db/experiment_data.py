@@ -10,7 +10,15 @@ import logging
 logger = logging.getLogger(__name__)
 
 collection = DB().data
-aggregate = collection.aggregate
+
+
+def aggregate(*args, **kwargs):
+    try:
+        logger.debug(*args, **kwargs)
+        return collection.aggregate(*args, **kwargs)
+    except Exception as e:
+        logger.error(e)
+        raise e
 
 
 def upload_trials(trials, experiment_name):
@@ -65,7 +73,7 @@ class TrialsCursor:
         scores = []
         golds = {}
         trial_info = item['trial']
-        logger.debug('parsing trial %s' % trial_info)
+        logger.debug('parsing trial %s', trial_info)
 
         n = 0
         while item['trial'] == trial_info:

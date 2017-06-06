@@ -7,6 +7,9 @@ from swap.utils import Singleton
 from pymongo import MongoClient
 
 import atexit
+import logging
+
+logger = logging.getLogger(__name__)
 
 assert Query
 
@@ -21,6 +24,7 @@ class _DB:
     """
 
     def __init__(self):
+        logger.info('opening mongo connection')
         config = Config()
 
         # Get database configuration from config file
@@ -43,6 +47,7 @@ class _DB:
         self.batch_size = size
 
     def close(self):
+        logger.info('closing mongo connection')
         self._client.close()
 
 
@@ -77,6 +82,8 @@ class Cursor:
         self.cursor = None
         self.count = None
 
+        logger.debug(query)
+
         if query:
             self.cursor = collection.aggregate(query, **kwargs)
 
@@ -95,6 +102,7 @@ class Cursor:
     def getCount(self):
         query = self.query
         query += [{'$group': {'_id': 1, 'sum': {'$sum': 1}}}]
+        logger.debug(query)
 
         count = self.collection.aggregate(query).next()['sum']
         return count
