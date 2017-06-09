@@ -170,6 +170,7 @@ def getRandomGoldSample(size, *args, type_=dict):
     query = [
         {'$group': {'_id': '$subject_id',
                     'gold': {'$first': '$gold_label'}}},
+        {'$match': {'gold': {'$ne': -1}}},
         {'$sample': {'size': size}}]
 
     cursor = aggregate(query)
