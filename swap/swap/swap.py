@@ -8,7 +8,7 @@ from swap.agents.subject import Subject
 from swap.agents.user import User
 from swap.config import Config
 from swap.utils.scores import ScoreExport, Score
-from swap.utils import Classification
+from swap.utils.classification import Classification
 
 from swap.db import classifications as db
 

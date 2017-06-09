@@ -1,8 +1,4 @@
 
-from swap.utils.classification import Classification
-
-assert Classification
-
 
 class Singleton(type):
     """
