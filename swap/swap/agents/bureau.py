@@ -183,15 +183,15 @@ class AgentIterator:
         return self.next()
 
 
-class _Bureaus:
-    """
-    Central container with references to the subject and
-    user bureaus
-    """
+# class _Bureaus:
+#     """
+#     Central container with references to the subject and
+#     user bureaus
+#     """
 
-    def add(self, name, bureau):
-        self.setattr(name, bureau)
+#     def add(self, name, bureau):
+#         self.setattr(name, bureau)
 
 
-class Bureaus(_Bureaus, metaclass=Singleton):
-    pass
+# class Bureaus(_Bureaus, metaclass=Singleton):
+#     pass

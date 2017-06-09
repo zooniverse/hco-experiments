@@ -4,7 +4,8 @@
 import abc
 import statistics as st
 
-from swap.agents.tracker import Tracker
+import swap.config.logger as log
+logger = log.get_logger(__name__)
 
 
 class Agent(metaclass=abc.ABCMeta):
@@ -44,13 +45,6 @@ class Agent(metaclass=abc.ABCMeta):
         """
         p = [agent.score for agent in bureau]
         return Stat(p)
-
-    @abc.abstractmethod
-    def export(self):
-        """
-            Abstract method to export agent data
-        """
-        pass
 
     def __str__(self):
         return 'id %s transactions %d' % \
@@ -190,7 +184,8 @@ class Accuracy:
             total += n
         return matched, total
 
-    def score(self, num, den):
+    @staticmethod
+    def score(num, den):
         """
             Gets numerical representation of an accuracy fraction.
             Returns 0 if dividing by 0
@@ -198,6 +193,7 @@ class Accuracy:
         try:
             return num / den
         except ZeroDivisionError:
+            logger.critical('Caught attempt to divide by zero!')
             return 0
 
     def __str__(self):

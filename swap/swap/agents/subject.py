@@ -87,28 +87,28 @@ class Subject(Agent):
     def isgold(self):
         return self.gold in [0, 1]
 
-    def export(self):
-        raise DeprecationWarning
-        """
-            Exports Subject data
+    # def export(self):
+    #     raise DeprecationWarning
+    #     """
+    #         Exports Subject data
 
-            Structure:
-                'user_scores': (list), history of user scores
-                'score': (int),        current subject score
-                'history': (list),     score history
-                'label': (int),        current subject label
-                'gold_label' (int),    current subject gold label
-        """
-        data = {
-            'subject_id': self.id,
-            'user_scores': self.user_scores.getHistory(),
-            'score': self.tracker.current(),
-            'history': self.tracker.getHistory(),
-            'label': self.label,
-            'gold_label': self.gold
-        }
+    #         Structure:
+    #             'user_scores': (list), history of user scores
+    #             'score': (int),        current subject score
+    #             'history': (list),     score history
+    #             'label': (int),        current subject label
+    #             'gold_label' (int),    current subject gold label
+    #     """
+    #     data = {
+    #         'subject_id': self.id,
+    #         'user_scores': self.user_scores.getHistory(),
+    #         'score': self.tracker.current(),
+    #         'history': self.tracker.getHistory(),
+    #         'label': self.label,
+    #         'gold_label': self.gold
+    #     }
 
-        return data
+    #     return data
 
     def __str__(self):
         return 'id: %s score: %.2f gold label: %d' % \
