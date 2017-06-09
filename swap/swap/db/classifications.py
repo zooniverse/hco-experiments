@@ -24,6 +24,7 @@ collection = DB().classifications
 
 def aggregate(*args, **kwargs):
     try:
+        logger.debug('Preparing to run aggregation')
         logger.debug(*args, **kwargs)
         return collection.aggregate(*args, **kwargs)
     except Exception as e:

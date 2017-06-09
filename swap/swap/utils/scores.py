@@ -92,10 +92,12 @@ class ScoreExport:
             score.gold = golds[score.id]
         return scores
 
-    def get_real_golds(self):
+    @staticmethod
+    def get_real_golds():
         """
         Fetch gold labels from database
         """
+        logger.debug('Getting real gold labels from db')
         return db.getAllGolds()
 
     def counts(self, threshold):
@@ -150,6 +152,9 @@ class ScoreExport:
         ----------
         desired_purity : float
         """
+
+        logger.debug('Trying to find purity %.3f', desired_purity)
+
         def purity(counts):
             total = sum(counts.values())
             if total > 0:
@@ -198,7 +203,7 @@ class ScoreExport:
         """
         p = self.find_purity(purity)
         if p is None:
-            logger.error('Can\'t find purity > %f in score set!' % purity)
+            logger.error('Can\'t find purity > %f in score set!', purity)
             return 0
 
     def __len__(self):
