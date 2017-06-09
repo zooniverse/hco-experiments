@@ -38,6 +38,11 @@ def upload_trials(trials, experiment_name):
     logger.debug('done')
 
 
+def remove_experiment(experiment_name):
+    collection.remove({'experiment': experiment_name})
+    trial_collection.remove({'experiment': experiment_name})
+
+
 def get_trials(experiment_name):
     return TrialsCursor(experiment_name)
     # assert group
