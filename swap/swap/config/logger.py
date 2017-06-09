@@ -1,11 +1,25 @@
 import logging
 import os
 from swap.config import Config
+import swap
 
 
-def get_path(file):
+# def get_path(file):
+#     # Get log path
+#     path = os.path.dirname(os.path.abspath(file))
+#     path = os.path.join(path, '../logs')
+#     path = os.path.abspath(path)
+
+#     # Ensure log path exists
+#     if not os.path.exists(path):
+#         os.makedirs(path)
+
+#     return path
+
+def get_path():
+
     # Get log path
-    path = os.path.dirname(os.path.abspath(file))
+    path = os.path.dirname(os.path.abspath(swap.__file__))
     path = os.path.join(path, '../logs')
     path = os.path.abspath(path)
 
@@ -16,17 +30,27 @@ def get_path(file):
     return path
 
 
+def get_logger(name):
+    return logging.getLogger('hco.%s' % name)
+
+
 def init(name, path):
-    path = get_path(path)
-    logger = logging.getLogger(name)
+    path = get_path()
+    logger = get_logger(name)
 
     # pylint: disable=E1101
     c = Config()
+    # global log level
     level = c.logging.level
+    # stdout log level
     console_level = c.logging.console_level
+    # filename structure for log output
     fname = c.logging.filename
+    # file log output format
     f_format = c.logging.file_format
+    # console log output format
     c_format = c.logging.console_format
+    # format for date
     date_format = c.logging.date_format
     # pylint: enable=E1101
 
@@ -42,10 +66,15 @@ def init(name, path):
             console_level = i
             break
 
+    # Ensure each process has its own unique log file
+    # to prevent file write conflicts
+    # TODO implement global log server with unique uuid per process
+    fname = fname % os.getppid()
     # Create file handler
     fname = os.path.join(path, fname)
     handler = logging.FileHandler(fname)
 
+    # Add formatter
     formatter = logging.Formatter(f_format, date_format)
     handler.setFormatter(formatter)
     handler.setLevel(level)

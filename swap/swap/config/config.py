@@ -64,7 +64,7 @@ class _Config:
         'level': 'DEBUG',
         'console_level': 'INFO',
         'keep_logs': 5,
-        'filename': 'swap.log'
+        'filename': 'swap-%d.log'
     })
 
 
