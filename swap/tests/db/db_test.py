@@ -16,12 +16,15 @@ class Test_DB:
         mock = MagicMock()
         dbcl.collection = mock
 
-        q = Query().project(
-            ['user_name', 'subject_id', 'annotation'])
+        query = [{
+            '$project': {
+                'user_name': 1,
+                'subject_id': 1,
+                'annotation': 1}}]
 
         dbcl.getClassifications()
 
-        mock.aggregate.assert_called_with(q.build(), batchSize=100000)
+        mock.aggregate.assert_called_with(query, batchSize=100000)
 
     # def test_get_classifications_2(self):
     #     db = DB()
@@ -34,31 +37,6 @@ class Test_DB:
     #     db.getClassifications(gold=False)
 
     #     mock.aggregate.assert_called_with(q.build(), batchSize=100000)
-
-    def test_get_classifications_3(self):
-        mock = MagicMock()
-        dbcl.collection = mock
-
-        q = Query().project(
-            ['a', 'b', 'c'])
-
-        dbcl.getClassifications(q)
-
-        mock.aggregate.assert_called_with(q.build(), batchSize=100000)
-
-    def test_batch_size(self):
-        mock = MagicMock()
-        dbcl.collection = mock
-
-        db = DB()
-        db.setBatchSize(42)
-
-        q = Query().project(
-            ['a', 'b', 'c'])
-
-        dbcl.getClassifications(q)
-
-        mock.aggregate.assert_called_with(q.build(), batchSize=42)
 
 
 class Test_Cursor:

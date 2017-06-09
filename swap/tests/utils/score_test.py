@@ -126,14 +126,24 @@ class TestScoreExport:
         assert p == 0.6
 
     def test_completeness(self):
-        golds = [1, 1, 0, 0, 1, 1]
+        golds = [1, 1, 1, 0, 0, 0, 0, 0, 1, 1]
         scores = dict([(i, Score(i, g, i / 10))
                        for i, g in enumerate(golds)])
         se = ScoreExport(scores, False)
-        print(se.find_purity(0.8))
-        c = se.completeness(0.8)
+        c = se.completeness(0.5)
 
-        assert c == 0.5
+        assert c == 0.4
+
+    def test_completeness_2(self):
+        scores = [(1, .1), (1, .1), (1, .1), (0, .4),
+                  (0, .5), (0, .5), (0, .5), (0, .6),
+                  (1, .9), (1, .9)]
+        scores = dict([(i, Score(i, gp[0], gp[1]))
+                       for i, gp in enumerate(scores)])
+        se = ScoreExport(scores, False)
+        c = se.completeness(0.5)
+
+        assert c == 0.4
 
 
 class TestScoreIterator:

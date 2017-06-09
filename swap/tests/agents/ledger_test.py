@@ -274,7 +274,7 @@ class TestSubjectLedger:
 
         score = le.recalculate()
         print(score)
-        assert False
+        assert score - 0.9998785824 < 1e-6
 
     def test_recalculate_empty(self):
         le = SLedger(0)

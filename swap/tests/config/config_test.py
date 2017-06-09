@@ -1,5 +1,5 @@
 
-from swap.config import Config
+import swap.config
 
 
 class TestConfig:

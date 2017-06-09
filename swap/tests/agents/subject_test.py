@@ -3,7 +3,7 @@
 
 import swap.agents.subject as _subject
 import swap.agents.user as _user
-from swap.utils import Classification
+from swap.utils.classification import Classification
 
 import pytest
 from unittest.mock import MagicMock

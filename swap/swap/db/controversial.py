@@ -24,7 +24,7 @@ def _controv_query(size=100, version='pow'):
         },
         {
             '$project': {
-                '_id': 1, 'real': 1, 'bogus': 1, 'total': 1, 'controv': {
+                '_id': 1, 'real': 1, 'bogus': 1, 'total': 1, 'controversy': {
                     '$cond': [
                         {'$gt': ['$real', '$bogus']},
                         {'$%s' % version: [
@@ -44,7 +44,7 @@ def _controv_query(size=100, version='pow'):
         # },
         {
             '$sort': {
-                'controv': -1
+                'controversy': -1
             }
         },
         {
@@ -67,7 +67,7 @@ def _consensus_query(size=100, version='pow'):
         },
         {
             '$project': {
-                '_id': 1, 'real': 1, 'bogus': 1, 'total': 1, 'controv': {
+                '_id': 1, 'real': 1, 'bogus': 1, 'total': 1, 'consensus': {
                     '$cond': [
                         {'$gt': ['$real', '$bogus']},
                         {'$%s' % version: [
@@ -89,7 +89,7 @@ def _consensus_query(size=100, version='pow'):
         # },
         {
             '$sort': {
-                'controv': -1
+                'consensus': -1
             }
         },
         {
@@ -151,7 +151,7 @@ def get_controversial(size):
     size : int
         Number of subjects in the set
     """
-    version = Config().controversial_version
+    version = config.controversial_version
     query = _controv_query(size, version)
     cursor = dbcl.aggregate(query)
     subjects = []
@@ -172,7 +172,7 @@ def get_consensus(size):
     size : int
         Number of subjects in the set
     """
-    version = Config().controversial_version
+    version = config.controversial_version
     query = _consensus_query(size, version)
     cursor = dbcl.aggregate(query)
     subjects = []
