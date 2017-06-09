@@ -122,7 +122,6 @@ class Ledger(ledger.Ledger):
         # self.first_change = None
         # Most recently added transaction
         self.last = None
-        self._score = None
         # Note: first_change and last are references to the
         #       actual transactions, not their id numbers
 

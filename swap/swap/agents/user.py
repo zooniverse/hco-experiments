@@ -165,7 +165,6 @@ class Ledger(ledger.Ledger):
         super().__init__(id_)
         self.no = Counter()
         self.yes = Counter()
-        self._score = None
 
     @ledger.Ledger.score.setter
     def score(self, new):

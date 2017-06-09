@@ -34,6 +34,8 @@ class Ledger:
         self.bureau = None
         self.changed = []
 
+        self._score = None
+
     def set_bureau(self, bureau):
         """
         Provides a bureau to the ledger so it can rebuild agent references
@@ -193,6 +195,7 @@ class Transaction:
     """
     Records an interaction from an agent with this ledger
     """
+
     def __init__(self, id_, agent):
         self.id = id_
         self._agent = agent
