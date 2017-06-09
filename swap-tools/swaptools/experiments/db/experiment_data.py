@@ -10,6 +10,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 collection = DB().data
+trial_collection = DB().trials
 
 
 def aggregate(*args, **kwargs):
@@ -23,12 +24,17 @@ def aggregate(*args, **kwargs):
 
 def upload_trials(trials, experiment_name):
     data = []
+    trial_data = []
     for trial in trials:
         data += trial.db_export(experiment_name)
+        trial_data.append({
+            'experiment': experiment_name,
+            'trial': trial._db_export_id()})
 
     logger.debug('uploading %d trials', len(data))
     if len(data) > 0:
         collection.insert_many(data)
+        trial_collection.insert_many(trial_data)
     logger.debug('done')
 
 

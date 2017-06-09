@@ -32,6 +32,7 @@ class _DB:
         self.batch_size = int(config.experiment_db.max_batch_size)
 
         self.data = self._db.data
+        self.trials = self._db.trials
 
     def setBatchSize(self, size):
         self.batch_size = size
