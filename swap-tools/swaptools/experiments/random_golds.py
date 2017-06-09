@@ -150,6 +150,10 @@ class Interface(experiment.ExperimentInterface):
 
         return e
 
+    @staticmethod
+    def _from_db(name, cutoff):
+        return Experiment.build_from_db(name, cutoff)
+
     # def _plot(self, e, args):
     #     assert e
     #     fname = self.f(args.plot[1])
