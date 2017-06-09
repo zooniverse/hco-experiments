@@ -5,9 +5,9 @@ from swaptools.experiments.db import DB
 from swap.db import Cursor
 
 import sys
-import logging
 
-logger = logging.getLogger(__name__)
+import swap.config.logger as log
+logger = log.get_logger(__name__)
 
 collection = DB().data
 trial_collection = DB().trials

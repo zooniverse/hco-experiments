@@ -5,9 +5,8 @@
 import swaptools
 import swaptools.ui
 
-import logging
-
-logger = logging.getLogger(swaptools.__name__)
+import swap.config.logger as log
+logger = log.get_logger(swaptools.__name__)
 
 
 def main():
