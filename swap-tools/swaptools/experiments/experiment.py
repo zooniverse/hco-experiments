@@ -270,7 +270,11 @@ class ExperimentInterface(swap.ui.Interface):
         pass
 
     def _plot(self, e, args):
-        pass
+        assert e
+        fname = self.f(args.plot[1])
+        type_ = args.plot[0]
+
+        e.plot(type_, fname)
 
     def _from_db(self, name, cutoff):
         pass
