@@ -7,6 +7,8 @@ import swaptools.experiments.experiment as experiment
 import logging
 
 logger = logging.getLogger(__name__)
+plt = distributions.plt
+mpl = distributions.mpl
 
 
 class Trial(experiment.Trial):
@@ -21,9 +23,9 @@ class Trial(experiment.Trial):
 
         self.n = n
 
-    # def plot(self, cutoff):
-    #     return (self.consensus, self.controversial,
-    #             self.purity(cutoff), self.completeness(cutoff))
+    def plot(self, cutoff):
+        return (len(self.golds), self.n,
+                self.purity(cutoff), self.completeness(cutoff))
 
     def _db_export_id(self):
         return {'n': self.n, 'golds': len(self.golds)}
@@ -50,6 +52,12 @@ class Experiment(experiment.Experiment):
                 gg.random(n_golds)
 
                 logger.debug('Running trial %d with %d golds', n, n_golds)
+                logger.debug('Real n golds: %d' % len(gg.golds))
+                fake = 0
+                for gold in gg.golds.values():
+                    if gold == -1:
+                        fake += 1
+                logger.debug('Fake n golds: %d' % fake)
 
                 swap.set_gold_labels(gg.golds)
                 swap.process_changes()
@@ -60,13 +68,42 @@ class Experiment(experiment.Experiment):
         n = trial_info['n']
         return Trial(n, golds, scores)
 
-    # def plot(self, type_, fname):
-    #     if type_ == 'purity':
-    #         self.plot_purity(fname)
-    #     elif type_ == 'completeness':
-    #         self.plot_completeness(fname)
-    #     elif type_ == 'both':
-    #         self.plot_both(fname)
+    def plot(self, type_, fname):
+        plt.subplot(111)
+        data = sorted(self.plot_points, key=lambda item: (item[0]//1000, item[2]))
+        # x, y, z, _ = zip(*data)
+        min_c = min(data, key=lambda item: item[2])[2]
+        max_c = max(data, key=lambda item: item[2])[2]
+        norm = mpl.colors.Normalize(vmin=min_c, vmax=max_c)
+        y = 0
+        last = 0
+        for point in data:
+            golds, n, p, _ = point
+            if last // 1000 < golds // 1000:
+                last = golds
+                y = 0
+            plt.scatter(golds, y, c=p, norm=norm, cmap='viridis')
+            print(golds, n, p)
+            y += 1
+
+
+        data = sorted(self.plot_points, key=lambda item: (item[0]//1000, item[3]))
+        # x, y, z, _ = zip(*data)
+        min_c = min(data, key=lambda item: item[3])[3]
+        max_c = max(data, key=lambda item: item[3])[3]
+        norm = mpl.colors.Normalize(vmin=min_c, vmax=max_c)
+        y = 0
+        last = 0
+        for point in data:
+            golds, n, _, c = point
+            if last // 1000 < golds // 1000:
+                last = golds
+                y = 0
+            plt.scatter(golds, y, c=c, norm=norm, cmap='viridis')
+            print(golds, n, c)
+            y -= 1
+
+        plt.show()
 
     # def plot_purity(self, fname):
     #     data = []
