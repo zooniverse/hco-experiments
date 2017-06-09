@@ -1,8 +1,8 @@
 
 from pprint import pprint
-import logging
 
-logger = logging.getLogger(__name__)
+import swap.config.logger as log
+logger = log.get_logger(__name__)
 
 
 class Classification:

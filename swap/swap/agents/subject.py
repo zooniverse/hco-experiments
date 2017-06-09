@@ -2,14 +2,12 @@
 # Subject agent, keeps track of a subject's history and
 # score
 
-from swap.agents.tracker import Tracker
 from swap.agents.agent import Agent
 import swap.agents.ledger as ledger
 from swap.config import Config
+import swap.config.logger as log
 
-import logging
-
-logger = logging.getLogger(__name__)
+logger = log.get_logger(__name__)
 
 
 class Subject(Agent):

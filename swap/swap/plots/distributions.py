@@ -9,9 +9,9 @@ from sklearn.neighbors.kde import KernelDensity
 from scipy.signal import argrelextrema
 
 import seaborn as sns
-import logging
 
-logger = logging.getLogger(__name__)
+import swap.config.logger as log
+logger = log.get_logger(__name__)
 
 
 def _plot(func):

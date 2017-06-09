@@ -2,18 +2,11 @@
 ################################################################
 # Main entrypoint for the processing algorithm
 
-import sys
-import os
-import logging
-
-dir_ = os.path.dirname(os.path.abspath(__file__))
-if os.path.samefile(dir_, sys.path[0]):
-    sys.path = sys.path[1:]
-
 import swap
 from swap import ui
+import swap.config.logger as log
 
-logger = logging.getLogger(swap.__name__)
+logger = log.get_logger(swap.__name__)
 
 
 def main():

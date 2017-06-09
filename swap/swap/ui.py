@@ -12,9 +12,9 @@ import argparse
 import os
 import sys
 import csv
-import logging
 
-logger = logging.getLogger(__name__)
+import swap.config.logger as log
+logger = log.get_logger(__name__)
 
 __doc__ = """
     An interface to interact with our utilities from the command line.

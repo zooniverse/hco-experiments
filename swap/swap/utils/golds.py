@@ -3,9 +3,9 @@ import swap.db.classifications as db
 import swap.db.controversial as cv
 
 from functools import wraps
-import logging
 
-logger = logging.getLogger(__name__)
+import swap.config.logger as log
+logger = log.get_logger(__name__)
 
 # pylint: disable=R0201
 

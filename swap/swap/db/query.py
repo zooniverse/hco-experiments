@@ -3,9 +3,9 @@
 
 from collections import OrderedDict
 
-import logging
+import swap.config.logger as log
 
-logger = logging.getLogger(__name__)
+logger = log.get_logger(__name__)
 
 
 class Query:

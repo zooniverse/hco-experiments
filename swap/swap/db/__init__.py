@@ -7,9 +7,9 @@ from swap.utils import Singleton
 from pymongo import MongoClient
 
 import atexit
-import logging
 
-logger = logging.getLogger(__name__)
+import swap.config.logger as log
+logger = log.get_logger(__name__)
 
 assert Query
 
