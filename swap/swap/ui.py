@@ -1,7 +1,7 @@
 ################################################################
 
 from swap.control import Control
-from swap.config import Config
+import swap.config as config
 import swap.plots as plots
 
 from swap.utils.scores import ScoreExport
@@ -97,7 +97,6 @@ class UI:
             ----------
             args : argparse.Namespace
         """
-        config = Config()
 
         if args.dir:
             self.set_dir(args.dir[0])

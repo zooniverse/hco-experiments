@@ -1,5 +1,5 @@
 
-import swap.config.config as _config
+import swaptools.experiments.config as config
 from swap.utils import Singleton
 from pymongo import MongoClient
 
@@ -20,9 +20,9 @@ class _DB:
 
     def __init__(self):
         logger.info('opening mongo connection')
-        config = Config()
 
         # Get database configuration from config file
+        # pylint: disable=E1101
         host = config.experiment_db.host
         db_name = config.experiment_db.name
         port = config.experiment_db.port
@@ -33,6 +33,7 @@ class _DB:
 
         self.data = self._db.data
         self.trials = self._db.trials
+        # pylint: enable=E1101
 
     def setBatchSize(self, size):
         self.batch_size = size
@@ -42,27 +43,27 @@ class _DB:
         self._client.close()
 
 
-class _Config(_config.Config):
+# class _Config(_config.Config):
 
-    experiment_db = _config.Object({
-        'name': 'experimentsDB',
-        'host': 'localhost',
-        'port': 27017,
-        'max_batch_size': 1e5,
-    })
+#     experiment_db = _config.Object({
+#         'name': 'experimentsDB',
+#         'host': 'localhost',
+#         'port': 27017,
+#         'max_batch_size': 1e5,
+#     })
 
-    trials = _config.Object({
-        'keep_amount': 10,
-        'cutoff': 0.96
-    })
+#     trials = _config.Object({
+#         'keep_amount': 10,
+#         'cutoff': 0.96
+#     })
 
 
 class DB(_DB, metaclass=Singleton):
     pass
 
 
-class Config(_Config, metaclass=Singleton):
-    pass
+# class Config(_Config, metaclass=Singleton):
+#     pass
 
 
 @atexit.register

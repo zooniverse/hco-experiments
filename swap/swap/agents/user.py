@@ -4,7 +4,6 @@
 
 
 from swap.agents.agent import Agent, MultiStat
-from swap.config import Config
 import swap.agents.ledger as ledger
 
 

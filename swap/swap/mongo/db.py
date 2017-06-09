@@ -3,8 +3,8 @@
 # !! DEPRECATED !!
 # Use swap.db instead
 
-from swap.config import Config
 from swap.mongo.query import Query
+import swap.config as config
 from pymongo import MongoClient
 
 
@@ -18,7 +18,6 @@ class _DB:
     """
 
     def __init__(self):
-        config = Config()
         self._cfg = config
 
         # Get database configuration from config file

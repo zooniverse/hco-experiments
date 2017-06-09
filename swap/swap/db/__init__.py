@@ -2,9 +2,9 @@
 # Mongo client
 
 from swap.db.query import Query
-from swap.config import Config
 from swap.utils import Singleton
 from pymongo import MongoClient
+import swap.config as config
 
 import atexit
 
@@ -25,7 +25,6 @@ class _DB:
 
     def __init__(self):
         logger.info('opening mongo connection')
-        config = Config()
 
         # Get database configuration from config file
         cdb = config.database

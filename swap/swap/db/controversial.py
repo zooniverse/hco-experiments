@@ -2,7 +2,7 @@
 #
 
 from swap.db import classifications as dbcl
-from swap.config import Config
+import swap.config as config
 
 
 __doc__ = """

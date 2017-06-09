@@ -6,11 +6,12 @@ from swap.agents.bureau import Bureau
 from swap.agents.agent import Stats
 from swap.agents.subject import Subject
 from swap.agents.user import User
-from swap.config import Config
 from swap.utils.scores import ScoreExport, Score
 from swap.utils.classification import Classification
 
 from swap.db import classifications as db
+
+import swap.config as config
 
 import progressbar
 
@@ -386,8 +387,6 @@ class SWAP:
                 golds[subject.gold] += 1
 
             return tuple(golds)
-
-        config = Config()
 
         s = ''
         s += 'SWAP manifest\n'

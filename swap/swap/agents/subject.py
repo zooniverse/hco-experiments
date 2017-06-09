@@ -4,7 +4,7 @@
 
 from swap.agents.agent import Agent
 import swap.agents.ledger as ledger
-from swap.config import Config
+import swap.config as config
 import swap.config.logger as log
 
 logger = log.get_logger(__name__)
@@ -129,7 +129,7 @@ class Ledger(ledger.Ledger):
         transaction = self.first_change
 
         if transaction is None:
-            score = Config().p0
+            score = config.p0
         else:
             score = transaction.get_prior()
             while transaction is not None:
@@ -198,7 +198,7 @@ class Transaction(ledger.Transaction):
 
     def get_prior(self):
         if self.left is None:
-            return Config().p0
+            return config.p0
         else:
             return self.left.score
 

@@ -1,6 +1,7 @@
 import logging
 import os
-from swap.config import Config
+
+import swap.config as config
 import swap
 
 
@@ -39,19 +40,18 @@ def init(name, path):
     logger = get_logger(name)
 
     # pylint: disable=E1101
-    c = Config()
     # global log level
-    level = c.logging.level
+    level = config.logging.level
     # stdout log level
-    console_level = c.logging.console_level
+    console_level = config.logging.console_level
     # filename structure for log output
-    fname = c.logging.filename
+    fname = config.logging.filename
     # file log output format
-    f_format = c.logging.file_format
+    f_format = config.logging.file_format
     # console log output format
-    c_format = c.logging.console_format
+    c_format = config.logging.console_format
     # format for date
-    date_format = c.logging.date_format
+    date_format = config.logging.date_format
     # pylint: enable=E1101
 
     # Set log level

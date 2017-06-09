@@ -2,7 +2,7 @@
 from swap import Control
 from swap.agents.agent import Stat
 from swap.utils.scores import Score, ScoreExport
-from swaptools.experiments.db import Config
+import swaptools.experiments.config as config
 import swap.ui
 import swaptools.experiments.db.experiment_data as dbe
 
@@ -134,7 +134,7 @@ class Experiment:
     def add_trial(self, trial, keep=True):
         if keep:
             self.trials.append(trial)
-            if len(self.trials) >= Config().trials.keep_amount:
+            if len(self.trials) >= config.trials.keep_amount:
                 self.clear_mem()
 
         self.plot_points.append(trial.plot(self.p_cutoff))
@@ -230,11 +230,10 @@ class ExperimentInterface(swap.ui.Interface):
         if args.cutoff:
             cutoff = float(args.cutoff[0])
         else:
-            cutoff = Config().trials.cutoff
+            cutoff = config.trials.cutoff
 
         name = args.name[0]
 
-        config = Config()
         if args.pow:
             config.controversial_version = 'pow'
         elif args.multiply:

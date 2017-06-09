@@ -8,7 +8,7 @@ import swap.db.classifications as db
 from swap.agents.agent import Agent
 from swap.agents.tracker import Tracker
 from swap.agents.bureau import Bureau
-from swap.config import Config
+import swap.config as config
 
 from swaptools.bootstrap.analysis import Metric, Metrics
 
@@ -146,7 +146,6 @@ class Bootstrap:
         bootstrap run, including whatever parameters were used, and
         statistical information on each run.
         """
-        config = Config()
         s = ''
         s += 'p0:         %f\n' % config.p0
         s += 'epsilon     %f\n' % config.epsilon
