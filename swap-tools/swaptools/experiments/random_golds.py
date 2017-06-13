@@ -1,3 +1,6 @@
+import matplotlib.cm
+from matplotlib.patches import Wedge
+
 import swap.plots.distributions as distributions
 from swap.utils.golds import GoldGetter
 from swap.agents.agent import Stat
@@ -68,9 +71,100 @@ class Experiment(experiment.Experiment):
         n = trial_info['n']
         return Trial(n, golds, scores)
 
+    def _db_export_plot(self):
+        data = []
+        for golds, n, purity, completeness in self.plot_points:
+            item = {'golds': golds, 'n': n,
+                    'purity': purity, 'completeness': completeness}
+            data.append(item)
+
+        return data
+
     def plot(self, type_, fname):
-        plt.subplot(111)
-        data = sorted(self.plot_points, key=lambda item: (item[0]//1000, item[2]))
+        if type_ == 'aligned':
+            self.plot_aligned()
+        elif type_ == 'sorted':
+            self.plot_sorted()
+        elif type_ == 'test':
+            self.plot_test()
+
+    def plot_aligned(self):
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        data = sorted(
+            self.plot_points,
+            key=lambda item: (item[0] // 1000, item[2]))
+        # x, y, z, _ = zip(*data)
+
+        min_c = min(data, key=lambda item: item[2])[2]
+        max_c = max(data, key=lambda item: item[2])[2]
+        norm = mpl.colors.Normalize(vmin=min_c, vmax=max_c)
+        cmap_pur = matplotlib.cm.ScalarMappable(norm, 'viridis')
+
+        min_c = min(data, key=lambda item: item[3])[3]
+        max_c = max(data, key=lambda item: item[3])[3]
+        norm = mpl.colors.Normalize(vmin=min_c, vmax=max_c)
+        cmap_comp = matplotlib.cm.ScalarMappable(norm, 'viridis')
+
+        y = 0
+        last = 0
+        count = 0
+        grid = [0, 0]
+        for point in data:
+            golds, n, p, c = point
+            if last // 1000 < golds // 1000:
+                last = golds
+
+                y = 0
+                grid[1] += 1
+            x = golds // 1000
+
+            color = cmap_pur.to_rgba(p)
+            wedge_purity = Wedge((x, y), .5, 45, 225, fc=color)
+            color = cmap_comp.to_rgba(c)
+            wedge_completeness = Wedge((x, y), .5, 225, 45, fc=color)
+            print(golds, n, p, c)
+
+            ax.add_artist(wedge_purity)
+            ax.add_artist(wedge_completeness)
+            y += 1
+            count += 1
+
+        grid[0] = count // grid[1]
+        ax.set_xlim((0, grid[1] + 1))
+        ax.set_ylim((-1, grid[0] + 1))
+
+        # plt.colorbar()
+        plt.axes().set_aspect('equal', 'box')
+
+        def picker(event):
+            print(event)
+            x, y = (event.xdata, event.ydata)
+            if x is None or y is None:
+                return
+            x = round(x)
+            y = round(y)
+            print(x,y)
+
+        fig.canvas.mpl_connect(
+            'button_press_event', picker)
+
+        plt.show()
+
+    def plot_test(self):
+        ax = plt.subplot(111)
+        ax.set_xlim([-5, 5])
+        ax.set_ylim([-5, 5])
+        w = Wedge((0, 0), 1, 0, 90, fc='k')
+        ax.plot(0, 0, ms=0)
+        ax.add_artist(w)
+        plt.show()
+
+    def plot_sorted(self):
+        plt.subplot(211)
+        data = sorted(
+            self.plot_points,
+            key=lambda item: (item[0] // 1000, item[2]))
         # x, y, z, _ = zip(*data)
         min_c = min(data, key=lambda item: item[2])[2]
         max_c = max(data, key=lambda item: item[2])[2]
@@ -86,8 +180,12 @@ class Experiment(experiment.Experiment):
             print(golds, n, p)
             y += 1
 
+        plt.colorbar()
 
-        data = sorted(self.plot_points, key=lambda item: (item[0]//1000, item[3]))
+        plt.subplot(212)
+        data = sorted(
+            self.plot_points,
+            key=lambda item: (item[0] // 1000, item[3]))
         # x, y, z, _ = zip(*data)
         min_c = min(data, key=lambda item: item[3])[3]
         max_c = max(data, key=lambda item: item[3])[3]
@@ -101,8 +199,9 @@ class Experiment(experiment.Experiment):
                 y = 0
             plt.scatter(golds, y, c=c, norm=norm, cmap='viridis')
             print(golds, n, c)
-            y -= 1
+            y += 1
 
+        plt.colorbar()
         plt.show()
 
     # def plot_purity(self, fname):
