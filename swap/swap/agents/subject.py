@@ -126,6 +126,13 @@ class Ledger(ledger.Ledger):
         #       actual transactions, not their id numbers
 
     def recalculate(self):
+
+        # Get the current user score for reach transaction that's changed
+        # Only if back_update set to true in config
+        if config.back_update:
+            self._propagate_user_scores()
+
+        # Recalculate chain of changes
         transaction = self.first_change
 
         if transaction is None:
@@ -170,6 +177,14 @@ class Ledger(ledger.Ledger):
 
         return self.transactions[id_]
 
+    def _propagate_user_scores(self):
+        """
+        Get the current user score for reach transaction that's changed
+        """
+        for id_ in self.changed:
+            self.get(id_)._get_user_score()
+
+
     # def _change(self, transaction):
     #     """
     #         Determine which transaction changed first in the ledger
@@ -192,6 +207,7 @@ class Transaction(ledger.Transaction):
         super().__init__(id_, user)
         self.annotation = annotation
         self.score = None
+        self.user_score = user.score
 
         self.right = None
         self.left = None
@@ -213,7 +229,7 @@ class Transaction(ledger.Transaction):
         # -------------------------
         #    s*(1-u1) + (1-s)*u0
 
-        u0, u1 = self.agent.score
+        u0, u1 = self.user_score
         if self.annotation == 1:
             a = prior * u1
             b = (1 - prior) * (1 - u0)
@@ -232,6 +248,9 @@ class Transaction(ledger.Transaction):
 
         self.score = score
         return score
+
+    def _get_user_score(self):
+        self.user_score = self.agent.score
 
     def __str__(self):
         score = self.score
