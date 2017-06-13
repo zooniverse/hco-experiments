@@ -5,6 +5,7 @@
 
 from swap.agents.agent import Agent, MultiStat
 import swap.agents.ledger as ledger
+import swap.config as config
 
 
 class User(Agent):
@@ -167,7 +168,8 @@ class Ledger(ledger.Ledger):
     def score(self, new):
         if self._score != new:
             self._score = new
-            self.notify_agents()
+            if config.back_update:
+                self.notify_agents()
 
     def add(self, transaction):
         # Remove gold label from transaction, will be put back in when
