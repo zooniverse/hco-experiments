@@ -31,11 +31,11 @@ def upload_trials(trials, experiment_name):
             'experiment': experiment_name,
             'trial': trial._db_export_id()})
 
-    logger.debug('uploading %d trials', len(data))
+    logger.info('uploading %d trials', len(data))
     if len(data) > 0:
         collection.insert_many(data)
         trial_collection.insert_many(trial_data)
-    logger.debug('done')
+    logger.info('done')
 
 
 def remove_experiment(experiment_name):

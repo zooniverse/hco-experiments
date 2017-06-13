@@ -5,6 +5,7 @@ from swap.utils.scores import Score, ScoreExport
 import swaptools.experiments.config as config
 import swap.ui
 import swaptools.experiments.db.experiment_data as dbe
+import swaptools.experiments.db.plots as plotsdb
 
 import swap.config.logger as log
 logger = log.get_logger(__name__)
@@ -82,6 +83,9 @@ class Experiment:
 
     @classmethod
     def trial_from_db(cls, trial_info, golds, scores):
+        pass
+
+    def _db_export_plot(self):
         pass
 
     ###############################################################
@@ -221,6 +225,9 @@ class ExperimentInterface(swap.ui.Interface):
             '--name', nargs=1, required=True,
             help='Name of experiment')
 
+        parser.add_argument(
+            '--save-plot', nargs=1)
+
         # parser.add_argument(
         #     '--upload', nargs=1,
         #     metavar='directory containing trial files',
@@ -256,6 +263,9 @@ class ExperimentInterface(swap.ui.Interface):
         if args.plot:
             self._plot(e, args)
 
+        if args.save_plot:
+            self.save_plot(e, args)
+
         if args.shell:
             import code
             code.interact(local=locals())
@@ -263,6 +273,12 @@ class ExperimentInterface(swap.ui.Interface):
         if args.save:
             assert e
             self.save(e, self.f(args.save[0]))
+
+    @classmethod
+    def save_plot(cls, e, args):
+        name = args.save_plot[0]
+        points = e._db_export_plot()
+        plotsdb.upload_plot(name, points)
 
     def _run(self, name, cutoff, args):
         pass

@@ -33,6 +33,7 @@ class _DB:
 
         self.data = self._db.data
         self.trials = self._db.trials
+        self.plots = self._db.plots
         # pylint: enable=E1101
 
     def setBatchSize(self, size):
