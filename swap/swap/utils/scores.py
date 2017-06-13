@@ -127,8 +127,9 @@ class ScoreExport:
         n = self.counts(threshold)
 
         total = sum(n.values())
-        for i in n:
-            n[i] = n[i] / total
+        if (total > 0):
+            for i in n:
+                n[i] = n[i] / total
 
         return n
 
