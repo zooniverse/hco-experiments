@@ -118,3 +118,7 @@ manifest
 *.sublime*
 .Rproj.user
 *.Rhistory
+
+# webapp modules
+node_modules/
+static/
