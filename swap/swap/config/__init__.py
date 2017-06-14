@@ -58,8 +58,8 @@ database = Object({
 })
 
 logging = Object({
-    'file_format': '%(asctime)s::%(name)s:%(funcName)s ' +
-                   '%(levelname)s %(message)s',
+    'file_format': '%(asctime)s:%(levelname)s::%(name)s:%(funcName)s ' +
+                   ' %(message)s',
     'console_format': '%(asctime)s %(levelname)s %(message)s',
     'date_format': '%Y%m%d_%H:%M:%S',
     'level': 'DEBUG',
