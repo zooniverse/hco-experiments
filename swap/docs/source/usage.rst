@@ -193,3 +193,28 @@ ROC Options
 
         Save the plot to file. If .. option:: - is passed, shows the plot
         with the builtin matplotlib viewer instead
+
+
+Interacting with SWAP
+=====================
+
+After running SWAP, you probably want to analyze the data. SWAP provides a couple
+convenience classes to collect and export the data.
+
+To get the score history of each subject, SWAP can export a HistoryExport object.
+
+.. highlight:: python
+
+::
+
+    history = swap.history_export()
+    for id_, gold, scores in history:
+        # do something
+
+For a more lightweight score export (which only includes the final score), you
+can export a ScoreExport object.
+
+::
+    scores = swap.score_export()
+    for id_, gold, score in scores.full():
+        # do something
