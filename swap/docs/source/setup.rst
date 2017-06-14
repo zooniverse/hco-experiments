@@ -9,14 +9,14 @@ Recommended to set up a virtual environment and install SWAP
 and its dependencies inside. For more information, consult the docs for
 `virtual environments <http://python-guide-pt-br.readthedocs.io/en/latest/dev/virtualenvs/>`_ and `conda <https://conda.io/docs/using/>`_. 
 
-To install SWAP, first clone the git repository. Then navigate
-to the project directory and install with::
+To install SWAP, you can use pip to install directly from the repository::
 
-    pip install hco-experiments/swap
+    pip install "git+git://github.com/miclaraia/hco-experiments#egg=SWAP&subdirectory=swap"
 
-Pip can also install SWAP in development mode. This means pip will install
-the project in editable mode. To do this, navigate to the project
-directory and run::
+*Development Mode:* Pip can also install SWAP in development mode. This means pip will install
+the project in editable mode, so changes to the source affect the runtime version.
+It will also install additional dependencies for testing and development.
+To do this, clone the git repository, navigate to the projectd directory, and run::
 
     pip install -e hco-experiments/swap[dev,test]
 
@@ -25,4 +25,4 @@ is `run_swap`. To run SWAP and pickle and save, run::
     
     run_swap swap --run --save output.pkl
 
-More detailed usage examples are available at :doc:`usage`.]
+More detailed usage examples are available at :doc:`usage`.
