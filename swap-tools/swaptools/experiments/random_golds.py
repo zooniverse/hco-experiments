@@ -27,8 +27,10 @@ class Trial(experiment.Trial):
         self.n = n
 
     def plot(self, cutoff):
+        p = self.scores.find_purity(0.89)
+        completeness = self.scores.completeness(p)
         return (len(self.golds), self.n,
-                self.purity(cutoff), self.completeness(cutoff))
+                p, completeness)
 
     def _db_export_id(self):
         return {'n': self.n, 'golds': len(self.golds)}
