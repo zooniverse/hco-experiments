@@ -454,7 +454,7 @@ class SWAPInterface(Interface):
 
             if args.subject:
                 fname = self.f(args.subject[0])
-                plots.traces.plot_subjects(swap, fname)
+                plots.traces.plot_subjects(swap.history_export(), fname)
 
             if args.user:
                 fname = self.f(args.user[0])

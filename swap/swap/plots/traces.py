@@ -30,19 +30,12 @@ def plot_user(swap, fname):
     plot_tracks(data, 'User Combined Tracks', fname, scale='log')
 
 
-def plot_subjects(swap, fname):
+def plot_subjects(export, fname):
     """
         Generate a trace plot of how each subject's score changes
         with each classification
     """
-    data = []
-    for subject in swap.subjects:
-        scores = []
-        for t in sorted(subject.ledger, key=lambda t: t.order):
-            scores.append(t.score)
-        data.append((subject.gold, scores))
-
-    plot_tracks(data, 'Subject Tracks', fname)
+    plot_tracks(export.traces(), 'Subject Tracks', fname)
 
     # export = swap.export()
     # print(fname)

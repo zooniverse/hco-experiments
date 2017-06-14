@@ -7,6 +7,7 @@ from swap.agents.agent import Stats
 from swap.agents.subject import Subject
 from swap.agents.user import User
 from swap.utils.scores import ScoreExport, Score
+from swap.utils.history import History, HistoryExport
 from swap.utils.classification import Classification
 
 from swap.db import classifications as db
@@ -338,6 +339,31 @@ class SWAP:
             score = subject.score
             scores[id_] = Score(id_, None, score)
         return ScoreExport(scores)
+
+    def history_export(self):
+        """
+        Genearte object containing subject score history
+
+        Returns
+        -------
+        swap.utils.history.HistoryExport
+            HistoryExport
+        """
+        history = {}
+        for subject in self.subjects:
+            if len(subject.ledger) == 0:
+                continue
+
+            # Generate list of subject scores
+            scores = []
+            for t in sorted(subject.ledger, key=lambda t: t.order):
+                scores.append(t.score)
+
+            # Create History object
+            id_ = subject.id
+            history[id_] = History(id_, subject.gold, scores)
+
+        return HistoryExport(history)
 
     def roc_export(self, labels=None):
         """
