@@ -28,6 +28,7 @@ class Trial(experiment.Trial):
 
     def plot(self, cutoff):
         p = self.scores.find_purity(0.89)
+        logger.debug('p: %s', str(p))
         completeness = self.scores.completeness(p)
         return (len(self.golds), self.n,
                 p, completeness)

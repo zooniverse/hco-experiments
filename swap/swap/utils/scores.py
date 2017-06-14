@@ -172,6 +172,9 @@ class ScoreExport:
             if _purity is not None and _purity > desired_purity:
                 return score.p
 
+        logger.info('Couldn\'t find purity above %f!', desired_purity)
+        return 1.0
+
     def completeness(self, threshold):
         """
         Find the completeness at a desired purity
