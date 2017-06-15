@@ -72,15 +72,20 @@ class TrialsCursor:
     def trials(self):
         if self._trials is None:
             logger.debug('generating list of trials')
-            query = [
-                {'$match': {'experiment': self.name}},
-                {'$sort': {'trial': 1}}
-            ]
+            query = self._query()
 
             self._trials = Cursor(query, collection, allowDiskUse=True)
             self.current_trial = self._trials.next()
             logger.debug('done')
         return self._trials
+
+    def _query(self):
+        query = [
+            {'$match': {'experiment': self.name}},
+            {'$sort': {'trial': 1}}
+        ]
+
+        return query
 
     def parse_trial(self):
         cursor = self.trials
@@ -142,3 +147,22 @@ class TrialsCursor:
 
     def __len__(self):
         return len(self.trials)
+
+
+class SingleTrialCursor(TrialsCursor):
+    def __init__(self, experiment, trial_info):
+        super().__init__(experiment)
+
+        self.trial_info = trial_info
+
+    def _query(self):
+        query = super()._query()
+        update = {}
+        for key, value in self.trial_info.items():
+            update['trial.%s' % key] = value
+        query[0]['$match'].update(update)
+
+        print(query)
+
+        return query
+
