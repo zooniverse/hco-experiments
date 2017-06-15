@@ -66,6 +66,8 @@ class TrialsCursor:
         self._trials = None
         self.current_trial = None
 
+        self.stop = False
+
     @property
     def trials(self):
         if self._trials is None:
@@ -90,23 +92,26 @@ class TrialsCursor:
         logger.debug('parsing trial %s', trial_info)
 
         n = 0
-        while item['trial'] == trial_info:
-            p = item['p']
-            gold = item['gold']
-            _id = item['subject']
+        try:
+            while item['trial'] == trial_info:
+                p = item['p']
+                gold = item['gold']
+                _id = item['subject']
 
-            if item['used_gold'] in [0, 1]:
-                golds[_id] = item['used_gold']
+                if item['used_gold'] in [0, 1]:
+                    golds[_id] = item['used_gold']
 
-            # score = Score(_id, gold, p)
-            scores.append((_id, gold, p))
+                # score = Score(_id, gold, p)
+                scores.append((_id, gold, p))
 
-            item = cursor.next()
-            n += 1
+                item = cursor.next()
+                n += 1
 
-            if n % 100 == 0:
-                sys.stdout.write('\r%d' % n)
-                sys.stdout.flush()
+                if n % 100 == 0:
+                    sys.stdout.write('\r%d' % n)
+                    sys.stdout.flush()
+        except StopIteration:
+            self.stop = True
 
         logger.debug('\ndone')
 
@@ -124,6 +129,9 @@ class TrialsCursor:
     #     return self.parse_trial(cursor)
 
     def next(self):
+        if self.stop:
+            raise StopIteration
+
         return self.parse_trial()
 
     def __iter__(self):
