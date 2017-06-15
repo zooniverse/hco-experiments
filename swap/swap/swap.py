@@ -114,6 +114,9 @@ class SWAP:
         subject.classify(cl, user)
         user.classify(cl, subject)
 
+        if not config.back_update:
+            self.process_changes()
+
     # def _classify_user(self, cl):
     #     """
     #         Gets the appropriate user and
@@ -162,19 +165,36 @@ class SWAP:
         Then any subject agent which is connected to a user whose score has
         changed recalculates its score.
         """
-        logger.info('processing user score changes')
-        with progressbar.ProgressBar(
-                max_value=self.users.calculate_changes()) as bar:
-            bar.update(0)
-            self.users.process_changes(bar)
-        logger.info('done')
 
-        logger.info('processing subject score changes')
-        with progressbar.ProgressBar(
-                max_value=self.subjects.calculate_changes()) as bar:
-            bar.update(0)
-            self.subjects.process_changes(bar)
-        logger.info('done')
+        with_bar = config.back_update
+
+        def run(bureau):
+            if with_bar:
+                with progressbar.ProgressBar(
+                        max_value=bureau.calculate_changes()) as bar:
+                    bar.update(0)
+                    bureau.process_changes(bar)
+                logger.info('done')
+
+            else:
+                bureau.process_changes()
+
+        run(self.users)
+        run(self.subjects)
+
+        # logger.info('processing user score changes')
+        # with progressbar.ProgressBar(
+        #         max_value=self.users.calculate_changes()) as bar:
+        #     bar.update(0)
+        #     self.users.process_changes(bar)
+        # logger.info('done')
+
+        # logger.info('processing subject score changes')
+        # with progressbar.ProgressBar(
+        #         max_value=self.subjects.calculate_changes()) as bar:
+        #     bar.update(0)
+        #     self.subjects.process_changes(bar)
+        # logger.info('done')
 
     # def getUserAgent(self, user_id):
     #     """
