@@ -13,6 +13,8 @@ class User(Agent):
         Agent to manage subject scores
     """
 
+    class_name = 'user'
+
     def __init__(self, user_name):
         """
             Initialize a User Agent

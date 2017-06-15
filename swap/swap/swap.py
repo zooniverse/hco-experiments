@@ -170,6 +170,8 @@ class SWAP:
 
         def run(bureau):
             if with_bar:
+                name = bureau.agent_type.class_name
+                logger.info('processing %s score changes', name)
                 with progressbar.ProgressBar(
                         max_value=bureau.calculate_changes()) as bar:
                     bar.update(0)

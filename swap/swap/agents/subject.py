@@ -15,6 +15,8 @@ class Subject(Agent):
         Agent to manage subject scores
     """
 
+    class_name = 'subject'
+
     def __init__(self, subject_id, gold_label=-1):
         """
             Initialize a Subject Agent
