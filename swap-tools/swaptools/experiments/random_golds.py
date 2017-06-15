@@ -36,6 +36,13 @@ class Trial(experiment.Trial):
     def _db_export_id(self):
         return {'n': self.n, 'golds': len(self.golds)}
 
+    @classmethod
+    def build_from_db(cls, trial_info, golds, scores):
+        scores = cls.scores_from_db(scores)
+        n = trial_info['n']
+
+        return cls(n, golds, scores)
+
 
 class Experiment(experiment.Experiment):
 
@@ -71,8 +78,7 @@ class Experiment(experiment.Experiment):
 
     @classmethod
     def trial_from_db(cls, trial_info, golds, scores):
-        n = trial_info['n']
-        return Trial(n, golds, scores)
+        return Trial.build_from_db(trial_info, golds, scores)
 
     def _db_export_plot(self):
         data = []

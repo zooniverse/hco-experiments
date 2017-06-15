@@ -31,6 +31,14 @@ class Trial(experiment.Trial):
             'consensus': self.consensus
         }
 
+    @classmethod
+    def build_from_db(cls, trial_info, golds, scores):
+        scores = cls.scores_from_db(scores)
+        cn = trial_info['consensus']
+        cv = trial_info['controversial']
+
+        return cls(cn, cv, golds, scores)
+
 
 class Experiment(experiment.Experiment):
 
@@ -79,9 +87,7 @@ class Experiment(experiment.Experiment):
 
     @classmethod
     def trial_from_db(cls, trial_info, golds, scores):
-        cv = trial_info['controversial']
-        cn = trial_info['consensus']
-        return Trial(cn, cv, golds, scores)
+        return Trial.build_from_db(trial_info, golds, scores)
 
     ###############################################################
 
