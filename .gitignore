@@ -122,3 +122,6 @@ manifest
 # webapp modules
 node_modules/
 static/
+
+# Local configuration overrides
+swap/swap/config/local_config.py

@@ -9,6 +9,8 @@
         config.p0
 """
 
+import os
+
 
 class Object:
     """
@@ -67,3 +69,11 @@ logging = Object({
     'keep_logs': 5,
     'filename': 'swap-%d.log'
 })
+
+# Import local_config.py to seamlessly override
+# config defaults without having to check in to git repo
+path = os.path.dirname(os.path.abspath(__file__))
+path = os.path.join(path, 'local_config.py')
+if os.path.isfile(path):
+    # pylint: disable=E0401,W0401
+    from swap.config.local_config import *
