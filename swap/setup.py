@@ -85,7 +85,8 @@ setup(
         'scikit-learn',
         'scipy',
         'seaborn',
-        'pandas'
+        'pandas',
+        'flask'
     ],
 
     # List additional groups of dependencies here (e.g. development
