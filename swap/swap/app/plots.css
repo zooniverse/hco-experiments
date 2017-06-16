@@ -9,13 +9,13 @@ body {
   background: rgba(0, 0, 0, 0.8);
   color: #fff;
   border-radius: 2px;
+  font-size: 11px;
 }
 
 /* Creates a small triangle extender for the tooltip */
 .d3-tip:after {
   box-sizing: border-box;
   display: inline;
-  font-size: 12px;
   width: 100%;
   line-height: 1;
   color: rgba(0, 0, 0, 0.8);
@@ -33,4 +33,36 @@ body {
 
 .d3-tip .tip-detail {
   color: red;
+  display: inline-block;
 }
+
+.d3-tip div.tip-line {
+  display:block;
+  padding: 2px;
+}
+
+#title.tip-line {
+  text-align: center;
+}
+
+.graph-item {
+  display:inline-block;
+  vertical-align: top
+}
+
+div.graph-container {
+  margin-left: 100px;
+  margin-top: 50px;
+  margin-bottom: 50px;
+  margin-right: 50px;
+}
+
+.d3-tip .tip-line #name {
+  width: 80px;
+  display: inline-block;
+}
+
+.tip-detail {
+  margin-right: 10px;
+}
+

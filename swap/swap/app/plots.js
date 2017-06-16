@@ -1,11 +1,11 @@
 
-var aligned_plot = new function() {
+var aligned_plot_4d = new function() {
     var self = this;
     var margin = {
-        'left': 50,
-        'right': 50,
-        'top': 50,
-        'bottom': 50
+        'left': 20,
+        'right': 20,
+        'top': 20,
+        'bottom': 20
     };
     var radius = 20;
     var legend_dimens = {
@@ -16,44 +16,14 @@ var aligned_plot = new function() {
 
     var legend_count = 0;
     var colormaps = {
-        'purity': 'viridis',
+        'purity': 'viridis_r',
         'completeness': 'viridis'
     }
 
-    var tip_text = function(d) {
-        var purity = d.purity.toFixed(3);
-        var completeness = d.completeness.toFixed(3);
-
-        var detail_span = function(text) {
-            return $('<div/>').append($('<span/>', {
-                class: 'tip-detail',
-                text: text
-            })).html();
-        };
-
-        text = 'Golds ' + detail_span(d.golds)
-            + ' n ' + detail_span(d.n)
-            + ' purity ' + detail_span(purity)
-            + ' completeness ' + detail_span(completeness);
-
-        node =  $('<div/>', {
-            id: 'test',
-            text: text
-        });
-        node.append($('<span/>'));
-
-        out = $('<div/>').append(node)
-        console.log(out.html());
-
-        return out.text()
+    var dimens = {
+        'height': null,
+        'width': null
     }
-
-    var tip = d3.tip()
-        .attr('class', 'd3-tip')
-        .offset([-10, 0])
-        .html(function(d) {
-            return tip_text(d);
-        });
 
     this.plot = function(data) {
         var chart = d3.select('div#chart');
@@ -64,6 +34,74 @@ var aligned_plot = new function() {
         add_legend(svg, data, 'purity');
         add_legend(svg, data, 'completeness');
     };
+
+    var tip_text = function(d) {
+
+        var html = function(element) {
+            return $('<div/>').append(element).html();
+        }
+
+        var value_span = function(text) {
+            return html($('<span/>', {
+                class: 'tip-detail',
+                text: text
+            }));
+        };
+
+        var title_block = function(id) {
+            var elements = [];
+
+            var text = '';
+            for (var key in id) {
+                var value = id[key];
+                text = text + ' ' + key + ' ' + value_span(value);
+            }
+            text = $('<div>' + text + '</div>');
+            text.attr('id', 'title').addClass('tip-line tip-values');
+            console.log(html(text))
+
+            return html(text);
+        }
+
+        var value_line = function(name, values) {
+            for (var n in values)
+                values[n] = parseFloat(values[n]).toFixed(3);
+
+            var text = [
+                $('<span/>', {id: 'name', text: name}),
+                $('<span/>', {id: 'value', class: 'tip-value tip-detail', text: values[0]}),
+                $('<span/>', {id: 'norm', class: 'tip-value tip-detail', text: values[1]})
+            ];
+
+            text = $('<div/>', {class: 'tip-line '}).append(text);
+
+            return html(text);
+        }
+
+        var node =  $('<div/>', {
+            id: 'test'
+        });
+        console.log(node)
+
+        var text = '';
+        text += title_block(d.id);
+        text += value_line('Purity', d.values.purity);
+        text += value_line('Completeness', d.values.completeness);
+
+        console.log(text)
+
+        // console.log(node.html())
+
+        out = $('<div/>').append($(text))
+        return out.html()
+    }
+
+    var tip = d3.tip()
+        .attr('class', 'd3-tip')
+        .offset([-10, 0])
+        .html(function(d) {
+            return tip_text(d);
+    });
 
     var legend_width = function() {
         d = legend_dimens;
@@ -95,7 +133,7 @@ var aligned_plot = new function() {
         }
 
         // Create svg handle
-        var svg = chart.append('svg')
+        var svg = chart.select('svg#graph-svg')
             .attr('width', full_width + 'px')
             .attr('height', full_height + 'px')
             .call(tip);
@@ -136,17 +174,17 @@ var aligned_plot = new function() {
             .data(data.points)
             .enter()
             .append('linearGradient')
-            .attr('id', function(d) {return 'grad' + d.id})
-            .attr("x1", "0%")
-            .attr("x2", "100%")
+            .attr('id', function(d) {return 'grad' + d.pos.id})
+            .attr("x1", "100%")
+            .attr("x2", "0%")
             .attr("y1", "0%")
-            .attr("y2", "100%")
+            .attr("y2", "0%")
         grads.append('stop')
             .attr('offset', '50%')
-            .style('stop-color', function(d) {return scales.comp(d.completeness)})
+            .style('stop-color', function(d) {return scales.comp(d.values.completeness[0])})
         grads.append('stop')
             .attr('offset', '50%')
-            .style('stop-color', function(d) {return scales.pur(d.purity)})
+            .style('stop-color', function(d) {return scales.pur(d.values.purity[0])})
 
         console.log(scales.pur(.45));
     }
@@ -162,10 +200,10 @@ var aligned_plot = new function() {
             .enter()
             .append('circle')
             .attr('r', '10' + 'px')
-            .attr('cx', function(d) {return d.y * 20 + 10})
-            .attr('cy', function(d) {return d.x * 20 + 10})
+            .attr('cx', function(d) {return d.pos.y * 20 + 10})
+            .attr('cy', function(d) {return d.pos.x * 20 + 10})
             .style("stroke-opacity", 0.6)
-            .style("fill", function(d) {return 'url(#grad' + d.id})
+            .style("fill", function(d) {return 'url(#grad' + d.pos.id})
             .on('click', function(d) {console.log(d)})
             .on('mouseover', tip.show)
             .on('mouseout', tip.hide);
@@ -226,7 +264,7 @@ var aligned_plot = new function() {
 
         var legendAxis = d3.axisRight(legendScale)
             .ticks(5)
-            .tickFormat(d3.format(".2f"));
+            .tickFormat(d3.format(".8f"));
 
 
         legend.append("g")
@@ -248,6 +286,10 @@ var genColorMap = function(key) {
         ],
         'bw': ['#000000', '#aaaaaa']
     }
+
+    var viridis_r = colors['viridis'].slice();
+    colors['viridis_r'] = viridis_r;
+    viridis_r.reverse();
 
     return colors[key]
 }
@@ -379,8 +421,19 @@ var genColorScale = function(stats, color) {
 //         genColorMap('bw'), data.completeness)
 // }
 
-var get_data = function(callback) {
-    $.get('/data?type=sorted', null, function(data, status) {
+var get_data = function(callback, experiment, type) {
+    var url = new URI(window.location.href);
+    var experiment = url.segment(1);
+    var type = url.segment(2);
+
+    var url = URI('/data')
+        .query({experiment: experiment, type: type});
+    console.log(url.toString());
+
+    $.get('/data', {
+        type: type,
+        experiment: experiment
+    }, function(data, status) {
         if (status == 'success' && data != null) {
             // console.log('data: ' + data.points.purity);
             console.log('status: ' + status);
@@ -410,10 +463,16 @@ var linspace = function(start, end, n) {
     return out;
 };
 
+var parseUrl = function (url) {
+    var a = document.createElement('a');
+    a.href = url;
+    return a;
+}
+
 var run = function() {
     console.log(10)
     var data = [4, 8, 15, 16, 23, 42];
-    get_data(aligned_plot.plot)
+    get_data(aligned_plot_4d.plot, 'random-500-p', 'sorted')
 }
 
 

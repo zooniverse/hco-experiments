@@ -10,10 +10,13 @@ app = Flask(__name__)
 
 @app.route('/data')
 def get_data():
-    points = plotsdb.get_plot('random-500')
 
     type_ = request.args.get('type', None)
-    max_width = choose_plot(points, type_)
+    experiment = request.args.get('experiment', None)
+
+    points = plotsdb.get_plot(experiment)
+
+    max_width, data = choose_plot(points, type_)
 
     def get_stats(key):
         max_ = max(points, key=lambda item: item[key])[key]
@@ -26,7 +29,7 @@ def get_data():
         }
 
     data = {
-        'points': points,
+        'points': data,
         'purity': get_stats('purity'),
         'completeness': get_stats('completeness'),
         'width': max_width,
@@ -76,13 +79,25 @@ def plot_points_sorted(data):
 
         return n
 
-    p_count = count(data, 'purity')
-    c_count = count(data, 'completeness')
+    def normalize(key):
+        max_ = max(data, key=lambda item: item[key])[key]
+        min_ = min(data, key=lambda item: item[key])[key]
+
+        new_key = '%s_n' % key
+        for item in data:
+            value = item[key]
+            if max_ != min_:
+                item[new_key] = (value - min_) / (max_ - min_)
+            else:
+                item[new_key] = 0
 
     def _sort(item):
-        p = item['purity'] / p_count
-        c = item['completeness'] / c_count
+        p = 1 - item['purity_n']
+        c = item['completeness_n']
         return p ** 2 + c ** 2
+
+    normalize('purity')
+    normalize('completeness')
 
     data = sorted(data, key=_sort)
     width = math.ceil(math.sqrt(len(data)))
@@ -100,11 +115,27 @@ def plot_points_sorted(data):
         })
         x += 1
 
-    return width
+    output = []
+    for item in data:
+        new_item = {
+            'id': {'golds': item['golds'], 'n': item['n']},
+            'values': {
+                'purity': [item['purity'], item['purity_n']],
+                'completeness': [item['completeness'], item['completeness_n']]
+            },
+            'pos': {
+                'x': item['x'],
+                'y': item['y'],
+                'id': item['id']
+            }
+        }
+        output.append(new_item)
+
+    return width, output
 
 
-@app.route("/")
-def index():
+@app.route("/plots/<experiment>/<type>")
+def index(experiment, type):
     return render_template("index.html")
 
 

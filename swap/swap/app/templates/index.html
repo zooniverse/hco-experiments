@@ -11,11 +11,16 @@
     <script src={{ url_for('static', filename='./node_modules/bootstrap/dist/js/bootstrap.min.js') }}></script>
     <script src={{ url_for('static', filename='./node_modules/d3/build/d3.min.js') }}></script>
     <script src={{ url_for('static', filename='./node_modules/d3-tip/index.js') }}></script>
+    <script src={{ url_for('static', filename='./node_modules/urijs/src/URI.js') }}></script>
+    <script src={{ url_for('static', filename='./node_modules/urijs/src/jquery.URI.js') }}></script>
     <script src={{ url_for('static', filename='plots.js') }}></script>
   </head>
   <body>
     <div class="container">
-      <div id="chart"></div>
+      <div id="chart" class="graph-container">
+        <svg id="graph-svg"/ class="graph-item">
+        <div id="console" class="graph-item">CONSOLE</div>
+      </div>
     </div>
     
   </body>
