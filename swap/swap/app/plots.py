@@ -30,7 +30,14 @@ def get_data():
 
     data = {
         'points': data,
-        'purity': get_stats('purity'),
+        'left': {
+            'name': 'purity',
+            'stats': get_stats('purity'),
+        },
+        'right': {
+            'name': 'completeness',
+            'stats': get_stats('completeness')
+        },
         'completeness': get_stats('completeness'),
         'width': max_width,
         'height': math.ceil(len(points) / max_width)

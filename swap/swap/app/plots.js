@@ -1,6 +1,44 @@
 
-var aligned_plot_4d = new function() {
+var message_box = function(node) {
     var self = this;
+
+    var init = function(node) {
+        var element = $(document.createElement('div'))
+            .addClass('message-box')
+            .append($(document.createElement('h3')).text('CONSOLE'));
+        node.append(element);
+
+        self.node = element;
+    }
+
+    self.message = function(msg) {
+        var element = $(document.createElement('div'));
+
+        element.addClass('message').text(msg);
+        self.node.append(element);
+    };
+
+    init(node);
+}
+
+
+var aligned_plot_4d = function(node) {
+    var self = this;
+    self.container = node;
+
+    (function() {
+        var element = $(document.createElement('div'))
+            .attr('id', 'console')
+            .addClass('graph-item');
+        node.append(element);
+
+        console.log(element)
+        self.messages = new message_box(element);
+    })();
+
+    console.log(44, self.messages);
+
+
     var margin = {
         'left': 20,
         'right': 20,
@@ -17,6 +55,7 @@ var aligned_plot_4d = new function() {
     var legend_count = 0;
     var colormaps = {
         'purity': 'viridis_r',
+        'p': 'viridis',
         'completeness': 'viridis'
     }
 
@@ -25,14 +64,14 @@ var aligned_plot_4d = new function() {
         'width': null
     }
 
-    this.plot = function(data) {
-        var chart = d3.select('div#chart');
+    self.plot = function(data) {
+        var chart = d3.select(self.container.get(0));
         var svg = init_svg(chart, data);
         add_gradients(svg, data);
         add_points(svg, data);
 
-        add_legend(svg, data, 'purity');
-        add_legend(svg, data, 'completeness');
+        add_legend(svg, data, data.left);
+        add_legend(svg, data, data.right);
     };
 
     var tip_text = function(d) {
@@ -58,12 +97,13 @@ var aligned_plot_4d = new function() {
             }
             text = $('<div>' + text + '</div>');
             text.attr('id', 'title').addClass('tip-line tip-values');
-            console.log(html(text))
+            // console.log(html(text))
 
             return html(text);
         }
 
         var value_line = function(name, values) {
+            var values = values.slice();
             for (var n in values)
                 values[n] = parseFloat(values[n]).toFixed(3);
 
@@ -78,19 +118,10 @@ var aligned_plot_4d = new function() {
             return html(text);
         }
 
-        var node =  $('<div/>', {
-            id: 'test'
-        });
-        console.log(node)
-
         var text = '';
         text += title_block(d.id);
         text += value_line('Purity', d.values.purity);
         text += value_line('Completeness', d.values.completeness);
-
-        console.log(text)
-
-        // console.log(node.html())
 
         out = $('<div/>').append($(text))
         return out.html()
@@ -138,36 +169,13 @@ var aligned_plot_4d = new function() {
             .attr('height', full_height + 'px')
             .call(tip);
 
-        // var xScale = d3.scaleOrdinal([linspace(0, width, data.width)])
-        //     .domain(d3.range(0, data.width, 1));
-
-        // var yScale = d3.scaleOrdinal([linspace(0, height, data.height)])
-        //     .domain(d3.range(0, data.height, 1));
-
-        // var xAxis = d3.svg.axis()
-        //     .scale(xScale)
-        //     .orient('bottom');
-
-        // var yAxis = d3.svg.axis()
-        //     .scale(yScale)
-        //     .orient('left');
-
-        // var xAxisSvg = svg.append('g')
-        //     .attr('class', 'x axis')
-        //     .attr('transform', 'translate(0,' + 0 + ')');
-        //     .call(xAxis);
-
-        // var yAxisSvg = svg.append('g')
-        //     .attr('class', 'y axis');
-        //     .call(yAxis);
-
         return svg;
     };
 
     var add_gradients = function(svg, data) {
         var scales = {
-            'pur': genColorScale(data.purity, colormaps.purity),
-            'comp': genColorScale(data.completeness, colormaps.completeness)
+            'left': genColorScale(data.left.stats, colormaps[data.left.name]),
+            'right': genColorScale(data.right.stats, colormaps[data.right.name])
         };
 
         grads = svg.append('defs').selectAll('linearGradient')
@@ -181,12 +189,12 @@ var aligned_plot_4d = new function() {
             .attr("y2", "0%")
         grads.append('stop')
             .attr('offset', '50%')
-            .style('stop-color', function(d) {return scales.comp(d.values.completeness[0])})
+            .style('stop-color', function(d) {return scales.right(d.values[data.right.name][0])})
         grads.append('stop')
             .attr('offset', '50%')
-            .style('stop-color', function(d) {return scales.pur(d.values.purity[0])})
+            .style('stop-color', function(d) {return scales.left(d.values[data.left.name][0])})
 
-        console.log(scales.pur(.45));
+        console.log(scales.left(.45));
     }
 
     var add_points = function(svg, data) {
@@ -204,23 +212,31 @@ var aligned_plot_4d = new function() {
             .attr('cy', function(d) {return d.pos.x * 20 + 10})
             .style("stroke-opacity", 0.6)
             .style("fill", function(d) {return 'url(#grad' + d.pos.id})
-            .on('click', function(d) {console.log(d)})
+            .on('click', function(d) {
+                console.log(d);
+                var text = 'id' + JSON.stringify(d.id)
+                    + ' purity: ' + parseFloat(d.values.purity[0]).toFixed(8)
+                    + ' completeness: ' + parseFloat(d.values.completeness[0]).toFixed(8);
+                self.messages.message(text);
+            })
             .on('mouseover', tip.show)
             .on('mouseout', tip.hide);
     };
 
-    var add_legend = function(svg, data, key) {
+    var add_legend = function(svg, data, data_info) {
         var offset = {
             'x': margin.left + self.dimens.width + legend_dimens.offset
                  + legend_count * legend_width(),
             'y': margin.top
         }
 
-        var stats = data[key]
+        var key = data_info.name;
+        var stats = data_info.stats;
+
         var height = self.dimens.height;
         var width = legend_dimens.width;
         var colormap = genColorMap(colormaps[key])
-        console.log(10009, colormap, key)
+        // console.log(10009, colormap, key)
 
 
         var legend = svg.append('g')
@@ -238,7 +254,6 @@ var aligned_plot_4d = new function() {
 
         // Defining color stop spacing
         var pct = linspace(0, 100, colormap.length).map(function(d) {
-            console.log(d)
             return Math.round(d) + '%';
         });
 
@@ -274,6 +289,7 @@ var aligned_plot_4d = new function() {
 
         legend_count += 1;
     };
+
 }
 
 var genColorMap = function(key) {
@@ -303,123 +319,6 @@ var genColorScale = function(stats, color) {
         .range(range)
     return colorScale;
 }
-
-// var add_legend = function(svg, offset, colormap, stats) {
-//     var height = offset.y
-//     var width = 20;
-
-//     var legend = svg.append('g')
-//         .attr('transform', 'translate(' + offset.x + (', 0)'))
-//     var grad = legend.append('defs').append('linearGradient')
-//         .attr('id', 'legend-gradient')
-//         .attr('x1', '0%')
-//         .attr('y1', '100%')
-//         .attr('x2', '0%')
-//         .attr('y2', '0%')
-//         .attr('spreadMethod', 'pad')
-
-//     var pct = linspace(0, 100, colormap.length).map(function(d) {
-//         console.log(d)
-//         return Math.round(d) + '%';
-//     });
-
-//     var colourPct = d3.zip(pct, colormap);
-//     colourPct.forEach(function(d) {
-//         grad.append('stop')
-//             .attr('offset', d[0])
-//             .attr('stop-color', d[1])
-//             .attr('stop-opacity', 1);
-//     });
-
-//     legend.append('rect')
-//         .attr('x', 0)
-//         .attr('y', 0)
-//         .attr('width', width)
-//         .attr('height', height)
-//         .style('fill', 'url(#legend-gradient)');
-
-//     var legendScale = d3.scaleLinear()
-//         .domain([stats.min, stats.max])
-//         .range([height, 0]);
-
-//     var legendAxis = d3.axisRight(legendScale)
-//         .ticks(5)
-//         .tickFormat(d3.format(".2f"));
-
-
-//     legend.append("g")
-//         .attr("class", "legend axis")
-//         .attr("transform", "translate(" + 25 + ", 0)")
-//         .call(legendAxis);
-// }
-
-// var plot = function(data) {
-
-//     var scale = {
-//         'pur': genColorScale(data.purity, 'viridis'),
-//         'comp': genColorScale(data.completeness, 'bw')
-//     };
-
-//     console.log(scale.pur(10))
-//     console.log(scale.pur(.4))
-//     console.log(scale.pur(.01))
-
-//     var chart = d3.select('div#chart');
-//     var svg = chart.append('svg')
-//         .attr('width', '5000px')
-//         .attr('height', '5000px');
-
-//     // var xAxis = d3.svg.axis()
-//     //     .scale(xScale)
-//     //     .orient('bottom');
-
-//     // var yAxis = d3.svg.axis()
-//     //     .scale(yScale)
-//     //     .orient('left');
-
-//     var xAxisSvg = svg.append('g')
-//         .attr('class', 'x axis')
-//         .attr('transform', 'translate(0,' + 0 + ')');
-//         // .call(xAxis);
-
-//     var yAxisSvg = svg.append('g')
-//         .attr('class', 'y axis');
-//         // .call(yAxis);
-
-//     grads = svg.append('defs').selectAll('linearGradient')
-//         .data(data.points)
-//         .enter()
-//         .append('linearGradient')
-//         .attr('id', function(d) {return 'grad' + d.id})
-//         .attr("x1", "0%")
-//         .attr("x2", "100%")
-//         .attr("y1", "0%")
-//         .attr("y2", "100%")
-//     grads.append('stop')
-//         .attr('offset', '50%')
-//         .style('stop-color', function(d) {return scale.comp(d.completeness)})
-//     grads.append('stop')
-//         .attr('offset', '50%')
-//         .style('stop-color', function(d) {return scale.pur(d.purity)})
-
-//     circles = svg.append('g').selectAll('circle')
-//         .data(data.points)
-//         .enter()
-//         .append('circle')
-//         .attr('r', '10' + 'px')
-//         .attr('cx', function(d) {return d.y * 20 + 10})
-//         .attr('cy', function(d) {return d.x * 20 + 10})
-//         .style("stroke-opacity", 0.6)
-//         .style("fill", function(d) {return 'url(#grad' + d.id})
-//         .on('click', function(d) {console.log(d)});
-
-//     add_legend(
-//         svg, {'x': (data.width + 1) * 20, 'y': data.height * 20},
-//         genColorMap('viridis'), data.purity)
-//     add_legend(
-//         svg, {'x': (data.width + 3) * 20, 'y': data.height * 20},
-//         genColorMap('bw'), data.completeness)
-// }
 
 var get_data = function(callback, experiment, type) {
     var url = new URI(window.location.href);
@@ -459,20 +358,17 @@ var linspace = function(start, end, n) {
     }
 
     out.push(end);
-    console.log(out)
+    // console.log(out)
     return out;
 };
-
-var parseUrl = function (url) {
-    var a = document.createElement('a');
-    a.href = url;
-    return a;
-}
 
 var run = function() {
     console.log(10)
     var data = [4, 8, 15, 16, 23, 42];
-    get_data(aligned_plot_4d.plot, 'random-500-p', 'sorted')
+    var plotter = new aligned_plot_4d($('div#chart'));
+    get_data(plotter.plot, 'random-500-p', 'sorted');
+
+    plotter.messages.message('test');
 }
 
 

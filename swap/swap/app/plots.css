@@ -55,6 +55,9 @@ div.graph-container {
   margin-top: 50px;
   margin-bottom: 50px;
   margin-right: 50px;
+
+  overflow-x: scroll;
+  white-space: nowrap;
 }
 
 .d3-tip .tip-line #name {
@@ -66,3 +69,11 @@ div.graph-container {
   margin-right: 10px;
 }
 
+div.message-box {
+  /*font-size: 14px;*/
+  margin-left: 5px;
+}
+
+div#console {
+  display: inline-block;
+}
