@@ -13,8 +13,8 @@ import os
 import sys
 import csv
 
-import swap.config.logger as log
-logger = log.get_logger(__name__)
+import logging
+logger = logging.getLogger(__name__)
 
 __doc__ = """
     An interface to interact with our utilities from the command line.

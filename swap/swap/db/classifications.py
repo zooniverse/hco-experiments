@@ -4,9 +4,8 @@
 from swap.db import DB, Cursor
 from swap.db.query import Query
 
-import swap.config.logger as log
-
-logger = log.get_logger(__name__)
+import logging
+logger = logging.getLogger(__name__)
 
 __doc__ = """
     Manages interactions with the classification collection in the database.

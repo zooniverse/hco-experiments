@@ -4,8 +4,8 @@
 import abc
 import statistics as st
 
-import swap.config.logger as log
-logger = log.get_logger(__name__)
+import logging
+logger = logging.getLogger(__name__)
 
 
 class Agent(metaclass=abc.ABCMeta):

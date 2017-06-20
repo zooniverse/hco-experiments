@@ -31,13 +31,12 @@ def get_path():
     return path
 
 
-def get_logger(name):
-    return logging.getLogger('hco.%s' % name)
+# def get_logger(name):
+#     return logging.getLogger('hco.%s' % name)
 
 
-def init(name, path):
-    path = get_path()
-    logger = get_logger(name)
+def init():
+    # logging.setLoggerClass(MyLogger)
 
     # pylint: disable=E1101
     # global log level
@@ -54,11 +53,10 @@ def init(name, path):
     date_format = config.logging.date_format
     # pylint: enable=E1101
 
-    # Set log level
+    # Set appropriate log level
     for i in range(0, 51, 10):
         if level == logging.getLevelName(i):
             level = i
-            logger.setLevel(i)
             break
 
     for i in range(0, 51, 10):
@@ -66,12 +64,13 @@ def init(name, path):
             console_level = i
             break
 
+    handlers = []
     # Ensure each process has its own unique log file
     # to prevent file write conflicts
     # TODO implement global log server with unique uuid per process
     fname = fname % os.getppid()
     # Create file handler
-    fname = os.path.join(path, fname)
+    fname = os.path.join(get_path(), fname)
     handler = logging.FileHandler(fname)
 
     # Add formatter
@@ -79,7 +78,7 @@ def init(name, path):
     handler.setFormatter(formatter)
     handler.setLevel(level)
 
-    logger.addHandler(handler)
+    handlers.append(handler)
 
     # Create console handler
     handler = logging.StreamHandler()
@@ -88,6 +87,30 @@ def init(name, path):
     formatter = logging.Formatter(c_format, date_format)
     handler.setFormatter(formatter)
 
-    logger.addHandler(handler)
+    handlers.append(handler)
 
-    logger.info('Initialized logging')
+    logging.basicConfig(handlers=handlers, level=level, datefmt=date_format)
+    logging.info('Initialized logging')
+
+
+class MyLogger(logging.Logger):
+
+    def makeRecord(self, name, level, fn, lno, msg, args, exc_info,
+                   func=None, extra=None, sinfo=None):
+
+        msg += 'asdfasdfasdf'
+        path = os.path.dirname(os.path.abspath(swap.__file__))
+        path = os.path.abspath(os.path.join(path, '../..'))
+        print(path)
+
+        path = os.path.relpath(fn, path)
+        path = os.path.splitext(path)[0]
+        print(path)
+
+        module = '.'.join(path.split('/')[1:])
+        # module = 'a123'
+
+        return super().makeRecord(
+            module, level, fn, lno, msg, args, exc_info,
+            func=None, extra=None, sinfo=None)
+

@@ -8,8 +8,8 @@ import swap.config as config
 
 import atexit
 
-import swap.config.logger as log
-logger = log.get_logger(__name__)
+import logging
+logger = logging.getLogger(__name__)
 
 assert Query
 

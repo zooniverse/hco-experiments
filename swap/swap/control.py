@@ -17,8 +17,8 @@ import swap.db.classifications as db
 from swap.utils.golds import GoldGetter
 from swap.db import Query
 
-import swap.config.logger as log
-logger = log.get_logger(__name__)
+import logging
+logger = logging.getLogger(__name__)
 
 
 class Control:

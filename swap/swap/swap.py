@@ -15,9 +15,9 @@ from swap.db import classifications as db
 import swap.config as config
 
 import progressbar
+import logging
 
-import swap.config.logger as log
-logger = log.get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 __doc__ = """

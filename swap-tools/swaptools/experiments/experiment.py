@@ -7,8 +7,8 @@ import swap.ui
 import swaptools.experiments.db.experiment_data as dbe
 import swaptools.experiments.db.plots as plotsdb
 
-import swap.config.logger as log
-logger = log.get_logger(__name__)
+import logging
+logger = logging.getLogger(__name__)
 
 
 class Trial:

@@ -1,8 +1,8 @@
 
 from swaptools.experiments.db import DB
 
-import swap.config.logger as log
-logger = log.get_logger(__name__)
+import logging
+logger = logging.getLogger(__name__)
 
 collection = DB().plots
 

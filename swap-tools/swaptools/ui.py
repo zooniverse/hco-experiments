@@ -9,8 +9,8 @@ import swaptools.experiments.random_golds as random_experiment
 import swap.ui
 import swap.plots as plots
 
-import swap.config.logger as log
-logger = log.get_logger(__name__)
+import logging
+logger = logging.getLogger(__name__)
 
 
 class BootInterface(swap.ui.Interface):

@@ -10,8 +10,8 @@ from scipy.signal import argrelextrema
 
 import seaborn as sns
 
-import swap.config.logger as log
-logger = log.get_logger(__name__)
+import logging
+logger = logging.getLogger(__name__)
 
 
 def _plot(func):

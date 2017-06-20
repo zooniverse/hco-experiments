@@ -7,8 +7,8 @@ from swap.agents.agent import Stat
 
 import swaptools.experiments.experiment as experiment
 
-import swap.config.logger as log
-logger = log.get_logger(__name__)
+import logging
+logger = logging.getLogger(__name__)
 
 plt = distributions.plt
 mpl = distributions.mpl

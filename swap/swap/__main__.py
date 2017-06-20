@@ -4,9 +4,10 @@
 
 import swap
 from swap import ui
-import swap.config.logger as log
 
-logger = log.get_logger(swap.__name__)
+import logging
+
+logger = logging.getLogger(swap.__name__)
 
 
 def main():

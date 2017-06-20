@@ -5,9 +5,9 @@
 from swap.agents.agent import Agent
 import swap.agents.ledger as ledger
 import swap.config as config
-import swap.config.logger as log
 
-logger = log.get_logger(__name__)
+import logging
+logger = logging.getLogger(__name__)
 
 
 class Subject(Agent):
