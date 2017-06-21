@@ -180,37 +180,37 @@ class Ledger(ledger.Ledger):
         id_ = super().add(transaction)
         return id_
 
+    def counter(self, gold):
+        if gold == 0:
+            return self.no
+        elif gold == 1:
+            return self.yes
+
+    def action(self, transaction, version):
+        t = transaction
+        c = self.counter(t.gold)
+        if c is not None:
+            if version == 'new':
+                if t.matched:
+                    c.match()
+                else:
+                    c.see()
+            elif version == 'old':
+                if t.matched:
+                    c.unmatch()
+                else:
+                    c.unsee()
+
     def recalculate(self):
-        def counter(gold):
-            if gold == 0:
-                return self.no
-            elif gold == 1:
-                return self.yes
-
-        def action(transaction, version):
-            t = transaction
-            c = counter(t.gold)
-            if c is not None:
-                if version == 'new':
-                    if t.matched:
-                        c.match()
-                    else:
-                        c.see()
-                elif version == 'old':
-                    if t.matched:
-                        c.unmatch()
-                    else:
-                        c.unsee()
-
         # print(self.changed)
         for i in self.changed:
             # print(i, self.id)
             t = self.transactions[i]
 
             if t.changed:
-                action(t, 'old')
+                self.action(t, 'old')
                 t.gold = t.agent.gold
-                action(t, 'new')
+                self.action(t, 'new')
 
         score = self._calculate()
 
