@@ -14,6 +14,7 @@ import progressbar
 
 from swap.swap import SWAP, Classification
 import swap.db.classifications as db
+import swap.db
 from swap.utils.golds import GoldGetter
 from swap.db import Query
 
@@ -59,14 +60,17 @@ class Control:
 
         # get classifications
         cursor = self.get_classifications()
+        db_stats = swap.db.DB().stats()
         # n_classifications = self._n_classifications()
 
         # loop over classification cursor to process
         # classifications one at a time
-        logger.info("Start: SWAP Processing %d classifications", len(cursor))
+        logger.info("Start: SWAP Processing %d classifications",
+                    db_stats['first_classifications'])
 
         count = 0
-        with progressbar.ProgressBar(max_value=len(cursor)) as bar:
+        with progressbar.ProgressBar(
+                max_value=db_stats['first_classifications']) as bar:
             # Loop over all classifications of the query
             # Note that the exact size of the query might be lower than
             # n_classifications if not all classifications are being queried

@@ -48,6 +48,8 @@ def getClassifications(query=None, **kwargs):
     """
     # Generate a default query if not specified
     query = [
+        {'$sort': {'seen_before': 1, 'classification_id': 1}},
+        {'$match': {'seen_before': False}},
         # {'$match': {'classification_id': {'$lt': 25000000}}},
         {'$project': {'user_name': 1, 'subject_id': 1, 'annotation': 1}}
     ]
@@ -61,7 +63,7 @@ def getClassifications(query=None, **kwargs):
 
     # perform query on classification data
     classifications = Cursor(query, collection,
-                             batchSize=batch_size)
+                             batchSize=int(1e5))
 
     return classifications
 
