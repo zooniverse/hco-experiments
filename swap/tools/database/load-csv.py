@@ -3,20 +3,19 @@
 # Script to load a csv file to the mongo database,
 # as described in the config.yaml
 
-from swap.config import Config
-from swap.mongo import DB
+import swap.db
+import swap.config as config
 
 import csv
 import os
 import sys
 import argparse
 
-db = DB()
-config = Config()
 _meta_names = config.database.metadata
 
 
 def main():
+    db = swap.db.DB()
 
     parser = argparse.ArgumentParser()
     parser.add_argument('file')
@@ -34,6 +33,7 @@ def main():
     total_count = 0
 
     db.classifications.drop()
+    db._init_classifications()
 
     with open(file, 'r') as csvfile:
         reader = csv.DictReader(csvfile, delimiter=',')
@@ -55,6 +55,8 @@ def main():
 
     upload(to_upload)
 
+    db._gen_stats()
+
 
 def processRow(row):
     # Convert types specified in config
@@ -69,6 +71,9 @@ def processRow(row):
                 row[key] = -1
             else:
                 row[key] = 0
+
+        if type_ is bool:
+            row[key] = value == 'True'
 
         # Cast value to the expected type
         if type(row[key]) is not type_:
@@ -86,6 +91,7 @@ def processRow(row):
 
 
 def upload(rows):
+    db = swap.db.DB()
     db.classifications.insert_many(rows)
 
 
