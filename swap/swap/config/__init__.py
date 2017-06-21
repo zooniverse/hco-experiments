@@ -50,25 +50,26 @@ back_update = False
 # Operator used in controversial and consensus score calculation
 controversial_version = 'pow'
 
-# Database config options
-database = Object({
-    'name': 'swapDB',
-    'host': 'localhost',
-    'port': 27017,
-    'max_batch_size': 1e5,
-    'metadata': ['mag', 'mag_err'],
-})
 
-logging = Object({
-    'file_format': '%(asctime)s:%(levelname)s::%(name)s:%(funcName)s ' +
-                   ' %(message)s',
-    'console_format': '%(asctime)s %(levelname)s %(message)s',
-    'date_format': '%Y%m%d_%H:%M:%S',
-    'level': 'DEBUG',
-    'console_level': 'INFO',
-    'keep_logs': 5,
-    'filename': 'swap-%d.log'
-})
+# Database config options
+class database:
+    name = 'swapDB'
+    host = 'localhost'
+    port = 27017
+    max_batch_size = 1e5
+    metadata = ['mag', 'mag_err']
+
+
+class logging:
+    file_format = '%(asctime)s:%(levelname)s::%(name)s:%(funcName)s ' + \
+                  '%(message)s'
+    console_format = '%(asctime)s %(levelname)s %(message)s'
+    date_format = '%Y%m%d_%H:%M:%S'
+    level = 'DEBUG'
+    console_level = 'INFO'
+    keep_logs = 5
+    filename = 'swap-%d.log'
+
 
 # Import local_config.py to seamlessly override
 # config defaults without having to check in to git repo
