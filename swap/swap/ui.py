@@ -89,6 +89,12 @@ class UI:
             '--multiply', action='store_true',
             help='controversial and consensus aggregation method')
 
+        parser.add_argument(
+            '--back', action='store_true')
+
+        parser.add_argument(
+            '--noback', action='store_true')
+
     def call(self, args):
         """
             Called when executing args
@@ -111,6 +117,11 @@ class UI:
             config.controversial_version = 'pow'
         elif args.multiply:
             config.controversial_version = 'multiply'
+
+        if args.back:
+            config.back_update = True
+        elif args.noback:
+            config.back_update = False
 
         if 'func' in args:
             args.func(args)
