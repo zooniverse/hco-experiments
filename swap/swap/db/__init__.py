@@ -6,6 +6,7 @@ from swap.utils import Singleton
 from pymongo import MongoClient
 import swap.config as config
 
+from pymongo import IndexModel, ASCENDING, DESCENDING
 import atexit
 
 import logging
@@ -39,6 +40,7 @@ class _DB:
         self.classifications = self._db.classifications
         self.experiment = self._db.experiment
         self.subjects = self._db.subjects
+        self.stats = self._db.swap_stats
 
         self.subject_count = None
 
@@ -48,6 +50,53 @@ class _DB:
     def close(self):
         logger.info('closing mongo connection')
         self._client.close()
+
+    def _init_classifications(self):
+        indexes = [
+            IndexModel([('subject_id', ASCENDING)]),
+            IndexModel([('user_id', ASCENDING)]),
+            IndexModel([('subject_id', ASCENDING), ('user_name', ASCENDING)]),
+            IndexModel([('seen_before', ASCENDING),
+                        ('classification_id', ASCENDING)])]
+
+        logger.debug('inserting %d indexes', len(indexes))
+        self.classifications.create_indexes(indexes)
+        logger.debug('done')
+
+    def _gen_stats(self):
+
+        def count(query):
+            cursor = Cursor(query, self.classifications)
+            return cursor.getCount()
+
+        nusers = count([{'$group': {'_id': '$user_name'}}])
+        logger.debug('nusers: %d', nusers)
+
+        nsubjects = count([{'$group': {'_id': '$subject_id'}}])
+        logger.debug('nsubjects: %d', nsubjects)
+
+        nclass = self.classifications.count()
+        logger.debug('nclass: %d', nclass)
+
+        nclass_nodup = count([{'$match': {'seen_before': False}}])
+        logger.debug('nclass_nodup: %d', nclass_nodup)
+
+        ndup = count([{'$match': {'seen_before': True}}])
+
+        stats = {
+            'classifications': nclass,
+            'users': nusers,
+            'subjects': nsubjects,
+            'first_classifications': nclass_nodup,
+            'duplicates': ndup
+        }
+
+        logger.info('stats: %s', str(stats))
+        self._db.swap_stats.insert_one(stats)
+        return stats
+
+    def stats(self):
+        return self.stats.find().sort({'_id': 1}).limit(1)
 
 
 class DB(_DB, metaclass=Singleton):
@@ -81,7 +130,7 @@ class Cursor:
         self.cursor = None
         self.count = None
 
-        logger.debug(query)
+        logger.debug('Cursor query: %s', str(query))
 
         if query:
             self.cursor = collection.aggregate(query, **kwargs)
