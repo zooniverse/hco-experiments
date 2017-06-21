@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 collection = DB().data
 trial_collection = DB().trials
 
+logger.info('loaded module')
+
 
 def aggregate(*args, **kwargs):
     try:
@@ -76,7 +78,8 @@ class TrialsCursor:
             logger.debug('generating list of trials')
             query = self._query()
 
-            self._trials = Cursor(query, collection, allowDiskUse=True)
+            self._trials = Cursor(query, collection,
+                                  allowDiskUse=True, batchSize=50000)
             self.current_trial = self._trials.next()
             logger.debug('done')
         return self._trials
@@ -96,7 +99,7 @@ class TrialsCursor:
         scores = []
         golds = {}
         trial_info = item['trial']
-        logger.debug('parsing trial %s', trial_info)
+        logger.debug('parsing trial %s', str(trial_info))
 
         n = 0
         try:
@@ -120,7 +123,8 @@ class TrialsCursor:
         except StopIteration:
             self.stop = True
 
-        logger.debug('\ndone')
+        print('\n')
+        logger.debug('done')
 
         self.current_trial = item
         return trial_info, golds, scores
@@ -159,12 +163,15 @@ class SingleTrialCursor(TrialsCursor):
 
     def _query(self):
         query = super()._query()
-        update = {}
-        for key, value in self.trial_info.items():
-            update['trial.%s' % key] = value
-        query[0]['$match'].update(update)
+        # update = {}
+        # for key, value in self.trial_info.items():
+        #     update['trial.%s' % key] = value
 
-        print(query)
+        from collections import OrderedDict
+        trial = OrderedDict([*self.trial_info])
+        query[0]['$match'] = OrderedDict([('experiment', self.name), ('trial', trial)])
+
+        logger.info(query)
 
         return query
 
