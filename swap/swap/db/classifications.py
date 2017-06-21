@@ -4,6 +4,8 @@
 from swap.db import DB, Cursor
 from swap.db.query import Query
 
+from collections import OrderedDict
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -48,7 +50,7 @@ def getClassifications(query=None, **kwargs):
     """
     # Generate a default query if not specified
     query = [
-        {'$sort': {'seen_before': 1, 'classification_id': 1}},
+        {'$sort': OrderedDict([('seen_before', 1), ('classification_id', 1)])},
         {'$match': {'seen_before': False}},
         # {'$match': {'classification_id': {'$lt': 25000000}}},
         {'$project': {'user_name': 1, 'subject_id': 1, 'annotation': 1}}
