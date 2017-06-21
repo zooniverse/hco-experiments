@@ -59,8 +59,7 @@ class Trial:
 
     def db_export(self, name):
         data = []
-        for i in self.scores.sorted_scores:
-            score = self.scores.scores[i]
+        for score in self.scores.sorted_scores:
             item = {'experiment': name}
             item.update({'trial': self._db_export_id()})
             item.update({
