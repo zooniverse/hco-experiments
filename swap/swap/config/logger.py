@@ -114,3 +114,7 @@ class MyLogger(logging.Logger):
             module, level, fn, lno, msg, args, exc_info,
             func=None, extra=None, sinfo=None)
 
+
+if not __name__ == "__main__":
+    init()
+
