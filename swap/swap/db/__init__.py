@@ -95,8 +95,8 @@ class _DB:
         self._db.swap_stats.insert_one(stats)
         return stats
 
-    def stats(self):
-        return self.stats.find().sort({'_id': 1}).limit(1)
+    def get_stats(self):
+        return self.stats.find().sort('_id', 1).limit(1).next()
 
 
 class DB(_DB, metaclass=Singleton):
