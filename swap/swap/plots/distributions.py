@@ -76,8 +76,7 @@ def plot_seaborn_density_split(scores, cutoff=1):
 @_plot
 def plot_class_histogram(score_export):
     data = score_export.roc()
-    sorted_data = score_export.sorted_scores
-    scores = score_export.scores
+    scores = list(score_export.sorted_scores)
     # b0 = [item[1] for item in roc if item[0] == 0]
     # b1 = [item[1] for item in roc if item[0] == 1]
 
@@ -126,8 +125,7 @@ def plot_class_histogram(score_export):
     completeness = []
     count = 0
     golds = 0
-    for i in reversed(sorted_data):
-        score = scores[i]
+    for score in reversed(scores):
         count += 1
         if score.gold == 1:
             golds += 1

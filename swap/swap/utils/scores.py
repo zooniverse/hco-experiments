@@ -58,7 +58,7 @@ class ScoreExport:
         if new_golds:
             scores = self._init_golds(scores)
         self.scores = scores
-        self.sorted_scores = sorted(scores, key=lambda id_: scores[id_].p)
+        self._sorted_ids = sorted(scores, key=lambda id_: scores[id_].p)
         self.class_counts = self.counts(0)
 
     @staticmethod
@@ -77,6 +77,11 @@ class ScoreExport:
 
             logger.info('done')
         return ScoreExport(data, new_golds=False)
+
+    @property
+    def sorted_scores(self):
+        for i in self._sorted_ids:
+            yield self.scores[i]
 
     def _init_golds(self, scores):
         """
@@ -126,7 +131,7 @@ class ScoreExport:
         """
         n = self.counts(threshold)
 
-        total = sum(n.values())
+        total = n[0] + n[1]
         if (total > 0):
             for i in n:
                 n[i] = n[i] / total
@@ -142,7 +147,17 @@ class ScoreExport:
         threshold : float
             Threshold for p values of Scores to consider
         """
-        return self.composition(threshold)[1]
+        return self._purity(self.counts(threshold))
+
+    @staticmethod
+    def _purity(counts):
+
+        def total(counts):
+            return counts[1] + counts[0]
+
+        t = total(counts)
+        if t > 0:
+            return counts[1] / t
 
     def find_purity(self, desired_purity):
         """
@@ -156,18 +171,12 @@ class ScoreExport:
 
         logger.debug('Trying to find purity %.3f', desired_purity)
 
-        def purity(counts):
-            total = sum(counts.values())
-            if total > 0:
-                return counts[1] / sum(counts.values())
-
         counts = self.class_counts.copy()
-        for id_ in self.sorted_scores:
-
-            score = self.scores[id_]
+        for score in self.sorted_scores:
             counts[score.gold] -= 1
 
-            _purity = purity(counts)
+            _purity = self._purity(counts)
+            print(_purity, score, counts)
 
             if _purity is not None and _purity > desired_purity:
                 return score.p
@@ -187,8 +196,7 @@ class ScoreExport:
         inside = 0
         total = 0
 
-        for i in self.sorted_scores:
-            score = self.scores[i]
+        for score in self.sorted_scores:
             if score.gold == 1:
                 if score.p > threshold:
                     inside += 1
@@ -216,7 +224,7 @@ class ScoreExport:
     def __iter__(self):
         return iter(self.scores)
 
-    def roc(self, labels=None):
+    def roc(self):
         """
         Generate iterator of information for a ROC curve
         """
@@ -226,14 +234,8 @@ class ScoreExport:
         def isgold(score):
             return score.gold in [0, 1]
 
-        scores = self.scores
-
-        if labels is None:
-            return ScoreIterator(scores, func, isgold)
-        else:
-            def cond(score):
-                return isgold(score) and score.id in labels
-            return ScoreIterator(scores, func, cond)
+        scores = list(self.sorted_scores)
+        return ScoreIterator(scores, func, isgold)
 
     def full(self):
         """
@@ -241,7 +243,7 @@ class ScoreExport:
         """
         def func(score):
             return (score.id, score.gold, score.p)
-        return ScoreIterator(self.scores, func)
+        return ScoreIterator(list(self.sorted_scores), func)
 
     def dict(self):
         return self.scores.copy()
