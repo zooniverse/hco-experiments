@@ -382,6 +382,10 @@ class SWAPInterface(Interface):
             help='Run swap with a test/train split, using the most/least' +
                  'consensus subjects')
 
+        parser.add_argument(
+            '--presrec', nargs=1,
+            metavar='file')
+
         # parser.add_argument(
         #     '--extremes', nargs=2,
         #     metavar='controversial consensus',
@@ -501,6 +505,11 @@ class SWAPInterface(Interface):
                 data = [s.getScore() for s in swap.subjects]
                 plots.plot_pdf(data, self.f(args.dist[0]), swap,
                                cutoff=float(args.dist[1]))
+
+            if args.presrec:
+                fname = self.f(args.presrec[0])
+                plots.distributions.sklearn_purity_completeness(
+                    fname, score_export)
 
             if args.scores_to_csv:
                 self.scores_to_csv(score_export, args.scores_to_csv[0])

@@ -6,6 +6,7 @@ import matplotlib as mpl
 import statistics as st
 
 from sklearn.neighbors.kde import KernelDensity
+from sklearn.metrics import precision_recall_curve
 from scipy.signal import argrelextrema
 
 import seaborn as sns
@@ -211,3 +212,23 @@ def plot_pdf(score_export, fname, swap=None, cutoff=1):
         plt.savefig(fname, dpi=300)
     else:
         plt.show()
+
+
+@_plot
+def sklearn_purity_completeness(score_export):
+    golds, probs = zip(*score_export.roc())
+    golds = np.array(golds)
+    probs = np.array(probs)
+
+    purity, completeness, _ = precision_recall_curve(golds, probs)
+
+    plt.clf()
+    plt.plot(completeness, purity, lw=2, color='navy',
+             label='Precision-Recall curve')
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+    plt.ylim([0.0, 1.05])
+    plt.xlim([0.0, 1.0])
+    # plt.title('Precision-Recall example: AUC={0:0.2f}'.format(average_precision[0]))
+    plt.legend(loc="lower left")
+    # plt.show()
