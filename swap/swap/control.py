@@ -2,22 +2,22 @@
 # Interface between the data structure and SWAP
 # Serves data to SWAP
 
-__doc__ = """
-    Contains classes to control a SWAP instance
+"""
+Contains classes to control a SWAP instance
 
-        Control: Regular SWAP instance in simulation mode
+    Control: Regular SWAP instance in simulation mode
 
-        MetaDataControl: SWAP instance that splits data by metadata
-        """
+    MetaDataControl: SWAP instance that splits data by metadata
+"""
 
-import progressbar
-
-from swap.swap import SWAP, Classification
 import swap.db.classifications as db
 import swap.db
+import swap.config as config
+from swap.swap import SWAP, Classification
 from swap.utils.golds import GoldGetter
 from swap.db import Query
 
+import progressbar
 import logging
 logger = logging.getLogger(__name__)
 
@@ -60,7 +60,7 @@ class Control:
 
         # get classifications
         cursor = self.get_classifications()
-        db_stats = swap.db.DB().stats()
+        db_stats = swap.db.DB().get_stats()
         # n_classifications = self._n_classifications()
 
         # loop over classification cursor to process
@@ -81,7 +81,9 @@ class Control:
                 bar.update(count)
                 count += 1
 
-        self.swap.process_changes()
+        if config.back_update:
+            logger.info('back_update active: processing changes')
+            self.swap.process_changes()
         logger.info('done')
 
     def _delegate(self, cl):

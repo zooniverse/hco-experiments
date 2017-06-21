@@ -114,8 +114,8 @@ class SWAP:
         subject.classify(cl, user)
         user.classify(cl, subject)
 
-        if not config.back_update:
-            self.process_changes()
+        # if not config.back_update:
+        #     self.process_changes()
 
     # def _classify_user(self, cl):
     #     """

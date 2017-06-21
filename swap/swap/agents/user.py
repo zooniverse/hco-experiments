@@ -178,6 +178,10 @@ class Ledger(ledger.Ledger):
         # recalculating
         transaction.gold = None
         id_ = super().add(transaction)
+
+        if not config.back_update:
+            self.recalculate()
+
         return id_
 
     def counter(self, gold):

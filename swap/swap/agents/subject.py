@@ -155,6 +155,9 @@ class Ledger(ledger.Ledger):
         # Store this transaction
         id_ = super().add(transaction)
 
+        if not config.back_update:
+            self.recalculate()
+
         # Determine if most first change in cascade
         # self._change(transaction)
         # Assign this as last added
