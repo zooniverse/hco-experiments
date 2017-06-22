@@ -3,8 +3,16 @@
 # with Caesar
 
 import swap.control
+import swap.db.classifications as db
+import swap.db
+import swap.config as config
+from swap.swap import SWAP, Classification
+from swap.utils.golds import GoldGetter
 
+import logging
 from flask import Flask
+
+logger = logging.getLogger(__name__)
 app = Flask(__name__)
 
 
@@ -72,6 +80,17 @@ class OnlineControl(swap.control.Control):
     """
 
     def __init__(self):
+        super().__init__()
+
+    def subjects_changed(self):
+        # return subjects whose scores have changed
         pass
 
-    def 
+    def classify(self, classification):
+        # Add classification from caesar
+        logger.debug('Adding classification from network: %s',
+                     str(classification))
+        self.swap.classify(classification)
+
+        subject = self.swap.subjects.get(classification.subject)
+        return subject.score
