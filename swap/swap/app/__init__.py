@@ -3,17 +3,15 @@
 # with Caesar
 
 import swap.control
-import swap.db.classifications as db
 import swap.db
 import swap.config as config
-from swap.swap import SWAP, Classification
-from swap.utils.golds import GoldGetter
+from swap.utils.classification import Classification
 
 import logging
-from flask import Flask
+import json
+from flask import Flask, request
 
 logger = logging.getLogger(__name__)
-app = Flask(__name__)
 
 
 # Actions we might take to notify caesar
@@ -60,18 +58,46 @@ TODO:
 """
 
 
-@app.route('/reduce')
-def reduce():
-    pass
+@app.route('/classify')
+def classify():
+    cl = parse_classification(request.args)
+
+    global control
+    control.classify(cl)
 
 
-def classify(request):
-    pass
+def parse_classification(json_string):
+    data = json.loads(json_string)
+
+    annotation = parse_annotation(json_string['annotations'])
+
+    params = {
+        'subject': data['subject_id'],
+        'user': data['user_name'],
+        'annotation': annotation
+    }
+    classification = Classification(**params)
+    return classification
 
 
-def init(self):
+def parse_annotation(annotations):
+    # TODO parsing annotations for multiple tasks
+    logger.debug('parsing annotations: %s', str(annotations))
+    value = annotations[0]['value']
+    if value == 0:
+        return 1
+    elif value == 1:
+        return 0
+    else:
+        raise ValueError('unknown annotation value: %s' % str(value))
+
+
+def init():
     # Init controller and process classifications already in database
-    pass
+    control = OnlineControl()
+    control.run()
+
+    return control
 
 
 class OnlineControl(swap.control.Control):
@@ -81,6 +107,7 @@ class OnlineControl(swap.control.Control):
 
     def __init__(self):
         super().__init__()
+        logger.debug('Initialized online controller')
 
     def subjects_changed(self):
         # return subjects whose scores have changed
@@ -94,3 +121,10 @@ class OnlineControl(swap.control.Control):
 
         subject = self.swap.subjects.get(classification.subject)
         return subject.score
+
+
+app = Flask(__name__)
+
+logger.info('Initializing controller')
+control = init()
+logger.info('done')
