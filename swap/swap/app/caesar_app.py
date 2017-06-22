@@ -5,7 +5,7 @@
 from swap.app.control import OnlineControl
 
 import logging
-from flask import Flask, request
+from flask import Flask, request, jsonify
 
 logger = logging.getLogger(__name__)
 
@@ -61,8 +61,11 @@ def classify():
     classification = OnlineControl.parse_classification(request.args)
     OnlineControl().classify(classification)
 
+    return jsonify({})
+
 
 def run():
+    OnlineControl()
     app.run(host='0.0.0.0', port=5000, debug=True)
 
 

@@ -13,7 +13,8 @@ Contains classes to control a SWAP instance
 import swap.db.classifications as db
 import swap.db
 import swap.config as config
-from swap.swap import SWAP, Classification
+from swap.swap import SWAP
+from swap.utils.classification import Classification
 from swap.utils.golds import GoldGetter
 from swap.db import Query
 
