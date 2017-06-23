@@ -237,7 +237,7 @@ class Transaction(ledger.Transaction):
 
     @property
     def changed(self):
-        return self.gold != self.agent.gold
+        return self.gold != self.change
 
     @property
     def matched(self):

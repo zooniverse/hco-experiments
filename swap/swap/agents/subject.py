@@ -201,6 +201,9 @@ class Transaction(ledger.Transaction):
         self.right = None
         self.left = None
 
+    def set_user_score(self, user):
+        self.user_score = user.score
+
     def notify(self, agent):
         self.change = agent.score
 
@@ -241,15 +244,12 @@ class Transaction(ledger.Transaction):
         self.score = score
         return score
 
-    def _get_user_score(self):
-        self.user_score = self.agent.score
-
     def __str__(self):
         score = self.score
         if score is None:
             score = -1
 
         s = super().__str__()
-        s += ' annotation %d score %.5f' % \
-            (self.annotation, score)
+        s += ' annotation %d score %.5f user_score %.3f %.3f' % \
+            (self.annotation, score, self.user_score[0], self.user_score[1])
         return s

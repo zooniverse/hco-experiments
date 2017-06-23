@@ -171,6 +171,8 @@ class Transaction:
         self.annotation = annotation
         # stores the order this transaction has in the ledger
         self.order = None
+        self.score = None
+        self.change = None
 
     def agent(self, bureau):
         return bureau.get(self.id)
