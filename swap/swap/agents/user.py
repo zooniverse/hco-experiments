@@ -205,7 +205,7 @@ class Ledger(ledger.Ledger):
                 else:
                     c.unsee()
 
-    def recalculate(self):
+    def recalculate(self, bureau):
         # print(self.changed)
         for i in self.changed:
             # print(i, self.id)
@@ -215,6 +215,8 @@ class Ledger(ledger.Ledger):
                 self.action(t, 'old')
                 t.gold = t.agent.gold
                 self.action(t, 'new')
+
+            t.score = self._calculate()
 
         score = self._calculate()
 
