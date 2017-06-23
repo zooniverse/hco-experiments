@@ -117,4 +117,3 @@ class MyLogger(logging.Logger):
 
 if not __name__ == "__main__":
     init()
-
