@@ -172,6 +172,8 @@ class Transaction:
         # stores the order this transaction has in the ledger
         self.order = None
 
+    def agent(self, bureau):
+        return bureau.get(self.id)
 
     def notify(self, agent):
         pass
