@@ -1,5 +1,7 @@
 
 import swap.app.control as control
+import swap.app.caesar_app as app
+import swap.agents.subject
 from swap.utils.classification import Classification
 from swap.utils.golds import GoldGetter
 import json
@@ -29,4 +31,10 @@ class TestCaesarApp:
         oc = control.OnlineControl()
         oc.init_swap()
         ret = oc.classify(Classification(0, 1, 1))
-        assert ret == 0.12
+
+        assert isinstance(ret, swap.agents.subject.Subject)
+        assert ret.score == 0.12
+
+    def test_generate_address(self):
+        assert app.generate_address() == \
+            'http://localhost:3000/workflows/1737/reducers/swap/reductions'
