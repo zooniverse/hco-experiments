@@ -4,11 +4,16 @@ from swap.utils.classification import Classification
 from swap.utils import Singleton
 
 import logging
+import json
+import threading
+from queue import Queue
 
 logger = logging.getLogger(__name__)
 
 
 def parse_classification(data):
+    print(data)
+    print(dir(data))
     annotation = parse_annotation(data['annotations'])
 
     params = {
@@ -28,7 +33,7 @@ def parse_annotation(annotations):
     return value
 
 
-class _OnlineControl(swap.control.Control):
+class OnlineControl(swap.control.Control):
     """
     Controller for SWAP in online mode
     """
@@ -53,8 +58,8 @@ class _OnlineControl(swap.control.Control):
         self.swap.classify(classification)
 
         subject = self.swap.subjects.get(classification.subject)
-        return subject.score
+        return subject
 
 
-class OnlineControl(_OnlineControl, metaclass=Singleton):
-    pass
+# class OnlineControl(_OnlineControl, metaclass=Singleton):
+#     pass
