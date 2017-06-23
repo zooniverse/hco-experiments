@@ -60,6 +60,30 @@ class database:
     metadata = ['mag', 'mag_err']
 
 
+class caesar:
+    # Address configuration for accessing caesar
+    host = 'localhost'
+    port = '3000'
+    # Authorization token for panoptes
+    OAUTH = None
+
+    class response:
+        # Response data for reductions
+        workflow = '1737'
+        reducer = 'swap'
+        field = 'swap_score'
+
+    class swap:
+        # Flask app config
+        port = '5000'
+        bind = '0.0.0.0'
+        debug = False
+
+    # Caesar URL format
+    _addr_format = 'http://%(host)s:%(port)s/workflows/%(workflow)s' + \
+                   '/reducers/%(reducer)s/reductions'
+
+
 class logging:
     file_format = '%(asctime)s:%(levelname)s::%(name)s:%(funcName)s ' + \
                   '%(message)s'
