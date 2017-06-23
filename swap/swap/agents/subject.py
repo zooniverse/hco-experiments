@@ -194,10 +194,9 @@ class Ledger(ledger.Ledger):
 
 
 class Transaction(ledger.Transaction):
-    def __init__(self, id_, user, annotation):
-        super().__init__(id_, user)
-        self.annotation = annotation
-        self.score = None
+    def __init__(self, user, annotation):
+        super().__init__(user, annotation)
+        self.set_user_score(user)
 
         self.right = None
         self.left = None

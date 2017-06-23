@@ -228,9 +228,8 @@ class Ledger(ledger.Ledger):
 
 
 class Transaction(ledger.Transaction):
-    def __init__(self, id_, subject, annotation):
-        super().__init__(id_, subject)
-        self.annotation = annotation
+    def __init__(self, subject, annotation):
+        super().__init__(subject, annotation)
         self.gold = subject.gold
 
     @property
