@@ -1,7 +1,6 @@
 
 import swap.control
 from swap.utils.classification import Classification
-from swap.utils import Singleton
 
 import logging
 
@@ -9,6 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 def parse_classification(data):
+    logger.debug(data)
     annotation = parse_annotation(data['annotations'])
 
     params = {
@@ -16,19 +16,25 @@ def parse_classification(data):
         'user': data['user_id'],
         'annotation': annotation
     }
+    logger.debug('parsed classification: %s', str(params))
+
     classification = Classification(**params)
+    logger.debug(classification)
+
     return classification
 
 
 def parse_annotation(annotations):
     # TODO parsing annotations for multiple tasks
     logger.debug('parsing annotations: %s', str(annotations))
+
     value = list(annotations.values())[0][0]['value']
-    print(value)
+
+    logger.debug('got %s', str(value))
     return value
 
 
-class _OnlineControl(swap.control.Control):
+class OnlineControl(swap.control.Control):
     """
     Controller for SWAP in online mode
     """
@@ -53,8 +59,8 @@ class _OnlineControl(swap.control.Control):
         self.swap.classify(classification)
 
         subject = self.swap.subjects.get(classification.subject)
-        return subject.score
+        return subject
 
 
-class OnlineControl(_OnlineControl, metaclass=Singleton):
-    pass
+# class OnlineControl(_OnlineControl, metaclass=Singleton):
+#     pass
