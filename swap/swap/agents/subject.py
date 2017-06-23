@@ -201,6 +201,9 @@ class Transaction(ledger.Transaction):
         self.right = None
         self.left = None
 
+    def notify(self, agent):
+        self.change = agent.score
+
     def get_prior(self):
         if self.left is None:
             return config.p0

@@ -99,13 +99,22 @@ class Ledger:
         # Clear the record of changes
         self.clear_changes()
 
-    def notify_agents(self):
+    def notify_agents(self, bureau):
         """
         Have all transactions notify the connected agents
         that this agent has changed
         """
+        # TODO
+
         for t in self:
-            t.notify(self.id)
+            agent = t.agent(bureau)
+            agent.ledger.notify(self.id, bureau)
+            # t.notify(self.id)
+
+    def notify(self, id_, bureau):
+        agent = bureau.get(id_)
+        self.update(id_)
+        self.transactions[id_].notify(agent)
 
     def clear_changes(self):
         """
@@ -164,6 +173,8 @@ class Transaction:
         self.order = None
 
 
+    def notify(self, agent):
+        pass
 
     def __str__(self):
         id_ = self.id

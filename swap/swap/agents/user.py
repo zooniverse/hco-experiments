@@ -232,6 +232,9 @@ class Transaction(ledger.Transaction):
         super().__init__(subject, annotation)
         self.gold = subject.gold
 
+    def notify(self, agent):
+        self.change = agent.gold
+
     @property
     def changed(self):
         return self.gold != self.agent.gold
