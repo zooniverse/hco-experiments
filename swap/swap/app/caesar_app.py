@@ -3,13 +3,13 @@
 # with Caesar
 
 from swap.app.control import OnlineControl
+import swap.config as config
 
 import logging
 from flask import Flask, request, jsonify
 import requests
 import threading
 from queue import Queue
-import atexit
 
 
 logger = logging.getLogger(__name__)
@@ -58,55 +58,90 @@ TODO:
         To store incoming classifications in cl database
 """
 
+"""
+To configure caesar:
+    swap must be registered as an external extractor in caesar's config
+    swap must be registered as an external reducer in caesar's config
+        with no URL
+"""
+
 app = Flask(__name__)
 threader = None
 
 
 @app.route('/classify', methods=['GET', 'POST'])
 def classify():
-    print(1)
-    logger.debug('received classification')
+    """
+    Receive a classification as an extractor from Caesar
+    """
+    logger.info('received classification')
     logger.debug(str(request))
-    print(request.method)
-    print(dir(request))
-    print(request.get_data())
-    print(request.get_json())
-    print(request.values)
-    # print(request.get_json())
 
-    # import code
-    # code.interact(local=locals())
-    classification = OnlineControl.parse_classification(request.get_json())
-    print(classification)
+    # Parse json from request
+    data = request.get_json()
+    classification = OnlineControl.parse_classification(data)
+
+    logger.debug(classification)
+    logger.debug('sending classification to swap thread')
     threader.queue.put(classification)
+
+    # return empty response
 
     resp = jsonify({'status': 'ok'})
     # resp.status_code = 200
     return resp
 
 
+def generate_address():
+    """
+    Generate Caesar address to PUT reduction
+    """
+    s = config.caesar._addr_format
+    c = config.caesar
+
+    kwargs = {
+        'host': c.host,
+        'port': c.port,
+        'workflow': c.response.workflow,
+        'reducer': c.response.reducer
+    }
+
+    return s % kwargs
+
+
 def respond(subject):
-    address = 'localhost:3000/workflows/4373/reducers/swap/reductions'
-    address = 'http://localhost:3000'
+    """
+    PUT subject score to Caesar
+    """
+    c = config.caesar
+
+    address = generate_address()
+
+    # address = 'http://localhost:3000'
     body = {
         'reduction': {
             'subject_id': subject.id,
             'data': {
-                'swap_score': subject.score
+                c.response.field: subject.score
             }
         }
     }
 
     print('responding!')
+    logger.info('PUT subject %d score %.4f to caesar',
+                subject.id, subject.score)
 
     requests.put(address, json=body)
+    logger.debug('done')
 
 
 def run():
     global threader
     threader = Threader(Queue())
     threader.start()
-    app.run(host='0.0.0.0', port=5000, debug=True)
+
+    c = config.caesar.swap
+    app.run(host=c.bind, port=c.port, debug=c.debug)
 
 
 class Threader(threading.Thread):
@@ -121,15 +156,25 @@ class Threader(threading.Thread):
         self.control = OnlineControl()
 
     def run(self):
+        """
+        Main thread for processing classifications
+        """
+
+        # Ensure thread doesn't exit
+        # Wait for classifications in queue
         while not self.exit.is_set():
-            print(1)
+
             classification = self.queue.get()
             if classification is not None:
-                print(1)
+
                 self.process_message(classification)
-        print('thread exiting')
+
+        logger.warning('thread exiting')
 
     def process_message(self, classification):
+        """
+        Process a classification and PUT response to caesar
+        """
         with self.control_lock:
             logger.info('classifying')
             subject = self.control.classify(classification)
@@ -137,16 +182,6 @@ class Threader(threading.Thread):
                         subject.id, subject.score)
 
             respond(subject)
-
-
-# @atexit.register
-# def goodbye():
-#     logger.info('Stopping threads')
-#     global threader
-#     print(threader.is_alive())
-#     # print(threader.queue.qsize())
-#     threader.exit.set()
-#     threader.join()
 
 
 if __name__ == '__main__':
