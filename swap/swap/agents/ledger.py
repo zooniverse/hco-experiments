@@ -45,14 +45,6 @@ class Ledger:
 
         self._score = None
 
-    def set_bureau(self, bureau):
-        """
-        Provides a bureau to the ledger so it can rebuild agent references
-        in its transactions on the fly. If this is a user ledger, provide a
-        subject bureau and vice versa
-        """
-        self.bureau = bureau
-
     def _change(self, id_):
         """
         Mark a transaction as having changed

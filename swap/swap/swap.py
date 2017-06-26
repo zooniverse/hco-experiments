@@ -64,9 +64,6 @@ class SWAP:
         self.users = Bureau(User)
         self.subjects = Bureau(Subject)
 
-        self.users.reference_bureau(self.subjects)
-        self.subjects.reference_bureau(self.users)
-
         # Directive to update - if True, then a volunteer agent's posterior
         # probability of containing an interesting object will be updated
         # whenever an expertly classified "gold standard" subject is
@@ -453,13 +450,6 @@ class SWAP:
         s += str(self.stats) + '\n'
 
         return s
-
-    def __setstate__(self, state):
-        # Restore cyclic references to transactions
-        self.__dict__.update(state)
-
-        self.subjects.reference_bureau(self.users)
-        self.users.reference_bureau(self.subjects)
 
 
 class DummySWAP:
