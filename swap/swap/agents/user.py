@@ -252,9 +252,13 @@ class Transaction(ledger.Transaction):
         return self.annotation == self.gold
 
     def __str__(self):
+        g = self.gold
+        if g is None:
+            g = -1
+
         s = super().__str__()
-        s += ' gold %d score %.4f' % \
-            (self.gold, self.score)
+        s += ' gold %d score %s' % \
+            (g, self.score)
         return s
 
 

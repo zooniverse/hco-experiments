@@ -113,8 +113,12 @@ class Subject(Agent):
     #     return data
 
     def __str__(self):
+        score = self.score
+        if score is None:
+            score = -1.
+
         return 'id: %s score: %.2f gold label: %d' % \
-            (self.id, self.score, self.gold)
+            (self.id, score, self.gold)
 
 
 class Ledger(ledger.Ledger):
