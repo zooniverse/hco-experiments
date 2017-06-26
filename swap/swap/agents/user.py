@@ -213,7 +213,7 @@ class Ledger(ledger.Ledger):
 
             if t.changed:
                 self.action(t, 'old')
-                t.gold = t.agent.gold
+                t.commit_change()
                 self.action(t, 'new')
 
             t.score = self._calculate()
@@ -232,7 +232,15 @@ class Ledger(ledger.Ledger):
 class Transaction(ledger.Transaction):
     def __init__(self, subject, annotation):
         super().__init__(subject, annotation)
-        self.gold = subject.gold
+
+        self.gold = None
+
+        # TODO store current score
+
+        self.notify(subject)
+
+    def commit_change(self):
+        self.gold = self.change
 
     def notify(self, agent):
         self.change = agent.gold

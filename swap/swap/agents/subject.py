@@ -144,8 +144,7 @@ class Ledger(ledger.Ledger):
         else:
             prior = transaction.get_prior()
             while transaction is not None:
-                user = transaction.agent(bureau)
-                transaction.set_user_score(user)
+                transaction.commit_change()
 
                 prior = transaction.calculate(prior)
                 transaction = transaction.right
@@ -212,13 +211,16 @@ class Ledger(ledger.Ledger):
 class Transaction(ledger.Transaction):
     def __init__(self, user, annotation):
         super().__init__(user, annotation)
-        self.set_user_score(user)
 
+        self.user_score = None
         self.right = None
         self.left = None
 
-    def set_user_score(self, user):
-        self.user_score = user.score
+        self.notify(user)
+        self.commit_change()
+
+    def commit_change(self):
+        self.user_score = self.change
 
     def notify(self, agent):
         self.change = agent.score

@@ -180,13 +180,17 @@ class Transaction:
     def notify(self, agent):
         pass
 
+    def commit_change(self):
+        pass
+
     def __str__(self):
         id_ = self.id
         if type(id_) is str and 'not-logged-in' in id_:
             id_ = id_.split('-')[-1]
         if self.order is None:
             self.order = -1
-        s = 'id %20s order %2d' % (str(id_), self.order)
+        s = 'id %20s order %2d annotation %d' % \
+            (str(id_), self.order, self.annotation)
         return s
 
 
