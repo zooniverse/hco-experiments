@@ -89,6 +89,10 @@ class GoldGetter:
         consensus = cv.get_consensus(size)
         return db.getExpertGold(consensus)
 
+    @_getter
+    def these(self, golds):
+        return golds
+
     # @_getter
     # def extreme_min(self, n_controv, max_consensus):
     #     def f():
