@@ -216,7 +216,7 @@ class Ledger(ledger.Ledger):
                 t.commit_change()
                 self.action(t, 'new')
 
-            t.score = self._calculate()
+                t.score = self._calculate()
 
         score = self._calculate()
 
