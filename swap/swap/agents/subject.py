@@ -153,7 +153,7 @@ class Ledger(ledger.Ledger):
             score = prior
 
         self._score = score
-        super().recalculate(bureau)
+        super().recalculate()
         return score
 
     def add(self, transaction):

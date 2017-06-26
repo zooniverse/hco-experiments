@@ -205,7 +205,7 @@ class Ledger(ledger.Ledger):
                 else:
                     c.unsee()
 
-    def recalculate(self, bureau):
+    def recalculate(self):
         # print(self.changed)
         for i in self.changed:
             # print(i, self.id)
