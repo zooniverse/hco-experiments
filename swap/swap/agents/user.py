@@ -166,6 +166,8 @@ class Ledger(ledger.Ledger):
         self.no = Counter()
         self.yes = Counter()
 
+        self.recalculate()
+
     @ledger.Ledger.score.setter
     def score(self, new):
         if self._score != new:
