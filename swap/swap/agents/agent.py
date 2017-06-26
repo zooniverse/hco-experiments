@@ -1,6 +1,8 @@
 ################################################################
 # Parent class for all agents
 
+import swap.agents.ledger as ledger
+
 import abc
 import statistics as st
 
@@ -31,7 +33,10 @@ class Agent(metaclass=abc.ABCMeta):
         """
             Score getter function
         """
-        return self.ledger.score
+        try:
+            return self.ledger.score
+        except ledger.StaleException:
+            return self.ledger._score
 
     @abc.abstractmethod
     def classify(self, cl):
