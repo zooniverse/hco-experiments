@@ -111,6 +111,9 @@ class SWAP:
         subject = self.subjects.get(cl.subject)
         user = self.users.get(cl.user)
 
+        if not config.back_update:
+            user.ledger.recalculate()
+
         subject.classify(cl, user)
         user.classify(cl, subject)
 
