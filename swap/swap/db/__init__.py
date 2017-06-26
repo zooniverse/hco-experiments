@@ -96,7 +96,7 @@ class _DB:
         return stats
 
     def get_stats(self):
-        return self.stats.find().sort('_id', 1).limit(1).next()
+        return self.stats.find().sort('_id', -1).limit(1).next()
 
 
 class DB(_DB, metaclass=Singleton):
