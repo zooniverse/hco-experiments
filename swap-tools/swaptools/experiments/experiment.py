@@ -183,6 +183,15 @@ def get_trials(directory):
 
 class ExperimentInterface(swap.ui.Interface):
 
+    def _from_db(self, name, cutoff):
+        pass
+
+    def _trial_kwargs(self, trial_args):
+        pass
+
+    def _build_trial(self, trial_info, golds, scores):
+        pass
+
     def options(self, parser):
 
         parser.add_argument(
@@ -230,6 +239,12 @@ class ExperimentInterface(swap.ui.Interface):
             help='experiment name')
 
         parser.add_argument(
+            '--swap-from-trial', action='store_true')
+
+        parser.add_argument(
+            '--trial', nargs='*')
+
+        parser.add_argument(
             '--name', nargs=1, required=True,
             help='Name of experiment')
 
@@ -265,6 +280,12 @@ class ExperimentInterface(swap.ui.Interface):
         elif args.from_db:
             e = self._from_db(name, cutoff)
 
+        elif args.swap_from_trial:
+            trial_info = self._trial_kwargs(args.trial)
+            trial = self._trial_from_db(trial_info, name)
+
+            swap = self.swap_from_trial(trial)
+
         elif args.load:
             e = self.load(args.load[0])
 
@@ -298,5 +319,14 @@ class ExperimentInterface(swap.ui.Interface):
 
         e.plot(type_, fname)
 
-    def _from_db(self, name, cutoff):
-        pass
+    def _trial_from_db(self, trial_info, name):
+        print(trial_info)
+        t, g, s = dbe.SingleTrialCursor(name, trial_info).next()
+        return self._build_trial(t, g, s)
+
+    def swap_from_trial(self, trial):
+        control = Control()
+        control.gold_getter.these(trial.golds)
+        control.run()
+
+        return control.swap
