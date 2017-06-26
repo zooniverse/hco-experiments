@@ -197,7 +197,7 @@ class Transaction:
 class StaleException(Exception):
 
     def __init__(self, ledger):
-        msg = 'Ledger is stale'
-        logger.error(msg)
+        msg = 'Ledger is stale: %s' % str(ledger)
+        # logger.error(msg)
         super().__init__(msg)
         self.ledger = ledger
