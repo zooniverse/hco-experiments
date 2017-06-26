@@ -40,7 +40,7 @@ class User(Agent):
         annotation = cl.annotation
 
         if subject.id not in self.ledger.transactions:
-            t = Transaction(subject.id, subject, annotation)
+            t = Transaction(subject, annotation)
             self.ledger.add(t)
 
     # def export(self):

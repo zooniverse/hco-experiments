@@ -66,7 +66,7 @@ class Subject(Agent):
         id_ = user.id
 
         if id_ not in self.ledger.transactions:
-            t = Transaction(id_, user, annotation)
+            t = Transaction(user, annotation)
             self.ledger.add(t)
 
     def set_gold_label(self, gold_label):
@@ -84,7 +84,7 @@ class Subject(Agent):
 
         if old != new:
             self._gold = gold_label
-            self.ledger.notify_agents()
+            self.ledger.notify_agents(users)
 
     def isgold(self):
         return self.gold in [0, 1]
