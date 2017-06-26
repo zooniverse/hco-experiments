@@ -227,7 +227,12 @@ class Transaction(ledger.Transaction):
         self.user_score = self.change
 
     def notify(self, agent):
-        self.change = agent.score
+        try:
+            self.change = agent.score
+        except ledger.StaleException:
+            # ledger is stale, continuing by using stale score
+            # for now
+            self.change = agent.ledger._score
 
     def get_prior(self):
         if self.left is None:
