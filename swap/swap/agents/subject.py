@@ -172,7 +172,7 @@ class Ledger(ledger.Ledger):
         id_ = super().add(transaction)
 
         if not config.back_update:
-            transaction.calculate()
+            self._score = transaction.calculate()
             # TODO
             # calculate new score
             # but not by calling recalcluate
