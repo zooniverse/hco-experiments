@@ -270,6 +270,6 @@ class Transaction(ledger.Transaction):
             score = -1
 
         s = super().__str__()
-        s += ' annotation %d score %.5f user_score %.3f %.3f' % \
-            (self.annotation, score, self.user_score[0], self.user_score[1])
+        s += ' score %.5f user_score %.3f %.3f' % \
+            (score, self.user_score[0], self.user_score[1])
         return s

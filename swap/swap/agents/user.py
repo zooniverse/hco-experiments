@@ -170,8 +170,6 @@ class Ledger(ledger.Ledger):
     def score(self, new):
         if self._score != new:
             self._score = new
-            if config.back_update:
-                self.notify_agents()
 
     def add(self, transaction):
         # Remove gold label from transaction, will be put back in when
@@ -255,8 +253,8 @@ class Transaction(ledger.Transaction):
 
     def __str__(self):
         s = super().__str__()
-        s += ' gold %d annotation %d' % \
-            (self.gold, self.annotation)
+        s += ' gold %d score %.4f' % \
+            (self.gold, self.score)
         return s
 
 
