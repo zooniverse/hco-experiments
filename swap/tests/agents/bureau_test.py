@@ -120,11 +120,13 @@ class TestBureau:
     def test_stats_subject(self):
         b = Bureau(Subject)
         [b.add(Subject(i)) for i in range(5)]
+        [s.ledger.recalculate() for s in b]
         b.stats()
 
     def test_stats_users(self):
         b = Bureau(User)
         [b.add(User(i)) for i in range(5)]
+        [u.ledger.recalculate() for u in b]
         b.stats()
 
     # ---------EXPORT TEST------------------------------

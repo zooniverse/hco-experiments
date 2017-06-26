@@ -1,6 +1,7 @@
 ################################################################
+# pylint: disable=R0201
 
-from swap.agents.ledger import Ledger, Transaction, MissingReference
+from swap.agents.ledger import Ledger, Transaction, StaleException
 from swap.agents.subject import Ledger as SLedger
 from swap.agents.subject import Transaction as STransaction
 from swap.agents.user import User
@@ -9,9 +10,28 @@ from swap.agents.user import Transaction as UTransaction
 from swap.agents.user import Counter
 from swap.agents.bureau import Bureau
 
+import swap.config as config
+
 from unittest.mock import MagicMock, patch
 
 import pytest
+
+
+def mocksubject(i=0, g=-1):
+    s = MagicMock()
+    s.id = i
+    s.gold = g
+    s.score = 0.12
+
+    return s
+
+
+def mockuser(i=0, score=(0.5, 0.5)):
+    u = MagicMock()
+    u.id = i
+    u.score = score
+
+    return u
 
 
 class TestLedger:
@@ -24,8 +44,8 @@ class TestLedger:
 
     def test_add_transaction(self):
         le = Ledger(0)
-        t0 = Transaction(0, None)
-        t1 = Transaction(1, None)
+        t0 = Transaction(mocksubject(0), 0)
+        t1 = Transaction(mocksubject(1), 0)
 
         le.add(t0)
         le.add(t1)
@@ -38,8 +58,8 @@ class TestLedger:
 
     def test_add_registers_change(self):
         le = Ledger(0)
-        t0 = Transaction(0, None)
-        t1 = Transaction(1, None)
+        t0 = Transaction(mocksubject(0), 0)
+        t1 = Transaction(mocksubject(1), 0)
 
         le.add(t0)
         le.add(t1)
@@ -50,14 +70,14 @@ class TestLedger:
 
     def test_get(self):
         le = Ledger(0)
-        t = Transaction(0, None)
+        t = Transaction(mocksubject(0), 0)
         le.add(t)
 
         assert le.get(0) == t
 
     def test_update(self):
         le = Ledger(0)
-        t0 = Transaction(0, None)
+        t0 = Transaction(mocksubject(0), 0)
         t0.notify = MagicMock()
 
         le.add(t0)
@@ -67,8 +87,8 @@ class TestLedger:
 
     def test_update_registers_change(self):
         le = Ledger(0)
-        t0 = Transaction(0, None)
-        t1 = Transaction(1, None)
+        t0 = Transaction(mocksubject(0), 0)
+        t1 = Transaction(mocksubject(1), 0)
 
         le.add(t0)
         le.add(t1)
@@ -81,8 +101,8 @@ class TestLedger:
 
     def test_recalculate_clears_changes(self):
         le = Ledger(0)
-        t0 = Transaction(0, None)
-        t1 = Transaction(1, None)
+        t0 = Transaction(mocksubject(0), 0)
+        t1 = Transaction(mocksubject(1), 0)
 
         le.add(t0)
         le.add(t1)
@@ -98,67 +118,89 @@ class TestLedger:
 
         assert 1 in le.changed
 
-    def test_missing_bureau(self):
-        le = Ledger(0)
+    # def test_missing_bureau(self):
+    #     le = Ledger(0)
 
-        with pytest.raises(MissingReference):
-            le.restore_agent(15)
+    #     with pytest.raises(MissingReference):
+    #         le.restore_agent(15)
+
+    @patch.object(Transaction, 'agent', return_value=MagicMock())
+    def test_notify_agents_getsagent(self, mock):
+        l = Ledger(0)
+        [l.add(Transaction(mocksubject(i), 0)) for i in range(5)]
+        l.notify_agents(None)
+
+        assert mock.call_count == 5
+
+    def test_notify_agents_callsnotify(self):
+        subject = mocksubject(0)
+        t = Transaction(mocksubject(1), 0)
+        mock = MagicMock(return_value=subject)
+        t.agent = mock
+
+        l = Ledger(15)
+        l.add(t)
+        l.notify_agents(16)
+
+        print(subject)
+        subject.ledger.notify.assert_called_once_with(15, 16)
 
 
 class TestTransaction:
 
     def test_init(self):
-        t = Transaction(1, 2)
-        assert t.id == 1
-        assert t._agent == 2
+        t = Transaction(mocksubject(15), 20)
+        assert t.id == 15
+        assert t.annotation == 20
         assert t.order is None
-        assert t.restore_callback is None
+        assert t.score is None
+        assert t.change is None
 
-    def test_delref(self):
-        t = Transaction(0, User(0))
-        t.delref()
+    # def test_delref(self):
+    #     t = Transaction(0, User(0))
+    #     t.delref()
 
-        assert t._agent is None
+    #     assert t._agent is None
 
-    def test_restore(self):
-        t = Transaction(0, None)
-        u = User(0)
-        t.restore(u)
+    # def test_restore(self):
+    #     t = Transaction(mocksubject(0), 0)
+    #     u = User(0)
+    #     t.restore(u)
 
-        assert t._agent == u
+    #     assert t._agent == u
 
-    def test_notify(self):
-        mock = MagicMock()
-        t = Transaction(0, mock)
-        t.notify(100)
+    # def test_notify(self):
+    #     mock = MagicMock()
+    #     t = Transaction(mock)
+    #     t.notify(100)
 
-        mock.ledger.update.assert_called_once_with(100)
+    #     mock.ledger.update.assert_called_once_with(100)
 
-    def test_set_restore_callback(self):
-        t = Transaction(0, None)
-        mock = MagicMock()
-        t.set_restore_callback(mock)
-        t.restore_callback()
+    # def test_set_restore_callback(self):
+    #     t = Transaction(mocksubject(0), 0)
+    #     mock = MagicMock()
+    #     t.set_restore_callback(mock)
+    #     t.restore_callback()
 
-        mock.assert_called_once_with()
+    #     mock.assert_called_once_with()
 
     def test_builtins(self):
-        t = Transaction(1, None)
+        t = Transaction(mocksubject(1), 0)
         print(t)
 
-    def test_agent_missing(self):
-        t = Transaction(1, None)
+    # def test_agent_missing(self):
+    #     t = Transaction(mocksubject(1), 0)
 
-        with pytest.raises(MissingReference):
-            t.agent
+    #     with pytest.raises(MissingReference):
+    #         t.agent
 
-    def test_agent_missing_callback(self):
-        t = Transaction(1, None)
-        mock = MagicMock()
-        t.set_restore_callback(mock)
+    # def test_agent_missing_callback(self):
+    #     t = Transaction(mocksubject(1), 0)
+    #     mock = MagicMock()
+    #     t.set_restore_callback(mock)
 
-        t.agent
-        mock.assert_called_once_with()
+    #     t.agent
+    #     mock.assert_called_once_with()
 
 
 class TestSubjectLedger:
@@ -173,14 +215,14 @@ class TestSubjectLedger:
     def test_score_stale(self):
         le = SLedger(0)
         le.stale = True
-        le.score
 
-        le.recalculate.asert_called_once()
+        with pytest.raises(StaleException):
+            le.score
 
     def test_add_transaction_last(self):
         le = SLedger(0)
-        t0 = STransaction(0, None, 0)
-        t1 = STransaction(1, None, 0)
+        t0 = STransaction(mockuser(0), 0)
+        t1 = STransaction(mockuser(1), 0)
 
         le.add(t0)
         le.add(t1)
@@ -189,8 +231,8 @@ class TestSubjectLedger:
 
     def test_add_transaction_links(self):
         le = SLedger(0)
-        t0 = STransaction(0, None, 0)
-        t1 = STransaction(1, None, 0)
+        t0 = STransaction(mockuser(0), 0)
+        t1 = STransaction(mockuser(1), 0)
 
         le.add(t0)
         le.add(t1)
@@ -204,9 +246,9 @@ class TestSubjectLedger:
     @patch.object(STransaction, 'calculate', MagicMock(return_value=.5))
     def test_update_first_change(self):
         le = SLedger(0)
-        t0 = STransaction(0, None, 0)
-        t1 = STransaction(1, None, 0)
-        t2 = STransaction(2, None, 0)
+        t0 = STransaction(mockuser(0), 0)
+        t1 = STransaction(mockuser(1), 0)
+        t2 = STransaction(mockuser(2), 0)
 
         t1.notify = MagicMock()
 
@@ -222,8 +264,8 @@ class TestSubjectLedger:
 
     def test_change(self):
         le = SLedger(0)
-        t0 = STransaction(0, None, 0)
-        t1 = STransaction(1, None, 0)
+        t0 = STransaction(mockuser(0), 0)
+        t1 = STransaction(mockuser(1), 0)
 
         le.add(t0)
         le.add(t1)
@@ -236,9 +278,9 @@ class TestSubjectLedger:
     @patch.object(STransaction, 'get_prior', new=MagicMock(return_value=.5))
     def test_recalculate_beginning(self):
         le = SLedger(0)
-        t0 = STransaction(0, None, 0)
-        t1 = STransaction(1, None, 0)
-        t2 = STransaction(2, None, 0)
+        t0 = STransaction(mockuser(0), 0)
+        t1 = STransaction(mockuser(1), 0)
+        t2 = STransaction(mockuser(2), 0)
 
         le.add(t0)
         le.add(t1)
@@ -251,9 +293,9 @@ class TestSubjectLedger:
     @patch.object(STransaction, 'get_prior', new=MagicMock(return_value=.5))
     def test_recalculate_middle(self):
         le = SLedger(0)
-        t0 = STransaction(0, None, 0)
-        t1 = STransaction(1, None, 0)
-        t2 = STransaction(2, None, 0)
+        t0 = STransaction(mockuser(0), 0)
+        t1 = STransaction(mockuser(1), 0)
+        t2 = STransaction(mockuser(2), 0)
 
         le.add(t0)
         le.add(t1)
@@ -265,12 +307,10 @@ class TestSubjectLedger:
 
     def test_recalculate_real(self):
         def u(i):
-            user = MagicMock()
-            user.score = (.25, .25)
-            return user
+            return mockuser(i, score=(.25, .25))
         le = SLedger(0)
         for x in range(10):
-            le.add(STransaction(x, u(x), 0))
+            le.add(STransaction(u(x), 0))
 
         score = le.recalculate()
         print(score)
@@ -281,28 +321,46 @@ class TestSubjectLedger:
         assert le.recalculate() == 0.12
 
     def test_recalculate_propagates(self):
-        def user(a, b):
-            u = MagicMock()
-            u.score = (a, b)
-            return u
+        def u(i, s):
+            return mockuser(i, s)
 
         le = SLedger(0)
-        t0 = STransaction(0, user(3 / 4, 3 / 4), 1)
-        t1 = STransaction(1, user(1 / 4, 1 / 4), 1)
+        t0 = STransaction(u(0, (3 / 4, 3 / 4)), 1)
+        t1 = STransaction(u(1, (1 / 4, 1 / 4)), 1)
 
         le.add(t0)
         le.add(t1)
 
+        le.recalculate()
+
         assert le.score - .12 < 1e-10
+
+    @patch('swap.config.back_update', False)
+    @patch.object(STransaction, 'calculate')
+    def test_add_legacy_callscalculate(self, mock):
+        le = SLedger(0)
+        t = STransaction(mockuser(0), 0)
+        le.add(t)
+
+        mock.assert_called_once_with()
+
+    @patch('swap.config.back_update', True)
+    @patch.object(STransaction, 'calculate')
+    def test_add_legacy_nocalculate(self, mock):
+        le = SLedger(0)
+        t = STransaction(mockuser(0), 0)
+        le.add(t)
+
+        assert mock.call_count == 0
 
 
 class TestSubjectTransaction:
     def test_init(self):
-        user = MagicMock()
-        t = STransaction(0, user, 0)
+        t = STransaction(mockuser(0), 0)
 
         assert t.id == 0
-        assert t.agent == user
+        assert t.user_score == (0.5, 0.5)
+        assert t.change == (0.5, 0.5)
         assert t.annotation == 0
         assert t.score is None
 
@@ -310,15 +368,14 @@ class TestSubjectTransaction:
         assert t.right is None
 
     def test_get_prior_first(self):
-        user = MagicMock()
-        t = STransaction(0, user, 0)
+        t = STransaction(mocksubject(0), 0)
 
         assert t.get_prior() == 0.12
 
     def test_get_prior_middle(self):
         user = MagicMock()
-        t0 = STransaction(0, user, 0)
-        t1 = STransaction(0, user, 0)
+        t0 = STransaction(mockuser(0), 0)
+        t1 = STransaction(mockuser(0), 0)
 
         t1.left = t0
         t0.score = 15
@@ -326,56 +383,78 @@ class TestSubjectTransaction:
         assert t1.get_prior() == 15
 
     def test_notify(self):
-        user = MagicMock()
-        t = STransaction(15, user, 0)
-        t.notify(25)
-        user.ledger.update.assert_called_once_with(25)
+        t = STransaction(mockuser(1), 0)
+        t.notify(mockuser(15, (0.1, 0.9)))
+
+        assert t.change == (0.1, 0.9)
+        assert t.user_score == (0.5, 0.5)
+
+    def test_commit_change(self):
+        t = STransaction(mockuser(1), 0)
+        t.notify(mockuser(15, (0.1, 0.9)))
+        t.commit_change()
+
+        assert t.change == (0.1, 0.9)
+        assert t.user_score == (0.1, 0.9)
+
+    def test_calculate_nocommit(self):
+        t = STransaction(mockuser(1), 0)
+        t.notify(mockuser(15, (0.1, 0.9)))
+
+        assert t.calculate(.12) == .12
 
     def test_calculate_1(self):
-        user = MagicMock()
-        user.score = (.25, .8)
+        user = mockuser(0, (.25, .8))
 
-        print(user.getScore(0))
-        print(user.getScore(1))
-
-        t = STransaction(0, user, 1)
+        t = STransaction(user, 1)
         assert t.calculate(.12) - .096 / .756 < 1e-10
 
     def test_calculate_0(self):
-        user = MagicMock()
-        user.score = (.25, .8)
-        print(*user.score)
-
-        t = STransaction(0, user, 0)
+        t = STransaction(mockuser(0, (.25, .8)), 0)
         assert t.calculate(.12) - .024 / .244 < 1e-10
 
 
 class TestUserLedger:
-    def get_subject(self, gold):
-        subject = MagicMock()
-        subject.gold = gold
-        return subject
 
     def test_init(self):
         le = ULedger(17)
         assert le.id == 17
         assert type(le.no) is Counter
         assert type(le.yes) is Counter
-        assert le._score is None
+        assert le._score == (0.5, 0.5)
 
     def test_add(self):
-        subject = self.get_subject(0)
-
         le = ULedger(0)
-        t = UTransaction(0, subject, 0)
+        t = UTransaction(mocksubject(0), 0)
         le.add(t)
         assert t.gold is None
 
+    @patch('swap.config.back_update', False)
+    @patch.object(ULedger, 'recalculate')
+    def test_add_legacyrecalculate(self, mock):
+        le = ULedger(0)
+        mock.reset_mock()
+
+        t = UTransaction(mocksubject(0), 0)
+        le.add(t)
+
+        le.recalculate.assert_called_once_with()
+
+    @patch('swap.config.back_update', True)
+    @patch.object(ULedger, 'recalculate')
+    def test_add_backupdaterecalculate(self, mock):
+        le = ULedger(0)
+        mock.reset_mock()
+        t = UTransaction(mocksubject(0), 0)
+        le.add(t)
+
+        assert mock.call_count == 0
+
     def test_recalculate_1(self):
         le = ULedger(0)
-        t0 = UTransaction(0, self.get_subject(0), 0)
-        t1 = UTransaction(1, self.get_subject(1), 0)
-        t2 = UTransaction(2, self.get_subject(1), 0)
+        t0 = UTransaction(mocksubject(0, 0), 0)
+        t1 = UTransaction(mocksubject(1, 1), 0)
+        t2 = UTransaction(mocksubject(2, 1), 0)
 
         le.add(t0)
         le.add(t1)
@@ -385,10 +464,10 @@ class TestUserLedger:
 
     def test_recalculate_2(self):
         le = ULedger(0)
-        t0 = UTransaction(0, self.get_subject(1), 0)
-        t1 = UTransaction(1, self.get_subject(1), 0)
-        t2 = UTransaction(2, self.get_subject(1), 0)
-        t3 = UTransaction(2, self.get_subject(1), 1)
+        t0 = UTransaction(mocksubject(0, 1), 0)
+        t1 = UTransaction(mocksubject(1, 1), 0)
+        t2 = UTransaction(mocksubject(2, 1), 0)
+        t3 = UTransaction(mocksubject(2, 1), 1)
 
         le.add(t0)
         le.add(t1)
@@ -399,32 +478,24 @@ class TestUserLedger:
 
     def test_score(self):
         le = ULedger(0)
-        t0 = UTransaction(0, self.get_subject(1), 0)
-        t1 = UTransaction(1, self.get_subject(1), 0)
-        t2 = UTransaction(2, self.get_subject(1), 0)
-        t3 = UTransaction(2, self.get_subject(1), 1)
+        t0 = UTransaction(mocksubject(0, 1), 0)
+        t1 = UTransaction(mocksubject(1, 1), 0)
+        t2 = UTransaction(mocksubject(2, 1), 0)
+        t3 = UTransaction(mocksubject(2, 1), 1)
 
         le.add(t0)
         le.add(t1)
         le.add(t2)
         le.add(t3)
 
+        le.recalculate()
+
         assert le.score == (1 / 2, 2 / 5)
-
-    def test_notify(self):
-        le = ULedger(0)
-        t = UTransaction(0, self.get_subject(1), 0)
-
-        le.notify_agents = MagicMock()
-        le.score = 0.5
-        le.notify_agents.assert_called_once_with()
 
     def test_no_gold(self):
         le = ULedger(0)
-        s = MagicMock()
-        s.gold = -1
         for i in range(0):
-            t = UTransaction(i, s, 0)
+            t = UTransaction(mocksubject(-1), 0)
             le.add(t)
 
         assert le.recalculate() == (0.5, 0.5)
@@ -445,53 +516,48 @@ class TestUserLedger:
 
 class TestUserTransaction:
     def test_init(self):
-        subject = MagicMock()
-        subject.gold = 0
-
-        t = UTransaction(0, subject, 0)
-
-        assert t.agent == subject
+        t = UTransaction(mocksubject(0, 0), 0)
         assert t.annotation == 0
-        assert t.gold == 0
+        assert t.gold is None
+        assert t.change == 0
 
     def test_notify(self):
-        subject = MagicMock()
-        subject.gold = 0
+        t = UTransaction(mocksubject(1, 1), 0)
+        t.notify(mocksubject(1, 1))
 
-        t = UTransaction(22, subject, 0)
-        t.notify(23)
-        t.agent.ledger.update.assert_called_once_with(23)
+        assert t.change == 1
+        assert t.gold is None
+
+    def test_commit_change(self):
+        t = UTransaction(mocksubject(1, 1), 0)
+        t.notify(mocksubject(1, 1))
+        t.commit_change()
+
+        assert t.change == 1
+        assert t.gold == 1
 
     def test_changed(self):
-        subject = MagicMock()
-        subject.gold = 0
-
-        t = UTransaction(0, subject, 0)
-        subject.gold = 1
+        t = UTransaction(mocksubject(1, 1), 0)
+        t.notify(mocksubject(1, 1))
 
         assert t.changed
 
     def test_unchanged(self):
-        subject = MagicMock()
-        subject.gold = 0
-
-        t = UTransaction(0, subject, 0)
+        t = UTransaction(mocksubject(1, 1), 0)
+        t.notify(mocksubject(1, 1))
+        t.commit_change()
 
         assert not t.changed
 
     def test_matched(self):
-        subject = MagicMock()
-        subject.gold = 0
-
-        t = UTransaction(0, subject, 0)
+        t = UTransaction(mocksubject(0, 0), 0)
+        t.commit_change()
 
         assert t.matched
 
     def test_unmatched(self):
-        subject = MagicMock()
-        subject.gold = 0
-
-        t = UTransaction(0, subject, 1)
+        t = UTransaction(mocksubject(0, 0), 1)
+        t.commit_change()
 
         assert not t.matched
 
@@ -531,59 +597,59 @@ class TestUserCounter:
         assert c.matched == 4
 
 
-class TestDynamicReferencing:
+# class TestDynamicReferencing:
 
-    def test_nuke(self):
-        le = Ledger(15)
-        mock = MagicMock()
-        t = Transaction(1, mock)
+#     def test_nuke(self):
+#         le = Ledger(15)
+#         mock = MagicMock()
+#         t = Transaction(mock)
 
-        le.add(t)
-        le.nuke()
+#         le.add(t)
+#         le.nuke()
 
-        mock.ledger.delrefs.assert_called_once_with(15)
+#         mock.ledger.delrefs.assert_called_once_with(15)
 
-    def test_delrefs(self):
-        le = Ledger(15)
-        t = Transaction(16, None)
-        t.delref = MagicMock()
-        le.add(t)
+#     def test_delrefs(self):
+#         le = Ledger(15)
+#         t = Transaction(16, mocksubject())
+#         t.delref = MagicMock()
+#         le.add(t)
 
-        le.delrefs(16)
-        t.delref.assert_called_once_with()
+#         le.delrefs(16)
+#         t.delref.assert_called_once_with()
 
-    def test_delete_all_agents(self):
+#     def test_delete_all_agents(self):
 
-        le = Ledger(0)
-        u = User(0)
-        for i in range(5):
-            le.add(Transaction(i, u))
+#         le = Ledger(0)
+#         u = User(0)
+#         for i in range(5):
+#             le.add(Transaction(i, u))
 
-        le.delete_all_agents()
+#         le.delete_all_agents()
 
-        for t in le:
-            assert t._agent is None
+#         for t in le:
+#             assert t._agent is None
 
-    def test_transaction_restore(self):
-        le = Ledger(0)
-        bureau = Bureau(User)
-        le.set_bureau(bureau)
-        user = bureau.get(15)
+#     def test_transaction_restore(self):
+#         le = Ledger(0)
+#         bureau = Bureau(User)
+#         le.set_bureau(bureau)
+#         user = bureau.get(15)
 
-        t = Transaction(15, None)
-        le.add(t)
+#         t = Transaction(15, mocksubject())
+#         le.add(t)
 
-        assert t.agent == user
+#         assert t.agent == user
 
-    def test_transaction_restore2(self):
-        le = Ledger(0)
-        bureau = Bureau(User)
-        le.set_bureau(bureau)
-        user = bureau.get(15)
+#     def test_transaction_restore2(self):
+#         le = Ledger(0)
+#         bureau = Bureau(User)
+#         le.set_bureau(bureau)
+#         user = bureau.get(15)
 
-        t = Transaction(15, None)
-        le.add(t)
-        t.restore_callback = None
-        t.set_restore_callback(lambda: le.restore_agent(t.id))
+#         t = Transaction(15, mocksubject())
+#         le.add(t)
+#         t.restore_callback = None
+#         t.set_restore_callback(lambda: le.restore_agent(t.id))
 
-        assert t.agent == user
+#         assert t.agent == user

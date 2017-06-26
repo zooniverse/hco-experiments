@@ -101,6 +101,7 @@ class TestSwap:
         for x in range(10):
             for y in range(10):
                 swap.classify(Classification(x, y, 0))
+        swap.process_changes()
 
         stats = swap.stats
         print(stats)
@@ -114,6 +115,7 @@ class TestSwap:
         for x in range(10):
             for y in range(10):
                 swap.classify(Classification(x, y, 0))
+        swap.process_changes()
 
         print(swap.manifest())
 
@@ -161,6 +163,7 @@ class TestSwap:
         print(bureau)
 
         swap.classify(Classification(0, 2, 0, 1))
+        swap.process_changes()
         print(bureau.get(1))
         assert bureau.get(2).gold == 0
 

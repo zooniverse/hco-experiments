@@ -3,6 +3,7 @@
 
 import swap.agents.subject as _subject
 import swap.agents.user as _user
+from swap.agents.bureau import Bureau
 from swap.utils.classification import Classification
 
 import pytest
@@ -30,7 +31,7 @@ class TestSubject:
         s = Subject(1, 0)
         assert s.isgold()
 
-        s.set_gold_label(1)
+        s = Subject(1, 1)
         assert s.isgold()
 
     def test_isgold_false(self):
@@ -39,18 +40,23 @@ class TestSubject:
 
     def test_score_property(self):
         s = Subject(1)
+        s.ledger.recalculate()
         assert s.score == 0.12
 
     def test_classify(self):
         s = Subject(12)
         cl = Classification(11, 12, 1, 1)
-        s.classify(cl, User(11))
+
+        u = User(11)
+        u.ledger.recalculate()
+        s.classify(cl, u)
 
         t = s.ledger.get(11)
         assert t.annotation == 1
-        assert t.agent.id == 11
         assert t.id == 11
         print(t)
+
+        s.ledger.recalculate()
         s.score
 
     def test_classify_rejects_wrong_classification(self):
@@ -113,22 +119,23 @@ class TestSubject:
         s = Subject(1)
         assert s.gold == -1
 
-        s.set_gold_label(1)
+        s.set_gold_label(1, MagicMock())
         assert s.gold == 1
 
     def test_set_gold_label_notify_ledger(self):
         s = Subject(1)
         s.ledger = MagicMock()
 
-        s.set_gold_label(1)
-        s.ledger.notify_agents.assert_called_once_with()
+        users = Bureau(User)
+        s.set_gold_label(1, users)
+        s.ledger.notify_agents.assert_called_once_with(users)
 
     def test_set_gold_label_no_notify_ledger(self):
         s = Subject(1)
         s.ledger = MagicMock()
 
         s._gold = 1
-        s.set_gold_label(1)
+        s.set_gold_label(1, MagicMock())
         s.ledger.notify_agents.assert_not_called()
 
     # ---------EXPORT TEST------------------------------

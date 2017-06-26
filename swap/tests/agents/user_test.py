@@ -36,13 +36,14 @@ class TestUser:
 
     def test_score_property(self):
         u = User(1)
+        u.ledger.recalculate()
 
         assert u.score == (.5, .5)
 
     def test_classify(self):
         u = User(11)
         s = Subject(12)
-        s.set_gold_label(0)
+        s.set_gold_label(0, None)
 
         cl = Classification(11, 12, 1)
         u.classify(cl, s)
@@ -50,8 +51,8 @@ class TestUser:
         print(u.ledger.transactions)
         t = u.ledger.get(12)
         assert t.annotation == 1
-        assert t.agent.gold == 0
-        assert t.agent.id == 12
+        assert t.change == 0
+        assert t.id == 12
 
     def test_classify_rejects_wrong_classification(self):
         u = User(1)
@@ -218,6 +219,9 @@ class TestUser:
         b.add(User(0))
         b.add(User(1))
         b.add(User(2))
+
+        for u in b:
+            u.ledger.recalculate()
 
         s = b.stats()
         assert 0 in s.stats
