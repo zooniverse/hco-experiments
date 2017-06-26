@@ -168,6 +168,8 @@ class SWAP:
 
         with_bar = config.back_update
 
+        # TODO make sure notify_agents is called on each ledger
+
         def run(bureau):
             if with_bar:
                 name = bureau.agent_type.class_name
@@ -250,7 +252,7 @@ class SWAP:
     #     """ Get Subject Bureau object """
     #     return self.subjects
 
-    def set_gold_labels(self, golds):
+    def set_gold_labels(self, golds, with_bar=True):
         """
             Defines the subjects explicitly that should be
             treated as gold standards
@@ -266,15 +268,21 @@ class SWAP:
                 (subject id : gold label) Mapping of subject to its gold label
         """
         # Removes gold label from all subjects not in the golds list
+        logger.info('Processing gold labels')
+        if with_bar:
+            bar = progressbar.ProgressBar(max_value=len(self.subjects))
         for subject in self.subjects:
             if subject.id not in golds:
-                subject.set_gold_label(-1, self.users)
+                subject.set_gold_label(-1, self.subjects, self.users)
+
+            if with_bar:
+                bar.update(bar.value + 1)
         # Assigns the new gold label to subjects in the list
         # Also tells the Bureau to make a new subject agent if it
         # doesn't exist yet
         for id_, gold in golds.items():
             subject = self.subjects.get(id_, make_new=True)
-            subject.set_gold_label(gold, self.users)
+            subject.set_gold_label(gold, self.subjects, self.users)
 
         # self.process_changes()
 
