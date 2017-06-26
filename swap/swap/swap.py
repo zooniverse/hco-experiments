@@ -181,7 +181,14 @@ class SWAP:
             else:
                 bureau.process_changes()
 
+        logger.info('Notifying user agents of subject changes')
+        self.subjects.notify_changes(self.users)
+
         run(self.users)
+
+        logger.info('Notifying subject agents of user changes')
+        self.users.notify_changes(self.subjects)
+
         run(self.subjects)
 
         # logger.info('processing user score changes')

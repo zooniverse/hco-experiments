@@ -94,6 +94,10 @@ class Bureau:
 
             agent.ledger.recalculate()
 
+    def notify_changes(self, other_bureau):
+        for agent in self:
+            agent.ledger.notify_agents(self, other_bureau)
+
     def calculate_changes(self):
         return len([1 for i in self if i.ledger.stale])
 

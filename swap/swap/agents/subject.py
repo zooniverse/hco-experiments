@@ -69,7 +69,7 @@ class Subject(Agent):
             t = Transaction(user, annotation)
             self.ledger.add(t)
 
-    def set_gold_label(self, gold_label, users):
+    def set_gold_label(self, gold_label, subjects, users):
         """
             Set a subject's gold label
 
@@ -84,7 +84,7 @@ class Subject(Agent):
 
         if old != new:
             self._gold = gold_label
-            self.ledger.notify_agents(users)
+            self.ledger.notify_agents(subjects, users)
 
     def isgold(self):
         return self.gold in [0, 1]

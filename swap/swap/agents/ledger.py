@@ -91,7 +91,7 @@ class Ledger:
         # Clear the record of changes
         self.clear_changes()
 
-    def notify_agents(self, bureau):
+    def notify_agents(self, this_bureau, other_bureau):
         """
         Have all transactions notify the connected agents
         that this agent has changed
@@ -99,8 +99,8 @@ class Ledger:
         # TODO
 
         for t in self:
-            agent = t.agent(bureau)
-            agent.ledger.notify(self.id, bureau)
+            agent = t.agent(other_bureau)
+            agent.ledger.notify(self.id, this_bureau)
             # t.notify(self.id)
 
     def notify(self, id_, bureau):
