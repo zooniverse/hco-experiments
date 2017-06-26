@@ -65,8 +65,8 @@ class Ledger:
         Get the current score from the ledger
         Recalculates the score if this ledger is stale
         """
-        if self.stale or self._score is None:
-            raise StaleException(self)
+        # if self.stale or self._score is None:
+        #     raise StaleException(self)
         return self._score
 
     def add(self, transaction):
