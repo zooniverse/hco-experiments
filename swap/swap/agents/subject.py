@@ -69,7 +69,7 @@ class Subject(Agent):
             t = Transaction(user, annotation)
             self.ledger.add(t)
 
-    def set_gold_label(self, gold_label):
+    def set_gold_label(self, gold_label, users):
         """
             Set a subject's gold label
 

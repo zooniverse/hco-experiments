@@ -261,12 +261,13 @@ class SWAP:
         # Removes gold label from all subjects not in the golds list
         for subject in self.subjects:
             if subject.id not in golds:
-                subject.set_gold_label(-1)
+                subject.set_gold_label(-1, self.users)
         # Assigns the new gold label to subjects in the list
         # Also tells the Bureau to make a new subject agent if it
         # doesn't exist yet
         for id_, gold in golds.items():
-            self.subjects.get(id_, make_new=True).set_gold_label(gold)
+            subject = self.subjects.get(id_, make_new=True)
+            subject.set_gold_label(gold, self.users)
 
         # self.process_changes()
 
