@@ -167,7 +167,7 @@ class Transaction:
     """
 
     def __init__(self, agent, annotation):
-        self.id = agent.id_
+        self.id = agent.id
         self.annotation = annotation
         # stores the order this transaction has in the ledger
         self.order = None
