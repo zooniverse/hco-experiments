@@ -82,7 +82,10 @@ class Classification:
         """
         Classification.Validate(cl)
 
-        user = cl['user_name']
+        user = cl['user_id']
+        if user == -1:
+            user = cl['session_id']
+
         subject = cl['subject_id']
         annotation = cl['annotation']
 
@@ -96,6 +99,7 @@ class Classification:
 
         return c
 
+    @staticmethod
     def Validate(cl):
         """
             Verify classification is compatible with current
@@ -107,7 +111,8 @@ class Classification:
                 classification
         """
         names = [
-            'user_name',
+            'user_id',
+            'session_id',
             'subject_id',
             'annotation']
         for key in names:

@@ -49,11 +49,14 @@ def getClassifications(query=None, **kwargs):
         allowDiskUse, batchSize, etc
     """
     # Generate a default query if not specified
+
+    # TODO: Parse session id if no user_id exists
     query = [
         {'$sort': OrderedDict([('seen_before', 1), ('classification_id', 1)])},
         {'$match': {'seen_before': False}},
         # {'$match': {'classification_id': {'$lt': 25000000}}},
-        {'$project': {'user_name': 1, 'subject_id': 1, 'annotation': 1}}
+        {'$project': {'user_id': 1, 'subject_id': 1,
+                      'annotation': 1, 'session_id': 1}}
     ]
 
     # set batch size as specified in kwargs,
