@@ -5,6 +5,7 @@
 from swaptools.bootstrap import Bootstrap
 import swaptools.experiments.cv_grid_experiment as cv_experiment
 import swaptools.experiments.random_golds as random_experiment
+import swaptools.experiments.ordered_golds as ordered_golds
 
 import swap.ui
 import swap.plots as plots
@@ -435,5 +436,6 @@ def run():
     BootInterface(ui)
     cv_experiment.Interface(ui)
     random_experiment.Interface(ui)
+    ordered_golds.Interface(ui)
 
     ui.run()
