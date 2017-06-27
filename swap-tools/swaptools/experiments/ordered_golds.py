@@ -96,12 +96,12 @@ class Interface(experiment.ExperimentInterface):
         super().options(parser)
 
         parser.add_argument(
-            '--steps', nargs=1)
+            '--step', nargs=1)
 
     def _run(self, name, cutoff, args):
         kwargs = {}
-        if args.n:
-            kwargs['steps'] = int(args.steps[0])
+        if args.step:
+            kwargs['step'] = int(args.step[0])
 
         e = Experiment(name, cutoff, **kwargs)
         e.run()
