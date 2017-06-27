@@ -12,9 +12,11 @@ logger = logging.getLogger(__name__)
 
 class Experiment(randomex.Experiment):
 
-    def __init__(self, name, cutoff, step=10):
+    def __init__(self, name, cutoff, start=5000, end=50000, step=10):
         super().__init__(name, cutoff)
 
+        self.start = start
+        self.end = end
         self.step = step
 
     def _run(self):
@@ -22,7 +24,9 @@ class Experiment(randomex.Experiment):
         gg.all()
 
         swap = self.init_swap()
-        for n, golds in enumerate(GoldIterator(gg.golds, self.step)):
+        gi = GoldIterator(gg.golds, self.step, self.start)
+
+        for n, golds in enumerate(gi):
 
             logger.info('Running trial %d with %d golds', n, len(golds))
             fake = 0
@@ -34,6 +38,9 @@ class Experiment(randomex.Experiment):
             swap.set_gold_labels(golds)
             swap.process_changes()
             self.add_trial(randomex.Trial(n, golds, swap.score_export()))
+
+            if len(golds) > self.end:
+                break
 
     def __str__(self):
         s = '%d points\n' % len(self.plot_points)
@@ -48,11 +55,11 @@ class Experiment(randomex.Experiment):
 
 class GoldIterator:
 
-    def __init__(self, golds, step):
+    def __init__(self, golds, start, step):
         self.golds = self.filter_golds(golds.copy())
         self.order = self.shuffle(self.golds)
-        self.step = step + 1
-        self.i = 0
+        self.step = step
+        self.i = start
 
     @staticmethod
     def shuffle(golds):
@@ -105,10 +112,22 @@ class Interface(experiment.ExperimentInterface):
         parser.add_argument(
             '--step', nargs=1)
 
+        parser.add_argument(
+            '--start', nargs=1)
+
+        parser.add_argument(
+            '--end', nargs=1)
+
     def _run(self, name, cutoff, args):
         kwargs = {}
         if args.step:
             kwargs['step'] = int(args.step[0])
+
+        if args.start:
+            kwargs['start'] = int(args.start[0])
+
+        if args.end:
+            kwargs['end'] = int(args.end[0])
 
         e = Experiment(name, cutoff, **kwargs)
         e.run()
