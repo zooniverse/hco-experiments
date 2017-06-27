@@ -24,7 +24,7 @@ class Experiment(randomex.Experiment):
         swap = self.init_swap()
         for n, golds in enumerate(GoldIterator(gg.golds, self.step)):
 
-            logger.debug('Running trial %d with %d golds', n, len(golds))
+            logger.info('Running trial %d with %d golds', n, len(golds))
             fake = 0
             for gold in golds.values():
                 if gold == -1:
