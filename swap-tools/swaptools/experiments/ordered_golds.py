@@ -24,7 +24,7 @@ class Experiment(randomex.Experiment):
         gg.all()
 
         swap = self.init_swap()
-        gi = GoldIterator(gg.golds, self.step, self.start)
+        gi = GoldIterator(gg.golds, self.start, self.step)
 
         for n, golds in enumerate(gi):
 
