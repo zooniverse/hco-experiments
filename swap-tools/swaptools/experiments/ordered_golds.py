@@ -49,8 +49,8 @@ class Experiment(randomex.Experiment):
 class GoldIterator:
 
     def __init__(self, golds, step):
-        self.golds = golds.copy()
-        self.order = self.shuffle(golds)
+        self.golds = self.filter_golds(golds.copy())
+        self.order = self.shuffle(self.golds)
         self.step = step + 1
         self.i = 0
 
@@ -58,6 +58,13 @@ class GoldIterator:
     def shuffle(golds):
         golds = list(golds.keys())
         return list(sorted(golds, key=lambda _: random.random()))
+
+    @staticmethod
+    def filter_golds(golds):
+        for subject in golds.copy():
+            if golds[subject] == -1:
+                del golds[subject]
+        return golds
 
     def next(self):
         golds = {}
