@@ -250,6 +250,14 @@ class ScoreExport:
             return (score.id, score.gold, score.p)
         return ScoreIterator(list(self.sorted_scores), func)
 
+    def full_dict(self):
+        d = {}
+        for i in self.scores:
+            score = self.scores[i]
+            d[score.id] = score.dict()
+
+        return d
+
     def dict(self):
         return self.scores.copy()
 
