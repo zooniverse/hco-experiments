@@ -1,5 +1,5 @@
 
-import swap.db.classifications as db
+import swap.db.golds as db
 import swap.db.controversial as cv
 
 from functools import wraps
@@ -37,7 +37,7 @@ class GoldGetter:
         """
         Get all gold labels
         """
-        return db.getAllGolds()
+        return db.get_golds()
 
     @_getter
     def random(self, size):
@@ -49,7 +49,7 @@ class GoldGetter:
         size : int
             Sample size
         """
-        return db.getRandomGoldSample(size)
+        return db.get_random_golds(size)
 
     @_getter
     def subjects(self, subject_ids):
@@ -61,7 +61,7 @@ class GoldGetter:
         subject_ids : list
             List of subject ids (int)
         """
-        return db.getExpertGold(subject_ids)
+        return db.get_golds(subject_ids)
 
     @_getter
     def controversial(self, size):
@@ -74,7 +74,7 @@ class GoldGetter:
             Number of subjects
         """
         subjects = cv.get_controversial(size)
-        return db.getExpertGold(subjects)
+        return db.get_golds(subjects)
 
     @_getter
     def consensus(self, size):
@@ -86,8 +86,8 @@ class GoldGetter:
         size : int
             Number of subjects
         """
-        consensus = cv.get_consensus(size)
-        return db.getExpertGold(consensus)
+        subjects = cv.get_consensus(size)
+        return db.get_golds(subjects)
 
     @_getter
     def these(self, golds):
