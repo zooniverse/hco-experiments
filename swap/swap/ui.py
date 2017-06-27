@@ -3,6 +3,7 @@
 from swap.control import Control
 import swap.config as config
 import swap.plots as plots
+import swap.app.caesar_app as caesar
 
 from swap.utils.scores import ScoreExport
 from swap.swap import SWAP
@@ -851,6 +852,53 @@ class ScoresInterface(Interface):
         return data
 
 
+class CaesarInterface(Interface):
+    """
+    Interface to launch the caesar app
+    """
+
+    def init(self):
+        """
+        Method called on init, after having registered with ui
+        """
+        pass
+
+    @property
+    def command(self):
+        return 'caesar'
+
+    def options(self, parser):
+        parser.add_argument(
+            '--load', nargs=1)
+
+        parser.add_argument(
+            '--run', action='store_true')
+
+        parser.add_argument(
+            '--port', nargs=1)
+
+    def call(self, args):
+        """
+        Define what to do if this interface's command was passed
+        """
+        swap = None
+
+        if args.port:
+            config.caesar.swap.port = int(args.port[0])
+
+        if args.load:
+            swap = self.load(args.load[0])
+
+        if args.run:
+            self.run(swap)
+
+    @staticmethod
+    def run(swap=None):
+        control = caesar.init_threader(swap)
+        api = caesar.API(control)
+        api.run()
+
+
 def load_pickle(fname):
     """
         Loads a pickled object from file
@@ -860,17 +908,17 @@ def load_pickle(fname):
             data = pickle.load(file)
         return data
     except Exception as e:
-        logger.error('Error load file %s' % fname)
+        logger.error('Error load file %s', fname)
         raise e
 
 
-def save_pickle(object, fname):
+def save_pickle(object_, fname):
     """
         Pickles and saves an object to file
     """
     sys.setrecursionlimit(10000)
     with open(fname, 'wb') as file:
-        pickle.dump(object, file)
+        pickle.dump(object_, file)
 
 
 def run(*interfaces):
@@ -884,6 +932,8 @@ def run(*interfaces):
     RocInterface(ui)
     SWAPInterface(ui)
     ScoresInterface(ui)
+    CaesarInterface(ui)
+
     for interface in interfaces:
         interface()
 
