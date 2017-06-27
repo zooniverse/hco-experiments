@@ -2,13 +2,13 @@
 # Collection of infrastructures to run SWAP in an online state
 # with Caesar
 
-from swap.app.control import OnlineControl
+from swap.app.control import ThreadedControl, OnlineControl
 import swap.config as config
 
 import logging
 from flask import Flask, request, jsonify
+from flask.views import MethodView
 import requests
-import threading
 from queue import Queue
 
 
@@ -65,31 +65,69 @@ To configure caesar:
         with no URL
 """
 
-app = Flask(__name__)
-threader = None
+
+class API:
+
+    def __init__(self, control_thread):
+        self.app = Flask(__name__)
+        self.control = control_thread
+
+    def run(self):
+        self._route('/', 'scores', self.scores, ['GET'])
+        self._route('/classify', 'classify', self.classify, ['POST'])
+        self.app.run()
+
+    def _route(self, route, name, func, methods=('GET')):
+        self.app.add_url_rule(
+            route, name, func, methods=methods)
+
+    def get(self, subject):
+        """
+        Return current score of a subject
+        """
+        pass
+
+    def classify(self):
+        """
+        Receive a classification from caesar and process it
+        """
+        logger.info('received classification')
+        logger.debug(str(request))
+
+        # Parse json from request
+        data = request.get_json()
+        classification = OnlineControl.parse_classification(data)
+
+        logger.debug(classification)
+        logger.debug('sending classification to swap thread')
+        self.control.queue('classify', classification, respond)
+
+        # return empty response
+
+        resp = jsonify({'status': 'ok'})
+        resp.status_code = 200
+        return resp
+
+    def scores(self):
+        """
+        Return current score export
+        """
+        scores = self.control.scores()
+
+        return jsonify(scores.full_dict())
 
 
-@app.route('/classify', methods=['GET', 'POST'])
-def classify():
-    """
-    Receive a classification as an extractor from Caesar
-    """
-    logger.info('received classification')
-    logger.debug(str(request))
 
-    # Parse json from request
-    data = request.get_json()
-    classification = OnlineControl.parse_classification(data)
+# app = Flask(__name__)
+# control = None
 
-    logger.debug(classification)
-    logger.debug('sending classification to swap thread')
-    threader.queue.put(classification)
 
-    # return empty response
-
-    resp = jsonify({'status': 'ok'})
-    # resp.status_code = 200
-    return resp
+# @app.route('/classify', methods=['GET', 'POST'])
+# def classify():
+#     """
+#     Receive a classification as an extractor from Caesar
+#     """
+#     pass
 
 
 def generate_address():
@@ -135,54 +173,19 @@ def respond(subject):
     logger.debug('done')
 
 
-def run():
-    global threader
-    threader = Threader(Queue())
-    threader.start()
+def init_threader(swap=None):
+    thread = ThreadedControl(swap=swap)
+    thread.start()
 
-    c = config.caesar.swap
-    app.run(host=c.bind, port=c.port, debug=c.debug)
+    return thread
 
 
-class Threader(threading.Thread):
-
-    def __init__(self, queue, args=(), kwargs=None):
-        threading.Thread.__init__(self, args=(), kwargs=None)
-        self.queue = queue
-        self.exit = threading.Event()
-        self.daemon = True
-
-        self.control_lock = threading.Lock()
-        self.control = OnlineControl()
-
-    def run(self):
-        """
-        Main thread for processing classifications
-        """
-
-        # Ensure thread doesn't exit
-        # Wait for classifications in queue
-        while not self.exit.is_set():
-
-            classification = self.queue.get()
-            if classification is not None:
-
-                self.process_message(classification)
-
-        logger.warning('thread exiting')
-
-    def process_message(self, classification):
-        """
-        Process a classification and PUT response to caesar
-        """
-        with self.control_lock:
-            logger.info('classifying')
-            subject = self.control.classify(classification)
-            logger.info('responding with subject %s score %.4f',
-                        subject.id, subject.score)
-
-            respond(subject)
+# def run():
+#     c = config.caesar.swap
+#     app.run(host=c.bind, port=c.port, debug=c.debug)
 
 
 if __name__ == '__main__':
-    run()
+    control = init_threader()
+    api = API(control)
+    api.run()
