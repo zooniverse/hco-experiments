@@ -183,6 +183,15 @@ def get_trials(directory):
 
 class ExperimentInterface(swap.ui.Interface):
 
+    def _from_db(self, name, cutoff):
+        pass
+
+    def _trial_kwargs(self, trial_args):
+        pass
+
+    def _build_trial(self, trial_info, golds, scores):
+        pass
+
     def options(self, parser):
 
         parser.add_argument(
@@ -310,19 +319,10 @@ class ExperimentInterface(swap.ui.Interface):
 
         e.plot(type_, fname)
 
-    def _from_db(self, name, cutoff):
-        pass
-
     def _trial_from_db(self, trial_info, name):
         print(trial_info)
         t, g, s = dbe.SingleTrialCursor(name, trial_info).next()
         return self._build_trial(t, g, s)
-
-    def _trial_kwargs(self, trial_args):
-        pass
-
-    def _build_trial(self, trial_info, golds, scores):
-        pass
 
     def swap_from_trial(self, trial):
         control = Control()
