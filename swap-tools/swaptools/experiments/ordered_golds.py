@@ -57,7 +57,7 @@ class GoldIterator:
     @staticmethod
     def shuffle(golds):
         golds = list(golds.keys())
-        return list(sorted(golds, key=random.random()))
+        return list(sorted(golds, key=lambda _: random.random()))
 
     def next(self):
         golds = {}
