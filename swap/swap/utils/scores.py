@@ -94,7 +94,10 @@ class ScoreExport:
         """
         golds = self.get_real_golds()
         for score in scores.values():
-            score.gold = golds[score.id]
+            if score.id in golds:
+                score.gold = golds[score.id]
+            else:
+                score.gold = -1
         return scores
 
     @staticmethod
