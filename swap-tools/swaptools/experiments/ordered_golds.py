@@ -19,10 +19,10 @@ class Experiment(randomex.Experiment):
 
     def _run(self):
         gg = GoldGetter()
-        all_golds = gg.all()
+        gg.all()
 
         swap = self.init_swap()
-        for n, golds in enumerate(GoldIterator(all_golds, self.step)):
+        for n, golds in enumerate(GoldIterator(gg.golds, self.step)):
 
             logger.debug('Running trial %d with %d golds', n, len(golds))
             fake = 0
