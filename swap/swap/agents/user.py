@@ -271,12 +271,17 @@ class Counter:
 
     def calculate(self):
         def formula(n, total):
-            alpha = 2
-            beta = 2
-            alpha += n
-            beta += total - n
-            score = (alpha - 1) / (alpha + beta - 2)
-            return score
+            # alpha = 2
+            # beta = 2
+            # alpha += n
+            # beta += total - n
+            # score = (alpha - 1) / (alpha + beta - 2)
+            # return score
+
+            right = n
+            gamma = 10
+
+            return (right + gamma / 2) / (total + gamma)
 
         return formula(self.matched, self.seen)
 
