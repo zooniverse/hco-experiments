@@ -223,6 +223,31 @@ class ScoreExport:
             logger.error('Can\'t find purity > %f in score set!', purity)
             return 0
 
+    def find_thresholds(self, fpr, mdr):
+        totals = self.counts(0)
+
+        # Calculate real retirement threshold
+        count = 0
+        real = 0
+        for score in self.sorted_scores:
+            if score.gold == 0:
+                count += 1
+
+            if 1 - count / totals[0] < fpr:
+                real = score.p
+
+        # Calculate bogus retirement threshold
+        count = 0
+        bogus = 0
+        for score in reversed(list(self.sorted_scores)):
+            if score.gold == 1:
+                count += 1
+
+            if 1 - count / totals[1] < mdr:
+                bogus = score.p
+
+        return bogus, real
+
     def __len__(self):
         return len(self.scores)
 
