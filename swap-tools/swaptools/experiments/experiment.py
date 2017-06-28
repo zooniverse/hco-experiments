@@ -78,12 +78,18 @@ class Trial:
 
 
 class Experiment:
+    # Make sure to override
+    Trial = Trial
+
     def __init__(self, name, cutoff):
         self.name = name
         self.trials = []
         self.plot_points = []
 
         self.p_cutoff = cutoff
+
+    ###############################################################
+    # Override
 
     def _run(self):
         pass
@@ -93,7 +99,7 @@ class Experiment:
 
     @classmethod
     def trial_from_db(cls, trial_info, golds, scores):
-        pass
+        return cls.Trial.build_from_db(trial_info, golds, scores)
 
     def _db_export_plot(self):
         pass
@@ -104,11 +110,11 @@ class Experiment:
         self._run()
         self.clear_mem()
 
-    @staticmethod
-    def from_trial_export(directory, cutoff, loader):
+    @classmethod
+    def from_trial_export(cls, directory, cutoff, loader):
         files = get_trials(directory)
 
-        e = Experiment(cutoff)
+        e = cls(cutoff)
         for fname in files:
             logger.debug(fname)
             trials = loader(fname)
@@ -182,15 +188,16 @@ def get_trials(directory):
 
 
 class ExperimentInterface(swap.ui.Interface):
+    Experiment = Experiment
 
     def _from_db(self, name, cutoff):
-        pass
+        return self.Experiment.build_from_db(name, cutoff)
 
     def _trial_kwargs(self, trial_args):
         pass
 
     def _build_trial(self, trial_info, golds, scores):
-        pass
+        return self.Experiment.Trial.build_from_db(trial_info, golds, scores)
 
     def options(self, parser):
 
@@ -273,7 +280,7 @@ class ExperimentInterface(swap.ui.Interface):
             e = self._run(name, cutoff, args)
 
         elif args.from_trials:
-            e = Experiment.from_trial_export(
+            e = self.Experiment.from_trial_export(
                 args.from_trials[0],
                 cutoff, self.save, self.load)
 

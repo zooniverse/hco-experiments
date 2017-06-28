@@ -7,6 +7,7 @@ from swap.agents.agent import Stat
 
 import swaptools.experiments.experiment as experiment
 
+from collections import OrderedDict
 import logging
 logger = logging.getLogger(__name__)
 
@@ -33,8 +34,12 @@ class Trial(experiment.Trial):
         return (len(self.golds), self.n,
                 p, completeness)
 
+    @staticmethod
+    def _db_id(n, n_golds):
+        return OrderedDict([('n', n), ('golds', n_golds)])
+
     def _db_export_id(self):
-        return {'n': self.n, 'golds': len(self.golds)}
+        return self._db_id(self.n, len(self.golds))
 
     @classmethod
     def build_from_db(cls, trial_info, golds, scores):
@@ -45,6 +50,7 @@ class Trial(experiment.Trial):
 
 
 class Experiment(experiment.Experiment):
+    Trial = Trial
 
     def __init__(self, name, cutoff, num_golds=None, num_trials=10):
         super().__init__(name, cutoff)
@@ -74,11 +80,7 @@ class Experiment(experiment.Experiment):
 
                 swap.set_gold_labels(gg.golds)
                 swap.process_changes()
-                self.add_trial(Trial(n, gg.golds, swap.score_export()))
-
-    @classmethod
-    def trial_from_db(cls, trial_info, golds, scores):
-        return Trial.build_from_db(trial_info, golds, scores)
+                self.add_trial(self.Trial(n, gg.golds, swap.score_export()))
 
     def _db_export_plot(self):
         data = []
@@ -257,6 +259,7 @@ class Experiment(experiment.Experiment):
 
 
 class Interface(experiment.ExperimentInterface):
+    Experiment = Experiment
 
     @property
     def command(self):
@@ -290,23 +293,16 @@ class Interface(experiment.ExperimentInterface):
             golds[1] += 1    # To ensure range() includes upper limit
             kwargs['num_golds'] = tuple(golds)
 
-        e = Experiment(name, cutoff, **kwargs)
+        e = self.Experiment(name, cutoff, **kwargs)
         e.run()
 
         return e
 
-    @staticmethod
-    def _from_db(name, cutoff):
-        return Experiment.build_from_db(name, cutoff)
-
-    @staticmethod
-    def _trial_kwargs(trial_args):
+    @classmethod
+    def _trial_kwargs(cls, trial_args):
         n = int(trial_args[0])
         golds = int(trial_args[1])
-        return [('n', n), ('golds', golds)]
-
-    def _build_trial(self, trial_info, golds, scores):
-        return Trial.build_from_db(trial_info, golds, scores)
+        return cls.Experiment.Trial._db_id(n, golds)
 
     # def _plot(self, e, args):
     #     assert e

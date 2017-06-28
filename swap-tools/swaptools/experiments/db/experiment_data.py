@@ -4,10 +4,8 @@
 from swaptools.experiments.db import DB
 from swap.db import Cursor
 
+from collections import OrderedDict
 import sys
-
-import swap.swap
-
 import logging
 logger = logging.getLogger(__name__)
 
@@ -167,11 +165,9 @@ class SingleTrialCursor(TrialsCursor):
         # for key, value in self.trial_info.items():
         #     update['trial.%s' % key] = value
 
-        from collections import OrderedDict
-        trial = OrderedDict([*self.trial_info])
-        query[0]['$match'] = OrderedDict([('experiment', self.name), ('trial', trial)])
+        query[0]['$match'] = OrderedDict(
+            [('experiment', self.name), ('trial', self.trial_info)])
 
         logger.info(query)
 
         return query
-

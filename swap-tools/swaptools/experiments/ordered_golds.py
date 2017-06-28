@@ -5,12 +5,20 @@ from swap.agents.agent import Stat
 import swaptools.experiments.experiment as experiment
 import swaptools.experiments.random_golds as randomex
 
+from collections import OrderedDict
 import random
 import logging
 logger = logging.getLogger(__name__)
 
 
+class Trial(randomex.Trial):
+    @staticmethod
+    def _db_id(n, n_golds):
+        return OrderedDict([('golds', n_golds), ('n', n)])
+
+
 class Experiment(randomex.Experiment):
+    Trial = Trial
 
     def __init__(self, name, cutoff, start=5000, end=50000, step=10):
         super().__init__(name, cutoff)
@@ -91,7 +99,8 @@ class GoldIterator:
         return self.next()
 
 
-class Interface(experiment.ExperimentInterface):
+class Interface(randomex.Interface):
+    Experiment = Experiment
 
     @property
     def command(self):
@@ -137,3 +146,12 @@ class Interface(experiment.ExperimentInterface):
     @staticmethod
     def _from_db(name, cutoff):
         return Experiment.build_from_db(name, cutoff)
+
+    def _build_trial(self, trial_info, golds, scores):
+        return Trial.build_from_db(trial_info, golds, scores)
+
+    @staticmethod
+    def _trial_kwargs(trial_args):
+        n = int(trial_args[0])
+        golds = int(trial_args[1])
+        return Trial._db_id(n, golds)

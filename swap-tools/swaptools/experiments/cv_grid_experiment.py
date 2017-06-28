@@ -5,6 +5,7 @@ from swap.agents.agent import Stat
 
 import swaptools.experiments.experiment as experiment
 
+from collections import OrderedDict
 import logging
 logger = logging.getLogger(__name__)
 
@@ -25,11 +26,15 @@ class Trial(experiment.Trial):
         return (self.consensus, self.controversial,
                 self.purity(cutoff), self.completeness(cutoff))
 
+    @staticmethod
+    def _db_id(controversial, consensus):
+        return OrderedDict([
+            ('controversial', controversial),
+            ('consensus', consensus)
+        ])
+
     def _db_export_id(self):
-        return {
-            'controversial': self.controversial,
-            'consensus': self.consensus
-        }
+        return self._db_id(self.controversial, self.consensus)
 
     @classmethod
     def build_from_db(cls, trial_info, golds, scores):
@@ -41,6 +46,7 @@ class Trial(experiment.Trial):
 
 
 class Experiment(experiment.Experiment):
+    Trial = Trial
 
     def __init__(self, name, cutoff,
                  consensus=None, controversial=None):
@@ -65,7 +71,7 @@ class Experiment(experiment.Experiment):
                 gg.reset()
 
                 logger.info('\nRunning trial %d with cv=%d cn=%d',
-                            (n, cv, cn))
+                            n, cv, cn)
                 if cv > 0:
                     gg.controversial(cv)
                 if cn > 0:
@@ -73,7 +79,8 @@ class Experiment(experiment.Experiment):
 
                 swap.set_gold_labels(gg.golds)
                 swap.process_changes()
-                self.add_trial(Trial(cn, cv, gg.golds, swap.score_export()))
+                self.add_trial(
+                    self.Trial(cn, cv, gg.golds, swap.score_export()))
 
                 n += 1
 
@@ -84,10 +91,6 @@ class Experiment(experiment.Experiment):
             self.plot_completeness(fname)
         elif type_ == 'both':
             self.plot_both(fname)
-
-    @classmethod
-    def trial_from_db(cls, trial_info, golds, scores):
-        return Trial.build_from_db(trial_info, golds, scores)
 
     ###############################################################
 
@@ -135,6 +138,7 @@ class Experiment(experiment.Experiment):
 
 
 class Interface(experiment.ExperimentInterface):
+    Experiment = Experiment
 
     @property
     def command(self):
@@ -172,7 +176,7 @@ class Interface(experiment.ExperimentInterface):
             _, b, c = args.controversial
             cv = (1, b + 1, c)
 
-        e = Experiment(name, cutoff, controversial=cv, consensus=cn)
+        e = self.Experiment(name, cutoff, controversial=cv, consensus=cn)
         e.run()
 
         return e
@@ -183,10 +187,6 @@ class Interface(experiment.ExperimentInterface):
         type_ = args.plot[0]
 
         e.plot(type_, fname)
-
-    @staticmethod
-    def _from_db(name, cutoff):
-        return Experiment.build_from_db(name, cutoff)
 
 
 if __name__ == "__main__":
