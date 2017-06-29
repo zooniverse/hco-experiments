@@ -51,8 +51,73 @@ def choose_plot(data, type_):
         return plot_points_reg(data)
     elif type_ == 'sorted':
         return plot_points_sorted(data)
+    elif type_ == 'square':
+        return plot_points_square(data)
 
 
+def plot(func):
+
+    def wrapper(data):
+
+        def normalize(key):
+            max_ = max(data, key=lambda item: item[key])[key]
+            min_ = min(data, key=lambda item: item[key])[key]
+
+            new_key = '%s_n' % key
+            for item in data:
+                value = item[key]
+                if max_ != min_:
+                    item[new_key] = (value - min_) / (max_ - min_)
+                else:
+                    item[new_key] = 0
+
+        normalize('purity')
+        normalize('completeness')
+
+        width, data = func(data)
+        output = []
+        for item in data:
+            new_item = {
+                'id': {'golds': item['golds'], 'n': item['n']},
+                'values': {
+                    'purity': [item['purity'], item['purity_n']],
+                    'completeness':
+                        [item['completeness'], item['completeness_n']]
+                },
+                'pos': {
+                    'x': item['x'],
+                    'y': item['y'],
+                    'id': item['id']
+                }
+            }
+            output.append(new_item)
+
+        return width, output
+
+    return wrapper
+
+
+@plot
+def plot_points_square(data):
+    x = 0
+    y = 0
+    width = math.ceil(math.sqrt(len(data)))
+
+    for i, item in enumerate(data):
+        if x > width:
+            x = 0
+            y += 1
+        item.update({
+            'x': x,
+            'y': y,
+            'id': i
+        })
+        x += 1
+
+    return width, data
+
+
+@plot
 def plot_points_reg(data):
     x = 0
     y = 0
@@ -75,36 +140,16 @@ def plot_points_reg(data):
         y += 1
         count += 1
 
-    return max_width
+    return max_width, data
 
 
+@plot
 def plot_points_sorted(data):
-    def count(data, key):
-        n = 0
-        for item in data:
-            n += item[key]
-
-        return n
-
-    def normalize(key):
-        max_ = max(data, key=lambda item: item[key])[key]
-        min_ = min(data, key=lambda item: item[key])[key]
-
-        new_key = '%s_n' % key
-        for item in data:
-            value = item[key]
-            if max_ != min_:
-                item[new_key] = (value - min_) / (max_ - min_)
-            else:
-                item[new_key] = 0
 
     def _sort(item):
         p = 1 - item['purity_n']
         c = item['completeness_n']
         return p ** 2 + c ** 2
-
-    normalize('purity')
-    normalize('completeness')
 
     data = sorted(data, key=_sort)
     width = math.ceil(math.sqrt(len(data)))
@@ -122,23 +167,7 @@ def plot_points_sorted(data):
         })
         x += 1
 
-    output = []
-    for item in data:
-        new_item = {
-            'id': {'golds': item['golds'], 'n': item['n']},
-            'values': {
-                'purity': [item['purity'], item['purity_n']],
-                'completeness': [item['completeness'], item['completeness_n']]
-            },
-            'pos': {
-                'x': item['x'],
-                'y': item['y'],
-                'id': item['id']
-            }
-        }
-        output.append(new_item)
-
-    return width, output
+    return width, data
 
 
 @app.route("/plots/<experiment>/<type>")
