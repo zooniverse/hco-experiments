@@ -1,5 +1,6 @@
 
 import swap.db.classifications as db
+import swap.config as config
 
 import csv
 
@@ -12,7 +13,7 @@ class Score:
     Stores information on each subject for export
     """
 
-    def __init__(self, id_, gold, p):
+    def __init__(self, id_, gold, p, retired=None):
         """
         Parameters
         ----------
@@ -26,12 +27,25 @@ class Score:
         self.id = id_
         self.gold = gold
         self.p = p
+        self.retired = retired
+        self.label = None
 
     def dict(self):
-        return {'id': self.id, 'gold': self.gold, 'p': self.p}
+        return {
+            'id': self.id, 'gold': self.gold, 'p': self.p,
+            'retired': self.retired}
+
+    @property
+    def is_retired(self):
+        return self.retired is not None
 
     def __str__(self):
-        return 'id: %d gold: %d p: %.3f' % (self.id, self.gold, self.p)
+        retired = self.retired
+        if retired is None:
+            retired = -1
+
+        return 'id: %d gold: %d p: %.4f retired: %.4f' % \
+            (self.id, self.gold, self.p, retired)
 
     def __repr__(self):
         return '{%s}' % self.__str__()
@@ -45,7 +59,7 @@ class ScoreExport:
     Used to generate plots like ROC curves.
     """
 
-    def __init__(self, scores, new_golds=True):
+    def __init__(self, scores, new_golds=True, history=None, thresholds=None):
         """
         Pararmeters
         -----------
@@ -60,6 +74,14 @@ class ScoreExport:
         self.scores = scores
         self._sorted_ids = sorted(scores, key=lambda id_: scores[id_].p)
         self.class_counts = self.counts(0)
+
+        if thresholds is None:
+            thresholds = self.find_thresholds(config.fpr, config.mdr)
+
+        self.thresholds = thresholds
+
+        if history is not None:
+            self.retire(history)
 
     @staticmethod
     def from_csv(fname):
@@ -82,6 +104,12 @@ class ScoreExport:
     def sorted_scores(self):
         for i in self._sorted_ids:
             yield self.scores[i]
+
+    @property
+    def retired_scores(self):
+        for score in self.scores.values():
+            if score.is_retired:
+                yield score
 
     def _init_golds(self, scores):
         """
@@ -224,6 +252,8 @@ class ScoreExport:
             return 0
 
     def find_thresholds(self, fpr, mdr):
+        logger.debug('determining retirement thresholds fpr %.3f mdr %.3f',
+                     fpr, mdr)
         totals = self.counts(0)
 
         # Calculate real retirement threshold
@@ -233,8 +263,11 @@ class ScoreExport:
             if score.gold == 0:
                 count += 1
 
-            if 1 - count / totals[0] < fpr:
-                real = score.p
+                _fpr = 1 - count / totals[0]
+                print(_fpr, count, totals[0], score)
+                if _fpr < fpr:
+                    real = score.p
+                    break
 
         # Calculate bogus retirement threshold
         count = 0
@@ -243,10 +276,30 @@ class ScoreExport:
             if score.gold == 1:
                 count += 1
 
-            if 1 - count / totals[1] < mdr:
-                bogus = score.p
+                _mdr = 1 - count / totals[1]
+                print(_mdr, count, totals[1], score)
+                if _mdr < mdr:
+                    bogus = score.p
+                    break
+
+        logger.debug('bogus %.4f real %.4f', bogus, real)
 
         return bogus, real
+
+    def retire(self, history_export):
+        logger.debug('finding subject retired scores')
+        bogus, real = self.thresholds
+
+        for score in self.scores.values():
+            history = history_export.get(score.id)
+
+            print(score.id)
+            for p in history.scores:
+                if p < bogus or p > real:
+                    print(p, bogus, real)
+                    score.retired = p
+                    break
+        logger.debug('done')
 
     def __len__(self):
         return len(self.scores)

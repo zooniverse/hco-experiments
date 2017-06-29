@@ -42,6 +42,10 @@ csv_types = {
 p0 = 0.12
 epsilon = 0.5
 
+# Retirement Thresholds
+mdr = 0.1
+fpr = 0.01
+
 # Methodology
 # Set this flag to true to use the back-updating transactional methodology
 # Setting this flag to false uses the traditional SWAP methodology

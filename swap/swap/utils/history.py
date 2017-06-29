@@ -31,6 +31,9 @@ class HistoryExport:
         """
         self.history = history
 
+    def get(self, id_):
+        return self.history[id_]
+
     def traces(self):
 
         def func(history):

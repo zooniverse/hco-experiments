@@ -357,7 +357,7 @@ class SWAP:
             'stats': self.stats.export()
         }
 
-    def score_export(self):
+    def score_export(self, history=None):
         """
         Generate object containing subject score data
 
@@ -368,6 +368,9 @@ class SWAP:
         swap.utils.scores.ScoreExport
             ScoreExport
         """
+        if history is None:
+            history = self.history_export()
+
         logger.info('Generating score export')
         scores = {}
         for subject in self.subjects:
@@ -376,7 +379,9 @@ class SWAP:
             id_ = subject.id
             score = subject.score
             scores[id_] = Score(id_, None, score)
-        return ScoreExport(scores)
+
+        logger.debug('done')
+        return ScoreExport(scores, history=history)
 
     def history_export(self):
         """
@@ -387,6 +392,7 @@ class SWAP:
         swap.utils.history.HistoryExport
             HistoryExport
         """
+        logger.info('Generating history export')
         history = {}
         for subject in self.subjects:
             if len(subject.ledger) == 0:
@@ -401,6 +407,7 @@ class SWAP:
             id_ = subject.id
             history[id_] = History(id_, subject.gold, scores)
 
+        logger.debug('done')
         return HistoryExport(history)
 
     def roc_export(self, labels=None):
