@@ -84,6 +84,8 @@ class online_swap:
     bind = '0.0.0.0'
     debug = False
 
+    workflow = 1737
+
     class caesar:
         # Address configuration for accessing caesar
         host = 'localhost'
@@ -91,7 +93,6 @@ class online_swap:
         # Authorization token for panoptes
         OAUTH = None
         # Response data for reductions
-        workflow = '1737'
         reducer = 'swap'
         field = 'swap_score'
 
@@ -109,6 +110,13 @@ class logging:
     console_level = 'INFO'
     keep_logs = 5
     filename = 'swap-%d.log'
+
+    class system:
+        active = False
+        location = '/var/log/online-swap'
+        name = 'online-swap.log'
+        keep_logs = 10
+        max_size = '20M'
 
 
 def local_config():

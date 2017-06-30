@@ -7,9 +7,7 @@ import swap.config as config
 
 import logging
 from flask import Flask, request, jsonify
-from flask.views import MethodView
 import requests
-from queue import Queue
 
 
 logger = logging.getLogger(__name__)
@@ -117,31 +115,18 @@ class API:
         return jsonify(scores.full_dict())
 
 
-
-# app = Flask(__name__)
-# control = None
-
-
-# @app.route('/classify', methods=['GET', 'POST'])
-# def classify():
-#     """
-#     Receive a classification as an extractor from Caesar
-#     """
-#     pass
-
-
 def generate_address():
     """
     Generate Caesar address to PUT reduction
     """
-    s = config.caesar._addr_format
-    c = config.caesar
+    s = config.online_swap._addr_format
+    c = config.online_swap
 
     kwargs = {
-        'host': c.host,
-        'port': c.port,
-        'workflow': c.response.workflow,
-        'reducer': c.response.reducer
+        'host': c.caesar.host,
+        'port': c.caesar.port,
+        'workflow': c.workflow,
+        'reducer': c.caesar.reducer
     }
 
     return s % kwargs
@@ -151,7 +136,7 @@ def respond(subject):
     """
     PUT subject score to Caesar
     """
-    c = config.caesar
+    c = config.online_swap
 
     address = generate_address()
 
@@ -160,7 +145,7 @@ def respond(subject):
         'reduction': {
             'subject_id': subject.id,
             'data': {
-                c.response.field: subject.score
+                c.caesar.field: subject.score
             }
         }
     }

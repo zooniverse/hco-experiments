@@ -14,7 +14,9 @@ from datetime import datetime
 
 meta_names = config.database.builder.metadata
 core_names = config.database.builder.core
-types = config.database.builder.types
+
+types = config.database.builder._core_types
+types.update(config.database.builder.types)
 
 
 def main():
