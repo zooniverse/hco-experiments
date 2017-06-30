@@ -25,19 +25,6 @@ class Object:
                     value = Object(value)
                 setattr(self, key, value)
 
-
-csv_types = {
-    'classification_id': int,
-    'user_id': int,
-    'annotation': int,
-    'gold_label': int,
-    'subject_id': int,
-
-    'machine_score': float,
-    'mag': float,
-    'mag_err': float
-}
-
 # Prior probabilities
 p0 = 0.12
 epsilon = 0.5
@@ -61,7 +48,29 @@ class database:
     host = 'localhost'
     port = 27017
     max_batch_size = 1e5
-    metadata = ['mag', 'mag_err']
+
+    class builder:
+        types = {
+            'classification_id': int,
+            'user_id': int,
+            'annotation': int,
+            'gold_label': int,
+            'subject_id': int,
+            'seen_before': bool,
+            'time_stamp': 'timestamp',
+
+            'object_id': int,
+            'machine_score': float,
+            'mag': float,
+            'mag_err': float
+        }
+
+        metadata = ['mag', 'mag_err', 'machine_score', 'diff', 'object_id'] + \
+            ['random%d' % (i + 1) for i in range(15)]
+
+        core = [
+            'classification_id', 'user_id', 'annotation', 'gold_label',
+            'subject_id', 'seen_before', 'time_stamp', 'session_id']
 
 
 class caesar:

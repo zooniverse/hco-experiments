@@ -10,8 +10,11 @@ import csv
 import os
 import sys
 import argparse
+from datetime import datetime
 
-_meta_names = config.database.metadata
+meta_names = config.database.builder.metadata
+core_names = config.database.builder.core
+types = config.database.builder.types
 
 
 def main():
@@ -61,33 +64,49 @@ def main():
 def processRow(row):
     # Convert types specified in config
     # anything not in config is interpreted as str
-    for key, type_ in config.csv_types.items():
+
+    def mod(key, value):
+        row[key] = value
+
+    for key, type_ in types.items():
         value = row[key]
+
+        # Parse timestamps
+        if type_ == "timestamp":
+            mod(key, datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%fZ"))
 
         # Replace cells that should be a number with 0
         # Except user_id, which gets -1 if empty
-        if value == '' and type_ in [int, float]:
+        elif value == '' and type_ in [int, float]:
             if key == 'user_id':
-                row[key] = -1
+                mod(key, -1)
             else:
-                row[key] = 0
+                mod(key, 0)
 
-        if type_ is bool:
-            row[key] = value == 'True'
+        elif value == 'None':
+            mod(key, -1)
+
+        elif type_ is bool:
+            mod(key, value == 'True')
 
         # Cast value to the expected type
-        if type(row[key]) is not type_:
-            row[key] = type_(value)
+        elif type(value) is not type_:
+            mod(key, type_(value))
 
-    metadata = {}
-    for m in _meta_names:
-        metadata[m] = row[m]
-        del row[m]
+    def pull(keys):
+        output = {}
+        for key in keys:
+            output[key] = row[key]
 
-    row['metadata'] = metadata
+        return output
+
+    metadata = pull(meta_names)
+    core = pull(core_names)
+
+    core['metadata'] = metadata
 
     # print(row)
-    return row
+    return core
 
 
 def upload(rows):
