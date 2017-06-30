@@ -25,6 +25,7 @@ class Object:
                     value = Object(value)
                 setattr(self, key, value)
 
+
 # Prior probabilities
 p0 = 0.12
 epsilon = 0.5
