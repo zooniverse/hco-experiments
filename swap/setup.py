@@ -86,7 +86,8 @@ setup(
         'scipy',
         'seaborn',
         'pandas',
-        'flask'
+        'flask',
+        'requests'
     ],
 
     # List additional groups of dependencies here (e.g. development
