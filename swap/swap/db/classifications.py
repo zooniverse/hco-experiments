@@ -3,9 +3,13 @@
 
 from swap.db import DB, Cursor
 from swap.db.query import Query
+from swap.utils.classification import PanoptesParser
+import swap.config as config
 
 from collections import OrderedDict
 
+import sys
+import csv
 import logging
 logger = logging.getLogger(__name__)
 
@@ -196,3 +200,31 @@ def getNSubjects():
         subject_count = cursor.next()['num']
 
     return subject_count
+
+
+def upload_project_dump(fname):
+    logger.info('dropping collection')
+    DB()._db.classifications.drop()
+    DB()._init_classifications()
+
+    logger.info('parsing csv dump')
+    data = []
+    pp = PanoptesParser(config.database.builder)
+
+    with open(fname, 'r') as file:
+        reader = csv.DictReader(file)
+
+        for i, row in enumerate(reader):
+            cl = pp.process(row)
+            data.append(cl)
+
+            sys.stdout.flush()
+            sys.stdout.write("%d records processed\r" % i)
+
+            if len(data) > 100000:
+                collection.insert_many(data)
+                data = []
+
+    collection.insert_many(data)
+    DB()._gen_stats()
+    logger.debug('done')
