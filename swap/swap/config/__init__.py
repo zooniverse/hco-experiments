@@ -57,25 +57,23 @@ class database:
             'classification_id': int,
             'user_id': int,
             'annotation': int,
-            'gold_label': int,
+            'workflow': int,
+            # 'gold_label': int,
             'subject_id': int,
             'seen_before': bool,
+            'live_project': bool,
             'time_stamp': 'timestamp',
         }
 
-        types = {
-            'object_id': int,
-            'machine_score': float,
-            'mag': float,
-            'mag_err': float
-        }
+        _timestamp_format = [
+            '%Y-%m-%d %H:%M:%S %Z',
+            '%Y-%m-%dT%H:%M:%S.%fZ'
+        ]
 
-        metadata = ['mag', 'mag_err', 'machine_score', 'diff', 'object_id'] + \
-            ['random%d' % (i + 1) for i in range(15)]
-
-        core = [
-            'classification_id', 'user_id', 'annotation', 'gold_label',
-            'subject_id', 'seen_before', 'time_stamp', 'session_id']
+        class annotation:
+            task = 'T1'
+            true = ['Real', 'yes', 1]
+            false = ['Bogus', 'no', 0]
 
 
 class online_swap:
