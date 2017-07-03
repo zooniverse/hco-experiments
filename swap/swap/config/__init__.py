@@ -53,6 +53,16 @@ class database:
     max_batch_size = 1e5
 
     class builder:
+
+        subject_metadata = {
+            'subject_id': int,
+            'gold': (int, 'gold_label'),
+            'object_id': int,
+            'machine_score': float,
+            'mag': float,
+            'mag_err': float
+        }
+
         _core_types = {
             'classification_id': int,
             'user_id': int,
