@@ -48,6 +48,3 @@ def upload_metadata_dump(fname):
 
     collection.insert_many(data)
     logger.debug('done')
-
-if __name__ == '__main__':
-    upload_metadata_dump('/home/michael/Downloads/SNHunters_classification_dump_20170622_gold-head.csv')
