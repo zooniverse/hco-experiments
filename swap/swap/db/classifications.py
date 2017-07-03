@@ -13,7 +13,7 @@
 
 from swap.db import DB, Cursor
 from swap.db.query import Query
-from swap.utils.classification import PanoptesParser
+import swap.utils.parsers as parsers
 import swap.config as config
 
 from collections import OrderedDict
@@ -209,7 +209,7 @@ def upload_project_dump(fname):
 
     logger.info('parsing csv dump')
     data = []
-    pp = PanoptesParser(config.database.builder)
+    pp = parsers.ClassificationParser(config.database.builder)
 
     with open(fname, 'r') as file:
         reader = csv.DictReader(file)
