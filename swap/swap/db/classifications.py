@@ -1,6 +1,16 @@
 ################################################################
 # Methods for classification collection
 
+"""
+    Manages interactions with the classification collection in the database.
+
+    Module level variables:
+        collection
+            collection this module acts on
+        aggregate
+            reference to the pymongo aggregation method of the collection
+"""
+
 from swap.db import DB, Cursor
 from swap.db.query import Query
 from swap.utils.classification import PanoptesParser
@@ -12,16 +22,6 @@ import sys
 import csv
 import logging
 logger = logging.getLogger(__name__)
-
-__doc__ = """
-    Manages interactions with the classification collection in the database.
-
-    Module level variables:
-        collection
-            collection this module acts on
-        aggregate
-            reference to the pymongo aggregation method of the collection
-"""
 
 subject_count = None
 collection = DB().classifications
