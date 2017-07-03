@@ -1,4 +1,6 @@
 
+from datetime import datetime
+import json
 import logging
 logger = logging.getLogger(__name__)
 
@@ -153,3 +155,92 @@ class ClValueError(ValueError):
         bad_type = type(value)
         msg = 'key %s should be type %s but is %s' % (key, _type, bad_type)
         ValueError.__init__(self, msg)
+
+
+class PanoptesParser:
+
+    def __init__(self, builder_config):
+        types = builder_config._core_types
+        # types.update(builder_config.types)
+
+        self.types = types
+        self.annotation = builder_config.annotation
+        self.timestamp_formats = builder_config._timestamp_format
+
+    def _type(self, value, type_):
+        # Parse timestamps
+        if type_ == "timestamp":
+            for fmt in self.timestamp_formats:
+                try:
+                    return datetime.strptime(value, fmt)
+                except ValueError:
+                    continue
+            raise ValueError('timestamp %s format not recognized' % value)
+
+        if value in ['None', 'null', '', None]:
+            return None
+
+        if type(value) is not type_:
+            if type_ is bool:
+                print(value)
+                return value in ['True', 'true']
+
+            # Cast value to the expected type
+            return type_(value)
+
+        return value
+
+    def _mod_types(self, cl):
+        # Convert types specified in config
+        # anything not in config is interpreted as str
+
+        # def mod(key, value):
+        #     cl[key] = value
+
+        for key, type_ in self.types.items():
+            value = self._type(cl[key], type_)
+
+            # if key == 'retired' and value is None:
+            #     value = False
+
+            cl[key] = value
+
+        return cl
+
+    def parse_annotations(self, cl):
+        annotations = json.loads(cl['annotations'])
+
+        for data in annotations:
+            if data['task'] == self.annotation.task:
+                value = data['value']
+
+                if value in self.annotation.true:
+                    return 1
+                if value in self.annotation.false:
+                    return 0
+                return -1
+
+    def process(self, cl):
+        metadata = json.loads(cl['metadata'])
+
+        output = {
+            'classification_id': cl['classification_id'],
+            'subject_id': cl['subject_ids'],
+            'user_name': cl['user_name'],
+            'user_id': cl['user_id'],
+            'workflow': cl['workflow_id'],
+            'time_stamp': cl['created_at'],
+        }
+
+        output.update({
+            'session_id': metadata['session'],
+            'live_project': metadata['live_project'],
+            'seen_before': metadata.get('seen_before', False)
+        })
+
+        output['annotation'] = self.parse_annotations(cl)
+
+        output = self._mod_types(output)
+
+        return output
+
