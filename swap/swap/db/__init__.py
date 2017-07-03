@@ -152,7 +152,10 @@ class Cursor:
         query += [{'$group': {'_id': 1, 'sum': {'$sum': 1}}}]
         logger.debug(query)
 
-        count = self.collection.aggregate(query).next()['sum']
+        try:
+            count = self.collection.aggregate(query).next()['sum']
+        except StopIteration:
+            count = 0
         return count
 
     def next(self):
