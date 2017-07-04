@@ -120,7 +120,13 @@ class ClassificationParser(Parser):
         logger.debug('parsing annotation %s', annotations)
 
         annotation = self._find_task(annotations)
-        return self._parse_value(annotation['value'])
+
+        value =  self._parse_value(annotation['value'])
+        if value is None:
+            logger.critical('Coult not find valid annotation for classification')
+            logger.debug(cl)
+
+        return value
 
     def parse_subject(self, cl):
         for key in ['subject_id', 'subject_ids']:
