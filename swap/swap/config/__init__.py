@@ -64,12 +64,12 @@ class database:
         }
 
         _core_types = {
-            'classification_id': int,
+            'classification_id': (int, ('classification_id', 'id')),
             'user_id': int,
             'annotation': int,
             'workflow': int,
             # 'gold_label': int,
-            'subject_id': int,
+            'subject_id': (int, 'subject_ids'),
             'seen_before': bool,
             'live_project': bool,
             'time_stamp': 'timestamp',
@@ -81,7 +81,9 @@ class database:
         ]
 
         class annotation:
-            task = 'T1'
+            task = 'T0'
+            value_key = 'details.0.value.0'
+            value_separator = '.'
             true = ['Real', 'yes', 1]
             false = ['Bogus', 'no', 0]
 

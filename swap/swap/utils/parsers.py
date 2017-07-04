@@ -16,6 +16,20 @@ class Parser:
     def _config_types(self, config):
         pass
 
+    def _remap(self, cl):
+        for key, remap in self.types.items():
+            if type(remap) is tuple:
+                remap = remap[1]
+                if type(remap) is not tuple:
+                    remap = (remap)
+
+                for old_key in remap:
+                    if old_key in cl:
+                        cl[key] = cl.pop(old_key)
+                        break
+
+        return cl
+
     def _type(self, value, type_):
         # Parse timestamps
         if type_ == "timestamp":
@@ -47,10 +61,8 @@ class Parser:
         #     cl[key] = value
 
         for key, type_ in self.types.items():
-
             if type(type_) is tuple:
-                type_, rename = type_
-                cl[key] = cl.pop(rename)
+                type_ = type_[0]
 
             value = self._type(cl[key], type_)
 
@@ -71,26 +83,65 @@ class ClassificationParser(Parser):
     def _config_types(self, config):
         return config._core_types
 
+    def _find_value(self, root_value):
+        steps = self.annotation.value_key.split('.')
+        item = root_value
+
+        print(steps, item)
+
+        for key in steps:
+            if type(item) is list:
+                key = int(key)
+
+            item = item[key]
+
+        return item
+
+    def _parse_value(self, value):
+        if self.annotation.value_key is not None:
+            value = self._find_value(value)
+
+        if value in self.annotation.true:
+            return 1
+        if value in self.annotation.false:
+            return 0
+        return -1
+
+    def _find_task(self, annotations):
+        task = self.annotation.task
+        if type(annotations) is dict and task in annotations:
+            return annotations[task][0]
+
+        if type(annotations) is list:
+            for annotation in annotations:
+                if annotation['task'] == self.annotation.task:
+                    return annotation
+
     def parse_annotations(self, cl):
-        annotations = json.loads(cl['annotations'])
+        annotations = self.parse_json(cl['annotations'])
+        print(400, annotations)
 
-        for data in annotations:
-            if data['task'] == self.annotation.task:
-                value = data['value']
+        annotation = self._find_task(annotations)
+        return self._parse_value(annotation['value'])
 
-                if value in self.annotation.true:
-                    return 1
-                if value in self.annotation.false:
-                    return 0
-                return -1
+    def parse_subject(self, cl):
+        for key in ['subject_id', 'subject_ids']:
+            if key in cl:
+                return cl[key]
+        raise KeyError('Can\'t find subject in classification' % cl)
+
+    @staticmethod
+    def parse_json(item):
+        if type(item) is str:
+            return json.loads(item)
+        return item
 
     def process(self, cl):
-        metadata = json.loads(cl['metadata'])
+        cl = self._remap(cl)
+        metadata = self.parse_json(cl['metadata'])
 
         output = {
             'classification_id': cl['classification_id'],
-            'subject_id': cl['subject_ids'],
-            'user_name': cl['user_name'],
             'user_id': cl['user_id'],
             'workflow': cl['workflow_id'],
             'time_stamp': cl['created_at'],
@@ -102,6 +153,7 @@ class ClassificationParser(Parser):
             'seen_before': metadata.get('seen_before', False)
         })
 
+        output['subject_id'] = self.parse_subject(cl)
         output['annotation'] = self.parse_annotations(cl)
 
         output = self._mod_types(output)
@@ -119,6 +171,7 @@ class MetadataParser(Parser):
         return config.subject_metadata
 
     def process(self, cl):
+        cl = self._remap(cl)
         output = self._mod_types(cl)
         return output
 
