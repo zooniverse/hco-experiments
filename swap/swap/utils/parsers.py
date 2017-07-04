@@ -45,7 +45,6 @@ class Parser:
 
         if type(value) is not type_:
             if type_ is bool:
-                print(value)
                 return value in ['True', 'true']
 
             # Cast value to the expected type
@@ -87,7 +86,7 @@ class ClassificationParser(Parser):
         steps = self.annotation.value_key.split('.')
         item = root_value
 
-        print(steps, item)
+        logger.debug('navigating %s in %s', str(steps), str(item))
 
         for key in steps:
             if type(item) is list:
@@ -119,7 +118,7 @@ class ClassificationParser(Parser):
 
     def parse_annotations(self, cl):
         annotations = self.parse_json(cl['annotations'])
-        print(400, annotations)
+        logger.debug('parsing annotation %s', annotations)
 
         annotation = self._find_task(annotations)
         return self._parse_value(annotation['value'])
@@ -181,8 +180,15 @@ if __name__ == '__main__':
     from pprint import pprint
     import swap.config as _config
 
-    pp = MetadataParser(_config.database.builder)
-    with open('/home/michael/Downloads/SNHunters_classification_dump_20170622_gold-head.csv') as file:
+    # pp = MetadataParser(_config.database.builder)
+    # with open('/home/michael/Downloads/SNHunters_classification_dump_20170622_gold-head.csv') as file:
+    #     reader = csv.DictReader(file)
+    #     for row in reader:
+    #         print(row)
+    #         print(pp.process(row))
+
+    pp = ClassificationParser(_config.database.builder)
+    with open('/home/michael/Downloads/supernova-hunters-classifications-100.csv') as file:
         reader = csv.DictReader(file)
         for row in reader:
             print(row)

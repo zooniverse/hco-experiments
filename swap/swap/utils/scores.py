@@ -1,6 +1,7 @@
 
 import swap.db.classifications as db
 import swap.config as config
+from swap.utils.golds import GoldGetter
 
 import csv
 
@@ -134,7 +135,7 @@ class ScoreExport:
         Fetch gold labels from database
         """
         logger.debug('Getting real gold labels from db')
-        return db.getAllGolds()
+        return GoldGetter().all()()
 
     def counts(self, threshold):
         """
