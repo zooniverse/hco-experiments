@@ -104,7 +104,6 @@ class ClassificationParser(Parser):
             return 1
         if value in self.annotation.false:
             return 0
-        return -1
 
     def _find_task(self, annotations):
         task = self.annotation.task
@@ -156,6 +155,9 @@ class ClassificationParser(Parser):
         output['annotation'] = self.parse_annotations(cl)
 
         output = self._mod_types(output)
+
+        if output['annotation'] is None:
+            return None
         return output
 
 

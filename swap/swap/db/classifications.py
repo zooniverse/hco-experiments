@@ -216,6 +216,8 @@ def upload_project_dump(fname):
 
         for i, row in enumerate(reader):
             cl = pp.process(row)
+            if cl is None:
+                continue
             data.append(cl)
 
             sys.stdout.flush()
