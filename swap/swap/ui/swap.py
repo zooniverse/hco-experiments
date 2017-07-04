@@ -17,12 +17,12 @@
 """
 
 import swap.plots as plots
-import swap.ui
 
 from swap.utils.scores import ScoreExport
 from swap.swap import SWAP
 from swap.control import Control
-from swap.ui import Interface
+from swap.ui.ui import Interface
+from swap.ui.utils import load_pickle, write_log
 
 import os
 import csv
@@ -197,7 +197,7 @@ class SWAPInterface(Interface):
 
             if args.log:
                 fname = self.f(args.log[0])
-                swap.ui.write_log(swap, fname)
+                write_log(swap, fname)
 
             if args.stats:
                 s = swap.stats_str()
@@ -246,8 +246,6 @@ class SWAPInterface(Interface):
 
         if args.shell:
             import code
-            ui = swap.ui
-
             code.interact(local=locals())
 
         return swap
@@ -390,7 +388,7 @@ class SWAPInterface(Interface):
         return control
 
     def difference(self, args):
-        base = swap.ui.load_pickle(args.diff[0])
+        base = load_pickle(args.diff[0])
 
         p_args = []
         args_ = args.diff[1: -1]
@@ -400,7 +398,7 @@ class SWAPInterface(Interface):
             if extension == '.csv':
                 scores = ScoreExport.from_csv(fname)
             elif extension == '.pkl':
-                scores = swap.ui.load_pickle(fname)
+                scores = load_pickle(fname)
 
             p_args.append((label, scores))
 

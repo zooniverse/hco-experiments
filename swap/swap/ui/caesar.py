@@ -18,7 +18,7 @@
 
 import swap.config as config
 import swap.app.caesar_app as caesar
-from swap.ui import Interface
+from swap.ui.ui import Interface
 
 import logging
 

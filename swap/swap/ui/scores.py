@@ -20,7 +20,7 @@ import swap.plots as plots
 
 from swap.utils.scores import ScoreExport
 from swap.swap import SWAP
-from swap.ui import Interface
+from swap.ui.ui import Interface
 
 import os
 import csv
