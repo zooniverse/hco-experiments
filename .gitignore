@@ -116,6 +116,8 @@ manifest
 *.sublime-project
 *.sublime-workspace
 *.sublime*
+
+# R Project files
 .Rproj.user
 *.Rhistory
 
@@ -123,5 +125,9 @@ manifest
 node_modules/
 static/
 
+# Pylint config
+.pylintrc
+
 # Local configuration overrides
 swap/swap/config/local_config.py
+swap/swap/config/config.py
