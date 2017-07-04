@@ -28,6 +28,7 @@ from swap.ui.ui import UI
 from swap.ui.scores import RocInterface, ScoresInterface
 from swap.ui.swap import SWAPInterface
 from swap.ui.caesar import CaesarInterface
+from swap.ui.admin import AdminInterface
 
 import pickle
 import argparse
@@ -53,6 +54,7 @@ def run(*interfaces):
     SWAPInterface(ui)
     ScoresInterface(ui)
     CaesarInterface(ui)
+    AdminInterface(ui)
 
     for interface in interfaces:
         interface()
