@@ -1,5 +1,6 @@
 
-# Place config overrides that should not propagate to the git repo in this file
+# Copy the contents of this file to config.py to override config
+# options
 
 
 def override(config):
