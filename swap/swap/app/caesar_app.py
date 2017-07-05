@@ -6,7 +6,8 @@ from swap.app.control import ThreadedControl, OnlineControl
 import swap.config as config
 
 import logging
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
+from functools import wraps
 import requests
 
 
@@ -64,11 +65,54 @@ To configure caesar:
 """
 
 
+
+class Auth:
+
+    def __init__(self, username, token):
+        self._username = username
+        self._token = self._mod_token(token)
+
+    @staticmethod
+    def _mod_token(token):
+        return token.replace(' ', '').replace('\n', '')
+
+    def check_auth(self, username, token):
+        return username == self._username and token == self._token
+
+    @staticmethod
+    def authenticate():
+        """
+        Sends a 401 response that enables basic auth
+        """
+        return Response(
+        'Could not verify your access level for that URL.\n'
+        'You have to login with proper credentials', 401,
+        {'WWW-Authenticate': 'Basic realm="Login Required"'})
+
+
+
 class API:
 
     def __init__(self, control_thread):
         self.app = Flask(__name__)
         self.control = control_thread
+
+        user = config.online_swap._auth_username
+        token = config.online_swap._auth_key
+        self._auth = Auth(user, token)
+
+    @staticmethod
+    def auth(func):
+        """
+        Wrapper to force authentication in HTTP request
+        """
+        @wraps(func)
+        def wrapper(self, *args, **kwargs):
+            auth = request.authorization
+            if not auth or not self._auth.check_auth(auth.username, auth.password):
+                return self._auth.authenticate()
+            return func(*args, **kwargs)
+        return wrapper
 
     def run(self):
         self._route('/', 'scores', self.scores, ['GET'])
@@ -85,6 +129,7 @@ class API:
         """
         pass
 
+    # @API.auth
     def classify(self):
         """
         Receive a classification from caesar and process it
@@ -106,6 +151,7 @@ class API:
         resp.status_code = 200
         return resp
 
+    # @API.auth
     def scores(self):
         """
         Return current score export
