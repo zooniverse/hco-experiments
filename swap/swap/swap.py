@@ -1,6 +1,13 @@
 ################################################################
-# SWAP implementation
-#
+"""
+    SWAP:
+        Calculates and updates a confusion matrix for each user, and the
+        probability that a subject is an object of interest
+
+    DummySWAP:
+        Calculates the probability that a subject is an object of interest
+        using only simple vote fractions
+"""
 
 from swap.agents.bureau import Bureau
 from swap.agents.agent import Stats
@@ -18,17 +25,6 @@ import progressbar
 import logging
 
 logger = logging.getLogger(__name__)
-
-
-__doc__ = """
-    SWAP:
-        Calculates and updates a confusion matrix for each user, and the
-        probability that a subject is an object of interest
-
-    DummySWAP:
-        Calculates the probability that a subject is an object of interest
-        using only simple vote fractions
-"""
 
 
 class SWAP:
@@ -409,31 +405,6 @@ class SWAP:
 
         logger.debug('done')
         return HistoryExport(history)
-
-    def roc_export(self, labels=None):
-        """
-            Exports subject classification data in a suitable form
-            for generating a roc curve. Data consolidated into list of tuples
-            Each tuble takes the form:
-                (true label, probability)
-
-            Args:
-                labels: List of subject ids. Limits roc export to these
-                        subjects
-        """
-
-        logger.info('Generating roc export')
-        db_golds = db.getAllGolds()
-
-        data = []
-        for id_, gold in db_golds.items():
-            if (labels is None or id_ in labels) and \
-                    gold in [0, 1] and \
-                    id_ in self.subjects:
-                score = self.subjects.get(id_, make_new=False).score
-                data.append((gold, score))
-
-        return data
 
     def debug_str(self):
         s = ''
