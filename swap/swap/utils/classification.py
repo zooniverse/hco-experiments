@@ -52,7 +52,6 @@ class Classification:
         annotation = cl['annotation']
 
         c = Classification(user, subject, annotation)
-        logger.debug(c)
 
         return c
 
