@@ -124,11 +124,11 @@ class TestLedger:
     #     with pytest.raises(MissingReference):
     #         le.restore_agent(15)
 
-    @patch.object(Transaction, 'agent', return_value=MagicMock())
+    @patch.object(Bureau, 'get', MagicMock())
     def test_notify_agents_getsagent(self, mock):
         l = Ledger(0)
-        [l.add(Transaction(mocksubject(i), 0)) for i in range(5)]
-        l.notify_agents(None)
+        _ = [l.add(Transaction(mocksubject(i), 0)) for i in range(5)]
+        l.notify_agents(Bureau(User))
 
         assert mock.call_count == 5
 

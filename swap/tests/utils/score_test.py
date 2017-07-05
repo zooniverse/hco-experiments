@@ -1,16 +1,18 @@
 ################################################################
 
 from swap.utils.scores import ScoreExport, Score, ScoreIterator
-import swap.db.classifications as dbcl
+from swap.db.classifications import Classifications
 from swap.agents.subject import Subject
 
 from unittest.mock import MagicMock, patch
 
+# pylint: disable=R0201
+
 
 class TestScoreExport:
 
-    @patch.object(dbcl, 'getAllGolds')
-    def test_init(self, mock):
+    @patch.object(Classifications, 'getAllGolds')
+    def test_init(self):
         golds = {1: 0, 2: 0, 3: 1, 4: 1}
         scores = {}
         for i, g in golds.items():
@@ -24,8 +26,7 @@ class TestScoreExport:
             assert score.gold == golds[score.id]
             assert score.p == score.id / 10
 
-    @patch.object(
-        ScoreExport, 'get_real_golds')
+    @patch.object(ScoreExport, 'get_real_golds')
     def test_assign_golds(self, mock):
         golds = [1, 1, 0, 0, 1, 1]
 

@@ -162,7 +162,9 @@ class TestSwap:
         bureau = swap.subjects
         print(bureau)
 
-        swap.classify(Classification(0, 2, 0, 1))
+        cl = Classification(0, 2, 0)
+        cl.gold = 1
+        swap.classify(cl)
         swap.process_changes()
         print(bureau.get(1))
         assert bureau.get(2).gold == 0

@@ -2,34 +2,44 @@
 ################################################################
 # Script to test control functionality
 
-import swap.db.classifications as dbcl
+from swap.db.classifications import Classifications
+from swap.db.golds import Golds
+from swap.db import DB
 from swap.control import Control
 from swap.utils.golds import GoldGetter
 
 from unittest.mock import MagicMock, patch
 import pytest
 
+# pylint: disable=R0201
+
 fields = {'user_id', 'classification_id', 'subject_id',
           'annotation', 'gold_label'}
 
 
+def db_cl():
+    return DB().classifications
+
+
 class TestControl:
 
-    @patch.object(dbcl, 'getRandomGoldSample', MagicMock(return_value=[]))
-    def test_with_train_split(self):
+    @patch.object(Golds, 'get_random_golds',
+                  return_value=MagicMock(return_value=[]))
+    def test_with_train_split(self, mock):
 
         c = Control()
         c.gold_getter.random(100)
         c.get_gold_labels()
 
-        dbcl.getRandomGoldSample.assert_called_with(100)
+        mock.assert_called_with(100)
 
-    @patch.object(dbcl, 'getAllGolds', MagicMock(return_value=[]))
-    def test_without_train_split(self):
+    @patch.object(Golds, 'get_golds',
+                  return_value=MagicMock(return_value=[]))
+    def test_without_train_split(self, mock):
         c = Control()
         c.get_gold_labels()
 
-        dbcl.getAllGolds.assert_called_with()
+        mock.assert_called_with()
 
 
 # def test_classifications_projection():
@@ -65,7 +75,7 @@ def test_get_one_classification():
     """
     control = Control(0.5, 0.5)
 
-    cursor = control.getClassifications()
+    cursor = control.get_classifications()
     n_class = len(cursor)
     cl = cursor.next()
 
@@ -76,30 +86,24 @@ def test_get_one_classification():
 
 class TestGoldGetter:
 
+    @patch.object(Golds, 'get_golds',
+                  MagicMock(return_value=[]))
     def test_wrapper_golds_to_None(self):
-        old = dbcl.getAllGolds
-        dbcl.getAllGolds = MagicMock(return_value=[])
-
         gg = GoldGetter()
         gg._golds = {}
         gg.all()
 
         assert gg._golds is None
 
-        dbcl.getAllGolds = old
-
+    @patch.object(Golds, 'get_golds',
+                  MagicMock(return_value=[]))
     def test_wrapper_getter(self):
-        old = dbcl.getAllGolds
-        dbcl.getAllGolds = MagicMock(return_value=[])
-
         gg = GoldGetter()
         gg._golds = {}
         gg.all()
 
         print(gg.getters)
         assert callable(gg.getters[0])
-
-        dbcl.getAllGolds = old
 
     def test_getter_propagation(self):
         c = Control()
@@ -130,7 +134,7 @@ class TestGoldGetter:
         gg.controversial(10)
         gg.consensus(10)
 
-        golds = c.getGoldLabels()
+        golds = c.get_gold_labels()
         print(golds)
         assert len(golds) == 20
 
