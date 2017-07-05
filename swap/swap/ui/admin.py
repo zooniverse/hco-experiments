@@ -1,5 +1,5 @@
 
-import swap.db.classifications as dbcl
+from swap.db import DB
 from swap.ui.ui import Interface
 
 
@@ -35,4 +35,4 @@ class AdminInterface(Interface):
 
         if args.upload_dump:
             fname = args.upload_dump[0]
-            dbcl.upload_project_dump(fname)
+            DB().classifications.upload_project_dump(fname)

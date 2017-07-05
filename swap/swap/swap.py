@@ -10,7 +10,7 @@ from swap.utils.scores import ScoreExport, Score
 from swap.utils.history import History, HistoryExport
 from swap.utils.classification import Classification
 
-from swap.db import classifications as db
+from swap.db import DB
 
 import swap.config as config
 
@@ -497,7 +497,8 @@ class DummySWAP:
             id_ = item['_id']
             self.data[id_] = Score(id_, gold, score)
 
-    def get_cursor(self):
+    @staticmethod
+    def get_cursor():
         """
         Generate a cursor with classifications
 
@@ -506,7 +507,7 @@ class DummySWAP:
         swap.db.Cursor
             Classifications
         """
-        cursor = db.aggregate([
+        cursor = DB().classifications.aggregate([
             {'$match': {'gold_label': {'$ne': -1}}},
             {'$group': {
                 '_id': '$subject_id',

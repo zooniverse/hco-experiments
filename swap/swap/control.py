@@ -10,10 +10,9 @@ Contains classes to control a SWAP instance
     MetaDataControl: SWAP instance that splits data by metadata
 """
 
-import swap.db.classifications as db
-import swap.db
 import swap.config as config
 from swap.swap import SWAP
+from swap.db import DB
 from swap.utils.classification import Classification
 from swap.utils.golds import GoldGetter
 from swap.db import Query
@@ -61,7 +60,7 @@ class Control:
 
         # get classifications
         cursor = self.get_classifications()
-        db_stats = swap.db.DB().get_stats()
+        db_stats = DB().classifications.get_stats()
         # n_classifications = self._n_classifications()
 
         # loop over classification cursor to process
@@ -129,7 +128,8 @@ class Control:
         """
         return self.gold_getter.golds
 
-    def get_classifications(self):
+    @staticmethod
+    def get_classifications():
         """
         Get the cursor containing classifications from db
 
@@ -138,7 +138,7 @@ class Control:
         swap.db.Cursor
             Cursor with classifications
         """
-        return db.getClassifications()
+        return DB().classifications.getClassifications()
 
     def getSWAP(self):
         """
@@ -201,6 +201,6 @@ class MetaDataControl(Control):
             q.match_range(meta_data_field, self.meta_lower, self.meta_upper)
 
         # perform query on classification data
-        classifications = db.aggregate(q.build())
+        classifications = DB().classifications.aggregate(q.build())
 
         return classifications

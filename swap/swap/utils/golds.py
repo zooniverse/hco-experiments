@@ -1,6 +1,5 @@
 
-import swap.db.golds as db
-import swap.db.controversial as cv
+from swap.db import DB
 
 from functools import wraps
 
@@ -8,6 +7,23 @@ import logging
 logger = logging.getLogger(__name__)
 
 # pylint: disable=R0201
+
+def db_cv():
+    return DB().controversial
+
+
+def _getter(func):
+    @wraps(func)
+    def wrapper(self, *args, **kwargs):
+        getter = lambda: func(self, *args, **kwargs)
+        logger.debug('Using getter %s with args %s %s',
+                     func, args, kwargs)
+
+        self.getters.append(getter)
+        self._golds = None
+
+        return getter
+    return wrapper
 
 
 class GoldGetter:
@@ -18,26 +34,14 @@ class GoldGetter:
     def __init__(self):
         self.getters = []
         self._golds = None
-
-    def _getter(func):
-        @wraps(func)
-        def wrapper(self, *args, **kwargs):
-            getter = lambda: func(self, *args, **kwargs)
-            logger.debug('Using getter %s with args %s %s',
-                         func, args, kwargs)
-
-            self.getters.append(getter)
-            self._golds = None
-
-            return getter
-        return wrapper
+        self.db = DB().golds
 
     @_getter
     def all(self):
         """
         Get all gold labels
         """
-        return db.get_golds()
+        return self.db.get_golds()
 
     @_getter
     def random(self, size):
@@ -49,7 +53,7 @@ class GoldGetter:
         size : int
             Sample size
         """
-        return db.get_random_golds(size)
+        return self.db.get_random_golds(size)
 
     @_getter
     def subjects(self, subject_ids):
@@ -61,7 +65,7 @@ class GoldGetter:
         subject_ids : list
             List of subject ids (int)
         """
-        return db.get_golds(subject_ids)
+        return self.db.get_golds(subject_ids)
 
     @_getter
     def controversial(self, size):
@@ -73,8 +77,8 @@ class GoldGetter:
         size : int
             Number of subjects
         """
-        subjects = cv.get_controversial(size)
-        return db.get_golds(subjects)
+        subjects = db_cv().get_controversial(size)
+        return self.db.get_golds(subjects)
 
     @_getter
     def consensus(self, size):
@@ -86,8 +90,8 @@ class GoldGetter:
         size : int
             Number of subjects
         """
-        subjects = cv.get_consensus(size)
-        return db.get_golds(subjects)
+        subjects = db_cv().get_consensus(size)
+        return self.db.get_golds(subjects)
 
     @_getter
     def these(self, golds):

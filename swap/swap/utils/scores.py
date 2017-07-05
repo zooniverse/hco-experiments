@@ -1,5 +1,4 @@
 
-import swap.db.classifications as db
 import swap.config as config
 from swap.utils.golds import GoldGetter
 
