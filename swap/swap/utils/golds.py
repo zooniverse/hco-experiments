@@ -93,10 +93,6 @@ class GoldGetter:
     def these(self, golds):
         return golds
 
-    @_getter
-    def these(self, golds):
-        return golds
-
     # @_getter
     # def extreme_min(self, n_controv, max_consensus):
     #     def f():
