@@ -1,5 +1,5 @@
 
-from swap.db import DB
+from swap.db.db import Collection
 import swap.utils.parsers as parsers
 import swap.config as config
 
@@ -8,43 +8,43 @@ import csv
 import logging
 logger = logging.getLogger(__name__)
 
-subject_count = None
-collection = DB().subjects
 
+class Subjects(Collection):
 
-def aggregate(*args, **kwargs):
-    try:
-        logger.debug('Preparing to run aggregation')
-        logger.debug(*args, **kwargs)
-        return collection.aggregate(*args, **kwargs)
-    except Exception as e:
-        logger.error(e)
-        raise e
+    @staticmethod
+    def _collection_name():
+        return 'subjects'
 
+    def schema(self):
+        pass
 
-def upload_metadata_dump(fname):
-    logger.info('dropping collection')
-    DB()._db.subjects.drop()
+    def _init_collection(self):
+        pass
 
-    logger.info('parsing csv dump')
-    data = []
-    parser = parsers.MetadataParser(config.database.builder)
+    #######################################################################
 
-    with open(fname, 'r') as file:
-        reader = csv.DictReader(file)
+    def upload_metadata_dump(self, fname):
+        self._rebuild()
 
-        for i, row in enumerate(reader):
-            item = parser.process(row)
-            print(item)
-            data.append(item)
+        logger.info('parsing csv dump')
+        data = []
+        parser = parsers.MetadataParser(config.database.builder)
 
-            sys.stdout.flush()
-            sys.stdout.write("%d records processed\r" % i)
+        with open(fname, 'r') as file:
+            reader = csv.DictReader(file)
 
-            if len(data) > 100000:
-                print(data)
-                collection.insert_many(data)
-                data = []
+            for i, row in enumerate(reader):
+                item = parser.process(row)
+                print(item)
+                data.append(item)
 
-    collection.insert_many(data)
-    logger.debug('done')
+                sys.stdout.flush()
+                sys.stdout.write("%d records processed\r" % i)
+
+                if len(data) > 100000:
+                    print(data)
+                    self.collection.insert_many(data)
+                    data = []
+
+        self.collection.insert_many(data)
+        logger.debug('done')

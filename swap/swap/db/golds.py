@@ -1,23 +1,9 @@
 
-from swap.db import DB
-import swap.db.classifications as dbc
+from swap.db.db import Collection
 
-import sys
 from functools import wraps
 import logging
 logger = logging.getLogger(__name__)
-
-collection = DB().subjects
-
-
-def aggregate(*args, **kwargs):
-    try:
-        logger.debug('Preparing to run aggregation')
-        logger.debug(*args, **kwargs)
-        return collection.aggregate(*args, **kwargs)
-    except Exception as e:
-        logger.error(e)
-        raise e
 
 
 def parse_golds(func):
@@ -43,13 +29,13 @@ def parse_golds(func):
     """
 
     @wraps(func)
-    def wrapper(*args, type_=dict, **kwargs):
+    def wrapper(self, *args, type_=dict, **kwargs):
         # build cursor from query
-        query = func(*args, **kwargs)
+        query = func(self, *args, **kwargs)
         # add pipelines to use most recent gold entry
         # of each subject, and propery projections
-        query += _selection()
-        cursor = aggregate(query)
+        query += self._selection()
+        cursor = self.aggregate(query)
 
         if type_ is dict:
             data = {}
@@ -69,44 +55,50 @@ def parse_golds(func):
     return wrapper
 
 
-# def _projection():
-#     return [{'$project': {'subject': 1, 'gold': 1}}]
+class Golds(Collection):
 
 
-def _selection():
-    return [
-        {'$group': {'_id': '$subject', 'gold': {'$last': '$gold'}}},
-        {'$project': {'subject': '$_id', 'gold': 1}}]
+    @staticmethod
+    def _collection_name():
+        return 'subjects'
 
+    def schema(self):
+        pass
 
-@parse_golds
-def get_golds(subjects=None):
-    query = []
-    if subjects is not None:
-        query += [{'$match': {'subject': {'$in': subjects}}}]
+    def _init_collection(self):
+        pass
 
-    return query
+    #######################################################################
 
+    @staticmethod
+    def _selection():
+        return [
+            {'$group': {'_id': '$subject', 'gold': {'$last': '$gold'}}},
+            {'$project': {'subject': '$_id', 'gold': 1}}]
 
-@parse_golds
-def get_random_golds(size):
-    query = [
-        {'$match': {'gold': {'$ne': -1}}},
-        {'$sample': {'size': size}}]
+    @parse_golds
+    def get_golds(self, subjects=None):
+        query = []
+        if subjects is not None:
+            query += [{'$match': {'subject': {'$in': subjects}}}]
 
-    return query
+        return query
 
+    @parse_golds
+    def get_random_golds(self, size):
+        query = [
+            {'$match': {'gold': {'$ne': -1}}},
+            {'$sample': {'size': size}}]
 
-def build_from_classifications():
-    data = []
-    count = 0
-    logger.info('querying for subject gold data')
-    for subject, gold in dbc.getAllGolds(type_=tuple):
-        data.append({'subject': subject, 'gold': gold})
+        return query
 
-        count += 1
-        sys.stdout.write('\r%d' % count)
-        sys.stdout.flush()
+    def build_from_classifications(self):
+        query = [
+            {'$group': {'_id': '$subject_id',
+                        'gold': {'$last': '$gold_label'}}},
+            {'$project': {'subject': '$_id', 'gold': 1, '_id': 0}},
+            {'$out': self._collection_name()}
+        ]
 
-    logger.info('Uploading subject data')
-    collection.insert_many(data)
+        logger.critical('building gold label list from classifications')
+        self._db.classifications.aggregate(query)
