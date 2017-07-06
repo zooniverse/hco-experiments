@@ -68,7 +68,11 @@ class _DB:
 
 
 class DB(_DB, metaclass=Singleton):
-    pass
+
+    @classmethod
+    def _reset(cls):
+        if cls in cls._instances:
+            cls._instances.pop(cls)
 
 
 @atexit.register
