@@ -2,6 +2,7 @@
 import swap.control
 import swap.config as config
 from swap.utils.classification import Classification
+from swap.utils.parsers import ClassificationParser
 
 import sys
 import threading
@@ -11,32 +12,32 @@ from queue import Queue
 logger = logging.getLogger(__name__)
 
 
-def parse_classification(data):
-    logger.debug(data)
-    annotation = parse_annotation(data['annotations'])
-
-    params = {
-        'subject': data['subject_id'],
-        'user': data['user_id'],
-        'annotation': annotation
-    }
-    logger.debug('parsed classification: %s', str(params))
-
-    classification = Classification(**params)
-    logger.debug(classification)
-
-    return classification
-
-
-def parse_annotation(annotations):
-    # TODO parsing annotations for multiple tasks
-    logger.debug('parsing annotations: %s', str(annotations))
-
-    value = list(annotations.values())[0][0]['value']
-
-    logger.debug('got %s', str(value))
-    return value
-
+# def parse_classification(data):
+#     logger.debug(data)
+#     annotation = parse_annotation(data['annotations'])
+#
+#     params = {
+#         'subject': data['subject_id'],
+#         'user': data['user_id'],
+#         'annotation': annotation
+#     }
+#     logger.debug('parsed classification: %s', str(params))
+#
+#     classification = Classification(**params)
+#     logger.debug(classification)
+#
+#     return classification
+#
+#
+# def parse_annotation(annotations):
+#     # TODO parsing annotations for multiple tasks
+#     logger.debug('parsing annotations: %s', str(annotations))
+#
+#     value = list(annotations.values())[0][0]['value']
+#
+#     logger.debug('got %s', str(value))
+#     return value
+#
 
 class OnlineControl(swap.control.Control):
     """
@@ -45,6 +46,7 @@ class OnlineControl(swap.control.Control):
 
     def __init__(self):
         super().__init__()
+        self.parser = ClassificationParser(config.database.builder)
 
         if config.database.name == 'swapDB':
             raise Exception('Refusing to use swapDB database in online mode')
@@ -55,9 +57,10 @@ class OnlineControl(swap.control.Control):
         # return subjects whose scores have changed
         pass
 
-    @staticmethod
-    def parse_classification(args):
-        return parse_classification(args)
+    def parse_classification(self, args):
+        data = self.parser.process(args)
+        cl = Classification.generate(data)
+        return cl
 
     def classify(self, classification):
         # Add classification from caesar
