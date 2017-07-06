@@ -142,5 +142,5 @@ class Classifications(Collection):
         return stats
 
     def get_stats(self):
-        stats = self._db.stats.collection
+        stats = self._db.stats
         return stats.find().sort('_id', -1).limit(1).next()
