@@ -63,6 +63,7 @@ class Classifications(Collection):
             batch_size = kwargs['batch_size']
         else:
             batch_size = config.database.max_batch_size
+        batch_size = int(batch_size)
 
         # perform query on classification data
         classifications = self.aggregate(query, {'batchSize': batch_size})
