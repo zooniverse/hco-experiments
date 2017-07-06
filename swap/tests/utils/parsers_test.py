@@ -125,7 +125,7 @@ class Test_Project_Parser:
 
         v = parser._parse_value('ghi')
 
-        assert v == -1
+        assert v is None
 
     def test_parse_value_and_find(self):
         self.override_annotation('T0', '0.value.1.2.3', [5], [0])

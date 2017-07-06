@@ -4,6 +4,7 @@
 from swap.agents.ledger import Ledger, Transaction, StaleException
 from swap.agents.subject import Ledger as SLedger
 from swap.agents.subject import Transaction as STransaction
+from swap.agents.subject import Subject
 from swap.agents.user import User
 from swap.agents.user import Ledger as ULedger
 from swap.agents.user import Transaction as UTransaction
@@ -124,26 +125,43 @@ class TestLedger:
     #     with pytest.raises(MissingReference):
     #         le.restore_agent(15)
 
-    @patch.object(Bureau, 'get', MagicMock())
+    @patch.object(Bureau, 'get', return_value=MagicMock())
     def test_notify_agents_getsagent(self, mock):
-        l = Ledger(0)
+        l = Ledger(100)
         _ = [l.add(Transaction(mocksubject(i), 0)) for i in range(5)]
-        l.notify_agents(Bureau(User))
 
+        l.notify_agents(None, Bureau(User))
         assert mock.call_count == 5
 
-    def test_notify_agents_callsnotify(self):
+    @patch.object(Transaction, 'agent', return_value=MagicMock())
+    def test_notify_agents_callsnotify(self, mock):
+
         subject = mocksubject(0)
         t = Transaction(mocksubject(1), 0)
-        mock = MagicMock(return_value=subject)
-        t.agent = mock
+        t.agent(0).ledger = MagicMock()
+        print(t.agent(0))
 
         l = Ledger(15)
         l.add(t)
-        l.notify_agents(16)
+        l.notify_agents(None, None)
 
-        print(subject)
-        subject.ledger.notify.assert_called_once_with(15, 16)
+        print(mock)
+        t.agent(0).ledger.notify.assert_called_once_with(15, None)
+
+    @patch.object(Bureau, 'get', return_value=mocksubject(16))
+    @patch.object(Transaction, 'notify', MagicMock())
+    def test_notify(self, mock):
+        l = Ledger(15)
+        t = Transaction(mock(), 0)
+        print(mock().id)
+        l.add(t)
+        l.clear_changes()
+
+        l.notify(16, Bureau(Subject))
+
+        t.notify.assert_called_once_with(mock())
+        assert l.stale is True
+        assert l.changed == [16]
 
 
 class TestTransaction:
@@ -210,14 +228,6 @@ class TestSubjectLedger:
         assert le.last is None
         assert le._score is None
         assert le.first_change is None
-
-    @patch.object(SLedger, 'recalculate', MagicMock())
-    def test_score_stale(self):
-        le = SLedger(0)
-        le.stale = True
-
-        with pytest.raises(StaleException):
-            le.score
 
     def test_add_transaction_last(self):
         le = SLedger(0)
@@ -450,6 +460,7 @@ class TestUserLedger:
 
         assert mock.call_count == 0
 
+    @patch('swap.config.gamma', 1)
     def test_recalculate_1(self):
         le = ULedger(0)
         t0 = UTransaction(mocksubject(0, 0), 0)
@@ -462,6 +473,7 @@ class TestUserLedger:
 
         assert le.recalculate() == (2 / 3, 1 / 4)
 
+    @patch('swap.config.gamma', 1)
     def test_recalculate_2(self):
         le = ULedger(0)
         t0 = UTransaction(mocksubject(0, 1), 0)
@@ -476,6 +488,26 @@ class TestUserLedger:
 
         assert le.recalculate() == (1 / 2, 2 / 5)
 
+    @patch('swap.config.gamma', 5)
+    def test_recalculate_gamma(self):
+        le = ULedger(0)
+        t = [
+            (0, 1, 0),
+            (1, 1, 0),
+            (2, 1, 0),
+            (3, 1, 1),
+            (4, 0, 0),
+
+            (5, 0, 0),
+            (6, 0, 0),
+            (7, 0, 0),
+        ]
+
+        _ = [le.add(UTransaction(mocksubject(i, g), a)) for i, g, a in t]
+
+        assert le.recalculate() == (9 / 14, 6 / 14)
+
+    @patch('swap.config.gamma', 1)
     def test_score(self):
         le = ULedger(0)
         t0 = UTransaction(mocksubject(0, 1), 0)

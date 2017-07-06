@@ -4,13 +4,16 @@
 import swap.agents.subject as _subject
 import swap.agents.user as _user
 from swap.agents.bureau import Bureau
+from swap.agents.ledger import Ledger
 from swap.utils.classification import Classification
 
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 Subject = _subject.Subject
 User = _user.User
+
+# pylint: disable=R0201
 
 
 class TestSubject:
@@ -45,7 +48,7 @@ class TestSubject:
 
     def test_classify(self):
         s = Subject(12)
-        cl = Classification(11, 12, 1, 1)
+        cl = Classification(11, 12, 1)
 
         u = User(11)
         u.ledger.recalculate()
@@ -57,11 +60,11 @@ class TestSubject:
         print(t)
 
         s.ledger.recalculate()
-        s.score
+        _ = s.score
 
     def test_classify_rejects_wrong_classification(self):
         s = Subject(1)
-        cl = Classification(0, 2, 0, 0)
+        cl = Classification(0, 2, 0)
         with pytest.raises(ValueError):
             s.classify(cl, None)
 
@@ -115,28 +118,30 @@ class TestSubject:
 
     #     assert score == 0
 
+    @patch.object(Ledger, 'notify_agents', MagicMock())
     def test_set_gold_label(self):
         s = Subject(1)
         assert s.gold == -1
 
-        s.set_gold_label(1, MagicMock())
+        s.set_gold_label(1, 15, 16)
         assert s.gold == 1
 
-    def test_set_gold_label_notify_ledger(self):
+    @patch.object(Ledger, 'notify_agents', return_value=MagicMock())
+    def test_set_gold_label_notify_ledger(self, mock):
         s = Subject(1)
-        s.ledger = MagicMock()
+        assert s.gold == -1
 
-        users = Bureau(User)
-        s.set_gold_label(1, users)
-        s.ledger.notify_agents.assert_called_once_with(users)
+        s.set_gold_label(1, 15, 16)
+        mock.assert_called_once_with(15, 16)
 
-    def test_set_gold_label_no_notify_ledger(self):
+    @patch.object(Ledger, 'notify_agents', return_value=MagicMock())
+    def test_set_gold_label_no_notify(self, mock):
         s = Subject(1)
-        s.ledger = MagicMock()
+        assert s.gold == -1
 
         s._gold = 1
-        s.set_gold_label(1, MagicMock())
-        s.ledger.notify_agents.assert_not_called()
+        s.set_gold_label(1, 15, 16)
+        mock.assert_not_called()
 
     # ---------EXPORT TEST------------------------------
 

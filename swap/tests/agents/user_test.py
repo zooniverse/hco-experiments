@@ -26,6 +26,8 @@ User = _user.User
 # uid = 0
 # epsilon = .5
 
+# pylint: disable=R0201
+
 
 class TestUser:
     def test_init(self):
@@ -43,7 +45,7 @@ class TestUser:
     def test_classify(self):
         u = User(11)
         s = Subject(12)
-        s.set_gold_label(0, None)
+        s._gold = 0
 
         cl = Classification(11, 12, 1)
         u.classify(cl, s)
