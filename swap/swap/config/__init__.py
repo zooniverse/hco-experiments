@@ -31,6 +31,7 @@ class Object:
 # Prior probabilities
 p0 = 0.12
 epsilon = 0.5
+gamma = 5
 
 # Retirement Thresholds
 mdr = 0.1

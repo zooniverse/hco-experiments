@@ -279,9 +279,9 @@ class Counter:
             # return score
 
             right = n
-            gamma = 10
+            gamma = config.gamma
 
-            return (right + gamma / 2) / (total + gamma)
+            return (right + gamma) / (total + gamma * 2)
 
         return formula(self.matched, self.seen)
 
