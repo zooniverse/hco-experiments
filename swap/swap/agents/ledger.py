@@ -93,8 +93,10 @@ class Ledger:
 
     def notify_agents(self, this_bureau, other_bureau):
         """
-        Have all transactions notify the connected agents
-        that this agent has changed
+        This agent notifies all connected agents of a change
+
+        If this ledger is part of a user, this ledger notifies all subjects
+        that this user's score has changed.
         """
         # TODO
 
@@ -104,6 +106,12 @@ class Ledger:
             # t.notify(self.id)
 
     def notify(self, id_, bureau):
+        """
+        Notify this agent that the connected agent has changed
+
+        If this ledger is part of a subject, the connected user agent
+        is notifying the subject that its score has changed.
+        """
         agent = bureau.get(id_)
         self.update(id_)
         self.transactions[id_].notify(agent)
