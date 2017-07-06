@@ -2,7 +2,7 @@
 # Collection of infrastructures to run SWAP in an online state
 # with Caesar
 
-from swap.app.control import ThreadedControl, OnlineControl
+from swap.app.control import ThreadedControl
 import swap.config as config
 
 import logging
@@ -90,6 +90,18 @@ class Auth:
         {'WWW-Authenticate': 'Basic realm="Login Required"'})
 
 
+def needs_auth(func):
+    """
+    Wrapper to force authentication in HTTP request
+    """
+    @wraps(func)
+    def wrapper(self, *args, **kwargs):
+        auth = request.authorization
+        if not auth or not self._auth.check_auth(auth.username, auth.password):
+            return self._auth.authenticate()
+        return func(self, *args, **kwargs)
+    return wrapper
+
 
 class API:
 
@@ -100,19 +112,6 @@ class API:
         user = config.online_swap._auth_username
         token = config.online_swap._auth_key
         self._auth = Auth(user, token)
-
-    @staticmethod
-    def auth(func):
-        """
-        Wrapper to force authentication in HTTP request
-        """
-        @wraps(func)
-        def wrapper(self, *args, **kwargs):
-            auth = request.authorization
-            if not auth or not self._auth.check_auth(auth.username, auth.password):
-                return self._auth.authenticate()
-            return func(*args, **kwargs)
-        return wrapper
 
     def run(self):
         self._route('/', 'scores', self.scores, ['GET'])
@@ -129,7 +128,7 @@ class API:
         """
         pass
 
-    # @API.auth
+    @needs_auth
     def classify(self):
         """
         Receive a classification from caesar and process it
@@ -139,11 +138,10 @@ class API:
 
         # Parse json from request
         data = request.get_json()
-        classification = OnlineControl.parse_classification(data)
 
-        logger.debug(classification)
+        logger.debug('received data %s', str(data))
         logger.debug('sending classification to swap thread')
-        self.control.queue('classify', classification, respond)
+        self.control.queue('classify', data, respond)
 
         # return empty response
 
@@ -151,7 +149,7 @@ class API:
         resp.status_code = 200
         return resp
 
-    # @API.auth
+    @needs_auth
     def scores(self):
         """
         Return current score export

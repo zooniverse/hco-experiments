@@ -58,12 +58,14 @@ class OnlineControl(swap.control.Control):
         pass
 
     def parse_classification(self, args):
+        logger.debug('parsing raw classification %s', str(args))
         data = self.parser.process(args)
         cl = Classification.generate(data)
         return cl
 
-    def classify(self, classification):
+    def classify(self, raw_cl):
         # Add classification from caesar
+        classification = self.parse_classification(raw_cl)
         logger.debug('Adding classification from network: %s',
                      str(classification))
         self.swap.classify(classification)
