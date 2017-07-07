@@ -1,0 +1,740 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>swap.swap &mdash; SWAP 1.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="SWAP 1.0.1 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> SWAP
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../setup.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">UI Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html#interacting-with-swap">Interacting with SWAP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html#detailed-usage">Detailed Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">API Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SWAP</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>swap.swap</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for swap.swap</h1><div class="highlight"><pre>
+<span></span><span class="c1">################################################################</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    SWAP:</span>
+<span class="sd">        Calculates and updates a confusion matrix for each user, and the</span>
+<span class="sd">        probability that a subject is an object of interest</span>
+
+<span class="sd">    DummySWAP:</span>
+<span class="sd">        Calculates the probability that a subject is an object of interest</span>
+<span class="sd">        using only simple vote fractions</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">swap.agents.bureau</span> <span class="k">import</span> <span class="n">Bureau</span>
+<span class="kn">from</span> <span class="nn">swap.agents.agent</span> <span class="k">import</span> <span class="n">Stats</span>
+<span class="kn">from</span> <span class="nn">swap.agents.subject</span> <span class="k">import</span> <span class="n">Subject</span>
+<span class="kn">from</span> <span class="nn">swap.agents.user</span> <span class="k">import</span> <span class="n">User</span>
+<span class="kn">from</span> <span class="nn">swap.utils.scores</span> <span class="k">import</span> <span class="n">ScoreExport</span><span class="p">,</span> <span class="n">Score</span>
+<span class="kn">from</span> <span class="nn">swap.utils.history</span> <span class="k">import</span> <span class="n">History</span><span class="p">,</span> <span class="n">HistoryExport</span>
+<span class="kn">from</span> <span class="nn">swap.utils.classification</span> <span class="k">import</span> <span class="n">Classification</span>
+
+<span class="kn">from</span> <span class="nn">swap.db</span> <span class="k">import</span> <span class="n">DB</span>
+
+<span class="kn">import</span> <span class="nn">swap.config</span> <span class="k">as</span> <span class="nn">config</span>
+
+<span class="kn">import</span> <span class="nn">progressbar</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="SWAP"><a class="viewcode-back" href="../../api/swap.html#swap.swap.SWAP">[docs]</a><span class="k">class</span> <span class="nc">SWAP</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        SWAP implementation, which calculates and updates a confusion matrix</span>
+<span class="sd">        for each user as well as the probability that a particular subject</span>
+<span class="sd">        contains an object of interest.</span>
+
+<span class="sd">        See: Marshall et al. 2016: &quot;Space Warps I: Crowd-sourcing the</span>
+<span class="sd">        Discovery of Gravitational Lenses&quot;, MNRAS, 455, 1171</span>
+<span class="sd">        (hereafter Marshall et al. 2016) for algorithm explanation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SWAP.__init__"><a class="viewcode-back" href="../../api/swap.html#swap.swap.SWAP.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Initialize SWAP instance</span>
+<span class="sd">            Args:</span>
+<span class="sd">                p0: Prior probability real - in general this is derived</span>
+<span class="sd">                empirically by considering the occurence frequency of</span>
+<span class="sd">                interesting objects that are expertly identified within a</span>
+<span class="sd">                fiducial dataset. It is required to initialize the likelihood</span>
+<span class="sd">                formulation framework for each subject prior to reception of</span>
+<span class="sd">                the first volunteer classification.</span>
+
+<span class="sd">                epsilon: Estimated volunteer performance - This is either</span>
+<span class="sd">                set arbitrarily or might be based upon judicious assesment of</span>
+<span class="sd">                cohort-wide volunteer performance on a similar analysis task.</span>
+<span class="sd">                It is required to initialize the likelihood formulation</span>
+<span class="sd">                framework for each volunteer&#39;s agent.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># initialize bureaus to manage user / subject agents</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">users</span> <span class="o">=</span> <span class="n">Bureau</span><span class="p">(</span><span class="n">User</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subjects</span> <span class="o">=</span> <span class="n">Bureau</span><span class="p">(</span><span class="n">Subject</span><span class="p">)</span></div>
+
+        <span class="c1"># Directive to update - if True, then a volunteer agent&#39;s posterior</span>
+        <span class="c1"># probability of containing an interesting object will be updated</span>
+        <span class="c1"># whenever an expertly classified &quot;gold standard&quot; subject is</span>
+        <span class="c1"># classified by that volunteer.</span>
+        <span class="c1"># self.gold_updates = True</span>
+
+        <span class="c1"># Directive to use gold labels from classification</span>
+        <span class="c1"># if true, assigns the gold_label from the classification</span>
+        <span class="c1"># whenever a new subject is created</span>
+        <span class="c1">#</span>
+        <span class="c1"># Useful to ignore gold_labels when doing a test/train split</span>
+        <span class="c1"># without properly sanitizing gold labels from classifications</span>
+        <span class="c1"># self.gold_from_cl = False</span>
+
+    <span class="c1"># Process a classification</span>
+<div class="viewcode-block" id="SWAP.classify"><a class="viewcode-back" href="../../api/swap.html#swap.swap.SWAP.classify">[docs]</a>    <span class="k">def</span> <span class="nf">classify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cl</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Process a classification</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            cl : swap.utils.classification.Classification, dict</span>
+<span class="sd">                Classification to be processed. Should be a Classification</span>
+<span class="sd">                object, but will also accept a dict object to generate a</span>
+<span class="sd">                new Classification object</span>
+<span class="sd">            subject : boolean</span>
+<span class="sd">                Deprecated</span>
+<span class="sd">            user : boolean</span>
+<span class="sd">                Deprecated</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># if subject is gold standard and gold_updates are specified,</span>
+        <span class="c1"># update user success probability</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">Classification</span><span class="p">):</span>
+            <span class="n">cl</span> <span class="o">=</span> <span class="n">Classification</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">cl</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">subject</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">user</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">DeprecationWarning</span><span class="p">(</span>
+                <span class="s1">&#39;controlling subject and user are &#39;</span> <span class="o">+</span>
+                <span class="s1">&#39;no longer supported&#39;</span><span class="p">)</span>
+
+        <span class="n">subject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">subjects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cl</span><span class="o">.</span><span class="n">subject</span><span class="p">)</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">users</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cl</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">config</span><span class="o">.</span><span class="n">back_update</span><span class="p">:</span>
+            <span class="n">user</span><span class="o">.</span><span class="n">ledger</span><span class="o">.</span><span class="n">recalculate</span><span class="p">()</span>
+
+        <span class="n">subject</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">user</span><span class="p">)</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">subject</span><span class="p">)</span></div>
+
+        <span class="c1"># if not config.back_update:</span>
+        <span class="c1">#     self.process_changes()</span>
+
+    <span class="c1"># def _classify_user(self, cl):</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#         Gets the appropriate user and</span>
+
+    <span class="c1">#         Parameters</span>
+    <span class="c1">#         ----------</span>
+    <span class="c1">#         cl: Classification</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+
+    <span class="c1">#     user = self.users.get(cl.user)</span>
+    <span class="c1">#     subject = self.subjects.get(cl.subject)</span>
+
+    <span class="c1">#     user.classify(cl, subject)</span>
+
+    <span class="c1"># def _classify_subject(self, cl):</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#         Pass a classification to the appropriate subject agent</span>
+
+    <span class="c1">#         Parameters</span>
+    <span class="c1">#         ----------</span>
+    <span class="c1">#         cl : (dict) classification</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+
+    <span class="c1">#     # Get subject and user agents</span>
+    <span class="c1">#     user = self.users.get(cl.user)</span>
+    <span class="c1">#     subject = self.subjects.get(cl.subject)</span>
+    <span class="c1">#     # process the classification</span>
+    <span class="c1">#     subject.classify(cl, user)</span>
+
+<div class="viewcode-block" id="SWAP.process_changes"><a class="viewcode-back" href="../../api/swap.html#swap.swap.SWAP.process_changes">[docs]</a>    <span class="k">def</span> <span class="nf">process_changes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Process changes to agent ledgers</span>
+
+<span class="sd">        While classifying, scores are calculated, they are merely added to</span>
+<span class="sd">        the ledger structures. Here the changes are committed and the new</span>
+<span class="sd">        scores are calculated. This reduces processing time as the subject</span>
+<span class="sd">        score calculation is dependent on the user confusion matrix. The</span>
+<span class="sd">        user&#39;s confusion matrix is subject to change depending on the</span>
+<span class="sd">        user&#39;s performance on gold standard subjects.</span>
+
+<span class="sd">        First the user&#39;s confusion matrices are calculated based on their</span>
+<span class="sd">        performance classifying gold standard subjects. If a user&#39;s scores</span>
+<span class="sd">        have changed, then it notifies every subject agent it classified on</span>
+<span class="sd">        of this change.</span>
+
+<span class="sd">        Then any subject agent which is connected to a user whose score has</span>
+<span class="sd">        changed recalculates its score.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">with_bar</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">back_update</span>
+
+        <span class="c1"># TODO make sure notify_agents is called on each ledger</span>
+
+        <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">bureau</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">with_bar</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">bureau</span><span class="o">.</span><span class="n">agent_type</span><span class="o">.</span><span class="n">class_name</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;processing </span><span class="si">%s</span><span class="s1"> score changes&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                <span class="k">with</span> <span class="n">progressbar</span><span class="o">.</span><span class="n">ProgressBar</span><span class="p">(</span>
+                        <span class="n">max_value</span><span class="o">=</span><span class="n">bureau</span><span class="o">.</span><span class="n">calculate_changes</span><span class="p">())</span> <span class="k">as</span> <span class="n">bar</span><span class="p">:</span>
+                    <span class="n">bar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">bureau</span><span class="o">.</span><span class="n">process_changes</span><span class="p">(</span><span class="n">bar</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;done&#39;</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">bureau</span><span class="o">.</span><span class="n">process_changes</span><span class="p">()</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Notifying user agents of subject changes&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subjects</span><span class="o">.</span><span class="n">notify_changes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">users</span><span class="p">)</span>
+
+        <span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">users</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Notifying subject agents of user changes&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">users</span><span class="o">.</span><span class="n">notify_changes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subjects</span><span class="p">)</span>
+
+        <span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subjects</span><span class="p">)</span></div>
+
+        <span class="c1"># logger.info(&#39;processing user score changes&#39;)</span>
+        <span class="c1"># with progressbar.ProgressBar(</span>
+        <span class="c1">#         max_value=self.users.calculate_changes()) as bar:</span>
+        <span class="c1">#     bar.update(0)</span>
+        <span class="c1">#     self.users.process_changes(bar)</span>
+        <span class="c1"># logger.info(&#39;done&#39;)</span>
+
+        <span class="c1"># logger.info(&#39;processing subject score changes&#39;)</span>
+        <span class="c1"># with progressbar.ProgressBar(</span>
+        <span class="c1">#         max_value=self.subjects.calculate_changes()) as bar:</span>
+        <span class="c1">#     bar.update(0)</span>
+        <span class="c1">#     self.subjects.process_changes(bar)</span>
+        <span class="c1"># logger.info(&#39;done&#39;)</span>
+
+    <span class="c1"># def getUserAgent(self, user_id):</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#         Get a User agent from the Bureau. Creates a new one</span>
+    <span class="c1">#         if it doesn&#39;t exist</span>
+
+    <span class="c1">#         Args:</span>
+    <span class="c1">#             agent_id: id for the user</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+
+    <span class="c1">#     # TODO should the bureau generate a new agent, or should</span>
+    <span class="c1">#     # that be handled here..?</span>
+    <span class="c1">#     if user_id in self.users:</span>
+    <span class="c1">#         return self.users.getAgent(user_id)</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         user = User(user_id, self.epsilon)</span>
+    <span class="c1">#         self.users.addAgent(user)</span>
+    <span class="c1">#         return user</span>
+
+    <span class="c1"># def getSubjectAgent(self, id_, cl=None):</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#         Get a Subject agent from the Bureau. Creates a new one</span>
+    <span class="c1">#         if it doesn&#39;t exist</span>
+
+    <span class="c1">#         Args:</span>
+    <span class="c1">#             agent_id: id for the subject</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+
+    <span class="c1">#     if id_ in self.subjects:</span>
+    <span class="c1">#         return self.subjects.getAgent(id_)</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         subject = Subject(id_, self.p0)</span>
+    <span class="c1">#         if self.gold_from_cl and cl.isGold():</span>
+    <span class="c1">#             subject.set_gold_label(cl.gold)</span>
+
+    <span class="c1">#         self.subjects.addAgent(subject)</span>
+    <span class="c1">#         return subject</span>
+
+    <span class="c1"># def getUserData(self):</span>
+    <span class="c1">#     &quot;&quot;&quot; Get User Bureau object &quot;&quot;&quot;</span>
+    <span class="c1">#     return self.users</span>
+
+    <span class="c1"># def getSubjectData(self):</span>
+    <span class="c1">#     &quot;&quot;&quot; Get Subject Bureau object &quot;&quot;&quot;</span>
+    <span class="c1">#     return self.subjects</span>
+
+<div class="viewcode-block" id="SWAP.set_gold_labels"><a class="viewcode-back" href="../../api/swap.html#swap.swap.SWAP.set_gold_labels">[docs]</a>    <span class="k">def</span> <span class="nf">set_gold_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">golds</span><span class="p">,</span> <span class="n">with_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Defines the subjects explicitly that should be</span>
+<span class="sd">            treated as gold standards</span>
+
+<span class="sd">            Note: To get proper test/train split, the gold_labels</span>
+<span class="sd">            still need to be stripped out of the classification dicts.</span>
+<span class="sd">            This function is for defining all subjects that are</span>
+<span class="sd">            gold on initialization</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            golds : dict</span>
+<span class="sd">                (subject id : gold label) Mapping of subject to its gold label</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Removes gold label from all subjects not in the golds list</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Processing gold labels&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">with_bar</span><span class="p">:</span>
+            <span class="n">bar</span> <span class="o">=</span> <span class="n">progressbar</span><span class="o">.</span><span class="n">ProgressBar</span><span class="p">(</span><span class="n">max_value</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subjects</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">subject</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subjects</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">subject</span><span class="o">.</span><span class="n">id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">golds</span><span class="p">:</span>
+                <span class="n">subject</span><span class="o">.</span><span class="n">set_gold_label</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">subjects</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">users</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">with_bar</span><span class="p">:</span>
+                <span class="n">bar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">bar</span><span class="o">.</span><span class="n">value</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># Assigns the new gold label to subjects in the list</span>
+        <span class="c1"># Also tells the Bureau to make a new subject agent if it</span>
+        <span class="c1"># doesn&#39;t exist yet</span>
+        <span class="k">for</span> <span class="n">id_</span><span class="p">,</span> <span class="n">gold</span> <span class="ow">in</span> <span class="n">golds</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">subject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">subjects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">id_</span><span class="p">,</span> <span class="n">make_new</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">subject</span><span class="o">.</span><span class="n">set_gold_label</span><span class="p">(</span><span class="n">gold</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">subjects</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">users</span><span class="p">)</span></div>
+
+        <span class="c1"># self.process_changes()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">golds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compile a list of all the subject -&gt; gold mappings being used</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            {subject id: gold label}</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">subject</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subjects</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">subject</span><span class="o">.</span><span class="n">isgold</span><span class="p">():</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">subject</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">subject</span><span class="o">.</span><span class="n">gold</span>
+
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="c1"># ----------------------------------------------------------------</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">stats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Consolidate all the statistical data from the bureaus</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            swap.agents.agent.Stats</span>
+<span class="sd">                Stats object containing statistical data on the</span>
+<span class="sd">                confusion matrices and subject scores</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">stats</span> <span class="o">=</span> <span class="n">Stats</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">users</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">stats</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">users</span><span class="o">.</span><span class="n">stats</span><span class="p">())</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subjects</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">stats</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">subjects</span><span class="o">.</span><span class="n">stats</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">stats</span>
+
+<div class="viewcode-block" id="SWAP.stats_str"><a class="viewcode-back" href="../../api/swap.html#swap.swap.SWAP.stats_str">[docs]</a>    <span class="k">def</span> <span class="nf">stats_str</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Consolidate all the statistical data from the bureaus</span>
+<span class="sd">            into a string</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            str</span>
+<span class="sd">                Stats to string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">)</span></div>
+
+    <span class="c1"># def exportUserData(self):</span>
+    <span class="c1">#     &quot;&quot;&quot; Exports consolidated user information &quot;&quot;&quot;</span>
+    <span class="c1">#     return self.users.export()</span>
+
+    <span class="c1"># def exportSubjectData(self):</span>
+    <span class="c1">#     &quot;&quot;&quot; Exports consolidated subject information &quot;&quot;&quot;</span>
+    <span class="c1">#     return self.subjects.export()</span>
+
+<div class="viewcode-block" id="SWAP.export"><a class="viewcode-back" href="../../api/swap.html#swap.swap.SWAP.export">[docs]</a>    <span class="k">def</span> <span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Export both user and subject data</span>
+
+<span class="sd">            Deprecated</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">DeprecationWarning</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;users&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">users</span><span class="o">.</span><span class="n">export</span><span class="p">(),</span>
+            <span class="s1">&#39;subjects&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">subjects</span><span class="o">.</span><span class="n">export</span><span class="p">(),</span>
+            <span class="s1">&#39;stats&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">export</span><span class="p">()</span>
+        <span class="p">}</span></div>
+
+<div class="viewcode-block" id="SWAP.score_export"><a class="viewcode-back" href="../../api/swap.html#swap.swap.SWAP.score_export">[docs]</a>    <span class="k">def</span> <span class="nf">score_export</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate object containing subject score data</span>
+
+<span class="sd">        Used in most of our plotting functions and other analysis tools</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        swap.utils.scores.ScoreExport</span>
+<span class="sd">            ScoreExport</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">history</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">history</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history_export</span><span class="p">()</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Generating score export&#39;</span><span class="p">)</span>
+        <span class="n">scores</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">subject</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subjects</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">subject</span><span class="o">.</span><span class="n">ledger</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">id_</span> <span class="o">=</span> <span class="n">subject</span><span class="o">.</span><span class="n">id</span>
+            <span class="n">score</span> <span class="o">=</span> <span class="n">subject</span><span class="o">.</span><span class="n">score</span>
+            <span class="n">scores</span><span class="p">[</span><span class="n">id_</span><span class="p">]</span> <span class="o">=</span> <span class="n">Score</span><span class="p">(</span><span class="n">id_</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">score</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;done&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ScoreExport</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="n">history</span><span class="o">=</span><span class="n">history</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SWAP.history_export"><a class="viewcode-back" href="../../api/swap.html#swap.swap.SWAP.history_export">[docs]</a>    <span class="k">def</span> <span class="nf">history_export</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Genearte object containing subject score history</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        swap.utils.history.HistoryExport</span>
+<span class="sd">            HistoryExport</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Generating history export&#39;</span><span class="p">)</span>
+        <span class="n">history</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">subject</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subjects</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">subject</span><span class="o">.</span><span class="n">ledger</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Generate list of subject scores</span>
+            <span class="n">scores</span> <span class="o">=</span> <span class="p">[</span><span class="n">config</span><span class="o">.</span><span class="n">p0</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">subject</span><span class="o">.</span><span class="n">ledger</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">order</span><span class="p">):</span>
+                <span class="n">scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">score</span><span class="p">)</span>
+
+            <span class="c1"># Create History object</span>
+            <span class="n">id_</span> <span class="o">=</span> <span class="n">subject</span><span class="o">.</span><span class="n">id</span>
+            <span class="n">history</span><span class="p">[</span><span class="n">id_</span><span class="p">]</span> <span class="o">=</span> <span class="n">History</span><span class="p">(</span><span class="n">id_</span><span class="p">,</span> <span class="n">subject</span><span class="o">.</span><span class="n">gold</span><span class="p">,</span> <span class="n">scores</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;done&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">HistoryExport</span><span class="p">(</span><span class="n">history</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SWAP.debug_str"><a class="viewcode-back" href="../../api/swap.html#swap.swap.SWAP.debug_str">[docs]</a>    <span class="k">def</span> <span class="nf">debug_str</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">users</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;user </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">ledger</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subjects</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;subject </span><span class="si">%s</span><span class="s1"> gold </span><span class="si">%d</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="n">a</span><span class="o">.</span><span class="n">gold</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">ledger</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">s</span></div>
+
+<div class="viewcode-block" id="SWAP.manifest"><a class="viewcode-back" href="../../api/swap.html#swap.swap.SWAP.manifest">[docs]</a>    <span class="k">def</span> <span class="nf">manifest</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates a text manifest. Contains relevant information on the</span>
+<span class="sd">        bootstrap run, including whatever parameters were used, and</span>
+<span class="sd">        statistical information on each run.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">countGolds</span><span class="p">():</span>
+            <span class="n">golds</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">subject</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subjects</span><span class="p">:</span>
+                <span class="n">golds</span><span class="p">[</span><span class="n">subject</span><span class="o">.</span><span class="n">gold</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">golds</span><span class="p">)</span>
+
+        <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;SWAP manifest</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;=============</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;p0:         </span><span class="si">%f</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">config</span><span class="o">.</span><span class="n">p0</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;epsilon:    </span><span class="si">%f</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">config</span><span class="o">.</span><span class="n">epsilon</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;n golds:    </span><span class="si">%d</span><span class="s1"> </span><span class="si">%d</span><span class="s1"> </span><span class="si">%d</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">countGolds</span><span class="p">()</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;Statistics</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;==========</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="k">return</span> <span class="n">s</span></div></div>
+
+
+<div class="viewcode-block" id="DummySWAP"><a class="viewcode-back" href="../../api/swap.html#swap.swap.DummySWAP">[docs]</a><span class="k">class</span> <span class="nc">DummySWAP</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    For each subject, calculates the probability that it is of</span>
+<span class="sd">    interest using simple vote fractions.</span>
+
+<span class="sd">    Purpose is to provide a baseline when making performance</span>
+<span class="sd">    comparisons</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="DummySWAP.__init__"><a class="viewcode-back" href="../../api/swap.html#swap.swap.DummySWAP.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">{}</span></div>
+
+<div class="viewcode-block" id="DummySWAP.process"><a class="viewcode-back" href="../../api/swap.html#swap.swap.DummySWAP.process">[docs]</a>    <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Process all subjects</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cursor</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">cursor</span><span class="p">:</span>
+            <span class="n">score</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;votes&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">]</span>
+            <span class="n">gold</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;gold&#39;</span><span class="p">]</span>
+            <span class="n">id_</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;_id&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">id_</span><span class="p">]</span> <span class="o">=</span> <span class="n">Score</span><span class="p">(</span><span class="n">id_</span><span class="p">,</span> <span class="n">gold</span><span class="p">,</span> <span class="n">score</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DummySWAP.get_cursor"><a class="viewcode-back" href="../../api/swap.html#swap.swap.DummySWAP.get_cursor">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_cursor</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate a cursor with classifications</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        swap.db.Cursor</span>
+<span class="sd">            Classifications</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="n">DB</span><span class="p">()</span><span class="o">.</span><span class="n">classifications</span><span class="o">.</span><span class="n">aggregate</span><span class="p">([</span>
+            <span class="p">{</span><span class="s1">&#39;$match&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;gold_label&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;$ne&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">}}},</span>
+            <span class="p">{</span><span class="s1">&#39;$group&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;_id&#39;</span><span class="p">:</span> <span class="s1">&#39;$subject_id&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;gold&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;$first&#39;</span><span class="p">:</span> <span class="s2">&quot;$gold_label&quot;</span><span class="p">},</span>
+                <span class="s1">&#39;total&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;$sum&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+                <span class="s1">&#39;votes&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;$sum&#39;</span><span class="p">:</span> <span class="s2">&quot;$annotation&quot;</span><span class="p">}}}])</span>
+
+        <span class="k">return</span> <span class="n">cursor</span></div>
+
+<div class="viewcode-block" id="DummySWAP.export"><a class="viewcode-back" href="../../api/swap.html#swap.swap.DummySWAP.export">[docs]</a>    <span class="k">def</span> <span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Deprecated</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">DeprecationWarning</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">subject</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">subject</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;gold&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;score&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]}</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="DummySWAP.score_export"><a class="viewcode-back" href="../../api/swap.html#swap.swap.DummySWAP.score_export">[docs]</a>    <span class="k">def</span> <span class="nf">score_export</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate object containing subject score data</span>
+
+<span class="sd">        Used in most of our plotting functions and other analysis tools</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        swap.utils.scores.ScoreExport</span>
+<span class="sd">            ScoreExport</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">ScoreExport</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">new_golds</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Michael Laraia, Marco Willi, Darryl Wright, Hugh Dickinson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'1.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

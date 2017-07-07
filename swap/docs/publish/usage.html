@@ -1,0 +1,578 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>UI Usage &mdash; SWAP 1.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="SWAP 1.0.1 documentation" href="index.html"/>
+        <link rel="next" title="API Documentation" href="api/index.html"/>
+        <link rel="prev" title="Getting Started" href="setup.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> SWAP
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">UI Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#useful-examples">Useful Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#interacting-with-swap">Interacting with SWAP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#detailed-usage">Detailed Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#Named Arguments">Named Arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Sub-commands:">Sub-commands:</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#admin">admin</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Named Arguments_repeat1">Named Arguments</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#swap">swap</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Named Arguments_repeat2">Named Arguments</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#caesar">caesar</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Named Arguments_repeat3">Named Arguments</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#scores">scores</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Named Arguments_repeat4">Named Arguments</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#roc">roc</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Named Arguments_repeat5">Named Arguments</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">API Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SWAP</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>UI Usage</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/usage.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="ui-usage">
+<h1>UI Usage<a class="headerlink" href="#ui-usage" title="Permalink to this headline">¶</a></h1>
+<p>There are a lots of different operations that may be desirable with SWAP.
+This is a tool to run various scripts from the command line in a consistent manner.</p>
+<div class="section" id="useful-examples">
+<h2>Useful Examples<a class="headerlink" href="#useful-examples" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>Running Swap</dt>
+<dd><code class="docutils literal"><span class="pre">run_swap</span> <span class="pre">swap</span> <span class="pre">--run</span></code></dd>
+<dt>Running Swap with custom p0 variable</dt>
+<dd><code class="docutils literal"><span class="pre">run_swap</span> <span class="pre">--p0</span> <span class="pre">0.01</span> <span class="pre">swap</span> <span class="pre">--run</span></code></dd>
+<dt>Running Swap then saving it</dt>
+<dd><code class="docutils literal"><span class="pre">run_swap</span> <span class="pre">swap</span> <span class="pre">--run</span> <span class="pre">--save</span> <span class="pre">swap.pkl</span></code></dd>
+<dt>Loading pickled Swap and exporting scores</dt>
+<dd><code class="docutils literal"><span class="pre">run_swap</span> <span class="pre">swap</span> <span class="pre">--load</span> <span class="pre">swap.pkl</span> <span class="pre">--save-score</span> <span class="pre">scores.pkl</span></code></dd>
+<dt>Loading pickled Swap and export confusion matrix plot</dt>
+<dd><code class="docutils literal"><span class="pre">run_swap</span> <span class="pre">swap</span> <span class="pre">--load</span> <span class="pre">swap.pkl</span> <span class="pre">--user</span> <span class="pre">user.png</span></code></dd>
+<dt>Generate a ROC curve from pickled score exports</dt>
+<dd><code class="docutils literal"><span class="pre">run_swap</span> <span class="pre">roc</span> <span class="pre">-a</span> <span class="pre">label1</span> <span class="pre">score_export1.pkl</span> <span class="pre">-a</span> <span class="pre">label2</span> <span class="pre">score_export2.pkl</span> <span class="pre">--output</span> <span class="pre">roc.png</span></code></dd>
+</dl>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Most of these examples assume you’ve added properly installed the SWAP
+package using distutils, such that run_swap exists in your PATH variable
+and points to the __main__.py script.
+You can install the SWAP package by running:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
+</pre></div>
+</div>
+<p class="last">from the project root. Make sure you have a virtual environment setup which
+points to a python version &gt;=3.4</p>
+</div>
+</div>
+</div>
+<div class="section" id="interacting-with-swap">
+<h1>Interacting with SWAP<a class="headerlink" href="#interacting-with-swap" title="Permalink to this headline">¶</a></h1>
+<p>After running SWAP, you probably want to analyze the data. SWAP provides a couple
+convenience classes to collect and export the data.</p>
+<p>To get the score history of each subject, SWAP can export a HistoryExport object.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">history</span> <span class="o">=</span> <span class="n">swap</span><span class="o">.</span><span class="n">history_export</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">id_</span><span class="p">,</span> <span class="n">gold</span><span class="p">,</span> <span class="n">scores</span> <span class="ow">in</span> <span class="n">history</span><span class="p">:</span>
+    <span class="c1"># do something</span>
+</pre></div>
+</div>
+<p>For a more lightweight score export (which only includes the final score), you
+can export a ScoreExport object.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">scores</span> <span class="o">=</span> <span class="n">swap</span><span class="o">.</span><span class="n">score_export</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">id_</span><span class="p">,</span> <span class="n">gold</span><span class="p">,</span> <span class="n">score</span> <span class="ow">in</span> <span class="n">scores</span><span class="o">.</span><span class="n">full</span><span class="p">():</span>
+    <span class="c1"># do something</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="detailed-usage">
+<h1>Detailed Usage<a class="headerlink" href="#detailed-usage" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">run_swap</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="nb">dir</span> <span class="n">DIR</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">p0</span> <span class="n">P0</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="nb">pow</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">multiply</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">back</span><span class="p">]</span>
+                <span class="p">[</span><span class="o">--</span><span class="n">noback</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">config</span><span class="o">-</span><span class="nb">file</span> <span class="n">path_to_config_override</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">db</span> <span class="n">DB</span><span class="p">]</span>
+                <span class="p">{</span><span class="n">admin</span><span class="p">,</span><span class="n">swap</span><span class="p">,</span><span class="n">caesar</span><span class="p">,</span><span class="n">scores</span><span class="p">,</span><span class="n">roc</span><span class="p">}</span> <span class="o">...</span>
+</pre></div>
+</div>
+<div class="section" id="Named Arguments">
+<h2>Named Arguments<a class="headerlink" href="#Named Arguments" title="Permalink to this headline">¶</a></h2>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd>--dir</kbd></td>
+<td>Save any files created by swap to a different directory</td></tr>
+<tr><td class="option-group">
+<kbd>--p0</kbd></td>
+<td>Define prior probability</td></tr>
+<tr><td class="option-group">
+<kbd>--pow</kbd></td>
+<td><p class="first">controversial and consensus aggregation method</p>
+<p class="last">Default: False</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd>--multiply</kbd></td>
+<td><p class="first">controversial and consensus aggregation method</p>
+<p class="last">Default: False</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd>--back</kbd></td>
+<td><p class="first">Run swap in back_update mode (static swap)</p>
+<p class="last">Default: False</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd>--noback</kbd></td>
+<td><p class="first">Run swap without back_update mode (dynamic swap)</p>
+<p class="last">Default: False</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd>--config-file</kbd></td>
+<td>Override config options with custom python module</td></tr>
+<tr><td class="option-group">
+<kbd>--db</kbd></td>
+<td>Override database name in config</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="Sub-commands:">
+<h2>Sub-commands:<a class="headerlink" href="#Sub-commands:" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="admin">
+<h3>admin<a class="headerlink" href="#admin" title="Permalink to this headline">¶</a></h3>
+<p>Undocumented</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">run_swap</span> <span class="n">admin</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">upload</span><span class="o">-</span><span class="n">dump</span> <span class="n">UPLOAD_DUMP</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">gen</span><span class="o">-</span><span class="n">stats</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="section" id="Named Arguments_repeat1">
+<h4>Named Arguments<a class="headerlink" href="#Named Arguments_repeat1" title="Permalink to this headline">¶</a></h4>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd>--upload-dump</kbd></td>
+<td>Upload panoptes project dump to mongo database</td></tr>
+<tr><td class="option-group">
+<kbd>--gen-stats</kbd></td>
+<td><p class="first">Force regeneration of classification stats in db for swap</p>
+<p class="last">Default: False</p>
+</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="swap">
+<h3>swap<a class="headerlink" href="#swap" title="Permalink to this headline">¶</a></h3>
+<p>Undocumented</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">run_swap</span> <span class="n">swap</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">save</span> <span class="nb">file</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">save</span><span class="o">-</span><span class="n">scores</span> <span class="nb">file</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">load</span> <span class="nb">file</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">run</span><span class="p">]</span>
+              <span class="p">[</span><span class="o">--</span><span class="n">train</span> <span class="n">n</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">controversial</span> <span class="n">n</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">consensus</span> <span class="n">n</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">subject</span> <span class="nb">file</span><span class="p">]</span>
+              <span class="p">[</span><span class="o">--</span><span class="n">user</span> <span class="nb">file</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">hist</span> <span class="nb">file</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">log</span> <span class="nb">file</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">presrec</span> <span class="nb">file</span><span class="p">]</span>
+              <span class="p">[</span><span class="o">--</span><span class="n">stats</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">dist</span> <span class="n">DIST</span> <span class="n">DIST</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">diff</span> <span class="p">[</span><span class="n">DIFF</span> <span class="p">[</span><span class="n">DIFF</span> <span class="o">...</span><span class="p">]]]</span>
+              <span class="p">[</span><span class="o">--</span><span class="n">shell</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">test</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">test</span><span class="o">-</span><span class="n">reorder</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">scores</span><span class="o">-</span><span class="n">from</span><span class="o">-</span><span class="n">csv</span> <span class="nb">file</span><span class="p">]</span>
+              <span class="p">[</span><span class="o">--</span><span class="n">scores</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">csv</span> <span class="nb">file</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">export</span><span class="o">-</span><span class="n">user</span><span class="o">-</span><span class="n">scores</span> <span class="nb">file</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="section" id="Named Arguments_repeat2">
+<h4>Named Arguments<a class="headerlink" href="#Named Arguments_repeat2" title="Permalink to this headline">¶</a></h4>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd>--save</kbd></td>
+<td>save swap to file</td></tr>
+<tr><td class="option-group">
+<kbd>--save-scores</kbd></td>
+<td>save swap scores to file</td></tr>
+<tr><td class="option-group">
+<kbd>--load</kbd></td>
+<td>Load a pickled SWAP object</td></tr>
+<tr><td class="option-group">
+<kbd>--run</kbd></td>
+<td><p class="first">Run the SWAP algorithm</p>
+<p class="last">Default: False</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd>--train</kbd></td>
+<td>Run swap with a test/train split. Restricts sample size of gold labels to ‘n’</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd>--controversial</kbd></td>
+</tr>
+<tr><td>&#160;</td><td>Run swap with a test/train split, using the most/leastcontroversial subjects</td></tr>
+<tr><td class="option-group">
+<kbd>--consensus</kbd></td>
+<td>Run swap with a test/train split, using the most/leastconsensus subjects</td></tr>
+<tr><td class="option-group">
+<kbd>--subject</kbd></td>
+<td>Generate subject track plot and output to file</td></tr>
+<tr><td class="option-group">
+<kbd>--user</kbd></td>
+<td>Generate plot of user confusion matrices and save to file. Specifying - as filename renders plot in matplotlib viewer.</td></tr>
+<tr><td class="option-group">
+<kbd>--hist</kbd></td>
+<td>Generate multiclass histogram plot. Specifying - as filename renders plot in matplotlib viewer.</td></tr>
+<tr><td class="option-group">
+<kbd>--log</kbd></td>
+<td>Write the entire SWAP export to file</td></tr>
+<tr><td class="option-group">
+<kbd>--presrec</kbd></td>
+<td>Generate Precision-Recall curve (SciKit learn) Specifying - as filename renders plot in matplotlib viewer.</td></tr>
+<tr><td class="option-group">
+<kbd>--stats</kbd></td>
+<td><p class="first">Display run statistics</p>
+<p class="last">Default: False</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd>--dist</kbd></td>
+<td>Show distribution plot</td></tr>
+<tr><td class="option-group">
+<kbd>--diff</kbd></td>
+<td>Visualize performance difference between swap outputs</td></tr>
+<tr><td class="option-group">
+<kbd>--shell</kbd></td>
+<td><p class="first">Drop to shell after other commands have completed.</p>
+<p class="last">Default: False</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd>--test</kbd></td>
+<td>Default: False</td></tr>
+<tr><td class="option-group">
+<kbd>--test-reorder</kbd></td>
+<td>Default: False</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd>--scores-from-csv</kbd></td>
+</tr>
+<tr><td>&#160;</td><td>Load scores from csv export</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd>--scores-to-csv</kbd></td>
+</tr>
+<tr><td>&#160;</td><td>Save score export to csv</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd>--export-user-scores</kbd></td>
+</tr>
+<tr><td>&#160;</td><td>Export user scores to csv</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="caesar">
+<h3>caesar<a class="headerlink" href="#caesar" title="Permalink to this headline">¶</a></h3>
+<p>Undocumented</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">run_swap</span> <span class="n">caesar</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">load</span> <span class="n">LOAD</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">run</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">port</span> <span class="n">PORT</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="section" id="Named Arguments_repeat3">
+<h4>Named Arguments<a class="headerlink" href="#Named Arguments_repeat3" title="Permalink to this headline">¶</a></h4>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd>--load</kbd></td>
+<td>NOT IMPLEMENTED Pre-load a swap instance from db</td></tr>
+<tr><td class="option-group">
+<kbd>--run</kbd></td>
+<td><p class="first">Run the app</p>
+<p class="last">Default: False</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd>--port</kbd></td>
+<td>Modify the port used by the app</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="scores">
+<h3>scores<a class="headerlink" href="#scores" title="Permalink to this headline">¶</a></h3>
+<p>Undocumented</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">run_swap</span> <span class="n">scores</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">a</span> <span class="n">label</span> <span class="nb">file</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">diff</span> <span class="n">score_export</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">user</span> <span class="n">swap</span><span class="p">]</span>
+                <span class="p">[</span><span class="o">--</span><span class="n">output</span> <span class="n">OUTPUT</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">xaxis</span> <span class="n">label</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">yaxis</span> <span class="n">label</span><span class="p">]</span>
+                <span class="p">[</span><span class="o">--</span><span class="n">aspect</span><span class="o">-</span><span class="n">ratio</span> <span class="n">ASPECT_RATIO</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">user</span><span class="o">-</span><span class="n">diff</span> <span class="n">swap</span> <span class="n">swap</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="section" id="Named Arguments_repeat4">
+<h4>Named Arguments<a class="headerlink" href="#Named Arguments_repeat4" title="Permalink to this headline">¶</a></h4>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd>-a, --add</kbd></td>
+<td>Add a score export file</td></tr>
+<tr><td class="option-group">
+<kbd>--diff</kbd></td>
+<td>Add a difference plot comparing the subjects scores betweenmultiple swap runs. Specify the base run with –diff, andspecify any other runs to be compared with -a. Will createa plot for each SWAP run added</td></tr>
+<tr><td class="option-group">
+<kbd>--user</kbd></td>
+<td>Add an image of the user confusion matrices</td></tr>
+<tr><td class="option-group">
+<kbd>--output</kbd></td>
+<td>Save the plot to file. Specify ‘-‘ here to display the plotwith the matplotlib viewer</td></tr>
+<tr><td class="option-group">
+<kbd>--xaxis</kbd></td>
+<td>X axis label</td></tr>
+<tr><td class="option-group">
+<kbd>--yaxis</kbd></td>
+<td>Y axis label</td></tr>
+<tr><td class="option-group">
+<kbd>--aspect-ratio</kbd></td>
+<td>Define fixed aspect ratio of each plot</td></tr>
+<tr><td class="option-group">
+<kbd>--user-diff</kbd></td>
+<td>Add a difference plot comparing the user confusion matrices between two swap runs. Specify the base run with –user-diff, and specify any other runs to be compared with -a. Will create a plot for each SWAP run added</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="roc">
+<h3>roc<a class="headerlink" href="#roc" title="Permalink to this headline">¶</a></h3>
+<p>Undocumented</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">run_swap</span> <span class="n">roc</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">a</span> <span class="n">label</span> <span class="nb">file</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">output</span> <span class="nb">file</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="section" id="Named Arguments_repeat5">
+<h4>Named Arguments<a class="headerlink" href="#Named Arguments_repeat5" title="Permalink to this headline">¶</a></h4>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd>-a, --add</kbd></td>
+<td>Add pickled SWAP object to roc curve</td></tr>
+<tr><td class="option-group">
+<kbd>--output, -o</kbd></td>
+<td>Save plot to file</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="api/index.html" class="btn btn-neutral float-right" title="API Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="setup.html" class="btn btn-neutral" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Michael Laraia, Marco Willi, Darryl Wright, Hugh Dickinson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

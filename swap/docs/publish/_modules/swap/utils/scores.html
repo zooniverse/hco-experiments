@@ -1,0 +1,615 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>swap.utils.scores &mdash; SWAP 1.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="SWAP 1.0.1 documentation" href="../../../index.html"/>
+        <link rel="up" title="swap.utils" href="../utils.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> SWAP
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../setup.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">UI Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html#interacting-with-swap">Interacting with SWAP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html#detailed-usage">Detailed Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">API Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SWAP</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../utils.html">swap.utils</a> &raquo;</li>
+        
+      <li>swap.utils.scores</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for swap.utils.scores</h1><div class="highlight"><pre>
+<span></span>
+<span class="kn">import</span> <span class="nn">swap.config</span> <span class="k">as</span> <span class="nn">config</span>
+<span class="kn">from</span> <span class="nn">swap.utils.golds</span> <span class="k">import</span> <span class="n">GoldGetter</span>
+
+<span class="kn">import</span> <span class="nn">csv</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Score"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.scores.Score">[docs]</a><span class="k">class</span> <span class="nc">Score</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Stores information on each subject for export</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Score.__init__"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.scores.Score.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id_</span><span class="p">,</span> <span class="n">gold</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">retired</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        id_ : int</span>
+<span class="sd">            Subject id</span>
+<span class="sd">        gold : gold</span>
+<span class="sd">            Gold label of subject</span>
+<span class="sd">        p : float</span>
+<span class="sd">            SWAP probability that the subject is real</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">id_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gold</span> <span class="o">=</span> <span class="n">gold</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">=</span> <span class="n">p</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">retired</span> <span class="o">=</span> <span class="n">retired</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="Score.dict"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.scores.Score.dict">[docs]</a>    <span class="k">def</span> <span class="nf">dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s1">&#39;gold&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">gold</span><span class="p">,</span> <span class="s1">&#39;p&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">,</span>
+            <span class="s1">&#39;retired&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">retired</span><span class="p">}</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_retired</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">retired</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">retired</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">retired</span>
+        <span class="k">if</span> <span class="n">retired</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">retired</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="k">return</span> <span class="s1">&#39;id: </span><span class="si">%d</span><span class="s1"> gold: </span><span class="si">%d</span><span class="s1"> p: </span><span class="si">%.4f</span><span class="s1"> retired: </span><span class="si">%.4f</span><span class="s1">&#39;</span> <span class="o">%</span> \
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gold</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="n">retired</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;{</span><span class="si">%s</span><span class="s1">}&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="ScoreExport"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.scores.ScoreExport">[docs]</a><span class="k">class</span> <span class="nc">ScoreExport</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Export SWAP scores</span>
+
+<span class="sd">    Uses less space than pickling and saving the entire SWAP object.</span>
+<span class="sd">    Used to generate plots like ROC curves.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ScoreExport.__init__"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.scores.ScoreExport.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scores</span><span class="p">,</span> <span class="n">new_golds</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">history</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">thresholds</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Pararmeters</span>
+<span class="sd">        -----------</span>
+<span class="sd">        scores : {Score}</span>
+<span class="sd">            Mapping of scores in export</span>
+<span class="sd">        new_golds : bool</span>
+<span class="sd">            Flag to indicate whether to fetch gold labels from database</span>
+<span class="sd">            or to use the gold labels already in score objects</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">new_golds</span><span class="p">:</span>
+            <span class="n">scores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_golds</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scores</span> <span class="o">=</span> <span class="n">scores</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sorted_ids</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">id_</span><span class="p">:</span> <span class="n">scores</span><span class="p">[</span><span class="n">id_</span><span class="p">]</span><span class="o">.</span><span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">class_counts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">counts</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">thresholds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">thresholds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_thresholds</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">fpr</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">mdr</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">thresholds</span> <span class="o">=</span> <span class="n">thresholds</span>
+
+        <span class="k">if</span> <span class="n">history</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">retire</span><span class="p">(</span><span class="n">history</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ScoreExport.from_csv"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.scores.ScoreExport.from_csv">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">from_csv</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span> <span class="k">as</span> <span class="n">csvfile</span><span class="p">:</span>
+            <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">csvfile</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;loading csv&#39;</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="n">g</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Score</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;done&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ScoreExport</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">new_golds</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sorted_scores</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sorted_ids</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">scores</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">retired_scores</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">score</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">scores</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">score</span><span class="o">.</span><span class="n">is_retired</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">score</span>
+
+    <span class="k">def</span> <span class="nf">_init_golds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scores</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Assign new gold labels to score objects</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        score : [Score]</span>
+<span class="sd">            List of scores in export</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">golds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_real_golds</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">score</span> <span class="ow">in</span> <span class="n">scores</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">score</span><span class="o">.</span><span class="n">id</span> <span class="ow">in</span> <span class="n">golds</span><span class="p">:</span>
+                <span class="n">score</span><span class="o">.</span><span class="n">gold</span> <span class="o">=</span> <span class="n">golds</span><span class="p">[</span><span class="n">score</span><span class="o">.</span><span class="n">id</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">score</span><span class="o">.</span><span class="n">gold</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">return</span> <span class="n">scores</span>
+
+<div class="viewcode-block" id="ScoreExport.get_real_golds"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.scores.ScoreExport.get_real_golds">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_real_golds</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fetch gold labels from database</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Getting real gold labels from db&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">GoldGetter</span><span class="p">()</span><span class="o">.</span><span class="n">all</span><span class="p">()()</span></div>
+
+<div class="viewcode-block" id="ScoreExport.counts"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.scores.ScoreExport.counts">[docs]</a>    <span class="k">def</span> <span class="nf">counts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Count how many subjects of each class are in the export</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        threshold : float</span>
+<span class="sd">            Threshold for p values of Scores to consider</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="p">{</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">score</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">scores</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">score</span><span class="o">.</span><span class="n">p</span> <span class="o">&gt;=</span> <span class="n">threshold</span><span class="p">:</span>
+                <span class="n">n</span><span class="p">[</span><span class="n">score</span><span class="o">.</span><span class="n">gold</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">n</span></div>
+
+<div class="viewcode-block" id="ScoreExport.composition"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.scores.ScoreExport.composition">[docs]</a>    <span class="k">def</span> <span class="nf">composition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Measure percentage of each class in the export</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        threshold : float</span>
+<span class="sd">            Threshold for p values of Scores to consider</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">counts</span><span class="p">(</span><span class="n">threshold</span><span class="p">)</span>
+
+        <span class="n">total</span> <span class="o">=</span> <span class="n">n</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">n</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">total</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">n</span><span class="p">:</span>
+                <span class="n">n</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">n</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">total</span>
+
+        <span class="k">return</span> <span class="n">n</span></div>
+
+<div class="viewcode-block" id="ScoreExport.purity"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.scores.ScoreExport.purity">[docs]</a>    <span class="k">def</span> <span class="nf">purity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Measure the purity of real objects in score export</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        threshold : float</span>
+<span class="sd">            Threshold for p values of Scores to consider</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_purity</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">counts</span><span class="p">(</span><span class="n">threshold</span><span class="p">))</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_purity</span><span class="p">(</span><span class="n">counts</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">total</span><span class="p">(</span><span class="n">counts</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">counts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">counts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">t</span> <span class="o">=</span> <span class="n">total</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">counts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">t</span>
+
+<div class="viewcode-block" id="ScoreExport.find_purity"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.scores.ScoreExport.find_purity">[docs]</a>    <span class="k">def</span> <span class="nf">find_purity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">desired_purity</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determine the threshold for p needed to arrive at the</span>
+<span class="sd">        desired purity.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        desired_purity : float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Trying to find purity </span><span class="si">%.3f</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">desired_purity</span><span class="p">)</span>
+
+        <span class="n">counts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">class_counts</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">score</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sorted_scores</span><span class="p">:</span>
+            <span class="n">counts</span><span class="p">[</span><span class="n">score</span><span class="o">.</span><span class="n">gold</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+
+            <span class="n">_purity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_purity</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>
+            <span class="c1"># print(_purity, score, counts)</span>
+
+            <span class="k">if</span> <span class="n">_purity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_purity</span> <span class="o">&gt;</span> <span class="n">desired_purity</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;found purity&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%f</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">_purity</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">score</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">counts</span><span class="p">))</span>
+                <span class="k">return</span> <span class="n">score</span><span class="o">.</span><span class="n">p</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Couldn</span><span class="se">\&#39;</span><span class="s1">t find purity above </span><span class="si">%f</span><span class="s1">!&#39;</span><span class="p">,</span> <span class="n">desired_purity</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mf">1.0</span></div>
+
+<div class="viewcode-block" id="ScoreExport.completeness"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.scores.ScoreExport.completeness">[docs]</a>    <span class="k">def</span> <span class="nf">completeness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find the completeness at a desired purity</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        threshold : float</span>
+<span class="sd">            Threshold for the desired purity</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">inside</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">score</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sorted_scores</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">score</span><span class="o">.</span><span class="n">gold</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">score</span><span class="o">.</span><span class="n">p</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">:</span>
+                    <span class="n">inside</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">total</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">inside</span> <span class="o">/</span> <span class="n">total</span></div>
+
+<div class="viewcode-block" id="ScoreExport.completeness_at_purity"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.scores.ScoreExport.completeness_at_purity">[docs]</a>    <span class="k">def</span> <span class="nf">completeness_at_purity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">purity</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find the completeness at a desired purity</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        threshold : float</span>
+<span class="sd">            Threshold for the desired purity</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_purity</span><span class="p">(</span><span class="n">purity</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Can</span><span class="se">\&#39;</span><span class="s1">t find purity &gt; </span><span class="si">%f</span><span class="s1"> in score set!&#39;</span><span class="p">,</span> <span class="n">purity</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="ScoreExport.find_thresholds"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.scores.ScoreExport.find_thresholds">[docs]</a>    <span class="k">def</span> <span class="nf">find_thresholds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fpr</span><span class="p">,</span> <span class="n">mdr</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;determining retirement thresholds fpr </span><span class="si">%.3f</span><span class="s1"> mdr </span><span class="si">%.3f</span><span class="s1">&#39;</span><span class="p">,</span>
+                     <span class="n">fpr</span><span class="p">,</span> <span class="n">mdr</span><span class="p">)</span>
+        <span class="n">totals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">counts</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Calculate real retirement threshold</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">real</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">score</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sorted_scores</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">score</span><span class="o">.</span><span class="n">gold</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="n">_fpr</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">count</span> <span class="o">/</span> <span class="n">totals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="c1"># print(_fpr, count, totals[0], score)</span>
+                <span class="k">if</span> <span class="n">_fpr</span> <span class="o">&lt;</span> <span class="n">fpr</span><span class="p">:</span>
+                    <span class="n">real</span> <span class="o">=</span> <span class="n">score</span><span class="o">.</span><span class="n">p</span>
+                    <span class="k">break</span>
+
+        <span class="c1"># Calculate bogus retirement threshold</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">bogus</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">score</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sorted_scores</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">score</span><span class="o">.</span><span class="n">gold</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="n">_mdr</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">count</span> <span class="o">/</span> <span class="n">totals</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="c1"># print(_mdr, count, totals[1], score)</span>
+                <span class="k">if</span> <span class="n">_mdr</span> <span class="o">&lt;</span> <span class="n">mdr</span><span class="p">:</span>
+                    <span class="n">bogus</span> <span class="o">=</span> <span class="n">score</span><span class="o">.</span><span class="n">p</span>
+                    <span class="k">break</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;bogus </span><span class="si">%.4f</span><span class="s1"> real </span><span class="si">%.4f</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">bogus</span><span class="p">,</span> <span class="n">real</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">bogus</span><span class="p">,</span> <span class="n">real</span></div>
+
+<div class="viewcode-block" id="ScoreExport.retire"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.scores.ScoreExport.retire">[docs]</a>    <span class="k">def</span> <span class="nf">retire</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history_export</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;finding subject retired scores&#39;</span><span class="p">)</span>
+        <span class="n">bogus</span><span class="p">,</span> <span class="n">real</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">thresholds</span>
+
+        <span class="k">for</span> <span class="n">score</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">scores</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">history</span> <span class="o">=</span> <span class="n">history_export</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">score</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+            <span class="c1"># print(score.id)</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">history</span><span class="o">.</span><span class="n">scores</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">p</span> <span class="o">&lt;</span> <span class="n">bogus</span> <span class="ow">or</span> <span class="n">p</span> <span class="o">&gt;</span> <span class="n">real</span><span class="p">:</span>
+                    <span class="c1"># print(p, bogus, real)</span>
+                    <span class="n">score</span><span class="o">.</span><span class="n">retired</span> <span class="o">=</span> <span class="n">p</span>
+                    <span class="k">break</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;done&#39;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scores</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scores</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ScoreExport.roc"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.scores.ScoreExport.roc">[docs]</a>    <span class="k">def</span> <span class="nf">roc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate iterator of information for a ROC curve</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">score</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">score</span><span class="o">.</span><span class="n">gold</span><span class="p">,</span> <span class="n">score</span><span class="o">.</span><span class="n">p</span>
+
+        <span class="k">def</span> <span class="nf">isgold</span><span class="p">(</span><span class="n">score</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">score</span><span class="o">.</span><span class="n">gold</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">scores</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sorted_scores</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ScoreIterator</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">isgold</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ScoreExport.full"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.scores.ScoreExport.full">[docs]</a>    <span class="k">def</span> <span class="nf">full</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate iterator of all information</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">score</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">score</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">score</span><span class="o">.</span><span class="n">gold</span><span class="p">,</span> <span class="n">score</span><span class="o">.</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ScoreIterator</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sorted_scores</span><span class="p">),</span> <span class="n">func</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ScoreExport.full_dict"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.scores.ScoreExport.full_dict">[docs]</a>    <span class="k">def</span> <span class="nf">full_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">scores</span><span class="p">:</span>
+            <span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scores</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">score</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">score</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">d</span></div>
+
+<div class="viewcode-block" id="ScoreExport.dict"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.scores.ScoreExport.dict">[docs]</a>    <span class="k">def</span> <span class="nf">dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">scores</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="ScoreIterator"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.scores.ScoreIterator">[docs]</a><span class="k">class</span> <span class="nc">ScoreIterator</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Custom iterator to process exported score data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ScoreIterator.__init__"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.scores.ScoreIterator.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scores</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">cond</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">:</span>
+            <span class="n">scores</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">scores</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;scores type </span><span class="si">%s</span><span class="s1"> not valid!&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">scores</span><span class="p">)))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">scores</span> <span class="o">=</span> <span class="n">scores</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">func</span> <span class="o">=</span> <span class="n">func</span>
+        <span class="k">if</span> <span class="n">cond</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cond</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cond</span> <span class="o">=</span> <span class="n">cond</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+    <span class="k">def</span> <span class="nf">_step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">i</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">StopIteration</span>
+
+        <span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scores</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">i</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">score</span>
+
+<div class="viewcode-block" id="ScoreIterator.next"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.scores.ScoreIterator.next">[docs]</a>    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step</span><span class="p">()</span>
+
+        <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span><span class="n">score</span><span class="p">):</span>
+            <span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step</span><span class="p">()</span>
+
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">score</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">obj</span></div>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scores</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Michael Laraia, Marco Willi, Darryl Wright, Hugh Dickinson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'1.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

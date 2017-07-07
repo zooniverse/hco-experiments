@@ -26,7 +26,12 @@ class AdminInterface(Interface):
 
         parser.add_argument(
             '--upload-dump', nargs=1,
-            help='Upload project dump to mongo database')
+            help='Upload panoptes project dump to mongo database')
+
+        parser.add_argument(
+            '--gen-stats', action='store_true',
+            help='Force regeneration of classification stats in db for swap'
+        )
 
     def call(self, args):
         """
@@ -36,3 +41,6 @@ class AdminInterface(Interface):
         if args.upload_dump:
             fname = args.upload_dump[0]
             DB().classifications.upload_project_dump(fname)
+
+        if args.gen_stats:
+            DB().classifications._gen_stats()

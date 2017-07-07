@@ -1,0 +1,455 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>swap.db.query &mdash; SWAP 1.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="SWAP 1.0.1 documentation" href="../../../index.html"/>
+        <link rel="up" title="swap.db" href="../db.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> SWAP
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../setup.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">UI Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html#interacting-with-swap">Interacting with SWAP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html#detailed-usage">Detailed Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">API Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SWAP</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../db.html">swap.db</a> &raquo;</li>
+        
+      <li>swap.db.query</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for swap.db.query</h1><div class="highlight"><pre>
+<span></span><span class="c1">################################################################</span>
+<span class="c1"># Class to construct a query dictionary</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Query"><a class="viewcode-back" href="../../../api/db.html#swap.db.query.Query">[docs]</a><span class="k">class</span> <span class="nc">Query</span><span class="p">:</span>
+
+<div class="viewcode-block" id="Query.__init__"><a class="viewcode-back" href="../../../api/db.html#swap.db.query.Query.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline</span> <span class="o">=</span> <span class="p">[]</span></div>
+
+<div class="viewcode-block" id="Query.limit"><a class="viewcode-back" href="../../../api/db.html#swap.db.query.Query.limit">[docs]</a>    <span class="k">def</span> <span class="nf">limit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Limits number of results to return</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="n">num</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Limit needs to by type int&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;$limit&#39;</span><span class="p">:</span> <span class="n">num</span><span class="p">})</span>
+
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Query.match"><a class="viewcode-back" href="../../../api/db.html#swap.db.query.Query.match">[docs]</a>    <span class="k">def</span> <span class="nf">match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">eq</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Limits results to documents where the field &#39;key&#39;</span>
+<span class="sd">            matches with value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">eq</span><span class="p">:</span>
+                <span class="n">match</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;$match&#39;</span><span class="p">:</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;$in&#39;</span><span class="p">:</span> <span class="n">value</span><span class="p">}}}</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">match</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;$match&#39;</span><span class="p">:</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;$nin&#39;</span><span class="p">:</span> <span class="n">value</span><span class="p">}}}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">eq</span><span class="p">:</span>
+                <span class="n">match</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;$match&#39;</span><span class="p">:</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span><span class="p">}}</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">match</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;$match&#39;</span><span class="p">:</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;$ne&#39;</span><span class="p">:</span> <span class="n">value</span><span class="p">}}}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">match</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Query.match_range"><a class="viewcode-back" href="../../../api/db.html#swap.db.query.Query.match_range">[docs]</a>    <span class="k">def</span> <span class="nf">match_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Limits results to documents where the field &#39;field&#39;</span>
+<span class="sd">            is greater equal &#39;lower&#39; and less than &#39;upper&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">match_range</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;$match&#39;</span><span class="p">:</span> <span class="p">{</span><span class="n">field</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;$gte&#39;</span><span class="p">:</span> <span class="n">lower</span><span class="p">,</span> <span class="s1">&#39;$lt&#39;</span><span class="p">:</span> <span class="n">upper</span><span class="p">}}}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">match_range</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Query.project"><a class="viewcode-back" href="../../../api/db.html#swap.db.query.Query.project">[docs]</a>    <span class="k">def</span> <span class="nf">project</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fields</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Limits the fields that are returned</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">project</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="n">fields</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">set</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">tuple</span><span class="p">:</span>
+                    <span class="n">project</span><span class="p">[</span><span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;$literal&#39;</span><span class="p">:</span> <span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">]}</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">project</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">:</span>
+            <span class="n">project</span> <span class="o">=</span> <span class="n">fields</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;$project&#39;</span><span class="p">:</span> <span class="n">project</span><span class="p">})</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Query.group"><a class="viewcode-back" href="../../../api/db.html#swap.db.query.Query.group">[docs]</a>    <span class="k">def</span> <span class="nf">group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">by</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Groups the data by the fields in by</span>
+
+<span class="sd">            If count=True then adds a field counting</span>
+<span class="sd">            number of entries in each group</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">by</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Group</span><span class="p">:</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="n">by</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="n">Group</span><span class="p">()</span><span class="o">.</span><span class="n">id</span><span class="p">(</span><span class="n">by</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">count</span><span class="p">:</span>
+                <span class="n">g</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">build</span><span class="p">())</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Query.sort"><a class="viewcode-back" href="../../../api/db.html#swap.db.query.Query.sort">[docs]</a>    <span class="k">def</span> <span class="nf">sort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Sorts the data via a Sort object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Sort</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;sort must receive a Sort class object&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">build</span><span class="p">())</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Query.out"><a class="viewcode-back" href="../../../api/db.html#swap.db.query.Query.out">[docs]</a>    <span class="k">def</span> <span class="nf">out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collection</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Writes query results to the specified collection</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Collection name needs to be string&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;$out&#39;</span><span class="p">:</span> <span class="n">collection</span><span class="p">})</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="Query.build"><a class="viewcode-back" href="../../../api/db.html#swap.db.query.Query.build">[docs]</a>    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Builds an SOM out of this object</span>
+<span class="sd">            for the mongo aggregation pipeline</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline</span></div></div>
+
+<div class="viewcode-block" id="Group"><a class="viewcode-back" href="../../../api/db.html#swap.db.query.Group">[docs]</a><span class="k">class</span> <span class="nc">Group</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Buils a $group statement in the aggregation pipeline.</span>
+<span class="sd">        $group is more complicated than the other commands,</span>
+<span class="sd">        so it deserves its own class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Group.__init__"><a class="viewcode-back" href="../../../api/db.html#swap.db.query.Group.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_extra</span> <span class="o">=</span> <span class="p">{}</span></div>
+
+
+<div class="viewcode-block" id="Group.id"><a class="viewcode-back" href="../../../api/db.html#swap.db.query.Group.id">[docs]</a>    <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Defines the _id field that the documents are</span>
+<span class="sd">            grouped by</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="s1">&#39;$</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">name</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="n">_id</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+                <span class="n">_id</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;$</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">field</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="n">_id</span>
+
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Group.push"><a class="viewcode-back" href="../../../api/db.html#swap.db.query.Group.push">[docs]</a>    <span class="k">def</span> <span class="nf">push</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">fields</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Args:</span>
+<span class="sd">                name (str) name of the pushed array</span>
+<span class="sd">                fields (list) list of fields to push</span>
+
+<span class="sd">            After grouping, pushes an array containing the</span>
+<span class="sd">            specified fields from the documents aggregated into</span>
+<span class="sd">            this group.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">push</span> <span class="o">=</span> <span class="s1">&#39;$</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fields</span>
+
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="n">push</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+                <span class="n">push</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;$</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">field</span>
+
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">:</span>
+            <span class="n">push</span> <span class="o">=</span> <span class="n">fields</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_extra</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;$push&#39;</span><span class="p">:</span><span class="n">push</span><span class="p">}</span>
+
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Group.count"><a class="viewcode-back" href="../../../api/db.html#swap.db.query.Group.count">[docs]</a>    <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;count&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Add an extra field counting the number of documents</span>
+<span class="sd">            in each group</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_extra</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;$sum&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">}</span>
+
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Group.build"><a class="viewcode-back" href="../../../api/db.html#swap.db.query.Group.build">[docs]</a>    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Build a dict out of this object for the mongo</span>
+<span class="sd">            aggregation pipeline</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">:</span>
+            <span class="n">output</span><span class="p">[</span><span class="s1">&#39;_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_extra</span><span class="p">)</span>
+
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;$group&#39;</span><span class="p">:</span> <span class="n">output</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Nothing set for group stage!&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span></div></div>
+
+<div class="viewcode-block" id="Sort"><a class="viewcode-back" href="../../../api/db.html#swap.db.query.Sort">[docs]</a><span class="k">class</span> <span class="nc">Sort</span><span class="p">:</span>
+
+<div class="viewcode-block" id="Sort.__init__"><a class="viewcode-back" href="../../../api/db.html#swap.db.query.Sort.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_order</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Sort.add"><a class="viewcode-back" href="../../../api/db.html#swap.db.query.Sort.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">order</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Args:</span>
+<span class="sd">                name (str) field name</span>
+<span class="sd">                order (int) 1 ascending, -1 descending</span>
+<span class="sd">            Sorts the aggregation results by the field name</span>
+<span class="sd">            in asc/desc order</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_order</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">order</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Sort.addMany"><a class="viewcode-back" href="../../../api/db.html#swap.db.query.Sort.addMany">[docs]</a>    <span class="k">def</span> <span class="nf">addMany</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Args:</span>
+<span class="sd">                order list(tuple(name, order))</span>
+
+<span class="sd">            Receives multiple sort commands as list of tuples,</span>
+<span class="sd">            where each tuple has the field name and asc/desc order</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">direction</span> <span class="ow">in</span> <span class="n">order</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_order</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">direction</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Sort.build"><a class="viewcode-back" href="../../../api/db.html#swap.db.query.Sort.build">[docs]</a>    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;$sort&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_order</span><span class="p">}</span></div></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Michael Laraia, Marco Willi, Darryl Wright, Hugh Dickinson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'1.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

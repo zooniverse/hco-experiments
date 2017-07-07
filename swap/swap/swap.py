@@ -395,7 +395,7 @@ class SWAP:
                 continue
 
             # Generate list of subject scores
-            scores = []
+            scores = [config.p0]
             for t in sorted(subject.ledger, key=lambda t: t.order):
                 scores.append(t.score)
 

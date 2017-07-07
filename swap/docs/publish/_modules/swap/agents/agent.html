@@ -1,0 +1,442 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>swap.agents.agent &mdash; SWAP 1.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="SWAP 1.0.1 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> SWAP
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../setup.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">UI Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html#interacting-with-swap">Interacting with SWAP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html#detailed-usage">Detailed Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">API Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SWAP</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>swap.agents.agent</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for swap.agents.agent</h1><div class="highlight"><pre>
+<span></span><span class="c1">################################################################</span>
+<span class="c1"># Parent class for all agents</span>
+
+<span class="kn">import</span> <span class="nn">swap.agents.ledger</span> <span class="k">as</span> <span class="nn">ledger</span>
+
+<span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">import</span> <span class="nn">statistics</span> <span class="k">as</span> <span class="nn">st</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Agent"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.agent.Agent">[docs]</a><span class="k">class</span> <span class="nc">Agent</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Agent to represent a classifier (user,machine) or a subject</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        id: str</span>
+<span class="sd">            Identifier of Agent</span>
+<span class="sd">        probability: num</span>
+<span class="sd">            Initial probability used depending on subclass.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Agent.__init__"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.agent.Agent.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id_</span><span class="p">,</span> <span class="n">ledger_type</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="n">id_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ledger</span> <span class="o">=</span> <span class="n">ledger_type</span><span class="p">(</span><span class="n">id_</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">score</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Score getter function</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ledger</span><span class="o">.</span><span class="n">score</span>
+        <span class="k">except</span> <span class="n">ledger</span><span class="o">.</span><span class="n">StaleException</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ledger</span><span class="o">.</span><span class="n">_score</span>
+
+<div class="viewcode-block" id="Agent.classify"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.agent.Agent.classify">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">classify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cl</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Agent.stats"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.agent.Agent.stats">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">stats</span><span class="p">(</span><span class="n">bureau</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Calculate the mean, standard deviation, and median</span>
+<span class="sd">            of the scores in a bureau containing Agents</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="p">[</span><span class="n">agent</span><span class="o">.</span><span class="n">score</span> <span class="k">for</span> <span class="n">agent</span> <span class="ow">in</span> <span class="n">bureau</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">Stat</span><span class="p">(</span><span class="n">p</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;id </span><span class="si">%s</span><span class="s1"> transactions </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> \
+            <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ledger</span><span class="o">.</span><span class="n">transactions</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> agent id </span><span class="si">%s</span><span class="s1"> transactions </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> \
+            <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ledger</span><span class="o">.</span><span class="n">transactions</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="BaseStat"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.agent.BaseStat">[docs]</a><span class="k">class</span> <span class="nc">BaseStat</span><span class="p">:</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Stat"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.agent.Stat">[docs]</a><span class="k">class</span> <span class="nc">Stat</span><span class="p">(</span><span class="n">BaseStat</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Keeps track of statistics in a dataset</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Stat.__init__"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.agent.Stat.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">median</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdev</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">pstdev</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Stat.export"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.agent.Stat.export">[docs]</a>    <span class="k">def</span> <span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;mean&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span>
+                <span class="s1">&#39;stdev&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">stdev</span><span class="p">,</span>
+                <span class="s1">&#39;median&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">median</span><span class="p">}</span></div>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;mean: </span><span class="si">%.4f</span><span class="s1"> median </span><span class="si">%.4f</span><span class="s1"> stdev </span><span class="si">%.4f</span><span class="s1">&#39;</span> <span class="o">%</span> \
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">median</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stdev</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MultiStat"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.agent.MultiStat">[docs]</a><span class="k">class</span> <span class="nc">MultiStat</span><span class="p">(</span><span class="n">BaseStat</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Keeps track of statistics for multiple classes in a single</span>
+<span class="sd">        category. For example, the 0 and 1 scores of each user agent.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MultiStat.__init__"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.agent.MultiStat.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">data</span><span class="p">):</span>
+        <span class="n">stats</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">stats</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">Stat</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stats</span> <span class="o">=</span> <span class="n">stats</span></div>
+
+<div class="viewcode-block" id="MultiStat.add"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.agent.MultiStat.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">stat</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">stat</span>
+
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="MultiStat.addNew"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.agent.MultiStat.addNew">[docs]</a>    <span class="k">def</span> <span class="nf">addNew</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">Stat</span><span class="p">(</span><span class="n">data</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="MultiStat.export"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.agent.MultiStat.export">[docs]</a>    <span class="k">def</span> <span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">export</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">stat</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">export</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">stat</span><span class="o">.</span><span class="n">export</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">export</span></div>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">stat</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;stat </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">label</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">stat</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">s</span></div>
+
+
+<div class="viewcode-block" id="Stats"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.agent.Stats">[docs]</a><span class="k">class</span> <span class="nc">Stats</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A collection of multiple BaseStat objects</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Stats.__init__"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.agent.Stats.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stats</span> <span class="o">=</span> <span class="p">{}</span></div>
+
+<div class="viewcode-block" id="Stats.add"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.agent.Stats.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">stat</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stat</span><span class="p">,</span> <span class="n">BaseStat</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Stat must be of type BaseStat&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">stat</span>
+
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Stats.get"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.agent.Stats.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> not a valid stat name&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="n">name</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Stats.export"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.agent.Stats.export">[docs]</a>    <span class="k">def</span> <span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">export</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">stat</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">export</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">stat</span><span class="o">.</span><span class="n">export</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">stats</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">stat</span> <span class="ow">in</span> <span class="n">stats</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">name</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;-&#39;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">name</span><span class="p">])</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">stat</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">s</span></div>
+
+
+<div class="viewcode-block" id="Accuracy"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.agent.Accuracy">[docs]</a><span class="k">class</span> <span class="nc">Accuracy</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Class to keep track of accuracy for multiple classes</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Accuracy.__init__"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.agent.Accuracy.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stats</span> <span class="o">=</span> <span class="p">{}</span></div>
+
+<div class="viewcode-block" id="Accuracy.add"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.agent.Accuracy.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">matched</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">            label:   Label of class (0, 1 for SNHunters)</span>
+<span class="sd">            matched: Number of correct matchings</span>
+<span class="sd">            n:       Number of total matchings</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">matched</span> <span class="o">&gt;</span> <span class="n">n</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Number of correct matches greater &#39;</span> <span class="o">+</span>
+                             <span class="s1">&#39;than total number of matches: </span><span class="si">%d</span><span class="s1"> &gt; </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span>
+                             <span class="p">(</span><span class="n">matched</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">matched</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Accuracy.total"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.agent.Accuracy.total">[docs]</a>    <span class="k">def</span> <span class="nf">total</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Returns the total accuracy accross all trackers:</span>
+<span class="sd">                Sum of all numerators and denominators</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">matched</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">matched</span> <span class="o">+=</span> <span class="n">m</span>
+            <span class="n">total</span> <span class="o">+=</span> <span class="n">n</span>
+        <span class="k">return</span> <span class="n">matched</span><span class="p">,</span> <span class="n">total</span></div>
+
+<div class="viewcode-block" id="Accuracy.score"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.agent.Accuracy.score">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">score</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">den</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Gets numerical representation of an accuracy fraction.</span>
+<span class="sd">            Returns 0 if dividing by 0</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">num</span> <span class="o">/</span> <span class="n">den</span>
+        <span class="k">except</span> <span class="ne">ZeroDivisionError</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="s1">&#39;Caught attempt to divide by zero!&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">0</span></div>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">format_</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%5s</span><span class="s1"> </span><span class="si">%6d</span><span class="s1"> / </span><span class="si">%6d</span><span class="s1"> </span><span class="si">%2.2f</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">:</span>
+            <span class="n">m</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="n">label</span><span class="p">]</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="n">format_</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">label</span><span class="p">),</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+
+        <span class="n">total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total</span><span class="p">()</span>
+        <span class="n">total_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="o">*</span><span class="n">total</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="n">format_</span> <span class="o">%</span> <span class="p">(</span><span class="s1">&#39;total&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">total</span><span class="p">,</span> <span class="n">total_score</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">s</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Michael Laraia, Marco Willi, Darryl Wright, Hugh Dickinson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'1.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

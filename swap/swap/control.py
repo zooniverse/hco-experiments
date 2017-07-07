@@ -81,6 +81,9 @@ class Control:
                 bar.update(count)
                 count += 1
 
+                if config.control.debug and count > config.control.amount:
+                    break
+
         if config.back_update:
             logger.info('back_update active: processing changes')
             self.swap.process_changes()

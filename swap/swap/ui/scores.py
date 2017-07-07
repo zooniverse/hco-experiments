@@ -49,28 +49,49 @@ class ScoresInterface(Interface):
         Add options to the parser
         """
         parser.add_argument(
-            '-a', '--add', nargs=2, action='append')
+            '-a', '--add', nargs=2, action='append',
+            metavar=('label', 'file'),
+            help='Add a score export file')
 
         parser.add_argument(
-            '--diff', nargs=1)
+            '--diff', nargs=1,
+            metavar='score_export',
+            help='Add a difference plot comparing the subjects scores between'
+                 'multiple swap runs. Specify the base run with --diff, and'
+                 'specify any other runs to be compared with -a. Will create'
+                 'a plot for each SWAP run added')
 
         parser.add_argument(
-            '--user', nargs=1)
+            '--user', nargs=1,
+            metavar='swap',
+            help='Add an image of the user confusion matrices')
 
         parser.add_argument(
-            '--output', nargs=1)
+            '--output', nargs=1,
+            help='Save the plot to file. Specify \'-\' here to display the plot'
+                 'with the matplotlib viewer')
 
         parser.add_argument(
-            '--xaxis', nargs=1)
+            '--xaxis', nargs=1,
+            metavar='label',
+            help='X axis label')
 
         parser.add_argument(
-            '--yaxis', nargs=1)
+            '--yaxis', nargs=1,
+            metavar='label',
+            help='Y axis label')
 
         parser.add_argument(
-            '--aspect-ratio', nargs=1)
+            '--aspect-ratio', nargs=1,
+            help='Define fixed aspect ratio of each plot')
 
         parser.add_argument(
-            '--user-diff', nargs=2)
+            '--user-diff', nargs=2,
+            metavar='swap',
+            help='Add a difference plot comparing the user confusion matrices '
+                 'between two swap runs. Specify the base run with --user-diff,'
+                 ' and specify any other runs to be compared with -a. Will '
+                 'create a plot for each SWAP run added')
 
     def call(self, args):
         """

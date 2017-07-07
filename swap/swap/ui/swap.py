@@ -67,31 +67,6 @@ class SWAPInterface(Interface):
             help='Run the SWAP algorithm')
 
         parser.add_argument(
-            '--subject', nargs=1,
-            metavar='file',
-            help='Generate subject track plot and output to file')
-
-        parser.add_argument(
-            '--utraces', nargs=1,
-            metavar='file',
-            help='Generate user track plots and output to file')
-
-        parser.add_argument(
-            '--user', nargs=1,
-            metavar='file',
-            help='Generate user confusion matrices and outname to file')
-
-        parser.add_argument(
-            '--hist', nargs=1,
-            metavar='file',
-            help='Generate multiclass histogram plot')
-
-        parser.add_argument(
-            '--log', nargs=1,
-            metavar='file',
-            help='Write the entire SWAP export to file')
-
-        parser.add_argument(
             '--train', nargs=1,
             metavar='n',
             help='Run swap with a test/train split. Restricts sample size' +
@@ -110,8 +85,37 @@ class SWAPInterface(Interface):
                  'consensus subjects')
 
         parser.add_argument(
+            '--subject', nargs=1,
+            metavar='file',
+            help='Generate subject track plot and output to file')
+
+        # parser.add_argument(
+        #     '--utraces', nargs=1,
+        #     metavar='file',
+        #     help='Generate user track plots and output to file')
+
+        parser.add_argument(
+            '--user', nargs=1,
+            metavar='file',
+            help='Generate plot of user confusion matrices and save to file.'
+                 ' Specifying - as filename renders plot in matplotlib viewer.')
+
+        parser.add_argument(
+            '--hist', nargs=1,
+            metavar='file',
+            help='Generate multiclass histogram plot.'
+                 ' Specifying - as filename renders plot in matplotlib viewer.')
+
+        parser.add_argument(
+            '--log', nargs=1,
+            metavar='file',
+            help='Write the entire SWAP export to file')
+
+        parser.add_argument(
             '--presrec', nargs=1,
-            metavar='file')
+            metavar='file',
+            help='Generate Precision-Recall curve (SciKit learn)'
+                 ' Specifying - as filename renders plot in matplotlib viewer.')
 
         # parser.add_argument(
         #     '--extremes', nargs=2,
@@ -138,7 +142,8 @@ class SWAPInterface(Interface):
             help='Visualize performance difference between swap outputs')
 
         parser.add_argument(
-            '--shell', action='store_true')
+            '--shell', action='store_true',
+            help='Drop to shell after other commands have completed.')
 
         parser.add_argument(
             '--test', action='store_true')
@@ -147,13 +152,18 @@ class SWAPInterface(Interface):
             '--test-reorder', action='store_true')
 
         parser.add_argument(
-            '--scores-from-csv', nargs=1)
+            '--scores-from-csv', nargs=1,
+            metavar='file',
+            help='Load scores from csv export')
 
         parser.add_argument(
-            '--scores-to-csv', nargs=1)
+            '--scores-to-csv', nargs=1,
+            metavar='file',
+            help='Save score export to csv')
 
         parser.add_argument(
             '--export-user-scores', nargs=1,
+            metavar='file',
             help='Export user scores to csv')
 
     def call(self, args):

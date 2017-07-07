@@ -1,0 +1,415 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>swap.agents.bureau &mdash; SWAP 1.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="SWAP 1.0.1 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> SWAP
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../setup.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">UI Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html#interacting-with-swap">Interacting with SWAP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html#detailed-usage">Detailed Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">API Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SWAP</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>swap.agents.bureau</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for swap.agents.bureau</h1><div class="highlight"><pre>
+<span></span><span class="c1">################################################################</span>
+<span class="c1"># Keeps track of all user and subject agents</span>
+<span class="c1"># - Initial class to test SWAP</span>
+
+<span class="kn">from</span> <span class="nn">swap.agents.agent</span> <span class="k">import</span> <span class="n">Agent</span>
+<span class="kn">from</span> <span class="nn">swap.utils</span> <span class="k">import</span> <span class="n">Singleton</span>
+
+
+<div class="viewcode-block" id="Bureau"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.bureau.Bureau">[docs]</a><span class="k">class</span> <span class="nc">Bureau</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Bureau to keep track of agents</span>
+
+<span class="sd">    Parameter:</span>
+<span class="sd">    ----------</span>
+<span class="sd">        agent_type: str</span>
+<span class="sd">            Informative string to indicate agent types in that specific bureau</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Bureau.__init__"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.bureau.Bureau.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent_type</span><span class="p">):</span>
+        <span class="c1"># type of agents, just a string? (e.g. users, subjects, machines,...)</span>
+        <span class="c1"># maybe not required because we could look at the agents&#39; subclass</span>
+
+        <span class="c1"># What if we pass the type of the agents here... as in Bureau(Subject)</span>
+        <span class="c1"># or Bureau(User) etc. ?</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">agent_type</span> <span class="o">=</span> <span class="n">agent_type</span>
+        <span class="c1"># dictionary to store all agents, key is agent-ID</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_agents</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Bureau.add"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.bureau.Bureau.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent</span><span class="p">,</span> <span class="n">override</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Add agent to bureau</span>
+
+<span class="sd">            Parameter:</span>
+<span class="sd">            ----------</span>
+<span class="sd">                agent: agent object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Verify agent is of proper type</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_type</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s1">&#39;Agent type </span><span class="si">%s</span><span class="s1"> is not of type </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">agent</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_type</span><span class="p">))</span>
+
+        <span class="c1"># Add agent to collection</span>
+        <span class="k">if</span> <span class="n">agent</span><span class="o">.</span><span class="n">id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_agents</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">override</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Agent-ID already in bureau, remove first&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_agents</span><span class="p">[</span><span class="n">agent</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">agent</span></div>
+
+<div class="viewcode-block" id="Bureau.get"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.bureau.Bureau.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent_id</span><span class="p">,</span> <span class="n">make_new</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Get agent from bureau</span>
+
+<span class="sd">        Parameter:</span>
+<span class="sd">        ----------</span>
+<span class="sd">            agent_id: id of agent</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        -------</span>
+<span class="sd">            agent</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">agent_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_agents</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_agents</span><span class="p">[</span><span class="n">agent_id</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">make_new</span><span class="p">:</span>
+            <span class="n">agent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_type</span><span class="p">(</span><span class="n">agent_id</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">agent</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">agent</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="Bureau.remove"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.bureau.Bureau.remove">[docs]</a>    <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Remove agent from bureau</span>
+
+<span class="sd">        Parameter:</span>
+<span class="sd">        ----------</span>
+<span class="sd">            agent_id: id of agent</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_agents</span><span class="p">[</span><span class="n">agent_id</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Bureau.has"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.bureau.Bureau.has">[docs]</a>    <span class="k">def</span> <span class="nf">has</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Check if agent is in bureau</span>
+
+<span class="sd">        Parameter:</span>
+<span class="sd">        ----------</span>
+<span class="sd">            agent_id: id of agent</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        --------</span>
+<span class="sd">            boolean</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">agent_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_agents</span></div>
+
+<div class="viewcode-block" id="Bureau.process_changes"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.bureau.Bureau.process_changes">[docs]</a>    <span class="k">def</span> <span class="nf">process_changes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bar</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">agent</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">bar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">agent</span><span class="o">.</span><span class="n">ledger</span><span class="o">.</span><span class="n">stale</span><span class="p">:</span>
+                <span class="n">bar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">bar</span><span class="o">.</span><span class="n">value</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+            <span class="n">agent</span><span class="o">.</span><span class="n">ledger</span><span class="o">.</span><span class="n">recalculate</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Bureau.notify_changes"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.bureau.Bureau.notify_changes">[docs]</a>    <span class="k">def</span> <span class="nf">notify_changes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other_bureau</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">agent</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">agent</span><span class="o">.</span><span class="n">ledger</span><span class="o">.</span><span class="n">notify_agents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other_bureau</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Bureau.calculate_changes"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.bureau.Bureau.calculate_changes">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_changes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">([</span><span class="mi">1</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">ledger</span><span class="o">.</span><span class="n">stale</span><span class="p">])</span></div>
+
+    <span class="c1"># ----------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="Bureau.idset"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.bureau.Bureau.idset">[docs]</a>    <span class="k">def</span> <span class="nf">idset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_agents</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="Bureau.stats"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.bureau.Bureau.stats">[docs]</a>    <span class="k">def</span> <span class="nf">stats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Calculates the mean, standard deviation, and median</span>
+<span class="sd">            of scores in this bureau</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_type</span><span class="o">.</span><span class="n">stats</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Bureau.export"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.bureau.Bureau.export">[docs]</a>    <span class="k">def</span> <span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">agent</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_agents</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">export</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="Bureau.iter_ids"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.bureau.Bureau.iter_ids">[docs]</a>    <span class="k">def</span> <span class="nf">iter_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">AgentIterator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_agents</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">Agent</span><span class="p">):</span>
+            <span class="n">id_</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">id</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">id_</span> <span class="o">=</span> <span class="n">item</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">has</span><span class="p">(</span><span class="n">id_</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_agents</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_agents</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> agents of type </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>\
+            <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_agents</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">agent_type</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="AgentIterator"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.bureau.AgentIterator">[docs]</a><span class="k">class</span> <span class="nc">AgentIterator</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Custom iterator to iterate through agents in a bureau</span>
+<span class="sd">        according to a list of ids</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="AgentIterator.__init__"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.bureau.AgentIterator.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bureau</span><span class="p">,</span> <span class="n">ids</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bureau</span> <span class="o">=</span> <span class="n">bureau</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ids</span> <span class="o">=</span> <span class="n">ids</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="AgentIterator.next"><a class="viewcode-back" href="../../../api/agents.html#swap.agents.bureau.AgentIterator.next">[docs]</a>    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">StopIteration</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">agent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bureau</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="n">agent</span></div>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">()</span></div>
+
+
+<span class="c1"># class _Bureaus:</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     Central container with references to the subject and</span>
+<span class="c1">#     user bureaus</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+
+<span class="c1">#     def add(self, name, bureau):</span>
+<span class="c1">#         self.setattr(name, bureau)</span>
+
+
+<span class="c1"># class Bureaus(_Bureaus, metaclass=Singleton):</span>
+<span class="c1">#     pass</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Michael Laraia, Marco Willi, Darryl Wright, Hugh Dickinson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'1.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

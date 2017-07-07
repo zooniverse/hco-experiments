@@ -1,0 +1,318 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>swap.plots.traces &mdash; SWAP 1.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="SWAP 1.0.1 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> SWAP
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../setup.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">UI Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html#interacting-with-swap">Interacting with SWAP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html#detailed-usage">Detailed Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">API Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SWAP</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>swap.plots.traces</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for swap.plots.traces</h1><div class="highlight"><pre>
+<span></span><span class="c1">################################################################</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+
+<div class="viewcode-block" id="plot_user"><a class="viewcode-back" href="../../../api/plots.html#swap.plots.traces.plot_user">[docs]</a><span class="k">def</span> <span class="nf">plot_user</span><span class="p">(</span><span class="n">swap</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate a trace plot of the average of each user&#39;s scores</span>
+<span class="sd">        change with each classification</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            fname: Save the plot to file.</span>
+<span class="sd">                   Shows the plot instead if None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">export</span> <span class="o">=</span> <span class="n">swap</span><span class="o">.</span><span class="n">export</span><span class="p">()</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">export</span><span class="p">[</span><span class="s1">&#39;users&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="n">h0</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;score_0_history&#39;</span><span class="p">]</span>
+        <span class="n">h1</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;score_1_history&#39;</span><span class="p">]</span>
+
+        <span class="n">h</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v0</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">h0</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">h1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">i</span><span class="p">:</span>
+                <span class="n">v1</span> <span class="o">=</span> <span class="n">h1</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">v1</span> <span class="o">=</span> <span class="n">h1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">h</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">v0</span> <span class="o">+</span> <span class="n">v1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span>
+
+    <span class="n">plot_tracks</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;User Combined Tracks&#39;</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="plot_subjects"><a class="viewcode-back" href="../../../api/plots.html#swap.plots.traces.plot_subjects">[docs]</a><span class="k">def</span> <span class="nf">plot_subjects</span><span class="p">(</span><span class="n">export</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate a trace plot of how each subject&#39;s score changes</span>
+<span class="sd">        with each classification</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">plot_tracks</span><span class="p">(</span><span class="n">export</span><span class="o">.</span><span class="n">traces</span><span class="p">(),</span> <span class="s1">&#39;Subject Tracks&#39;</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span></div>
+
+    <span class="c1"># export = swap.export()</span>
+    <span class="c1"># print(fname)</span>
+    <span class="c1"># data = [(d[&#39;gold_label&#39;], d[&#39;history&#39;])</span>
+    <span class="c1">#         for d in export[&#39;subjects&#39;].values()]</span>
+    <span class="c1"># plot_tracks(data, &#39;Subject Tracks&#39;, fname)</span>
+
+
+<div class="viewcode-block" id="plot_tracks"><a class="viewcode-back" href="../../../api/plots.html#swap.plots.traces.plot_tracks">[docs]</a><span class="k">def</span> <span class="nf">plot_tracks</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot subject tracks</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Should be a list of tuples of the form</span>
+<span class="sd">                  (gold label, [subject history])</span>
+<span class="sd">            title: Title of the plot</span>
+<span class="sd">            fname: Save the plot to file.</span>
+<span class="sd">                   Shows the plot instead if None</span>
+<span class="sd">            dpi: Passed to matplotlib</span>
+<span class="sd">            scale: (&#39;log&#39;|&#39;linear&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cmap</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;#669D31&quot;</span><span class="p">,</span> <span class="s2">&quot;#F00200&quot;</span><span class="p">,</span> <span class="s2">&quot;#000000&quot;</span><span class="p">]</span>
+
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">gold</span><span class="p">,</span> <span class="n">history</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">1000</span><span class="p">:</span>
+            <span class="k">break</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="p">[</span><span class="mf">0.01</span><span class="p">]</span> <span class="o">+</span> <span class="n">history</span><span class="p">,</span>
+            <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">history</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="s2">&quot;-&quot;</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="n">cmap</span><span class="p">[</span><span class="n">gold</span><span class="p">],</span>
+            <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+
+        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">1.01</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">invert_yaxis</span><span class="p">()</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;P(real)&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;number of classificaions&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">fname</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="n">dpi</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Michael Laraia, Marco Willi, Darryl Wright, Hugh Dickinson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'1.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
