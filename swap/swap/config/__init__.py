@@ -45,6 +45,12 @@ back_update = False
 # Operator used in controversial and consensus score calculation
 controversial_version = 'pow'
 
+# Activate debug mode for control
+# limits how many classifications Control will iterate through
+class control:
+    debug = False
+    amount = 100000
+
 
 # Database config options
 class database:
