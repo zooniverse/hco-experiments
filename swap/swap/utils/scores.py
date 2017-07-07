@@ -359,18 +359,22 @@ class ScoreIterator:
             self.cond = cond
         self.i = 0
 
-    def next(self):
+    def _step(self):
         if self.i >= len(self):
             raise StopIteration
 
         score = self.scores[self.i]
         self.i += 1
+        return score
 
-        if self.cond(score):
-            obj = self.func(score)
-            return obj
-        else:
-            return self.next()
+    def next(self):
+        score = self._step()
+
+        while not self.cond(score):
+            score = self._step()
+
+        obj = self.func(score)
+        return obj
 
     def __iter__(self):
         return self
