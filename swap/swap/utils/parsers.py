@@ -14,9 +14,20 @@ class Parser:
         self.types = self._config_types(builder_config)
 
     def _config_types(self, config):
+        """
+        Return the type mapping in the config used for this parser
+        """
         pass
 
     def _remap(self, cl):
+        """
+        Remap keys in the classification dump as specified in config
+
+        if there is a type entry in the config like:
+            'name': (int, 'other_name')
+        this will look for 'other_name' in a raw classification in the cl blob
+        and modify its key to 'name'
+        """
         for key, remap in self.types.items():
             if type(remap) is tuple:
                 remap = remap[1]
@@ -31,6 +42,15 @@ class Parser:
         return cl
 
     def _type(self, value, type_):
+        """
+        Casts a value in the classification stream as specified in config
+
+        if there is a type entry in the config like:
+            'name': int
+        this will receive the value of 'name' in the classification and
+        cast it as an int. Other supported types are float, bool, timestamp,
+        and str.
+        """
         # Parse timestamps
         if type_ == "timestamp":
             for fmt in self.timestamp_formats:
@@ -53,6 +73,14 @@ class Parser:
         return value
 
     def _mod_types(self, cl):
+        """
+        Casts values in the classification stream as specified in config
+
+        if there is a type entry in the config like:
+            'name': int
+        this will look for 'name' in the classification and
+        cast it as an int.
+        """
         # Convert types specified in config
         # anything not in config is interpreted as str
 
@@ -181,6 +209,17 @@ class MetadataParser(Parser):
         cl = self._remap(cl)
         output = self._mod_types(cl)
         return output
+
+
+class GoldsParser(MetadataParser):
+
+    def __init__(self, builder_config):
+        super().__init__(builder_config)
+
+    def _config_types(self, config):
+        data = config.subject_metadata
+
+        return {k: v for k, v in data.items() if k in ['subject', 'gold']}
 
 
 if __name__ == '__main__':

@@ -1,6 +1,10 @@
 
 from swap.db.db import Collection
+import swap.utils.parsers as parsers
+import swap.config as config
 
+import csv
+import sys
 from functools import wraps
 import logging
 logger = logging.getLogger(__name__)
@@ -102,3 +106,28 @@ class Golds(Collection):
 
         logger.critical('building gold label list from classifications')
         self._db.classifications.aggregate(query)
+
+    def upload_golds_csv(self, fname):
+
+        logger.info('parsing csv dump')
+        data = []
+        pp = parsers.GoldsParser(config.database.builder)
+
+        with open(fname, 'r') as file:
+            reader = csv.DictReader(file)
+
+            for i, row in enumerate(reader):
+                item = pp.process(row)
+                if item is None:
+                    continue
+                data.append(item)
+
+                sys.stdout.flush()
+                sys.stdout.write("%d records processed\r" % i)
+
+                if len(data) > 100000:
+                    self.collection.insert_many(data)
+                    data = []
+
+        self.collection.insert_many(data)
+        logger.debug('done')
