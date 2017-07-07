@@ -176,7 +176,7 @@ class Address:
         name = cls.config.caesar.reducer
         addr = cls.swap_classify()
         data = {'workflow': {
-            'extractors_config': {name: {'type': 'external', 'url': addr}},
+            'extractors_config': {'ext': {'type': 'external', 'url': addr}},
             'reducers_config': {name: {'type': 'external'}},
             'rules_config': []
         }}
@@ -185,8 +185,8 @@ class Address:
 
 class Requests:
 
-    @staticmethod
-    def register_swap():
+    @classmethod
+    def register_swap(cls):
         """
         Register swap as an extractor/reducer on caesar
         """
@@ -195,7 +195,12 @@ class Requests:
 
         logger.info('PUT to %s with %s', address, str(data))
         auth_header = AuthCaesar().auth()
-        requests.put(address, headers=auth_header, json=data)
+        r = requests.put(address, headers=auth_header, json=data)
+
+        if r.status_code != 200:
+            print(r)
+            logger.error(str(r.__dict__))
+            raise cls.BadResponse('Received status code %d' % r.status_code)
         logger.info('done')
 
     @staticmethod
@@ -224,6 +229,9 @@ class Requests:
         auth_header = AuthCaesar().auth()
         requests.put(address, headers=auth_header, json=body)
         logger.debug('done')
+
+    class BadResponse(Exception):
+        pass
 
 
 def init_threader(swap=None):
