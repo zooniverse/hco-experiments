@@ -50,6 +50,12 @@ class CaesarInterface(Interface):
             help='Register swap as an external extractor/reducer'
         )
 
+        # TODO ability to unregister swap
+        # parser.add_argument(
+        #     '--unregister', action='store_true',
+        #     help='Clear swap registration from caesar'
+        # )
+
         parser.add_argument(
             '--run', action='store_true',
             help='Run the app')
