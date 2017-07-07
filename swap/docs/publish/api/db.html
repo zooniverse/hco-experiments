@@ -1,0 +1,636 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>swap.db &mdash; SWAP 1.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="SWAP 1.0.1 documentation" href="../index.html"/>
+        <link rel="up" title="API Documentation" href="index.html"/>
+        <link rel="next" title="swap.plots" href="plots.html"/>
+        <link rel="prev" title="swap.config" href="config.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> SWAP
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../setup.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">UI Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html#interacting-with-swap">Interacting with SWAP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html#detailed-usage">Detailed Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">API Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="agents.html"><code class="docutils literal"><span class="pre">swap.agents</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="config.html"><code class="docutils literal"><span class="pre">swap.config</span></code></a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#"><code class="docutils literal"><span class="pre">swap.db</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#swap-db-db-cursor"><code class="docutils literal"><span class="pre">swap.db.db.Cursor</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#swap-db-db"><code class="docutils literal"><span class="pre">swap.db.DB</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#swap-db-db-collection"><code class="docutils literal"><span class="pre">swap.db.db.Collection</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-swap.db.classifications"><code class="docutils literal"><span class="pre">swap.db.classifications</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-swap.db.controversial"><code class="docutils literal"><span class="pre">swap.db.controversial</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-swap.db.query"><code class="docutils literal"><span class="pre">swap.db.query</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="plots.html"><code class="docutils literal"><span class="pre">swap.plots</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="swap.html"><code class="docutils literal"><span class="pre">swap</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html"><code class="docutils literal"><span class="pre">swap.utils</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SWAP</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">API Documentation</a> &raquo;</li>
+        
+      <li><code class="docutils literal"><span class="pre">swap.db</span></code></li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/db.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="swap-db">
+<h1><code class="xref py py-mod docutils literal"><span class="pre">swap.db</span></code><a class="headerlink" href="#swap-db" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="swap-db-db-cursor">
+<h2><a class="reference internal" href="#swap.db.db.Cursor" title="swap.db.db.Cursor"><code class="xref py py-mod docutils literal"><span class="pre">swap.db.db.Cursor</span></code></a><a class="headerlink" href="#swap-db-db-cursor" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="swap.db.db.Cursor">
+<em class="property">class </em><code class="descclassname">swap.db.db.</code><code class="descname">Cursor</code><span class="sig-paren">(</span><em>query</em>, <em>collection</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/db.html#Cursor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.db.Cursor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Custom wrapper around mongo’s aggregation cursor.</p>
+<p>Has additional functionality to get the number of documents
+in a query, which is not otherwise available from the regular cursor.
+However, this functionality performs an additional query to mongo,
+so it comes with a slight penalty due to additional network access.</p>
+<dl class="method">
+<dt id="swap.db.db.Cursor.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>query</em>, <em>collection</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/db.html#Cursor.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.db.Cursor.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>query</strong> (<em>list</em>) – Aggregation query for mongo</li>
+<li><strong>collection</strong> (<em>swap.db.</em><em>[</em><em>collection</em><em>]</em>) – Collection the query thould be performed on</li>
+<li><strong>**kargs</strong> – Additional parameters that are passed to the pymongo aggregation
+command</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="swap.db.db.Cursor.getCount">
+<code class="descname">getCount</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/db.html#Cursor.getCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.db.Cursor.getCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.db.db.Cursor.getCursor">
+<code class="descname">getCursor</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/db.html#Cursor.getCursor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.db.Cursor.getCursor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.db.db.Cursor.next">
+<code class="descname">next</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/db.html#Cursor.next"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.db.Cursor.next" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="swap-db-db">
+<h2><code class="xref py py-mod docutils literal"><span class="pre">swap.db.DB</span></code><a class="headerlink" href="#swap-db-db" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="swap.db._DB">
+<em class="property">class </em><code class="descclassname">swap.db.</code><code class="descname">_DB</code><a class="reference internal" href="../_modules/swap/db.html#_DB"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db._DB" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>DB</p>
+<p>The main interaction between the python code and the
+supporting mongo database. All calls to the database
+should be made from here.</p>
+<dl class="method">
+<dt id="swap.db._DB.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db.html#_DB.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db._DB.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.db._DB.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db.html#_DB.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db._DB.close" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.db._DB.get_stats">
+<code class="descname">get_stats</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db.html#_DB.get_stats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db._DB.get_stats" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.db._DB.setBatchSize">
+<code class="descname">setBatchSize</code><span class="sig-paren">(</span><em>size</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db.html#_DB.setBatchSize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db._DB.setBatchSize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="swap-db-db-collection">
+<h2><a class="reference internal" href="#swap.db.db.Collection" title="swap.db.db.Collection"><code class="xref py py-mod docutils literal"><span class="pre">swap.db.db.Collection</span></code></a><a class="headerlink" href="#swap-db-db-collection" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="swap.db.db.Collection">
+<em class="property">class </em><code class="descclassname">swap.db.db.</code><code class="descname">Collection</code><span class="sig-paren">(</span><em>db</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/db.html#Collection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.db.Collection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="swap.db.db.Collection.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>db</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/db.html#Collection.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.db.Collection.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.db.db.Collection.aggregate">
+<code class="descname">aggregate</code><span class="sig-paren">(</span><em>query</em>, <em>cursor_args={}</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/db.html#Collection.aggregate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.db.Collection.aggregate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.db.db.Collection.schema">
+<code class="descname">schema</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/db.html#Collection.schema"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.db.Collection.schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.db.db.Collection.upload">
+<code class="descname">upload</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/db.html#Collection.upload"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.db.Collection.upload" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-swap.db.classifications">
+<span id="swap-db-classifications"></span><h2><a class="reference internal" href="#module-swap.db.classifications" title="swap.db.classifications"><code class="xref py py-mod docutils literal"><span class="pre">swap.db.classifications</span></code></a><a class="headerlink" href="#module-swap.db.classifications" title="Permalink to this headline">¶</a></h2>
+<p>Manages interactions with the classification collection in the database.</p>
+<dl class="docutils">
+<dt>Module level variables:</dt>
+<dd><dl class="first last docutils">
+<dt>collection</dt>
+<dd>collection this module acts on</dd>
+<dt>aggregate</dt>
+<dd>reference to the pymongo aggregation method of the collection</dd>
+</dl>
+</dd>
+</dl>
+<dl class="class">
+<dt id="swap.db.classifications.Classifications">
+<em class="property">class </em><code class="descclassname">swap.db.classifications.</code><code class="descname">Classifications</code><span class="sig-paren">(</span><em>db</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/classifications.html#Classifications"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.classifications.Classifications" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#swap.db.db.Collection" title="swap.db.db.Collection"><code class="xref py py-class docutils literal"><span class="pre">swap.db.db.Collection</span></code></a></p>
+<dl class="method">
+<dt id="swap.db.classifications.Classifications.getClassifications">
+<code class="descname">getClassifications</code><span class="sig-paren">(</span><em>query=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/classifications.html#Classifications.getClassifications"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.classifications.Classifications.getClassifications" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns all classifications.</p>
+<p>Useful when running simulations of SWAP, as it returns all
+available data at once.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>query</strong> (<em>list</em>) – Use a custom query instead</li>
+<li><strong>**kwargs</strong> – Any other variables to pass to mongo, like
+allowDiskUse, batchSize, etc</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="swap.db.classifications.Classifications.get_stats">
+<code class="descname">get_stats</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/classifications.html#Classifications.get_stats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.classifications.Classifications.get_stats" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.db.classifications.Classifications.upload_project_dump">
+<code class="descname">upload_project_dump</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/classifications.html#Classifications.upload_project_dump"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.classifications.Classifications.upload_project_dump" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-swap.db.controversial">
+<span id="swap-db-controversial"></span><h2><a class="reference internal" href="#module-swap.db.controversial" title="swap.db.controversial"><code class="xref py py-mod docutils literal"><span class="pre">swap.db.controversial</span></code></a><a class="headerlink" href="#module-swap.db.controversial" title="Permalink to this headline">¶</a></h2>
+<p>Ranks subjects by how controversial or agreeable they are</p>
+<dl class="class">
+<dt id="swap.db.controversial.Controversial">
+<em class="property">class </em><code class="descclassname">swap.db.controversial.</code><code class="descname">Controversial</code><span class="sig-paren">(</span><em>db</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/controversial.html#Controversial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.controversial.Controversial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#swap.db.db.Collection" title="swap.db.db.Collection"><code class="xref py py-class docutils literal"><span class="pre">swap.db.db.Collection</span></code></a></p>
+<dl class="method">
+<dt id="swap.db.controversial.Controversial.get_consensus">
+<code class="descname">get_consensus</code><span class="sig-paren">(</span><em>size</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/controversial.html#Controversial.get_consensus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.controversial.Controversial.get_consensus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the most agreeable subjects, i.e. subjects with highest consensus</p>
+<p>Formula: <span class="math">\((y-x) ^ {1 - {x \over y}}\)</span> where <span class="math">\(x&lt;y\)</span></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>size</strong> (<em>int</em>) – Number of subjects in the set</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="swap.db.controversial.Controversial.get_controversial">
+<code class="descname">get_controversial</code><span class="sig-paren">(</span><em>size</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/controversial.html#Controversial.get_controversial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.controversial.Controversial.get_controversial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the most controversial subjects</p>
+<p>Formula: <span class="math">\((x + y) ^ {x \over y}\)</span> where <span class="math">\(x&lt;y\)</span></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>size</strong> (<em>int</em>) – Number of subjects in the set</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="swap.db.controversial.Controversial.schema">
+<code class="descname">schema</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/controversial.html#Controversial.schema"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.controversial.Controversial.schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-swap.db.query">
+<span id="swap-db-query"></span><h2><a class="reference internal" href="#module-swap.db.query" title="swap.db.query"><code class="xref py py-mod docutils literal"><span class="pre">swap.db.query</span></code></a><a class="headerlink" href="#module-swap.db.query" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="swap.db.query.Group">
+<em class="property">class </em><code class="descclassname">swap.db.query.</code><code class="descname">Group</code><a class="reference internal" href="../_modules/swap/db/query.html#Group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.query.Group" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Buils a $group statement in the aggregation pipeline.
+$group is more complicated than the other commands,
+so it deserves its own class</p>
+<dl class="method">
+<dt id="swap.db.query.Group.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/query.html#Group.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.query.Group.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.db.query.Group.build">
+<code class="descname">build</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/query.html#Group.build"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.query.Group.build" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a dict out of this object for the mongo
+aggregation pipeline</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="swap.db.query.Group.count">
+<code class="descname">count</code><span class="sig-paren">(</span><em>name=’count’</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/query.html#Group.count"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.query.Group.count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add an extra field counting the number of documents
+in each group</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="swap.db.query.Group.id">
+<code class="descname">id</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/query.html#Group.id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.query.Group.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the _id field that the documents are
+grouped by</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="swap.db.query.Group.push">
+<code class="descname">push</code><span class="sig-paren">(</span><em>name</em>, <em>fields</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/query.html#Group.push"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.query.Group.push" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>str</em>) – </li>
+<li><strong>fields</strong> (<em>list</em>) – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>After grouping, pushes an array containing the
+specified fields from the documents aggregated into
+this group.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="swap.db.query.Query">
+<em class="property">class </em><code class="descclassname">swap.db.query.</code><code class="descname">Query</code><a class="reference internal" href="../_modules/swap/db/query.html#Query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.query.Query" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="swap.db.query.Query.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/query.html#Query.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.query.Query.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.db.query.Query.build">
+<code class="descname">build</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/query.html#Query.build"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.query.Query.build" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds an SOM out of this object
+for the mongo aggregation pipeline</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="swap.db.query.Query.group">
+<code class="descname">group</code><span class="sig-paren">(</span><em>by</em>, <em>count=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/query.html#Query.group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.query.Query.group" title="Permalink to this definition">¶</a></dt>
+<dd><p>Groups the data by the fields in by</p>
+<p>If count=True then adds a field counting
+number of entries in each group</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="swap.db.query.Query.limit">
+<code class="descname">limit</code><span class="sig-paren">(</span><em>num</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/query.html#Query.limit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.query.Query.limit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Limits number of results to return</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="swap.db.query.Query.match">
+<code class="descname">match</code><span class="sig-paren">(</span><em>key</em>, <em>value</em>, <em>eq=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/query.html#Query.match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.query.Query.match" title="Permalink to this definition">¶</a></dt>
+<dd><p>Limits results to documents where the field ‘key’
+matches with value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="swap.db.query.Query.match_range">
+<code class="descname">match_range</code><span class="sig-paren">(</span><em>field</em>, <em>lower</em>, <em>upper</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/query.html#Query.match_range"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.query.Query.match_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Limits results to documents where the field ‘field’
+is greater equal ‘lower’ and less than ‘upper’</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="swap.db.query.Query.out">
+<code class="descname">out</code><span class="sig-paren">(</span><em>collection</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/query.html#Query.out"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.query.Query.out" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes query results to the specified collection</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="swap.db.query.Query.project">
+<code class="descname">project</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/query.html#Query.project"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.query.Query.project" title="Permalink to this definition">¶</a></dt>
+<dd><p>Limits the fields that are returned</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="swap.db.query.Query.sort">
+<code class="descname">sort</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/query.html#Query.sort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.query.Query.sort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sorts the data via a Sort object</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="swap.db.query.Sort">
+<em class="property">class </em><code class="descclassname">swap.db.query.</code><code class="descname">Sort</code><a class="reference internal" href="../_modules/swap/db/query.html#Sort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.query.Sort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="swap.db.query.Sort.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/query.html#Sort.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.query.Sort.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.db.query.Sort.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>name</em>, <em>order</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/query.html#Sort.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.query.Sort.add" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>str</em>) – </li>
+<li><strong>order</strong> (<em>int</em>) – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Sorts the aggregation results by the field name
+in asc/desc order</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="swap.db.query.Sort.addMany">
+<code class="descname">addMany</code><span class="sig-paren">(</span><em>order</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/query.html#Sort.addMany"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.query.Sort.addMany" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>list</strong> (<em>order</em>) – </td>
+</tr>
+</tbody>
+</table>
+<p>Receives multiple sort commands as list of tuples,
+where each tuple has the field name and asc/desc order</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="swap.db.query.Sort.build">
+<code class="descname">build</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/db/query.html#Sort.build"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.db.query.Sort.build" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="plots.html" class="btn btn-neutral float-right" title="swap.plots" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="config.html" class="btn btn-neutral" title="swap.config" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Michael Laraia, Marco Willi, Darryl Wright, Hugh Dickinson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

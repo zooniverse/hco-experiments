@@ -1,0 +1,979 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>swap.agents &mdash; SWAP 1.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="SWAP 1.0.1 documentation" href="../index.html"/>
+        <link rel="up" title="API Documentation" href="index.html"/>
+        <link rel="next" title="swap.config" href="config.html"/>
+        <link rel="prev" title="API Documentation" href="index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> SWAP
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../setup.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">UI Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html#interacting-with-swap">Interacting with SWAP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html#detailed-usage">Detailed Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">API Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#"><code class="docutils literal"><span class="pre">swap.agents</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-swap.agents.agent"><code class="docutils literal"><span class="pre">swap.agents.agent</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-swap.agents.bureau"><code class="docutils literal"><span class="pre">swap.agents.bureau</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-swap.agents.ledger"><code class="docutils literal"><span class="pre">swap.agents.ledger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-swap.agents.subject"><code class="docutils literal"><span class="pre">swap.agents.subject</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-swap.agents.user"><code class="docutils literal"><span class="pre">swap.agents.user</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="config.html"><code class="docutils literal"><span class="pre">swap.config</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html"><code class="docutils literal"><span class="pre">swap.db</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="plots.html"><code class="docutils literal"><span class="pre">swap.plots</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="swap.html"><code class="docutils literal"><span class="pre">swap</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html"><code class="docutils literal"><span class="pre">swap.utils</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SWAP</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">API Documentation</a> &raquo;</li>
+        
+      <li><code class="docutils literal"><span class="pre">swap.agents</span></code></li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/agents.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="swap-agents">
+<h1><code class="xref py py-mod docutils literal"><span class="pre">swap.agents</span></code><a class="headerlink" href="#swap-agents" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-swap.agents.agent">
+<span id="swap-agents-agent"></span><h2><a class="reference internal" href="#module-swap.agents.agent" title="swap.agents.agent"><code class="xref py py-mod docutils literal"><span class="pre">swap.agents.agent</span></code></a><a class="headerlink" href="#module-swap.agents.agent" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="swap.agents.agent.Accuracy">
+<em class="property">class </em><code class="descclassname">swap.agents.agent.</code><code class="descname">Accuracy</code><a class="reference internal" href="../_modules/swap/agents/agent.html#Accuracy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.agent.Accuracy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Class to keep track of accuracy for multiple classes</p>
+<dl class="method">
+<dt id="swap.agents.agent.Accuracy.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/agent.html#Accuracy.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.agent.Accuracy.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.agent.Accuracy.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>label</em>, <em>matched</em>, <em>n</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/agent.html#Accuracy.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.agent.Accuracy.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>label:   Label of class (0, 1 for SNHunters)
+matched: Number of correct matchings
+n:       Number of total matchings</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="swap.agents.agent.Accuracy.score">
+<em class="property">static </em><code class="descname">score</code><span class="sig-paren">(</span><em>num</em>, <em>den</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/agent.html#Accuracy.score"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.agent.Accuracy.score" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets numerical representation of an accuracy fraction.
+Returns 0 if dividing by 0</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.agent.Accuracy.total">
+<code class="descname">total</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/agent.html#Accuracy.total"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.agent.Accuracy.total" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Returns the total accuracy accross all trackers:</dt>
+<dd>Sum of all numerators and denominators</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="swap.agents.agent.Agent">
+<em class="property">class </em><code class="descclassname">swap.agents.agent.</code><code class="descname">Agent</code><span class="sig-paren">(</span><em>id_</em>, <em>ledger_type</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/agent.html#Agent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.agent.Agent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Agent to represent a classifier (user,machine) or a subject</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>id</strong> – str
+Identifier of Agent</li>
+<li><strong>probability</strong> – num
+Initial probability used depending on subclass.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="swap.agents.agent.Agent.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>id_</em>, <em>ledger_type</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/agent.html#Agent.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.agent.Agent.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.agent.Agent.classify">
+<code class="descname">classify</code><span class="sig-paren">(</span><em>cl</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/agent.html#Agent.classify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.agent.Agent.classify" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="swap.agents.agent.Agent.id">
+<code class="descname">id</code><a class="headerlink" href="#swap.agents.agent.Agent.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="swap.agents.agent.Agent.score">
+<code class="descname">score</code><a class="headerlink" href="#swap.agents.agent.Agent.score" title="Permalink to this definition">¶</a></dt>
+<dd><p>Score getter function</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="swap.agents.agent.Agent.stats">
+<em class="property">static </em><code class="descname">stats</code><span class="sig-paren">(</span><em>bureau</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/agent.html#Agent.stats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.agent.Agent.stats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the mean, standard deviation, and median
+of the scores in a bureau containing Agents</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="swap.agents.agent.BaseStat">
+<em class="property">class </em><code class="descclassname">swap.agents.agent.</code><code class="descname">BaseStat</code><a class="reference internal" href="../_modules/swap/agents/agent.html#BaseStat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.agent.BaseStat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="swap.agents.agent.MultiStat">
+<em class="property">class </em><code class="descclassname">swap.agents.agent.</code><code class="descname">MultiStat</code><span class="sig-paren">(</span><em>*data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/agent.html#MultiStat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.agent.MultiStat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#swap.agents.agent.BaseStat" title="swap.agents.agent.BaseStat"><code class="xref py py-class docutils literal"><span class="pre">swap.agents.agent.BaseStat</span></code></a></p>
+<p>Keeps track of statistics for multiple classes in a single
+category. For example, the 0 and 1 scores of each user agent.</p>
+<dl class="method">
+<dt id="swap.agents.agent.MultiStat.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>*data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/agent.html#MultiStat.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.agent.MultiStat.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.agent.MultiStat.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>label</em>, <em>stat</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/agent.html#MultiStat.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.agent.MultiStat.add" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.agent.MultiStat.addNew">
+<code class="descname">addNew</code><span class="sig-paren">(</span><em>label</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/agent.html#MultiStat.addNew"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.agent.MultiStat.addNew" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.agent.MultiStat.export">
+<code class="descname">export</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/agent.html#MultiStat.export"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.agent.MultiStat.export" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="swap.agents.agent.Stat">
+<em class="property">class </em><code class="descclassname">swap.agents.agent.</code><code class="descname">Stat</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/agent.html#Stat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.agent.Stat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#swap.agents.agent.BaseStat" title="swap.agents.agent.BaseStat"><code class="xref py py-class docutils literal"><span class="pre">swap.agents.agent.BaseStat</span></code></a></p>
+<p>Keeps track of statistics in a dataset</p>
+<dl class="method">
+<dt id="swap.agents.agent.Stat.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/agent.html#Stat.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.agent.Stat.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.agent.Stat.export">
+<code class="descname">export</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/agent.html#Stat.export"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.agent.Stat.export" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="swap.agents.agent.Stats">
+<em class="property">class </em><code class="descclassname">swap.agents.agent.</code><code class="descname">Stats</code><a class="reference internal" href="../_modules/swap/agents/agent.html#Stats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.agent.Stats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>A collection of multiple BaseStat objects</p>
+<dl class="method">
+<dt id="swap.agents.agent.Stats.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/agent.html#Stats.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.agent.Stats.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.agent.Stats.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>name</em>, <em>stat</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/agent.html#Stats.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.agent.Stats.add" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.agent.Stats.export">
+<code class="descname">export</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/agent.html#Stats.export"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.agent.Stats.export" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.agent.Stats.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/agent.html#Stats.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.agent.Stats.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-swap.agents.bureau">
+<span id="swap-agents-bureau"></span><h2><a class="reference internal" href="#module-swap.agents.bureau" title="swap.agents.bureau"><code class="xref py py-mod docutils literal"><span class="pre">swap.agents.bureau</span></code></a><a class="headerlink" href="#module-swap.agents.bureau" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="swap.agents.bureau.AgentIterator">
+<em class="property">class </em><code class="descclassname">swap.agents.bureau.</code><code class="descname">AgentIterator</code><span class="sig-paren">(</span><em>bureau</em>, <em>ids</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/bureau.html#AgentIterator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.bureau.AgentIterator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Custom iterator to iterate through agents in a bureau
+according to a list of ids</p>
+<dl class="method">
+<dt id="swap.agents.bureau.AgentIterator.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>bureau</em>, <em>ids</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/bureau.html#AgentIterator.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.bureau.AgentIterator.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.bureau.AgentIterator.next">
+<code class="descname">next</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/bureau.html#AgentIterator.next"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.bureau.AgentIterator.next" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="swap.agents.bureau.Bureau">
+<em class="property">class </em><code class="descclassname">swap.agents.bureau.</code><code class="descname">Bureau</code><span class="sig-paren">(</span><em>agent_type</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/bureau.html#Bureau"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.bureau.Bureau" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Bureau to keep track of agents</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>agent_type: str</dt>
+<dd>Informative string to indicate agent types in that specific bureau</dd>
+</dl>
+</div></blockquote>
+<dl class="method">
+<dt id="swap.agents.bureau.Bureau.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>agent_type</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/bureau.html#Bureau.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.bureau.Bureau.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.bureau.Bureau.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>agent</em>, <em>override=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/bureau.html#Bureau.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.bureau.Bureau.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add agent to bureau</p>
+<blockquote>
+<div>agent: agent object</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.bureau.Bureau.calculate_changes">
+<code class="descname">calculate_changes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/bureau.html#Bureau.calculate_changes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.bureau.Bureau.calculate_changes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.bureau.Bureau.export">
+<code class="descname">export</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/bureau.html#Bureau.export"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.bureau.Bureau.export" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.bureau.Bureau.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>agent_id</em>, <em>make_new=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/bureau.html#Bureau.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.bureau.Bureau.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get agent from bureau</p>
+<blockquote>
+<div>agent_id: id of agent</div></blockquote>
+<blockquote>
+<div>agent</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.bureau.Bureau.has">
+<code class="descname">has</code><span class="sig-paren">(</span><em>agent_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/bureau.html#Bureau.has"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.bureau.Bureau.has" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if agent is in bureau</p>
+<blockquote>
+<div>agent_id: id of agent</div></blockquote>
+<blockquote>
+<div>boolean</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.bureau.Bureau.idset">
+<code class="descname">idset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/bureau.html#Bureau.idset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.bureau.Bureau.idset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.bureau.Bureau.iter_ids">
+<code class="descname">iter_ids</code><span class="sig-paren">(</span><em>ids</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/bureau.html#Bureau.iter_ids"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.bureau.Bureau.iter_ids" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.bureau.Bureau.notify_changes">
+<code class="descname">notify_changes</code><span class="sig-paren">(</span><em>other_bureau</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/bureau.html#Bureau.notify_changes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.bureau.Bureau.notify_changes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.bureau.Bureau.process_changes">
+<code class="descname">process_changes</code><span class="sig-paren">(</span><em>bar=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/bureau.html#Bureau.process_changes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.bureau.Bureau.process_changes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.bureau.Bureau.remove">
+<code class="descname">remove</code><span class="sig-paren">(</span><em>agent_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/bureau.html#Bureau.remove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.bureau.Bureau.remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove agent from bureau</p>
+<blockquote>
+<div>agent_id: id of agent</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.bureau.Bureau.stats">
+<code class="descname">stats</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/bureau.html#Bureau.stats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.bureau.Bureau.stats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the mean, standard deviation, and median
+of scores in this bureau</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-swap.agents.ledger">
+<span id="swap-agents-ledger"></span><h2><a class="reference internal" href="#module-swap.agents.ledger" title="swap.agents.ledger"><code class="xref py py-mod docutils literal"><span class="pre">swap.agents.ledger</span></code></a><a class="headerlink" href="#module-swap.agents.ledger" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="swap.agents.ledger.Ledger">
+<em class="property">class </em><code class="descclassname">swap.agents.ledger.</code><code class="descname">Ledger</code><span class="sig-paren">(</span><em>id_</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/ledger.html#Ledger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.ledger.Ledger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Data structure used in an agent to keep track of all interactions
+with the agent</p>
+<p>Uses dynamic references inside the transactions to directly link each
+transaction to the acting agent. For example, each transaction in a ledger
+for a subject will have a reference to the user making the classification</p>
+<p>This allows quick recalculations as the ledger has direct access to
+the memory location of the relevant agent. This ledger is also intended
+for use with online bureaus to reduce memory load, and can dereference
+agents and rebuild reference trees arbitrarily from a bureau</p>
+<dl class="method">
+<dt id="swap.agents.ledger.Ledger.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>id_</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/ledger.html#Ledger.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.ledger.Ledger.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>id</strong> – id of the agent this ledger belongs to</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.ledger.Ledger.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>transaction</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/ledger.html#Ledger.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.ledger.Ledger.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a transaction to the ledger</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.ledger.Ledger.clear_changes">
+<code class="descname">clear_changes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/ledger.html#Ledger.clear_changes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.ledger.Ledger.clear_changes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear the record of changes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.ledger.Ledger.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>id_</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/ledger.html#Ledger.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.ledger.Ledger.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a transaction from the ledger</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.ledger.Ledger.notify">
+<code class="descname">notify</code><span class="sig-paren">(</span><em>id_</em>, <em>bureau</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/ledger.html#Ledger.notify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.ledger.Ledger.notify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Notify this agent that the connected agent has changed</p>
+<p>If this ledger is part of a subject, the connected user agent
+is notifying the subject that its score has changed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.ledger.Ledger.notify_agents">
+<code class="descname">notify_agents</code><span class="sig-paren">(</span><em>this_bureau</em>, <em>other_bureau</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/ledger.html#Ledger.notify_agents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.ledger.Ledger.notify_agents" title="Permalink to this definition">¶</a></dt>
+<dd><p>This agent notifies all connected agents of a change</p>
+<p>If this ledger is part of a user, this ledger notifies all subjects
+that this user’s score has changed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.ledger.Ledger.print">
+<code class="descname">print</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/ledger.html#Ledger.print"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.ledger.Ledger.print" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.ledger.Ledger.recalculate">
+<code class="descname">recalculate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/ledger.html#Ledger.recalculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.ledger.Ledger.recalculate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the new score given what has changed</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="swap.agents.ledger.Ledger.score">
+<code class="descname">score</code><a class="headerlink" href="#swap.agents.ledger.Ledger.score" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the current score from the ledger
+Recalculates the score if this ledger is stale</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.ledger.Ledger.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>id_</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/ledger.html#Ledger.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.ledger.Ledger.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mark a transaction that has changed</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="swap.agents.ledger.MissingReference">
+<em class="property">exception </em><code class="descclassname">swap.agents.ledger.</code><code class="descname">MissingReference</code><a class="reference internal" href="../_modules/swap/agents/ledger.html#MissingReference"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.ledger.MissingReference" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">AttributeError</span></code></p>
+<p>Missing a reference to an object that should be there.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="swap.agents.ledger.StaleException">
+<em class="property">exception </em><code class="descclassname">swap.agents.ledger.</code><code class="descname">StaleException</code><span class="sig-paren">(</span><em>ledger</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/ledger.html#StaleException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.ledger.StaleException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></p>
+<dl class="method">
+<dt id="swap.agents.ledger.StaleException.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>ledger</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/ledger.html#StaleException.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.ledger.StaleException.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="swap.agents.ledger.Transaction">
+<em class="property">class </em><code class="descclassname">swap.agents.ledger.</code><code class="descname">Transaction</code><span class="sig-paren">(</span><em>agent</em>, <em>annotation</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/ledger.html#Transaction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.ledger.Transaction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Records an interaction from an agent with this ledger</p>
+<dl class="method">
+<dt id="swap.agents.ledger.Transaction.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>agent</em>, <em>annotation</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/ledger.html#Transaction.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.ledger.Transaction.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.ledger.Transaction.agent">
+<code class="descname">agent</code><span class="sig-paren">(</span><em>bureau</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/ledger.html#Transaction.agent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.ledger.Transaction.agent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.ledger.Transaction.commit_change">
+<code class="descname">commit_change</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/ledger.html#Transaction.commit_change"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.ledger.Transaction.commit_change" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.ledger.Transaction.notify">
+<code class="descname">notify</code><span class="sig-paren">(</span><em>agent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/ledger.html#Transaction.notify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.ledger.Transaction.notify" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-swap.agents.subject">
+<span id="swap-agents-subject"></span><h2><a class="reference internal" href="#module-swap.agents.subject" title="swap.agents.subject"><code class="xref py py-mod docutils literal"><span class="pre">swap.agents.subject</span></code></a><a class="headerlink" href="#module-swap.agents.subject" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="swap.agents.subject.Ledger">
+<em class="property">class </em><code class="descclassname">swap.agents.subject.</code><code class="descname">Ledger</code><span class="sig-paren">(</span><em>id_</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/subject.html#Ledger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.subject.Ledger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#swap.agents.ledger.Ledger" title="swap.agents.ledger.Ledger"><code class="xref py py-class docutils literal"><span class="pre">swap.agents.ledger.Ledger</span></code></a></p>
+<dl class="method">
+<dt id="swap.agents.subject.Ledger.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>id_</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/subject.html#Ledger.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.subject.Ledger.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.subject.Ledger.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>transaction</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/subject.html#Ledger.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.subject.Ledger.add" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="swap.agents.subject.Ledger.first_change">
+<code class="descname">first_change</code><a class="headerlink" href="#swap.agents.subject.Ledger.first_change" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.subject.Ledger.recalculate">
+<code class="descname">recalculate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/subject.html#Ledger.recalculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.subject.Ledger.recalculate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="swap.agents.subject.Subject">
+<em class="property">class </em><code class="descclassname">swap.agents.subject.</code><code class="descname">Subject</code><span class="sig-paren">(</span><em>subject_id</em>, <em>gold_label=-1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/subject.html#Subject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.subject.Subject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#swap.agents.agent.Agent" title="swap.agents.agent.Agent"><code class="xref py py-class docutils literal"><span class="pre">swap.agents.agent.Agent</span></code></a></p>
+<p>Agent to manage subject scores</p>
+<dl class="method">
+<dt id="swap.agents.subject.Subject.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>subject_id</em>, <em>gold_label=-1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/subject.html#Subject.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.subject.Subject.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize a Subject Agent</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>subject_id</strong> – (int) id number</li>
+<li><strong>gold_label</strong> – <p>(int)
+-1 no gold label</p>
+<blockquote>
+<div>0 bogus object
+1 real supernova</div></blockquote>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="swap.agents.subject.Subject.class_name">
+<code class="descname">class_name</code><em class="property"> = ‘subject’</em><a class="headerlink" href="#swap.agents.subject.Subject.class_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.subject.Subject.classify">
+<code class="descname">classify</code><span class="sig-paren">(</span><em>cl</em>, <em>user</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/subject.html#Subject.classify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.subject.Subject.classify" title="Permalink to this definition">¶</a></dt>
+<dd><p>adds a classification and calculates the new score</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cl</strong> (<a class="reference internal" href="utils.html#swap.utils.classification.Classification" title="swap.utils.classification.Classification"><em>Classification</em></a>) – </li>
+<li><strong>user_agent</strong> (<em>Agent-&gt;User</em>) – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="swap.agents.subject.Subject.gold">
+<code class="descname">gold</code><a class="headerlink" href="#swap.agents.subject.Subject.gold" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.subject.Subject.isgold">
+<code class="descname">isgold</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/subject.html#Subject.isgold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.subject.Subject.isgold" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.subject.Subject.set_gold_label">
+<code class="descname">set_gold_label</code><span class="sig-paren">(</span><em>gold_label</em>, <em>subjects</em>, <em>users</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/subject.html#Subject.set_gold_label"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.subject.Subject.set_gold_label" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a subject’s gold label</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>gold_label</strong> – <p>(int)
+-1 no gold label</p>
+<blockquote>
+<div>0 bogus object
+1 real supernova</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="swap.agents.subject.Transaction">
+<em class="property">class </em><code class="descclassname">swap.agents.subject.</code><code class="descname">Transaction</code><span class="sig-paren">(</span><em>user</em>, <em>annotation</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/subject.html#Transaction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.subject.Transaction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#swap.agents.ledger.Transaction" title="swap.agents.ledger.Transaction"><code class="xref py py-class docutils literal"><span class="pre">swap.agents.ledger.Transaction</span></code></a></p>
+<dl class="method">
+<dt id="swap.agents.subject.Transaction.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>user</em>, <em>annotation</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/subject.html#Transaction.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.subject.Transaction.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.subject.Transaction.calculate">
+<code class="descname">calculate</code><span class="sig-paren">(</span><em>prior=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/subject.html#Transaction.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.subject.Transaction.calculate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.subject.Transaction.commit_change">
+<code class="descname">commit_change</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/subject.html#Transaction.commit_change"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.subject.Transaction.commit_change" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.subject.Transaction.get_prior">
+<code class="descname">get_prior</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/subject.html#Transaction.get_prior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.subject.Transaction.get_prior" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.subject.Transaction.notify">
+<code class="descname">notify</code><span class="sig-paren">(</span><em>agent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/subject.html#Transaction.notify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.subject.Transaction.notify" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-swap.agents.user">
+<span id="swap-agents-user"></span><h2><a class="reference internal" href="#module-swap.agents.user" title="swap.agents.user"><code class="xref py py-mod docutils literal"><span class="pre">swap.agents.user</span></code></a><a class="headerlink" href="#module-swap.agents.user" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="swap.agents.user.Counter">
+<em class="property">class </em><code class="descclassname">swap.agents.user.</code><code class="descname">Counter</code><a class="reference internal" href="../_modules/swap/agents/user.html#Counter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.user.Counter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="swap.agents.user.Counter.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/user.html#Counter.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.user.Counter.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.user.Counter.calculate">
+<code class="descname">calculate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/user.html#Counter.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.user.Counter.calculate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.user.Counter.match">
+<code class="descname">match</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/user.html#Counter.match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.user.Counter.match" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="swap.agents.user.Counter.score">
+<code class="descname">score</code><a class="headerlink" href="#swap.agents.user.Counter.score" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.user.Counter.see">
+<code class="descname">see</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/user.html#Counter.see"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.user.Counter.see" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.user.Counter.unmatch">
+<code class="descname">unmatch</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/user.html#Counter.unmatch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.user.Counter.unmatch" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.user.Counter.unsee">
+<code class="descname">unsee</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/user.html#Counter.unsee"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.user.Counter.unsee" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="swap.agents.user.Ledger">
+<em class="property">class </em><code class="descclassname">swap.agents.user.</code><code class="descname">Ledger</code><span class="sig-paren">(</span><em>id_</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/user.html#Ledger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.user.Ledger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#swap.agents.ledger.Ledger" title="swap.agents.ledger.Ledger"><code class="xref py py-class docutils literal"><span class="pre">swap.agents.ledger.Ledger</span></code></a></p>
+<dl class="method">
+<dt id="swap.agents.user.Ledger.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>id_</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/user.html#Ledger.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.user.Ledger.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.user.Ledger.action">
+<code class="descname">action</code><span class="sig-paren">(</span><em>transaction</em>, <em>version</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/user.html#Ledger.action"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.user.Ledger.action" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.user.Ledger.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>transaction</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/user.html#Ledger.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.user.Ledger.add" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.user.Ledger.counter">
+<code class="descname">counter</code><span class="sig-paren">(</span><em>gold</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/user.html#Ledger.counter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.user.Ledger.counter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.user.Ledger.recalculate">
+<code class="descname">recalculate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/user.html#Ledger.recalculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.user.Ledger.recalculate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="swap.agents.user.Ledger.score">
+<code class="descname">score</code><a class="headerlink" href="#swap.agents.user.Ledger.score" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the current score from the ledger
+Recalculates the score if this ledger is stale</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="swap.agents.user.Transaction">
+<em class="property">class </em><code class="descclassname">swap.agents.user.</code><code class="descname">Transaction</code><span class="sig-paren">(</span><em>subject</em>, <em>annotation</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/user.html#Transaction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.user.Transaction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#swap.agents.ledger.Transaction" title="swap.agents.ledger.Transaction"><code class="xref py py-class docutils literal"><span class="pre">swap.agents.ledger.Transaction</span></code></a></p>
+<dl class="method">
+<dt id="swap.agents.user.Transaction.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>subject</em>, <em>annotation</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/user.html#Transaction.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.user.Transaction.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="swap.agents.user.Transaction.changed">
+<code class="descname">changed</code><a class="headerlink" href="#swap.agents.user.Transaction.changed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.user.Transaction.commit_change">
+<code class="descname">commit_change</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/user.html#Transaction.commit_change"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.user.Transaction.commit_change" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="swap.agents.user.Transaction.matched">
+<code class="descname">matched</code><a class="headerlink" href="#swap.agents.user.Transaction.matched" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.user.Transaction.notify">
+<code class="descname">notify</code><span class="sig-paren">(</span><em>agent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/user.html#Transaction.notify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.user.Transaction.notify" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="swap.agents.user.User">
+<em class="property">class </em><code class="descclassname">swap.agents.user.</code><code class="descname">User</code><span class="sig-paren">(</span><em>user_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/user.html#User"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.user.User" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#swap.agents.agent.Agent" title="swap.agents.agent.Agent"><code class="xref py py-class docutils literal"><span class="pre">swap.agents.agent.Agent</span></code></a></p>
+<p>Agent to manage subject scores</p>
+<dl class="method">
+<dt id="swap.agents.user.User.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>user_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/user.html#User.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.user.User.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize a User Agent</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>user_id</strong> – (int) id number</li>
+<li><strong>epsilon</strong> – (float) prior user probability</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="swap.agents.user.User.class_name">
+<code class="descname">class_name</code><em class="property"> = ‘user’</em><a class="headerlink" href="#swap.agents.user.User.class_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="swap.agents.user.User.classify">
+<code class="descname">classify</code><span class="sig-paren">(</span><em>cl</em>, <em>subject</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/user.html#User.classify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.user.User.classify" title="Permalink to this definition">¶</a></dt>
+<dd><p>adds a classification and calculates the new score</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cl</strong> (<a class="reference internal" href="utils.html#swap.utils.classification.Classification" title="swap.utils.classification.Classification"><em>Classification</em></a>) – </li>
+<li><strong>subject</strong> (<a class="reference internal" href="#swap.agents.subject.Subject" title="swap.agents.subject.Subject"><em>Subject</em></a>) – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="swap.agents.user.User.stats">
+<em class="property">static </em><code class="descname">stats</code><span class="sig-paren">(</span><em>bureau</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/swap/agents/user.html#User.stats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#swap.agents.user.User.stats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the mean, standard deviation, and median
+of the scores in a bureau containing Users</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="config.html" class="btn btn-neutral float-right" title="swap.config" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="API Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Michael Laraia, Marco Willi, Darryl Wright, Hugh Dickinson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

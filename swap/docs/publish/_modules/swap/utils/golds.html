@@ -1,0 +1,374 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>swap.utils.golds &mdash; SWAP 1.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="SWAP 1.0.1 documentation" href="../../../index.html"/>
+        <link rel="up" title="swap.utils" href="../utils.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> SWAP
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../setup.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">UI Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html#interacting-with-swap">Interacting with SWAP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html#detailed-usage">Detailed Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">API Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SWAP</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../utils.html">swap.utils</a> &raquo;</li>
+        
+      <li>swap.utils.golds</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for swap.utils.golds</h1><div class="highlight"><pre>
+<span></span>
+<span class="kn">from</span> <span class="nn">swap.db</span> <span class="k">import</span> <span class="n">DB</span>
+
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">wraps</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="c1"># pylint: disable=R0201</span>
+
+<div class="viewcode-block" id="db_cv"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.golds.db_cv">[docs]</a><span class="k">def</span> <span class="nf">db_cv</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">DB</span><span class="p">()</span><span class="o">.</span><span class="n">controversial</span></div>
+
+
+<span class="k">def</span> <span class="nf">_getter</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">getter</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Using getter </span><span class="si">%s</span><span class="s1"> with args </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                     <span class="n">func</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">getters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">getter</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_golds</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="n">getter</span>
+    <span class="k">return</span> <span class="n">wrapper</span>
+
+
+<div class="viewcode-block" id="GoldGetter"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.golds.GoldGetter">[docs]</a><span class="k">class</span> <span class="nc">GoldGetter</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compile a set of gold labels given a set of parameters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="GoldGetter.__init__"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.golds.GoldGetter.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">getters</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_golds</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db</span> <span class="o">=</span> <span class="n">DB</span><span class="p">()</span><span class="o">.</span><span class="n">golds</span></div>
+
+<div class="viewcode-block" id="GoldGetter.all"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.golds.GoldGetter.all">[docs]</a>    <span class="nd">@_getter</span>
+    <span class="k">def</span> <span class="nf">all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get all gold labels</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get_golds</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="GoldGetter.random"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.golds.GoldGetter.random">[docs]</a>    <span class="nd">@_getter</span>
+    <span class="k">def</span> <span class="nf">random</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a random sample of gold labels</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        size : int</span>
+<span class="sd">            Sample size</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get_random_golds</span><span class="p">(</span><span class="n">size</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GoldGetter.subjects"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.golds.GoldGetter.subjects">[docs]</a>    <span class="nd">@_getter</span>
+    <span class="k">def</span> <span class="nf">subjects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subject_ids</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the gold labels for a set of subjects</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        subject_ids : list</span>
+<span class="sd">            List of subject ids (int)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get_golds</span><span class="p">(</span><span class="n">subject_ids</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GoldGetter.controversial"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.golds.GoldGetter.controversial">[docs]</a>    <span class="nd">@_getter</span>
+    <span class="k">def</span> <span class="nf">controversial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the gold labels for the most controversial subjects</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        size : int</span>
+<span class="sd">            Number of subjects</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">subjects</span> <span class="o">=</span> <span class="n">db_cv</span><span class="p">()</span><span class="o">.</span><span class="n">get_controversial</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get_golds</span><span class="p">(</span><span class="n">subjects</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GoldGetter.consensus"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.golds.GoldGetter.consensus">[docs]</a>    <span class="nd">@_getter</span>
+    <span class="k">def</span> <span class="nf">consensus</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the gold labels for the most consensus subjects</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        size : int</span>
+<span class="sd">            Number of subjects</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">subjects</span> <span class="o">=</span> <span class="n">db_cv</span><span class="p">()</span><span class="o">.</span><span class="n">get_consensus</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get_golds</span><span class="p">(</span><span class="n">subjects</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GoldGetter.these"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.golds.GoldGetter.these">[docs]</a>    <span class="nd">@_getter</span>
+    <span class="k">def</span> <span class="nf">these</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">golds</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">golds</span></div>
+
+    <span class="c1"># @_getter</span>
+    <span class="c1"># def extreme_min(self, n_controv, max_consensus):</span>
+    <span class="c1">#     def f():</span>
+    <span class="c1">#         controv = cv.get_controversial(n_controv)</span>
+    <span class="c1">#         consensus = cv.get_max_consensus(max_consensus)</span>
+
+    <span class="c1">#         return db.getExpertGold(controv + consensus)</span>
+    <span class="c1">#     return f</span>
+
+    <span class="c1"># @_getter</span>
+    <span class="c1"># def extremes(self, n_controv, n_consensus):</span>
+    <span class="c1">#     def f():</span>
+    <span class="c1">#         controv = cv.get_controversial(n_controv)</span>
+    <span class="c1">#         consensus = cv.get_consensus(n_consensus)</span>
+
+    <span class="c1">#         return db.getExpertGold(controv + consensus)</span>
+    <span class="c1">#     return f</span>
+
+<div class="viewcode-block" id="GoldGetter.reset"><a class="viewcode-back" href="../../../api/utils.html#swap.utils.golds.GoldGetter.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reset the gold getter.</span>
+
+<span class="sd">        Clears the set of golds and list of getters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">getters</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_golds</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">golds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the set of golds. Fetches from database the first</span>
+<span class="sd">        time and caches for faster recall.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_golds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getters</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+
+            <span class="n">golds</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">getter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">getters</span><span class="p">:</span>
+                <span class="n">golds</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">getter</span><span class="p">())</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_golds</span> <span class="o">=</span> <span class="n">golds</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_golds</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">golds</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Michael Laraia, Marco Willi, Darryl Wright, Hugh Dickinson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'1.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
