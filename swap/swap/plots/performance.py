@@ -98,21 +98,24 @@ def plot_confusion_matrix(data, title, fname, dpi=300):
     #              ms=(n_class_user)/500,
     #              color="#3F88C5", alpha=0.5)
 
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
     for item in data:
-        plt.plot(item[1], item[0],
+        ax.plot(item[1], item[0],
                  'o', ms=item[2] / 500,
                  color="#3F88C5", alpha=0.5)
 
     # Quadrant labels
-    plt.text(0.03, 0.03, "Obtuse")
-    plt.text(0.75, 0.03, "Optimistic")
-    plt.text(0.03, 0.95, "Pessimistic")
-    plt.text(0.8, 0.95, "Astute")
+    ax.text(0.03, 0.03, "Obtuse")
+    ax.text(0.75, 0.03, "Optimistic")
+    ax.text(0.03, 0.95, "Pessimistic")
+    ax.text(0.8, 0.95, "Astute")
 
     # Quadrant divider lines
-    plt.plot([0.5, 0.5], [0, 1], "k--", lw=1)
-    plt.plot([0, 1], [0.5, 0.5], "k--", lw=1)
-    plt.plot([0, 1], [1, 0], "k-", lw=1)
+    ax.plot([0.5, 0.5], [0, 1], "k--", lw=1)
+    ax.plot([0, 1], [0.5, 0.5], "k--", lw=1)
+    ax.plot([0, 1], [1, 0], "k-", lw=1)
 
     # Axis labels
     plt.xlabel("P(\'real\'|real)")
