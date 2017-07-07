@@ -138,7 +138,7 @@ class Classifications(Collection):
         }
 
         logger.info('stats: %s', str(stats))
-        self._db.stats.collection.insert_one(stats)
+        self._db.stats.insert_one(stats)
         return stats
 
     def get_stats(self):
