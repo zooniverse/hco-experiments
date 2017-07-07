@@ -46,15 +46,11 @@ class UI:
         """
         parser.add_argument(
             '--dir', nargs=1,
-            help='Direct all output to a different directory')
+            help='Save any files created by swap to a different directory')
 
         parser.add_argument(
             '--p0', nargs=1,
-            help='Define p0')
-
-        parser.add_argument(
-            '--epsilon', nargs=1,
-            help='Define epsilon')
+            help='Define prior probability')
 
         parser.add_argument(
             '--pow', action='store_true',
@@ -65,10 +61,12 @@ class UI:
             help='controversial and consensus aggregation method')
 
         parser.add_argument(
-            '--back', action='store_true')
+            '--back', action='store_true',
+            help='Run swap in back_update mode (static swap)')
 
         parser.add_argument(
-            '--noback', action='store_true')
+            '--noback', action='store_true',
+            help='Run swap without back_update mode (dynamic swap)')
 
         parser.add_argument(
             '--config-file', nargs=1,
@@ -95,8 +93,8 @@ class UI:
         if args.p0:
             config.p0 = float(args.p0[0])
 
-        if args.epsilon:
-            config.epsilon = float(args.epsilon[0])
+        # if args.epsilon:
+        #     config.epsilon = float(args.epsilon[0])
 
         if args.pow:
             config.controversial_version = 'pow'

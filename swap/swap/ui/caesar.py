@@ -41,13 +41,16 @@ class CaesarInterface(Interface):
 
     def options(self, parser):
         parser.add_argument(
-            '--load', nargs=1)
+            '--load', nargs=1,
+            help='NOT IMPLEMENTED Pre-load a swap instance from db')
 
         parser.add_argument(
-            '--run', action='store_true')
+            '--run', action='store_true',
+            help='Run the app')
 
         parser.add_argument(
-            '--port', nargs=1)
+            '--port', nargs=1,
+            help='Modify the port used by the app')
 
     def call(self, args):
         """

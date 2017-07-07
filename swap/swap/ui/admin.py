@@ -26,11 +26,11 @@ class AdminInterface(Interface):
 
         parser.add_argument(
             '--upload-dump', nargs=1,
-            help='Upload project dump to mongo database')
+            help='Upload panoptes project dump to mongo database')
 
         parser.add_argument(
             '--gen-stats', action='store_true',
-            help='Regenerate run stats for classifications in db'
+            help='Force regeneration of classification stats in db for swap'
         )
 
     def call(self, args):
