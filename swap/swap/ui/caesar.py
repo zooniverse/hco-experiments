@@ -84,7 +84,7 @@ class CaesarInterface(Interface):
             AuthCaesar().login()
 
         if args.register:
-            caesar.register_swap()
+            caesar.Requests.register_swap()
 
         if args.run:
             self.run(swap)
