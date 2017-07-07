@@ -94,7 +94,8 @@ class API:
         self._auth = Auth(user, token)
 
     def run(self):
-        self._route('/', 'scores', self.scores, ['GET'])
+        self._route('/', 'status', self.status, ['GET'])
+        self._route('/scores', 'scores', self.scores, ['GET'])
         self._route('/classify', 'classify', self.classify, ['POST'])
         self.app.run()
 
@@ -107,6 +108,9 @@ class API:
         Return current score of a subject
         """
         pass
+
+    def status(self):
+        Response('status: ok', 200)
 
     @needs_auth
     def classify(self):
