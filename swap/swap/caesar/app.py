@@ -164,6 +164,7 @@ class Address:
 
         username = cls.config._auth_username
         password = cls.config._auth_key
+        password = Auth._mod_token(password)
 
         return addr % \
             {'user': username, 'pass': password,
@@ -273,8 +274,11 @@ class _AuthCaesar:
 
     def __init__(self):
         self.client = Panoptes(endpoint='https://panoptes-staging.zooniverse.org')
-        self.token = config.online_swap.caesar.OAUTH
         self.lock = threading.Lock()
+
+    @property
+    def token(self):
+        return self.client.get_bearer_token()
 
     def login(self):
         with self.lock:
@@ -284,7 +288,6 @@ class _AuthCaesar:
 
             self.client.login(user, password)
             token = self.client.get_bearer_token()
-            self.token = token
 
         print(token)
         return token
@@ -311,8 +314,8 @@ class _AuthCaesar:
                 'app again with --login flag')
 
 
-class AuthCaesar(_AuthCaesar):
-    __metaclass__ = Singleton
+class AuthCaesar(_AuthCaesar, metaclass=Singleton):
+    pass
 
 
 # def run():
