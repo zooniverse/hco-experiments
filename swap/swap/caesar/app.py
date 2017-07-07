@@ -110,7 +110,7 @@ class API:
         pass
 
     def status(self):
-        Response('status: ok', 200)
+        return Response('status: ok', 200)
 
     @needs_auth
     def classify(self):
