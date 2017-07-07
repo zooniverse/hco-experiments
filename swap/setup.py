@@ -87,7 +87,8 @@ setup(
         'seaborn',
         'pandas',
         'flask',
-        'requests'
+        'requests',
+        'panoptes-client'
     ],
 
     # List additional groups of dependencies here (e.g. development
@@ -96,7 +97,8 @@ setup(
     # $ pip install -e .[dev,test]
     extras_require={
         'dev': ['check-manifest', 'setuptools', 'wheel', 'sphinx',
-                'sphinxcontrib-napoleon', 'sphinx-rtd-theme'],
+                'sphinxcontrib-napoleon', 'sphinx-rtd-theme',
+                'sphinx-argparse'],
         'test': ['coverage', 'pytest'],
     },
 
