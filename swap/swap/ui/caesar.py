@@ -18,6 +18,7 @@
 
 import swap.config as config
 import swap.caesar.app as caesar
+from swap.caesar.app import AuthCaesar
 from swap.ui.ui import Interface
 
 import logging
@@ -49,6 +50,10 @@ class CaesarInterface(Interface):
         parser.add_argument(
             '--port', nargs=1)
 
+        parser.add_argument(
+            '--login', action='store_true'
+        )
+
     def call(self, args):
         """
         Define what to do if this interface's command was passed
@@ -60,6 +65,9 @@ class CaesarInterface(Interface):
 
         if args.load:
             swap = self.load(args.load[0])
+
+        if args.login:
+            AuthCaesar().login()
 
         if args.run:
             self.run(swap)
