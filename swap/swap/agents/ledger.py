@@ -131,6 +131,9 @@ class Ledger:
         self._change(id_)
         # self.transactions[id_].notify()
 
+    def print(self):
+        print(self)
+
     def __str__(self):
         s = 'id %s transactions %d stale %s score %s\n' % \
             (str(self.id), len(self.transactions),
