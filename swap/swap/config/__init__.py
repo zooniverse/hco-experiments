@@ -62,7 +62,7 @@ class database:
     class builder:
 
         subject_metadata = {
-            'subject_id': int,
+            'subject': (int,'subject_id'),
             'gold': (int, 'gold_label'),
             'object_id': int,
             'machine_score': float,
