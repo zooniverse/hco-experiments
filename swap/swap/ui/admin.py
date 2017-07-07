@@ -28,6 +28,11 @@ class AdminInterface(Interface):
             '--upload-dump', nargs=1,
             help='Upload project dump to mongo database')
 
+        parser.add_argument(
+            '--gen-stats', action='store_true',
+            help='Regenerate run stats for classifications in db'
+        )
+
     def call(self, args):
         """
         Define what to do if this interface's command was passed
@@ -36,3 +41,6 @@ class AdminInterface(Interface):
         if args.upload_dump:
             fname = args.upload_dump[0]
             DB().classifications.upload_project_dump(fname)
+
+        if args.gen_stats:
+            DB().classifications._gen_stats()
