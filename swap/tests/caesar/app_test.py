@@ -3,7 +3,6 @@ import swap.caesar.control as control
 import swap.caesar.app as app
 import swap.agents.subject
 from swap.db import DB
-from swap.utils.classification import Classification
 from swap.utils.golds import GoldGetter
 
 import json
