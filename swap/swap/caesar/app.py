@@ -3,17 +3,13 @@
 # with Caesar
 
 from swap.caesar.control import ThreadedControl
-from swap.utils import Singleton
+from swap.caesar.auth import Auth, AuthCaesar
 import swap.config as config
 
-from panoptes_client.panoptes import Panoptes
-
-from getpass import getpass
 import logging
 from flask import Flask, request, jsonify, Response
 from functools import wraps
 import requests
-import threading
 
 
 logger = logging.getLogger(__name__)
@@ -109,7 +105,8 @@ class API:
         """
         pass
 
-    def status(self):
+    @staticmethod
+    def status():
         return Response('status: ok', 200)
 
     @needs_auth
@@ -125,7 +122,7 @@ class API:
 
         logger.debug('received data %s', str(data))
         logger.debug('sending classification to swap thread')
-        self.control.queue('classify', data, respond)
+        self.control.queue('classify', data, Requests.respond)
 
         # return empty response
 
@@ -186,61 +183,47 @@ class Address:
         logger.info('compiled caesar config: %s', data)
         return data
 
-# def generate_address():
-#     """
-#     Generate Caesar address to PUT reduction
-#     """
-#     s = config.online_swap._addr_format
-#     c = config.online_swap
-#
-#     kwargs = {
-#         'host': c.caesar.host,
-#         'port': c.caesar.port,
-#         'workflow': c.workflow,
-#         'reducer': c.caesar.reducer
-#     }
-#
-#     return s % kwargs
+class Requests:
 
+    @staticmethod
+    def register_swap():
+        """
+        Register swap as an extractor/reducer on caesar
+        """
+        data = Address.config_caesar()
+        address = Address.root()
 
-def register_swap():
-    """
-    Register swap as an extractor/reducer on caesar
-    """
-    data = Address.config_caesar()
-    address = Address.root()
+        logger.info('PUT to %s with %s', address, str(data))
+        auth_header = AuthCaesar().auth()
+        requests.put(address, headers=auth_header, json=data)
+        logger.info('done')
 
-    logger.info('PUT to %s with %s', address, str(data))
-    auth_header = AuthCaesar().auth()
-    requests.put(address, headers=auth_header, json=data)
-    logger.info('done')
+    @staticmethod
+    def respond(subject):
+        """
+        PUT subject score to Caesar
+        """
+        c = config.online_swap
 
+        address = Address.reducer()
 
-def respond(subject):
-    """
-    PUT subject score to Caesar
-    """
-    c = config.online_swap
-
-    address = Address.reducer()
-
-    # address = 'http://localhost:3000'
-    body = {
-        'reduction': {
-            'subject_id': subject.id,
-            'data': {
-                c.caesar.field: subject.score
+        # address = 'http://localhost:3000'
+        body = {
+            'reduction': {
+                'subject_id': subject.id,
+                'data': {
+                    c.caesar.field: subject.score
+                }
             }
         }
-    }
 
-    print('responding!')
-    logger.info('PUT subject %d score %.4f to caesar',
-                subject.id, subject.score)
+        print('responding!')
+        logger.info('PUT subject %d score %.4f to caesar',
+                    subject.id, subject.score)
 
-    auth_header = AuthCaesar().auth()
-    requests.put(address, headers=auth_header, json=body)
-    logger.debug('done')
+        auth_header = AuthCaesar().auth()
+        requests.put(address, headers=auth_header, json=body)
+        logger.debug('done')
 
 
 def init_threader(swap=None):
@@ -248,78 +231,6 @@ def init_threader(swap=None):
     thread.start()
 
     return thread
-
-
-class Auth:
-
-    def __init__(self, username, token):
-        self._username = username
-        self._token = self._mod_token(token)
-
-    @staticmethod
-    def _mod_token(token):
-        return token.replace(' ', '').replace('\n', '')
-
-    def check_auth(self, username, token):
-        return username == self._username and token == self._token
-
-    @staticmethod
-    def authenticate():
-        """
-        Sends a 401 response that enables basic auth
-        """
-        return Response(
-        'Could not verify your access level for that URL.\n'
-        'You have to login with proper credentials', 401,
-        {'WWW-Authenticate': 'Basic realm="Login Required"'})
-
-
-class _AuthCaesar:
-
-    def __init__(self):
-        self.client = Panoptes(endpoint='https://panoptes-staging.zooniverse.org')
-        self.lock = threading.Lock()
-
-    @property
-    def token(self):
-        return self.client.get_bearer_token()
-
-    def login(self):
-        with self.lock:
-            logger.info('Logging in to panoptes')
-            user = input('Username: ')
-            password = getpass()
-
-            self.client.login(user, password)
-            token = self.client.get_bearer_token()
-
-        print(token)
-        return token
-
-    def auth(self, headers=None):
-        logger.info('adding authorization header')
-        with self.lock:
-            if self.token is None:
-                raise self.NotLoggedIn
-            token = self.token
-
-        if headers is None:
-            headers = {}
-
-        headers.update({
-            'Authorization': 'Bearer %s' % token
-        })
-
-    class NotLoggedIn(Exception):
-        def __init__(self):
-            super().__init__(
-                'Need to log in first. Either set panoptes oauth2 bearer '
-                'token in config.online_swap.caesar.OAUTH, or try running '
-                'app again with --login flag')
-
-
-class AuthCaesar(_AuthCaesar, metaclass=Singleton):
-    pass
 
 
 # def run():
