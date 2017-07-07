@@ -2,7 +2,7 @@
 # Collection of infrastructures to run SWAP in an online state
 # with Caesar
 
-from swap.app.control import ThreadedControl
+from swap.caesar.control import ThreadedControl
 import swap.config as config
 
 import logging

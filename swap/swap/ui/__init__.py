@@ -19,7 +19,7 @@
 from swap.control import Control
 import swap.config as config
 import swap.plots as plots
-import swap.app.caesar_app as caesar
+import swap.caesar.app as caesar
 
 from swap.utils.scores import ScoreExport
 from swap.swap import SWAP

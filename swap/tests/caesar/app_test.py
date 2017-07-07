@@ -1,6 +1,6 @@
 
-import swap.app.control as control
-import swap.app.caesar_app as app
+import swap.caesar.control as control
+import swap.caesar.app as app
 import swap.agents.subject
 from swap.db import DB
 from swap.utils.classification import Classification
@@ -42,11 +42,13 @@ class TestCaesarApp:
     @patch.object(GoldGetter, 'golds', {})
     @patch('swap.config.back_update', False)
     @patch('swap.config.database.name', 'swapDBtest')
+    @patch('swap.config.database.builder.annotation.true', [1])
+    @patch('swap.config.database.builder.annotation.false', [0])
     def test_classify(self, run):
         DB._reset()
         oc = control.OnlineControl()
         oc.init_swap()
-        ret = oc.classify(Classification(0, 1, 1))
+        ret = oc.classify(self.mock_classification)
 
         assert isinstance(ret, swap.agents.subject.Subject)
         assert ret.score == 0.12
