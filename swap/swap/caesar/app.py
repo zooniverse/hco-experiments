@@ -139,21 +139,76 @@ class API:
         return jsonify(scores.full_dict())
 
 
-def generate_address():
-    """
-    Generate Caesar address to PUT reduction
-    """
-    s = config.online_swap._addr_format
-    c = config.online_swap
+class Address:
+    config = config.online_swap
 
-    kwargs = {
-        'host': c.caesar.host,
-        'port': c.caesar.port,
-        'workflow': c.workflow,
-        'reducer': c.caesar.reducer
-    }
+    @classmethod
+    def root(cls):
+        host = cls.config.caesar.host
+        port = cls.config.caesar.port
+        workflow = cls.config.workflow
+        return cls.config.address._base % \
+            {'host': host, 'port': port, 'workflow': workflow}
 
-    return s % kwargs
+    @classmethod
+    def reducer(cls):
+        reducer = cls.config.caesar.reducer
+        addr = cls.config.address._reducer
+        return cls.root() + addr % {'reducer': reducer}
+
+    @classmethod
+    def swap_classify(cls):
+        addr = cls.config.address._swap
+        host = cls.config.host
+        port = cls.config.ext_port
+
+        username = cls.config._auth_username
+        password = cls.config._auth_key
+
+        return addr % \
+            {'user': username, 'pass': password,
+             'host': host, 'port': port}
+
+    @classmethod
+    def config_caesar(cls):
+        name = cls.config.caesar.reducer
+        addr = cls.swap_classify()
+        data = {'workflow': {
+            'extractors_config': {name: {'type': 'external', 'url': addr}},
+            'reducers_config': {name: {'type': 'external'}},
+            'rules_config': []
+        }}
+        logger.info('compiled caesar config: %s', data)
+        return data
+
+# def generate_address():
+#     """
+#     Generate Caesar address to PUT reduction
+#     """
+#     s = config.online_swap._addr_format
+#     c = config.online_swap
+#
+#     kwargs = {
+#         'host': c.caesar.host,
+#         'port': c.caesar.port,
+#         'workflow': c.workflow,
+#         'reducer': c.caesar.reducer
+#     }
+#
+#     return s % kwargs
+
+
+def register_swap():
+    """
+    Register swap as an extractor/reducer on caesar
+    """
+    data = Address.config_caesar()
+    address = Address.root()
+
+    logger.info('PUT to %s with %s', address, str(data))
+    auth_header = AuthCaesar().auth()
+    requests.put(address, headers=auth_header, json=data)
+    logger.info('done')
 
 
 def respond(subject):
@@ -162,7 +217,7 @@ def respond(subject):
     """
     c = config.online_swap
 
-    address = generate_address()
+    address = Address.reducer()
 
     # address = 'http://localhost:3000'
     body = {
@@ -217,7 +272,7 @@ class Auth:
 class _AuthCaesar:
 
     def __init__(self):
-        self.client = Panoptes()
+        self.client = Panoptes(endpoint='https://panoptes-staging.zooniverse.org')
         self.token = config.online_swap.caesar.OAUTH
         self.lock = threading.Lock()
 

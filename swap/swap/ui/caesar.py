@@ -46,6 +46,11 @@ class CaesarInterface(Interface):
             help='NOT IMPLEMENTED Pre-load a swap instance from db')
 
         parser.add_argument(
+            '--register', action='store_true',
+            help='Register swap as an external extractor/reducer'
+        )
+
+        parser.add_argument(
             '--run', action='store_true',
             help='Run the app')
 
@@ -71,6 +76,9 @@ class CaesarInterface(Interface):
 
         if args.login:
             AuthCaesar().login()
+
+        if args.register:
+            caesar.register_swap()
 
         if args.run:
             self.run(swap)

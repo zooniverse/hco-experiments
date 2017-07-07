@@ -53,6 +53,29 @@ class TestCaesarApp:
         assert isinstance(ret, swap.agents.subject.Subject)
         assert ret.score == 0.12
 
-    def test_generate_address(self):
-        assert app.generate_address() == \
-            'http://localhost:3000/workflows/1737/reducers/swap/reductions'
+    def test_reducer_address(self):
+        address = 'https://caesar-staging.zooniverse.org:443/' \
+                  'workflows/1646/reducers/swap/reductions'
+        assert app.Address.reducer() == address
+
+    def test_root_address(self):
+        address = 'https://caesar-staging.zooniverse.org:443/' \
+                  'workflows/1646'
+        assert app.Address.root() == address
+
+    @patch('swap.config.online_swap._auth_key', 'TEST')
+    def test_classify_address(self):
+        address = 'https://caesar:TEST@northdown.spa.umn.edu:443/classify'
+        assert app.Address.swap_classify() == address
+
+    @patch('swap.config.online_swap.caesar.reducer', 'name')
+    @patch('swap.config.online_swap._auth_key', 'TEST')
+    def test_config_caesar(self):
+        addr = app.Address.swap_classify()
+        data = {'workflow': {
+            'extractors_config': {'name': {'type': 'external', 'url': addr}},
+            'reducers_config': {'name': {'type': 'external'}},
+            'rules_config': []
+        }}
+
+        assert app.Address.config_caesar() == data
