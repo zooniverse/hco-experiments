@@ -7,6 +7,7 @@ from swap.caesar.auth import Auth, AuthCaesar
 import swap.config as config
 
 import logging
+import json
 from flask import Flask, request, jsonify, Response
 from functools import wraps
 import requests
@@ -204,8 +205,8 @@ class Requests:
             raise cls.BadResponse('Received status code %d' % r.status_code)
         logger.info('done')
 
-    @staticmethod
-    def respond(subject):
+    @classmethod
+    def respond(cls, subject):
         """
         PUT subject score to Caesar
         """
@@ -228,12 +229,28 @@ class Requests:
         logger.info('PUT to %s subject %d score %.4f to caesar',
                     address, subject.id, subject.score)
 
-        auth_header = AuthCaesar().auth()
-        requests.put(address, headers=auth_header, json=body)
+        headers = cls.headers()
+        headers.update(AuthCaesar().auth())
+        r = requests.put(address, headers=headers, json=body)
         logger.debug('done')
+
+        if True or r.status_code != 200:
+            logger.error(str(r))
+
+            try:
+                data = json.loads(r.text)
+            except json.decoder.JSONDecodeError:
+                data = r.text
+            logger.error(data)
 
     class BadResponse(Exception):
         pass
+
+    @staticmethod
+    def headers():
+        return {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'}
 
 
 def init_threader(swap=None):
