@@ -224,8 +224,9 @@ class Requests:
         }
 
         print('responding!')
-        logger.info('PUT subject %d score %.4f to caesar',
-                    subject.id, subject.score)
+        # address='http://httpbin.org/put'
+        logger.info('PUT to %s subject %d score %.4f to caesar',
+                    address, subject.id, subject.score)
 
         auth_header = AuthCaesar().auth()
         requests.put(address, headers=auth_header, json=body)
@@ -238,6 +239,7 @@ class Requests:
 def init_threader(swap=None):
     thread = ThreadedControl(swap=swap)
     thread.start()
+    logger.info('Finished launching swap thread')
 
     return thread
 

@@ -71,6 +71,7 @@ class OnlineControl(swap.control.Control):
         self.swap.classify(classification)
 
         subject = self.swap.subjects.get(classification.subject)
+        print(subject, type(subject))
         return subject
 
 
@@ -98,22 +99,26 @@ class ThreadedControl(threading.Thread):
 
         if swap is not None:
             self.control.setSWAP(swap)
+        else:
+            self.control.run()
 
     def command(self, message):
         if message.command == 'classify':
             self.classify(message)
 
     def queue(self, command, data, callback=None):
+        logger.info('queueing')
         self._queue.put(Message(command, data, callback))
 
     def classify(self, message):
+        logger.info('classifying')
         classification = message.data
         if classification is not None:
             with self.control_lock:
                 logger.info('classifying')
                 subject = self.control.classify(classification)
                 logger.info('responding with subject %s score %.4f',
-                            subject.id, subject.score)
+                            str(subject.id), subject.score)
 
                 message.callback(subject)
 
@@ -129,14 +134,19 @@ class ThreadedControl(threading.Thread):
         """
         Main thread for processing classifications
         """
-        self.control.run()
         # Ensure thread doesn't exit
         # Wait for classifications in queue
         while not self.exit.is_set():
 
             message = self._queue.get()
             if message is not None:
-                self.command(message)
+                logger.debug('received message')
+                try:
+                    self.command(message)
+                except Exception as e:
+                    logger.error(e)
+                    raise e
+                    sys.exit(1)
 
         logger.warning('thread exiting')
 

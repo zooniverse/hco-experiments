@@ -93,4 +93,5 @@ class CaesarInterface(Interface):
     def run(swap=None):
         control = caesar.init_threader(swap)
         api = caesar.API(control)
+        logger.info('launching flask app')
         api.run()
