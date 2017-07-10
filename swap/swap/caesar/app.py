@@ -195,6 +195,7 @@ class Requests:
 
         logger.info('PUT to %s with %s', address, str(data))
         auth_header = AuthCaesar().auth()
+        print(auth_header)
         r = requests.put(address, headers=auth_header, json=data)
 
         if r.status_code != 200:

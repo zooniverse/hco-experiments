@@ -72,6 +72,8 @@ class _AuthCaesar:
             'Authorization': 'Bearer %s' % token
         })
 
+        return headers
+
     class NotLoggedIn(Exception):
         def __init__(self):
             super().__init__(
