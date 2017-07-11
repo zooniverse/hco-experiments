@@ -134,7 +134,7 @@ class Schema:
             raise self.SchemaValidationError.schema(obj, schema)
 
         for key, value in obj.items():
-            type_ = schema['key'].get('type', str)
+            type_ = schema[key].get('type', str)
             if type(type_) is type and type(value) is not type_:
                 raise self.SchemaValidationError.type(obj, key, type_)
 
