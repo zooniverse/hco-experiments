@@ -151,5 +151,10 @@ class Classifications(Collection):
         return stats.find().sort('_id', -1).limit(1).next()
 
     def exists(self, classification_id):
-        query = {'classification_id': classification_id}
-        return self.collection.find(query).count() > 0
+        match = {'classification_id': classification_id}
+        return self.collection.find(match).count() > 0
+
+    def insert(self, classification):
+        id_ = classification['classification_id']
+        if not self.exists(id_):
+            super().insert(classification)
