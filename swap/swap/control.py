@@ -44,7 +44,7 @@ class Control:
         self.gold_getter = GoldGetter()
         self.swap = None
 
-    def run(self):
+    def run(self, amount=None):
         """
         Process all classifications in DB with SWAP
 
@@ -56,21 +56,22 @@ class Control:
             Prints status.
         """
 
+        if amount is None:
+            amount = DB().classifications.get_stats()
+            amount = amount['first_classifications']
+
         self.init_swap()
 
         # get classifications
         cursor = self.get_classifications()
-        db_stats = DB().classifications.get_stats()
-        # n_classifications = self._n_classifications()
 
         # loop over classification cursor to process
         # classifications one at a time
-        logger.info("Start: SWAP Processing %d classifications",
-                    db_stats['first_classifications'])
+        logger.info('Start: SWAP Processing %d classifications', amount)
 
         count = 0
-        with progressbar.ProgressBar(
-                max_value=db_stats['first_classifications']) as bar:
+        with progressbar.ProgressBar(max_value=amount) as bar:
+            bar.update(count)
             # Loop over all classifications of the query
             # Note that the exact size of the query might be lower than
             # n_classifications if not all classifications are being queried
