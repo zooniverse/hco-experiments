@@ -160,10 +160,15 @@ class Classifications(Collection):
         return stats.find().sort('_id', -1).limit(1).next()
 
     def exists(self, classification_id):
+        print(self.collection)
         logger.debug(
-            'Checking if classification %d already in db', classification_id)
+            'Checking if classification %d already in \'%s\'',
+            classification_id, self._collection_name())
         match = {'classification_id': classification_id}
-        return self.collection.find(match).count() > 0
+
+        exists = self.collection.find(match).count() > 0
+        logger.debug('exists: %s', str(exists))
+        return exists
 
     def insert(self, classification):
         id_ = classification['classification_id']

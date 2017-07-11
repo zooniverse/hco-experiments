@@ -121,7 +121,6 @@ class API:
         data = request.get_json()
 
         logger.debug('received data %s', str(data))
-        logger.debug('sending classification to swap thread')
         self.control.queue('classify', data, Requests.respond)
 
         # return empty response

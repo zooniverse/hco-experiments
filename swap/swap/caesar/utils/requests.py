@@ -78,14 +78,7 @@ class Requests:
         r = requests.put(address, headers=headers, json=body)
         logger.debug('done')
 
-        if True or r.status_code != 200:
-            logger.error(str(r))
-
-            try:
-                data = json.loads(r.text)
-            except json.decoder.JSONDecodeError:
-                data = r.text
-            logger.error(data)
+        return r
 
     class BadResponse(Exception):
         def __init__(self, response, msg=None):

@@ -26,14 +26,13 @@ class Parser:
         steps = dotkey.split(split)
         item = obj
 
-        logger.debug('navigating %s in %s', str(steps), str(item))
+        logger.debug('navigating to %s', str(steps))
 
         for key in steps:
             if type(item) is list:
                 key = int(key)
 
             item = item[key]
-            print(item)
 
         return item
 
@@ -219,6 +218,8 @@ class AnnotationParser(Parser):
         """
         key = self.config.value_key
         sep = self.config.value_separator
+        logger.debug('value %s key %s', str(value), key)
+
         if key is not None:
             value = self._navigate(value, key, sep)
 
