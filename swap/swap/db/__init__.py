@@ -6,6 +6,7 @@ from swap.db.query import Query
 from swap.utils import Singleton
 
 from swap.db.classifications import Classifications
+from swap.db.caesar import CaesarClassifications
 from swap.db.golds import Golds
 from swap.db.subjects import Subjects
 from swap.db.controversial import Controversial
@@ -44,6 +45,7 @@ class _DB:
         self.batch_size = int(cdb.max_batch_size)
 
         self.classifications = Classifications(self)
+        self.caesar = CaesarClassifications(self)
         self.subjects = Subjects(self)
         self.golds = Golds(self)
         self.controversial = Controversial(self)

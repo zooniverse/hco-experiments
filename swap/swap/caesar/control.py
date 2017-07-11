@@ -3,6 +3,7 @@ import swap.control
 import swap.config as config
 from swap.utils.classification import Classification
 from swap.utils.parsers import ClassificationParser
+from swap.db import DB
 
 import sys
 import threading
@@ -57,22 +58,49 @@ class OnlineControl(swap.control.Control):
         # return subjects whose scores have changed
         pass
 
-    def parse_classification(self, args):
-        logger.debug('parsing raw classification %s', str(args))
-        data = self.parser.process(args)
-        cl = Classification.generate(data)
-        return cl
+    def get_classifications(self):
+        logger.info('Loading dual cursors of dump and caesar classifications')
+
+        cursor1 = DB().classifications.getClassifications()
+        cursor2 = DB().caesar.getClassifications()
+
+        return DualCursor(cursor1, cursor2)
+
+    def parse_raw(self, raw_cl):
+        logger.debug('parsing raw classification %s', str(raw_cl))
+        data = self.parser.process(raw_cl)
+        return data
+
+    @staticmethod
+    def gen_cl(data):
+        return Classification.generate(data)
 
     def classify(self, raw_cl):
         # Add classification from caesar
-        classification = self.parse_classification(raw_cl)
-        logger.debug('Adding classification from network: %s',
-                     str(classification))
-        self.swap.classify(classification)
+        data = self.parse_raw(raw_cl)
+        cl = self.gen_cl(data)
 
-        subject = self.swap.subjects.get(classification.subject)
+        logger.debug('Uploading classification to caesar db: %s',
+                     str(data))
+        DB().classifications.insert(data)
+
+        logger.debug('Adding classification from network: %s',
+                     str(cl))
+        self.swap.classify(cl)
+
+        subject = self.swap.subjects.get(cl.subject)
         print(subject, type(subject))
         return subject
+
+    def run(self, amount=None):
+        def _amt(stats):
+            return stats['first_classifications']
+
+        if amount is None:
+            amount = _amt(DB().classifications.get_stats())
+            amount += _amt(DB().caesar._gen_stats(upload=False))
+
+        super().run(amount=amount)
 
 
 class Message:
@@ -149,3 +177,34 @@ class ThreadedControl(threading.Thread):
                     sys.exit(1)
 
         logger.warning('thread exiting')
+
+
+class DualCursor:
+
+    def __init__(self, cursor_1, cursor_2):
+        self.cursors = (cursor_1, cursor_2)
+        self.i = 0
+
+    @property
+    def cursor(self):
+        return self.cursors[self.i]
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        return self.next()
+
+    def __len__(self):
+        return sum(self.cursors, key=lambda cursor: cursor.getCount())
+
+    def next(self):
+        if self.i > 1:
+            raise StopIteration
+
+        try:
+            return next(self.cursor)
+        except StopIteration:
+            logger.info('Switching cursors: %d', self.i)
+            self.i += 1
+            return self.next()
