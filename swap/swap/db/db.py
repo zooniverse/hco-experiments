@@ -105,6 +105,9 @@ class Cursor:
     def __iter__(self):
         return self.cursor
 
+    def __next__(self):
+        return self.next()
+
     def getCursor(self):
         return self.cursor
 
