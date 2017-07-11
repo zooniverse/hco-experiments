@@ -18,12 +18,21 @@ def parse_test_csv():
         reader = csv.DictReader(file)
         return list(reader)
 
+
 def parse_test_json():
     path = os.path.dirname(os.path.abspath(__file__))
     path = os.path.join(path, 'test_json.json')
     with open(path, 'r') as file:
         line = file.readline()
         return json.loads(line)
+
+
+def parse_test_metadata():
+    path = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(path, 'test_metadata_csv.csv')
+    with open(path, 'r') as file:
+        reader = csv.DictReader(file)
+        return next(reader)
 
 
 class Test_Parser:
@@ -323,3 +332,23 @@ class Test_Project_Parser:
             assert d[key] == value
 
         assert len(d) == len(compare)
+
+
+class Test_Metadata_Parser:
+
+    test_metadata = parse_test_metadata()
+
+    def test_csv(self):
+        config.parser.subject_metadata = {
+            'subject': {'type': int, 'remap': ['subject_id']},
+            'project': {'type': int, 'remap': 'project_id'},
+        }
+
+        parser = parsers.MetadataParser('csv')
+        data = self.test_metadata
+        print(data)
+
+        data = parser.process(data)
+        assert data['subject'] == 3353054
+        assert data['project'] == 3098
+        assert len(data) == 2
