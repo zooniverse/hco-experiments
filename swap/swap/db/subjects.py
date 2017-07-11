@@ -24,6 +24,16 @@ class Subjects(Collection):
 
     #######################################################################
 
+    def get_metadata(self, subject_id):
+        cursor = self.collection.find({'subject': subject_id}).sort('_id', -1)
+
+        try:
+            data = cursor.next()
+            data.pop('_id')
+            return data
+        except StopIteration:
+            pass
+
     def upload_metadata_dump(self, fname):
         self._rebuild()
 
