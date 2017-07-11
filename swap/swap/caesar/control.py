@@ -46,7 +46,7 @@ class OnlineControl(swap.control.Control):
 
     def __init__(self):
         super().__init__()
-        self.parser = ClassificationParser(config.database.builder)
+        self.parser = ClassificationParser('json')
 
         if config.database.name == 'swapDB':
             raise Exception('Refusing to use swapDB database in online mode')

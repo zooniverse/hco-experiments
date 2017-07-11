@@ -59,40 +59,40 @@ class database:
     port = 27017
     max_batch_size = 1e5
 
-    class builder:
+class parser:
 
-        subject_metadata = {
-            'subject': (int,'subject_id'),
-            'gold': (int, 'gold_label'),
-            'object_id': int,
-            'machine_score': float,
-            'mag': float,
-            'mag_err': float
-        }
+    subject_metadata = {
+        'subject': {'type': int, 'remap': ['subject_id']},
+        'gold': {'type': int, 'remap': ['gold_label']},
+        'object_id': {'type': int},
+        'machine_score': {'type': float},
+        'mag': {'type': float},
+        'mag_err': {'type': float}
+    }
 
-        _core_types = {
-            'classification_id': (int, ('classification_id', 'id')),
-            'user_id': int,
-            'annotation': int,
-            'workflow': int,
-            # 'gold_label': int,
-            'subject_id': (int, 'subject_ids'),
-            'seen_before': bool,
-            'live_project': bool,
-            'time_stamp': 'timestamp',
-        }
+    classification = {
+        'classification_id': {'type': int, 'remap': {'json': 'id'}},
+        'user_id': {'type': int},
+        'annotation': {'type': int},
+        'workflow': {'type': int, 'remap': 'workflow_id'},
+        'subject_id': {'type': int, 'remap': {'csv': 'subject_ids'}},
+        # 'seen_before': {'type': bool, 'remap': ['metadata.session']},
+        'live_project': {'type': bool, 'remap': ['metadata.live_project']},
+        'session_id': {'remap': ['metadata.session']},
+        'time_stamp': {'type': 'timestamp', 'remap': 'created_at'},
+    }
 
-        _timestamp_format = [
-            '%Y-%m-%d %H:%M:%S %Z',
-            '%Y-%m-%dT%H:%M:%S.%fZ'
-        ]
+    _timestamp_format = [
+        '%Y-%m-%d %H:%M:%S %Z',
+        '%Y-%m-%dT%H:%M:%S.%fZ'
+    ]
 
-        class annotation:
-            task = 'T1'
-            value_key = None
-            value_separator = '.'
-            true = ['Yes!']
-            false = ['No.']
+    class annotation:
+        task = 'T1'
+        value_key = None
+        value_separator = '.'
+        true = ['Yes!']
+        false = ['No.']
 
 
 class online_swap:
@@ -151,6 +151,12 @@ class logging:
         name = 'online-swap.log'
         keep_logs = 10
         max_size = '20M'
+
+
+class ConfigError(Exception):
+    def __init__(self, item, value):
+        super().__init__('Error parsing config entry %s: %s' %
+                         (str(item), str(value)))
 
 
 def local_config():

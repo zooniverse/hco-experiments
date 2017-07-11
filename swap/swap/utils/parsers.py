@@ -1,4 +1,6 @@
 
+import swap.config
+
 from datetime import datetime
 import json
 import logging
@@ -8,18 +10,34 @@ logger = logging.getLogger(__name__)
 
 class Parser:
 
-    def __init__(self, builder_config):
-        self.config = builder_config
-        self.timestamp_formats = builder_config._timestamp_format
-        self.types = self._config_types(builder_config)
+    def __init__(self, source):
+        self.timestamp_formats = swap.config.parser._timestamp_format
+        self.source = source
 
-    def _config_types(self, config):
+    @property
+    def config(self):
         """
         Return the type mapping in the config used for this parser
         """
         pass
 
-    def _remap(self, cl):
+    @staticmethod
+    def _navigate(obj, dotkey, split='.'):
+        steps = dotkey.split(split)
+        item = obj
+
+        logger.debug('navigating %s in %s', str(steps), str(item))
+
+        for key in steps:
+            if type(item) is list:
+                key = int(key)
+
+            item = item[key]
+            print(item)
+
+        return item
+
+    def _remap(self, cl, key, field):
         """
         Remap keys in the classification dump as specified in config
 
@@ -28,18 +46,29 @@ class Parser:
         this will look for 'other_name' in a raw classification in the cl blob
         and modify its key to 'name'
         """
-        for key, remap in self.types.items():
-            if type(remap) is tuple:
-                remap = remap[1]
-                if type(remap) is not tuple:
-                    remap = (remap)
+        if 'remap' in field:
+            remap = field['remap']
 
-                for old_key in remap:
-                    if old_key in cl:
-                        cl[key] = cl.pop(old_key)
-                        break
+            if type(remap) is dict:
+                if self.source in remap:
+                    remap = remap[self.source]
 
-        return cl
+                    if type(remap) is not list:
+                        remap = [remap]
+            elif type(remap) is str:
+                remap = [remap]
+            elif type(remap) is not list:
+                raise self.MissingInformation(field, 'remap')
+
+            for old_key in remap:
+                try:
+                    return self._navigate(cl, old_key)
+                except KeyError:
+                    pass
+        if key in cl:
+            return cl[key]
+
+        raise self.MissingInformation(cl, key)
 
     def _type(self, value, type_):
         """
@@ -65,14 +94,18 @@ class Parser:
 
         if type(value) is not type_:
             if type_ is bool:
-                return value in ['True', 'true']
+                if value in ['True', 'true']:
+                    return True
+                if value in ['False', 'false']:
+                    return False
+                raise TypeError('Can\'t parse %s as bool' % value)
 
             # Cast value to the expected type
             return type_(value)
 
         return value
 
-    def _mod_types(self, cl):
+    def _mod_fields(self, cl):
         """
         Casts values in the classification stream as specified in config
 
@@ -87,63 +120,114 @@ class Parser:
         # def mod(key, value):
         #     cl[key] = value
 
-        for key, type_ in self.types.items():
-            if type(type_) is tuple:
-                type_ = type_[0]
+        out = {}
+        for key, field in self.config.items():
+            type_ = field.get('type', str)
+            value = self._remap(cl, key, field)
+            value = self._type(value, type_)
 
-            value = self._type(cl[key], type_)
+            out[key] = value
 
-            # if key == 'retired' and value is None:
-            #     value = False
+        return out
 
-            cl[key] = value
+    @staticmethod
+    def parse_json(item):
+        if type(item) is str:
+            try:
+                return json.loads(item)
+            except json.decoder.JSONDecodeError:
+                logger.error('Couldn\'t parse json from %s', item)
+        return item
 
-        return cl
+    def process(self, cl):
+        return self._mod_fields(cl)
+
+    class MissingInformation(Exception):
+        def __init__(self, cl, key):
+            msg='Couldn\'t parse \'%s\' out of classification %s' % (key, str(cl))
+            super().__init__(msg)
 
 
 class ClassificationParser(Parser):
 
-    def __init__(self, builder_config):
-        super().__init__(builder_config)
-        self.annotation = builder_config.annotation
+    def __init__(self, source):
+        super().__init__(source)
+        self.annotation = AnnotationParser(source)
 
-    def _config_types(self, config):
-        return config._core_types
+    @property
+    def config(self):
+        return swap.config.parser.classification
 
-    def _find_value(self, root_value):
-        steps = self.annotation.value_key.split('.')
-        item = root_value
+    # def _find_value(self, root_value):
+    #     steps = self.annotation.value_key.split('.')
+    #     item = root_value
+    #
+    #     logger.debug('navigating %s in %s', str(steps), str(item))
+    #
+    #     for key in steps:
+    #         if type(item) is list:
+    #             key = int(key)
+    #
+    #         item = item[key]
+    #
+    #     return item
 
-        logger.debug('navigating %s in %s', str(steps), str(item))
 
-        for key in steps:
-            if type(item) is list:
-                key = int(key)
 
-            item = item[key]
 
-        return item
+    def parse_subject(self, cl):
+        for key in ['subject_id', 'subject_ids']:
+            if key in cl:
+                return cl[key]
+        raise self.MissingInformation(cl, 'subject')
 
-    def _parse_value(self, value):
-        if self.annotation.value_key is not None:
-            value = self._find_value(value)
+    def process(self, cl):
+        cl['metadata'] = self.parse_json(cl['metadata'])
+        cl['annotation'] = self.annotation.process(cl)
+        out = super().process(cl)
 
-        if value in self.annotation.true:
-            return 1
-        if value in self.annotation.false:
-            return 0
+        # cl = self._remap(cl)
+        # metadata = self.parse_json(cl['metadata'])
+        #
+        # output = {
+        #     'classification_id': cl['classification_id'],
+        #     'user_id': cl['user_id'],
+        #     'workflow': cl['workflow_id'],
+        #     'time_stamp': cl['created_at'],
+        # }
 
-    def _find_task(self, annotations):
-        task = self.annotation.task
-        if type(annotations) is dict and task in annotations:
-            return annotations[task][0]
+        out.update({
+            'seen_before': cl['metadata'].get('seen_before', False),
+        })
 
-        if type(annotations) is list:
-            for annotation in annotations:
-                if annotation['task'] == self.annotation.task:
-                    return annotation
+        return out
 
-    def parse_annotations(self, cl):
+        # output.update({
+        #     'session_id': metadata['session'],
+        #     'live_project': metadata['live_project'],
+        #     'seen_before': metadata.get('seen_before', False)
+        # })
+        #
+        # output['subject_id'] = self.parse_subject(cl)
+        # output['annotation'] = self.parse_annotations(cl)
+        #
+        # output = self._mod_types(output)
+
+        # if output['annotation'] is None:
+        #     return None
+        # return output
+
+
+class AnnotationParser(Parser):
+
+    def __init__(self, source):
+        super().__init__(source)
+
+    @property
+    def config(self):
+        return swap.config.parser.annotation
+
+    def process(self, cl):
         annotations = self.parse_json(cl['annotations'])
         logger.debug('parsing annotation %s', annotations)
 
@@ -151,56 +235,54 @@ class ClassificationParser(Parser):
 
         value =  self._parse_value(annotation['value'])
         if value is None:
-            logger.critical('Coult not find valid annotation for classification')
-            logger.debug(cl)
+            logger.error('Coult not find valid annotation for classification')
+            task = self.config.task
+            value_key = self.config.value_key
+            raise self.MissingAnnotation(cl, task, value_key)
 
         return value
 
-    def parse_subject(self, cl):
-        for key in ['subject_id', 'subject_ids']:
-            if key in cl:
-                return cl[key]
-        raise KeyError('Can\'t find subject in classification' % cl)
+    def _find_task(self, annotations):
+        """
+        Find the right task from the annotation field in a classification
 
-    @staticmethod
-    def parse_json(item):
-        if type(item) is str:
-            return json.loads(item)
-        return item
+        Needs to be dynamic because csv dump and caesar stream send
+        classifications with different formats
+        """
+        task = self.config.task
+        if type(annotations) is dict and task in annotations:
+            return annotations[task][0]
 
-    def process(self, cl):
-        cl = self._remap(cl)
-        metadata = self.parse_json(cl['metadata'])
+        if type(annotations) is list:
+            for annotation in annotations:
+                if annotation['task'] == self.config.task:
+                    return annotation
 
-        output = {
-            'classification_id': cl['classification_id'],
-            'user_id': cl['user_id'],
-            'workflow': cl['workflow_id'],
-            'time_stamp': cl['created_at'],
-        }
+    def _parse_value(self, value):
+        """
+        Parses the value field of an annotation task
+        """
+        key = self.config.value_key
+        sep = self.config.value_separator
+        if key is not None:
+            value = self._navigate(value, key, sep)
 
-        output.update({
-            'session_id': metadata['session'],
-            'live_project': metadata['live_project'],
-            'seen_before': metadata.get('seen_before', False)
-        })
+        if value in self.config.true:
+            return 1
+        if value in self.config.false:
+            return 0
 
-        output['subject_id'] = self.parse_subject(cl)
-        output['annotation'] = self.parse_annotations(cl)
-
-        output = self._mod_types(output)
-
-        if output['annotation'] is None:
-            return None
-        return output
+    class MissingAnnotation(Parser.MissingInformation):
+        def __init__(self, field, task, value_key):
+            super().__init__(field, '%s %s' % (task, value_key))
 
 
 class MetadataParser(Parser):
 
-    def __init__(self, builder_config):
-        super().__init__(builder_config)
+    def __init__(self, parser_config):
+        super().__init__(parser_config)
 
-        self.metadata = builder_config.subject_metadata
+        self.metadata = parser_config.subject_metadata
 
     def _config_types(self, config):
         return config.subject_metadata
@@ -213,8 +295,8 @@ class MetadataParser(Parser):
 
 class GoldsParser(MetadataParser):
 
-    def __init__(self, builder_config):
-        super().__init__(builder_config)
+    def __init__(self, parser_config):
+        super().__init__(parser_config)
 
     def _config_types(self, config):
         data = config.subject_metadata
