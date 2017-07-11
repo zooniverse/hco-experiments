@@ -53,10 +53,17 @@ class Classifications(Collection):
         # Generate a default query if not specified
 
         # TODO: Parse session id if no user_id exists
+        # query = [
+        #     {'$sort': OrderedDict(
+        #         [('seen_before', 1), ('classification_id', 1)])},
+        #     {'$match': {'seen_before': False}},
+        #     # {'$match': {'classification_id': {'$lt': 25000000}}},
+        #     {'$project': {'user_id': 1, 'subject_id': 1,
+        #                   'annotation': 1, 'session_id': 1}}
+        # ]
         query = [
-            {'$sort': OrderedDict(
-                [('seen_before', 1), ('classification_id', 1)])},
             {'$match': {'seen_before': False}},
+            {'$sort': {'classification_id': 1}},
             # {'$match': {'classification_id': {'$lt': 25000000}}},
             {'$project': {'user_id': 1, 'subject_id': 1,
                           'annotation': 1, 'session_id': 1}}
@@ -114,7 +121,7 @@ class Classifications(Collection):
         self._gen_stats()
         logger.debug('done')
 
-    def _gen_stats(self):
+    def _gen_stats(self, upload=True):
 
         def count(query):
             cursor = self.aggregate(query)
@@ -143,7 +150,9 @@ class Classifications(Collection):
         }
 
         logger.info('stats: %s', str(stats))
-        self._db.stats.insert_one(stats)
+        if upload:
+            logger.critical('Uploading stats')
+            self._db.stats.insert_one(stats)
         return stats
 
     def get_stats(self):
@@ -151,10 +160,13 @@ class Classifications(Collection):
         return stats.find().sort('_id', -1).limit(1).next()
 
     def exists(self, classification_id):
+        logger.debug(
+            'Checking if classification %d already in db', classification_id)
         match = {'classification_id': classification_id}
         return self.collection.find(match).count() > 0
 
     def insert(self, classification):
         id_ = classification['classification_id']
         if not self.exists(id_):
+            logger.debug('Uploading classification to database')
             super().insert(classification)
