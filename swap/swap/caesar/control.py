@@ -75,22 +75,33 @@ class OnlineControl(swap.control.Control):
     def gen_cl(data):
         return Classification.generate(data)
 
+    @staticmethod
+    def cl_exists(cl):
+        def id_(cl):
+            return cl['classification_id']
+
+        return DB().caesar.exists(id_(cl)) or \
+            DB().classifications.exists(id_(cl))
+
+
     def classify(self, raw_cl):
         # Add classification from caesar
         data = self.parse_raw(raw_cl)
         cl = self.gen_cl(data)
 
-        logger.debug('Uploading classification to caesar db: %s',
-                     str(data))
-        DB().classifications.insert(data)
+        logger.debug('Checking if already received classification')
+        if not self.cl_exists(data):
 
-        logger.debug('Adding classification from network: %s',
-                     str(cl))
-        self.swap.classify(cl)
+            logger.debug('Uploading classification to caesar db: %s',
+                         str(data))
+            DB().caesar.insert(data)
 
-        subject = self.swap.subjects.get(cl.subject)
-        print(subject, type(subject))
-        return subject
+            logger.debug('Adding classification from network: %s',
+                         str(cl))
+            self.swap.classify(cl)
+
+            subject = self.swap.subjects.get(cl.subject)
+            return subject
 
     def run(self, amount=None):
         def _amt(stats):
@@ -135,20 +146,24 @@ class ThreadedControl(threading.Thread):
             self.classify(message)
 
     def queue(self, command, data, callback=None):
-        logger.info('queueing')
+        logger.info('queueing %s %s %s', command, type(data), str(callback))
         self._queue.put(Message(command, data, callback))
 
     def classify(self, message):
-        logger.info('classifying')
         classification = message.data
         if classification is not None:
             with self.control_lock:
                 logger.info('classifying')
                 subject = self.control.classify(classification)
-                logger.info('responding with subject %s score %.4f',
-                            str(subject.id), subject.score)
 
-                message.callback(subject)
+                if subject is not None:
+                    logger.info('responding with subject %s score %.4f',
+                                str(subject.id), subject.score)
+                    message.callback(subject)
+                else:
+                    logger.info('Already classified, not responding')
+        else:
+            logger.error('Classification was None: %s', str(classification))
 
     def scores(self):
         with self.control_lock:
