@@ -13,7 +13,7 @@ class Controversial(Collection):
     def _collection_name():
         return 'classifications'
 
-    def schema(self):
+    def _schema(self):
         pass
 
     def _init_collection(self):
@@ -127,11 +127,11 @@ def _consensus_query(size=100, version='pow'):
                         {'$gt': ['$real', '$bogus']},
                         {'$%s' % version: [
                             {'$abs': {'$subtract': ['$real', '$bogus']}},
-                            {'$subtract':
+                            {'$subtract': \
                                 [1, {'$divide': ['$bogus', '$real']}]}]},
                         {'$%s' % version: [
                             {'$abs': {'$subtract': ['$real', '$bogus']}},
-                            {'$subtract':
+                            {'$subtract': \
                                 [1, {'$divide': ['$real', '$bogus']}]}]},
                     ]
                 }

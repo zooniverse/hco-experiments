@@ -11,7 +11,7 @@
             reference to the pymongo aggregation method of the collection
 """
 
-from swap.db.db import Collection
+from swap.db.db import Collection, Schema
 import swap.utils.parsers as parsers
 import swap.config as config
 
@@ -28,6 +28,10 @@ class Classifications(Collection):
     @staticmethod
     def _collection_name():
         return 'classifications'
+
+    @staticmethod
+    def _schema():
+        return Schema(config.parser.classification)
 
     #######################################################################
 
@@ -50,7 +54,8 @@ class Classifications(Collection):
 
         # TODO: Parse session id if no user_id exists
         query = [
-            {'$sort': OrderedDict([('seen_before', 1), ('classification_id', 1)])},
+            {'$sort': OrderedDict(
+                [('seen_before', 1), ('classification_id', 1)])},
             {'$match': {'seen_before': False}},
             # {'$match': {'classification_id': {'$lt': 25000000}}},
             {'$project': {'user_id': 1, 'subject_id': 1,
@@ -87,7 +92,7 @@ class Classifications(Collection):
 
         logger.info('parsing csv dump')
         data = []
-        pp = parsers.ClassificationParser(config.database.builder)
+        pp = parsers.ClassificationParser('csv')
 
         with open(fname, 'r') as file:
             reader = csv.DictReader(file)
@@ -144,3 +149,7 @@ class Classifications(Collection):
     def get_stats(self):
         stats = self._db.stats
         return stats.find().sort('_id', -1).limit(1).next()
+
+    def exists(self, classification_id):
+        query = {'classification_id': classification_id}
+        return self.collection.find(query).count() > 0

@@ -15,8 +15,9 @@ class Subjects(Collection):
     def _collection_name():
         return 'subjects'
 
-    def schema(self):
-        pass
+    @staticmethod
+    def _schema():
+        return config.parser.subject_metadata
 
     def _init_collection(self):
         pass
@@ -28,7 +29,7 @@ class Subjects(Collection):
 
         logger.info('parsing csv dump')
         data = []
-        parser = parsers.MetadataParser(config.database.builder)
+        parser = parsers.MetadataParser('csv')
 
         with open(fname, 'r') as file:
             reader = csv.DictReader(file)

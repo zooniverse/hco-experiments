@@ -7,8 +7,10 @@ logger = logging.getLogger(__name__)
 class Collection:
 
     def __init__(self, db):
+        # pylint: disable=E1111
         self.collection = self._collection_fromdb(db._db)
         self._db = db
+        self.schema = self._schema()
 
     #######################################################################
 
@@ -16,7 +18,8 @@ class Collection:
     def _collection_name():
         pass
 
-    def schema(self):
+    @staticmethod
+    def _schema():
         pass
 
     def _init_collection(self):
@@ -38,6 +41,16 @@ class Collection:
         except Exception as e:
             logger.error(e)
             raise e
+
+    def insert(self, data):
+        self.schema.validate(data)
+        self.collection.insert_one(data)
+
+    def insert_many(self, data):
+        for item in data:
+            self.schema.validate(item)
+
+        self.collection.insert_many(data)
 
     def upload(self):
         pass
@@ -108,3 +121,43 @@ class Cursor:
 
     def next(self):
         return self.cursor.next()
+
+
+class Schema:
+
+    def __init__(self, schema):
+        self.schema = schema
+
+    def validate(self, obj):
+        schema = self.schema
+        if set(obj) != set(schema):
+            raise self.SchemaValidationError.schema(obj, schema)
+
+        for key, value in obj.items():
+            type_ = schema['key'].get('type', str)
+            if type(type_) is type and type(value) is not type_:
+                raise self.SchemaValidationError.type(obj, key, type_)
+
+    class SchemaValidationError(Exception):
+
+        def __init__(self, msg):
+            msg = 'Attempt to upload invalid data. %s' % str(msg)
+            super().__init__(msg)
+
+        @classmethod
+        def schema(cls, obj, schema):
+            msg = 'Schema mismatch: %s not equal to schema %s' % \
+                  (str(set(obj)), str(set(schema)))
+            return cls(msg)
+
+        @classmethod
+        def missing(cls, obj, key):
+            msg = 'Couldn\'t find %s in %s' % (key, str(obj))
+            return cls(msg)
+
+        @classmethod
+        def type(cls, obj, key, type_):
+            value = obj[key]
+            msg = 'Type mismatch: %s in %s is %s, should be %s' % \
+                  (key, str(obj), str(type(value)), str(type_))
+            return cls(msg)

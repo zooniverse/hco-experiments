@@ -61,13 +61,13 @@ def parse_golds(func):
 
 class Golds(Collection):
 
-
     @staticmethod
     def _collection_name():
         return 'subjects'
 
-    def schema(self):
-        pass
+    @staticmethod
+    def _schema():
+        return parsers.GoldsParser(None).config
 
     def _init_collection(self):
         pass
@@ -111,7 +111,7 @@ class Golds(Collection):
 
         logger.info('parsing csv dump')
         data = []
-        pp = parsers.GoldsParser(config.database.builder)
+        pp = parsers.GoldsParser('csv')
 
         with open(fname, 'r') as file:
             reader = csv.DictReader(file)
