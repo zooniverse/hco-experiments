@@ -239,11 +239,6 @@ class MetadataParser(Parser):
     NOTE: Not fully tested yet
     """
 
-    def __init__(self, parser_config):
-        super().__init__(parser_config)
-
-        self.metadata = parser_config.subject_metadata
-
     @property
     def config(self):
         return swap.config.parser.subject_metadata
