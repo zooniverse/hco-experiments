@@ -1,6 +1,7 @@
 
 import swap.caesar.control as control
 import swap.caesar.app as app
+from swap.caesar.utils.address import Address
 import swap.agents.subject
 from swap.db import DB
 from swap.utils.golds import GoldGetter
@@ -25,8 +26,8 @@ class TestCaesarApp:
     @patch.object(GoldGetter, 'golds', {})
     @patch('swap.config.back_update', False)
     @patch('swap.config.database.name', 'swapDBtest')
-    @patch('swap.config.database.builder.annotation.true', [1])
-    @patch('swap.config.database.builder.annotation.false', [0])
+    @patch('swap.config.parser.annotation.true', [1])
+    @patch('swap.config.parser.annotation.false', [0])
     def test_parse_annotation(self, run):
         oc = control.OnlineControl()
         cl = oc.parse_classification(self.mock_classification)
@@ -41,8 +42,8 @@ class TestCaesarApp:
     @patch.object(GoldGetter, 'golds', {})
     @patch('swap.config.back_update', False)
     @patch('swap.config.database.name', 'swapDBtest')
-    @patch('swap.config.database.builder.annotation.true', [1])
-    @patch('swap.config.database.builder.annotation.false', [0])
+    @patch('swap.config.parser.annotation.true', [1])
+    @patch('swap.config.parser.annotation.false', [0])
     def test_classify(self, run):
         DB._reset()
         oc = control.OnlineControl()
@@ -52,29 +53,31 @@ class TestCaesarApp:
         assert isinstance(ret, swap.agents.subject.Subject)
         assert ret.score == 0.12
 
+    @patch('swap.config.online_swap.workflow', '1234')
     def test_reducer_address(self):
         address = 'https://caesar-staging.zooniverse.org:443/' \
-                  'workflows/1646/reducers/swap/reductions'
-        assert app.Address.reducer() == address
+                  'workflows/1234/reducers/swap/reductions'
+        assert Address.reducer() == address
 
+    @patch('swap.config.online_swap.workflow', '1234')
     def test_root_address(self):
         address = 'https://caesar-staging.zooniverse.org:443/' \
-                  'workflows/1646'
-        assert app.Address.root() == address
+                  'workflows/1234'
+        assert Address.root() == address
 
     @patch('swap.config.online_swap._auth_key', 'TEST')
     def test_classify_address(self):
         address = 'https://caesar:TEST@northdown.spa.umn.edu:443/classify'
-        assert app.Address.swap_classify() == address
+        assert Address.swap_classify() == address
 
     @patch('swap.config.online_swap.caesar.reducer', 'name')
     @patch('swap.config.online_swap._auth_key', 'TEST')
     def test_config_caesar(self):
-        addr = app.Address.swap_classify()
+        addr = Address.swap_classify()
         data = {'workflow': {
-            'extractors_config': {'name': {'type': 'external', 'url': addr}},
+            'extractors_config': {'ext': {'type': 'external', 'url': addr}},
             'reducers_config': {'name': {'type': 'external'}},
             'rules_config': []
         }}
 
-        assert app.Address.config_caesar() == data
+        assert Address.config_caesar() == data

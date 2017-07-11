@@ -149,19 +149,3 @@ class ThreadedControl(threading.Thread):
                     sys.exit(1)
 
         logger.warning('thread exiting')
-
-    # def process_message(self, classification):
-    #     """
-    #     Process a classification and PUT response to caesar
-    #     """
-    #     with self.control_lock:
-    #         logger.info('classifying')
-    #         subject = self.control.classify(classification)
-    #         logger.info('responding with subject %s score %.4f',
-    #                     subject.id, subject.score)
-
-    #         self.respond(subject)
-
-
-# class OnlineControl(_OnlineControl, metaclass=Singleton):
-#     pass
