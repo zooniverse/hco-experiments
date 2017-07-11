@@ -147,7 +147,8 @@ class Parser:
 
     class MissingInformation(Exception):
         def __init__(self, cl, key):
-            msg='Couldn\'t parse \'%s\' out of classification %s' % (key, str(cl))
+            msg = 'Couldn\'t parse \'%s\' out of classification %s' % \
+                (key, str(cl))
             super().__init__(msg)
 
 
@@ -187,7 +188,7 @@ class AnnotationParser(Parser):
 
         annotation = self._find_task(annotations)
 
-        value =  self._parse_value(annotation['value'])
+        value = self._parse_value(annotation['value'])
         if value is None:
             logger.error('Coult not find valid annotation for classification')
             task = self.config.task
@@ -259,23 +260,3 @@ class GoldsParser(MetadataParser):
     def config(self):
         data = swap.config.parser.subject_metadata
         return {k: v for k, v in data.items() if k in ['subject', 'gold']}
-
-
-if __name__ == '__main__':
-    import csv
-    from pprint import pprint
-    import swap.config as _config
-
-    # pp = MetadataParser(_config.database.builder)
-    # with open('/home/michael/Downloads/SNHunters_classification_dump_20170622_gold-head.csv') as file:
-    #     reader = csv.DictReader(file)
-    #     for row in reader:
-    #         print(row)
-    #         print(pp.process(row))
-
-    pp = ClassificationParser(_config.database.builder)
-    with open('/home/michael/Downloads/supernova-hunters-classifications-100.csv') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            print(row)
-            print(pp.process(row))

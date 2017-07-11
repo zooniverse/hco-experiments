@@ -18,7 +18,7 @@
 
 import swap.config as config
 import swap.caesar.app as caesar
-from swap.caesar.app import AuthCaesar
+from swap.caesar.auth import AuthCaesar
 from swap.ui.ui import Interface
 
 import logging
