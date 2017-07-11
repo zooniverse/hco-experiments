@@ -68,6 +68,9 @@ class Parser:
         if key in cl:
             return cl[key]
 
+        if 'ifgone' in field:
+            return field['ifgone']
+
         raise self.MissingInformation(cl, key)
 
     def _type(self, value, type_):
@@ -158,23 +161,6 @@ class ClassificationParser(Parser):
     def config(self):
         return swap.config.parser.classification
 
-    # def _find_value(self, root_value):
-    #     steps = self.annotation.value_key.split('.')
-    #     item = root_value
-    #
-    #     logger.debug('navigating %s in %s', str(steps), str(item))
-    #
-    #     for key in steps:
-    #         if type(item) is list:
-    #             key = int(key)
-    #
-    #         item = item[key]
-    #
-    #     return item
-
-
-
-
     def parse_subject(self, cl):
         for key in ['subject_id', 'subject_ids']:
             if key in cl:
@@ -186,36 +172,7 @@ class ClassificationParser(Parser):
         cl['annotation'] = self.annotation.process(cl)
         out = super().process(cl)
 
-        # cl = self._remap(cl)
-        # metadata = self.parse_json(cl['metadata'])
-        #
-        # output = {
-        #     'classification_id': cl['classification_id'],
-        #     'user_id': cl['user_id'],
-        #     'workflow': cl['workflow_id'],
-        #     'time_stamp': cl['created_at'],
-        # }
-
-        out.update({
-            'seen_before': cl['metadata'].get('seen_before', False),
-        })
-
         return out
-
-        # output.update({
-        #     'session_id': metadata['session'],
-        #     'live_project': metadata['live_project'],
-        #     'seen_before': metadata.get('seen_before', False)
-        # })
-        #
-        # output['subject_id'] = self.parse_subject(cl)
-        # output['annotation'] = self.parse_annotations(cl)
-        #
-        # output = self._mod_types(output)
-
-        # if output['annotation'] is None:
-        #     return None
-        # return output
 
 
 class AnnotationParser(Parser):

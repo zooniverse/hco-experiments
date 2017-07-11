@@ -76,7 +76,8 @@ class parser:
         'annotation': {'type': int},
         'workflow': {'type': int, 'remap': 'workflow_id'},
         'subject_id': {'type': int, 'remap': {'csv': 'subject_ids'}},
-        # 'seen_before': {'type': bool, 'remap': ['metadata.session']},
+        'seen_before':
+            {'type': bool, 'remap': ['metadata.seen_before'], 'ifgone': False},
         'live_project': {'type': bool, 'remap': ['metadata.live_project']},
         'session_id': {'remap': ['metadata.session']},
         'time_stamp': {'type': 'timestamp', 'remap': 'created_at'},

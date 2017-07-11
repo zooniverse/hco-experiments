@@ -178,6 +178,36 @@ class Test_Project_Parser:
 
         assert len(d) == len(compare)
 
+    def test_csv_parser_seen_before(self):
+        self.override_annotation(
+            'T1', None,
+            ['Real', 'yes', 1], ['Bogus', 'no', 0])
+
+        from pprint import pprint
+        parser = parsers.ClassificationParser('csv')
+        cl = self.test_csv[3].copy()
+        pprint(cl)
+        d = parser.process(cl)
+
+        compare = {
+            'classification_id': 11423065,
+            'user_id': 1437100,
+            'workflow': 1737,
+            'time_stamp': datetime.datetime(2016, 4, 18, 18, 50, 48),
+            'session_id': 'b759eab8f4fe3436707edede3094cd5bd30c4812e2a701e48fa7cb13f0068f40',
+            'live_project': False,
+            'seen_before': True,
+            'annotation': 1,
+            'subject_id': 1935795,
+        }
+
+        print(d)
+        for key, value in compare.items():
+            print(key, value)
+            assert d[key] == value
+
+        assert len(d) == len(compare)
+
     def test_csv_parser_elephant(self):
         self.override_annotation(
             'T1', None,
