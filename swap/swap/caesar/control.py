@@ -87,7 +87,7 @@ class Message:
 
 class ThreadedControl(threading.Thread):
 
-    def __init__(self, swap=None, args=(), kwargs=None):
+    def __init__(self, swap_=None, args=(), kwargs=None):
         threading.Thread.__init__(self, args=(), kwargs=None)
 
         self._queue = Queue()
@@ -97,8 +97,8 @@ class ThreadedControl(threading.Thread):
         self.control_lock = threading.Lock()
         self.control = OnlineControl()
 
-        if swap is not None:
-            self.control.setSWAP(swap)
+        if swap_ is not None:
+            self.control.setSWAP(swap_)
         else:
             self.control.run()
 

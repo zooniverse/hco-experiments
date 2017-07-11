@@ -141,7 +141,7 @@ class API:
 
 
 def init_threader(swap=None):
-    thread = ThreadedControl(swap=swap)
+    thread = ThreadedControl(swap_=swap)
     thread.start()
     logger.info('Finished launching swap thread')
 
