@@ -220,9 +220,6 @@ class ClassificationParser(Parser):
 
 class AnnotationParser(Parser):
 
-    def __init__(self, source):
-        super().__init__(source)
-
     @property
     def config(self):
         return swap.config.parser.annotation
@@ -278,29 +275,32 @@ class AnnotationParser(Parser):
 
 
 class MetadataParser(Parser):
+    """
+    Parse subject metadata from csv dump
+
+    NOTE: Not fully tested yet
+    """
 
     def __init__(self, parser_config):
         super().__init__(parser_config)
 
         self.metadata = parser_config.subject_metadata
 
-    def _config_types(self, config):
-        return config.subject_metadata
-
-    def process(self, cl):
-        cl = self._remap(cl)
-        output = self._mod_types(cl)
-        return output
+    @property
+    def config(self):
+        return swap.config.parser.subject_metadata
 
 
 class GoldsParser(MetadataParser):
+    """
+    Parse subject gold standard data from a custom lightweight csv dump
 
-    def __init__(self, parser_config):
-        super().__init__(parser_config)
+    NOTE: Not fully tested yet
+    """
 
-    def _config_types(self, config):
-        data = config.subject_metadata
-
+    @property
+    def config(self):
+        data = swap.config.parser.subject_metadata
         return {k: v for k, v in data.items() if k in ['subject', 'gold']}
 
 
