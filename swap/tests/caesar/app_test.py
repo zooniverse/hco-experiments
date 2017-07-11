@@ -4,6 +4,8 @@ import swap.caesar.app as app
 from swap.caesar.utils.address import Address
 import swap.agents.subject
 from swap.db import DB
+from swap.db.db import Collection
+from swap.db.classifications import Classifications
 from swap.utils.golds import GoldGetter
 
 import json
@@ -30,7 +32,8 @@ class TestCaesarApp:
     @patch('swap.config.parser.annotation.false', [0])
     def test_parse_annotation(self, run):
         oc = control.OnlineControl()
-        cl = oc.parse_classification(self.mock_classification)
+        cl = oc.parse_raw(self.mock_classification)
+        cl = oc.gen_cl(cl)
         print(cl)
 
         assert cl.user == 1437100
@@ -40,6 +43,7 @@ class TestCaesarApp:
 
     @patch.object(control.OnlineControl, 'run')
     @patch.object(GoldGetter, 'golds', {})
+    @patch.object(Classifications, 'insert', MagicMock())
     @patch('swap.config.back_update', False)
     @patch('swap.config.database.name', 'swapDBtest')
     @patch('swap.config.parser.annotation.true', [1])
