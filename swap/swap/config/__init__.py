@@ -92,8 +92,8 @@ class parser:
         task = 'T1'
         value_key = None
         value_separator = '.'
-        true = ['Yes!']
-        false = ['No.']
+        true = [1]
+        false = [0]
 
 
 class online_swap:
