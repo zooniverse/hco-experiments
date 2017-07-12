@@ -89,6 +89,8 @@ class API:
         token = config.online_swap._auth_key
         self._auth = Auth(user, token)
 
+        self._recent_cl = []
+
     def run(self):
         self._route('/', 'status', self.status, ['GET'])
         self._route('/scores', 'scores', self.scores, ['GET'])
@@ -114,17 +116,20 @@ class API:
         """
         Receive a classification from caesar and process it
         """
-        logger.info('received classification')
+        logger.info('received request')
         logger.debug(str(request))
 
         # Parse json from request
         data = request.get_json()
 
-        logger.debug('received data %s', str(data))
-        self.control.queue('classify', data, Requests.respond)
+        if not self._is_recent_cl(data):
+            logger.info('Classification not recently received')
+            logger.debug('received data %s', str(data))
+            self.control.queue('classify', data, Requests.respond)
+        else:
+            logger.info('Filtering duplicate classificatio')
 
         # return empty response
-
         resp = jsonify({'status': 'ok'})
         resp.status_code = 200
         return resp
@@ -137,6 +142,16 @@ class API:
         scores = self.control.scores()
 
         return jsonify(scores.full_dict())
+
+    def _is_recent_cl(self, data):
+        id_ = data['id']
+        if id_ in self._recent_cl:
+            return True
+
+        self._recent_cl.append(id_)
+        if len(self._recent_cl) > 10:
+            self._recent_cl.pop(0)
+        return False
 
 
 def init_threader(swap=None):

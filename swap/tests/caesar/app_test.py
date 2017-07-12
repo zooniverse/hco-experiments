@@ -85,3 +85,25 @@ class TestCaesarApp:
         }}
 
         assert Address.config_caesar() == data
+
+    def test_recent_cl_full(self):
+        api = app.API(None)
+        api._recent_cl = list(range(10))
+
+        api._is_recent_cl({'id': 12})
+
+        compare = list(range(1, 10)) + [12]
+        assert api._recent_cl == compare
+
+    def test_recent_cl_false(self):
+        api = app.API(None)
+
+        assert api._is_recent_cl({'id': 1}) is False
+        assert api._recent_cl == [1]
+
+    def test_recent_cl_true(self):
+        api = app.API(None)
+
+        api._is_recent_cl({'id': 1})
+        assert api._is_recent_cl({'id': 1}) is True
+        assert api._recent_cl == [1]
