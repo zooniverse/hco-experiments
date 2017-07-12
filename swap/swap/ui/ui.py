@@ -111,7 +111,8 @@ class UI:
 
         if args.db:
             config.database.name = args.db[0]
-            swap.db.DB._reset()
+
+        swap.db.DB._reset()
 
         if 'func' in args:
             args.func(args)
