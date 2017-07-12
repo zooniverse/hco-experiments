@@ -143,15 +143,24 @@ class logging:
     date_format = '%Y%m%d_%H:%M:%S'
     level = 'DEBUG'
     console_level = 'INFO'
+
     keep_logs = 5
-    filename = 'swap-%d.log'
+
+    class files:
+        version = 'dynamic'
+
+        dynamic = 'swap-%(pid)d.log'
+        static = 'swap.log'
+
+        keep_logs = 5
+        max_size_mb = 10
 
     class system:
         active = False
         location = '/var/log/online-swap'
-        name = 'online-swap.log'
-        keep_logs = 10
-        max_size = '20M'
+        name = 'swap.log'
+        keep = 10
+        max_size = 10
 
 
 class ConfigError(Exception):
