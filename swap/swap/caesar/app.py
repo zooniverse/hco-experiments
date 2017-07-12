@@ -127,7 +127,7 @@ class API:
             logger.debug('received data %s', str(data))
             self.control.queue('classify', data, Requests.respond)
         else:
-            logger.info('Filtering duplicate classificatio')
+            logger.info('Filtering duplicate classification')
 
         # return empty response
         resp = jsonify({'status': 'ok'})
