@@ -37,15 +37,3 @@ class Address:
         return addr % \
             {'user': username, 'pass': password,
              'host': host, 'port': port}
-
-    @classmethod
-    def config_caesar(cls):
-        name = cls.config.caesar.reducer
-        addr = cls.swap_classify()
-        data = {'workflow': {
-            'extractors_config': {'ext': {'type': 'external', 'url': addr}},
-            'reducers_config': {name: {'type': 'external'}},
-            'rules_config': []
-        }}
-        logger.info('compiled caesar config: %s', data)
-        return data

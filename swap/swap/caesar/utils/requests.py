@@ -30,24 +30,33 @@ class Requests:
         """
         Register swap as an extractor/reducer on caesar
         """
-        data = Address.config_caesar()
+        data = cls.config_caesar('on')
         address = Address.root()
 
         logger.info('PUT to %s with %s', address, str(data))
         auth_header = AuthCaesar().auth()
         print(auth_header)
         r = requests.put(address, headers=auth_header, json=data)
-
-        if r.status_code != 200:
-            print(r)
-            logger.error(str(r.__dict__))
-            raise cls.BadResponse('Received status code %d' % r.status_code)
         logger.info('done')
+
+        return r
 
     @classmethod
     @request_wrapper
     def unregister_swap(cls):
-        pass
+        """
+        Remove swap from caesar's extractor/reducer config
+        """
+        data = cls.config_caesar('off')
+        address = Address.root()
+
+        logger.info('PUT to %s with %s', address, str(data))
+        auth_header = AuthCaesar().auth()
+        print(auth_header)
+        r = requests.put(address, headers=auth_header, json=data)
+        logger.debug('done')
+
+        return r
 
     @classmethod
     @request_wrapper
@@ -79,6 +88,37 @@ class Requests:
         logger.debug('done')
 
         return r
+
+    @classmethod
+    def config_caesar(cls, method='on'):
+
+        def _config(ext, red, rul):
+            return {'workflow': {
+                'extractors_config': ext,
+                'reducers_config': red,
+                'rules_config': rul
+            }}
+
+        name = Address.config.caesar.reducer
+        addr = Address.swap_classify()
+
+        if method == 'on':
+            return _config(
+                {'ext': {'type': 'external', 'url': addr}},
+                {name: {'type': 'external'}},
+                []
+            )
+        elif method == 'off':
+            return _config({}, {}, [])
+
+
+        data = {'workflow': {
+            'extractors_config': {'ext': {'type': 'external', 'url': addr}},
+            'reducers_config': {name: {'type': 'external'}},
+            'rules_config': []
+        }}
+        logger.info('compiled caesar config: %s', data)
+        return data
 
     class BadResponse(Exception):
         def __init__(self, response, msg=None):
