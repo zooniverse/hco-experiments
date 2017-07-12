@@ -1,0 +1,37 @@
+#!/bin/bash
+
+set -eu
+set -o pipefail
+
+set +eu
+ROOT=$(dirname "${VAR}")
+set -eu
+
+ROOT=$(readlink -f "${ROOT}")
+echo "Building from $ROOT"
+
+BUILDDIR="/tmp/swap-pages-$$"
+echo "Building to $BUILDDIR"
+
+GIT=$(git remote -v | grep push | grep origin | awk '{print $2}')
+echo "Using git origin address $GIT"
+
+mkdir $BUILDDIR
+cd $BUILDDIR
+git init .
+git remote add -t gh-pages origin $GIT
+git pull
+
+ln -s . html
+touch .nojekyll
+
+cd $ROOT
+sphinx-build -a -E -b html source $BUILDDIR
+
+cd $BUILDDIR
+rm html
+git add -A
+git commit -m "Auto publish updated docs...."
+
+read -p "Build finished, should push?" -n 1 -r
+git push origin master:gh-pages

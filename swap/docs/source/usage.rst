@@ -35,6 +35,11 @@ Generate a ROC curve from pickled score exports
     from the project root. Make sure you have a virtual environment setup which
     points to a python version >=3.4
 
+Launching Caesar
+----------------
+
+Some examples to launch caesar
+
 
 Interacting with SWAP
 =====================
