@@ -120,7 +120,7 @@ class API:
 
         # Parse json from request
         data = request.get_json()
-        logger.debug('request %s cl %d', str(request), data['id'])
+        logger.debug('request %s cl %s', str(request), str(data['id']))
 
         if not self._is_recent_cl(data):
             logger.info('Classification not recently received')
