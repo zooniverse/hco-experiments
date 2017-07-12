@@ -67,7 +67,7 @@ class OnlineControl(swap.control.Control):
         return DualCursor(cursor1, cursor2)
 
     def parse_raw(self, raw_cl):
-        logger.debug('parsing raw classification %s', str(raw_cl))
+        logger.debug('parsing raw classification')
         data = self.parser.process(raw_cl)
         return data
 
