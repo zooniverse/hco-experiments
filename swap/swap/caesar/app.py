@@ -117,10 +117,10 @@ class API:
         Receive a classification from caesar and process it
         """
         logger.info('received request')
-        logger.debug(str(request))
 
         # Parse json from request
         data = request.get_json()
+        logger.debug('request %s cl %d', str(request), data['id'])
 
         if not self._is_recent_cl(data):
             logger.info('Classification not recently received')
