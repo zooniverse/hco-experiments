@@ -4,8 +4,24 @@
 
 
 def override(config):
+
+    # Configuration for Online Swap
+    # config.database.name = 'ghosts_test'
+    # config.parser.annotation.task = 'T0'
+    # config.parser.annotation.true = ['Yes', 1]
+    # config.parser.annotation.false = ['No', 0]
+    #
+    # config.online_swap.host = 'northdown.spa.umn.edu'
+    # config.online_swap.ext_port = '443'
+    # config.online_swap.caesar.host = 'caesar-staging.zooniverse.org'
+    # config.online_swap.caesar.port = '443'
+    #
+    # config.online_swap.workflow = 3004
+    #
+    # config.logging.files.version = 'static'
+
     # True: static swap, False: dynamic swap
-    config.back_update = True
+    # config.back_update = True
 
     # Prior probability
     # config.p0 = 0.12
